@@ -12,14 +12,14 @@ export default function MachineBoard(props: {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {MACHINE_TYPES.map((mt) => (
-        <section key={mt} className="rounded-lg border bg-card/50">
-          <header className="flex items-center justify-between border-b p-3">
-            <h3 className="text-sm font-semibold">{mt}</h3>
+        <section key={mt} className="rounded-lg border bg-gradient-to-br from-card/50 via-accent/5 to-background/50">
+          <header className="flex items-center justify-between border-b p-3 bg-gradient-to-r from-primary/5 to-accent/3">
+            <h3 className="text-sm font-semibold text-primary">{mt}</h3>
             <Badge variant="secondary">{props.data[mt]?.length ?? 0}</Badge>
           </header>
           <div className="divide-y">
-            {(props.data[mt] ?? []).map((o) => (
-              <article key={o.id} className="flex items-center gap-3 p-3">
+            {(props.data[mt] ?? []).map((o, idx) => (
+              <article key={o.id} className={`flex items-center gap-3 p-3 ${idx % 2 === 0 ? "bg-white/40" : "bg-muted/10"}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <div className="truncate font-medium">{o.modelName}</div>
