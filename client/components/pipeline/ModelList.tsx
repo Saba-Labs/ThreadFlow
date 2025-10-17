@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import SimpleModal from "@/components/ui/SimpleModal";
 import { Input } from "@/components/ui/input";
 import { MACHINE_TYPES, PathStep, WorkOrder } from "@/hooks/useProductionPipeline";
 import { ArrowDown, ArrowUp, Scissors, SkipForward, Trash2 } from "lucide-react";
