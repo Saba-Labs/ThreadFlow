@@ -48,7 +48,7 @@ export default function AppLayout() {
                   )
                 }
               >
-                All
+                All Models
               </NavLink>
 
               <NavLink
@@ -76,7 +76,7 @@ export default function AppLayout() {
                   )
                 }
               >
-                On Hold
+                Hold
               </NavLink>
 
               <NavLink
