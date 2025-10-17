@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { SewingPin, Settings } from "lucide-react";
+import { Scissors, Settings } from "lucide-react";
 
 export default function AppLayout() {
   const location = useLocation();
@@ -11,7 +11,7 @@ export default function AppLayout() {
         <div className="container flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-semibold">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <SewingPin className="h-4 w-4" />
+              <Scissors className="h-4 w-4" />
             </span>
             <span className="tracking-tight">StitchFlow</span>
           </Link>
