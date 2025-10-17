@@ -62,13 +62,15 @@ export default function ModelForm(props: {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{props.trigger ?? <Button size="sm"><Plus className="h-4 w-4"/> New Model</Button>}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>New Model / Batch</DialogTitle>
-          <DialogDescription>Define quantity and the exact path through machines or job work.</DialogDescription>
-        </DialogHeader>
+    <>
+      <div onClick={() => setOpen(true)}>{props.trigger ?? <Button size="sm"><Plus className="h-4 w-4"/> New Model</Button>}</div>
+      <SimpleModal
+        open={open}
+        onOpenChange={setOpen}
+        title="New Model / Batch"
+        footer={<div className="flex justify-end"><Button onClick={submit}>Create</Button></div>}
+      >
+        <p className="text-sm text-muted-foreground mb-4">Define quantity and the exact path through machines or job work.</p>
         <div className="grid gap-4">
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
@@ -122,10 +124,7 @@ export default function ModelForm(props: {
             </div>
           </div>
         </div>
-        <DialogFooter>
-          <Button onClick={submit}>Create</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </SimpleModal>
+    </>
   );
 }
