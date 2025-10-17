@@ -1,0 +1,131 @@
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { MACHINE_TYPES, MachineType } from "@/hooks/useProductionPipeline";
+
+export interface NewPathStep {
+  kind: "machine" | "job";
+  machineType?: Exclude<MachineType, "Job Work">;
+  externalUnitName?: string;
+}
+
+export default function ModelForm(props: {
+  onCreate: (data: { modelName: string; quantity: number; path: NewPathStep[] }) => void;
+  trigger?: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [modelName, setModelName] = useState("");
+  const [quantity, setQuantity] = useState(100);
+  const [path, setPath] = useState<NewPathStep[]>([
+    { kind: "machine", machineType: "Singer" },
+    { kind: "machine", machineType: "Folding" },
+    { kind: "machine", machineType: "5 Thread Joint" },
+    { kind: "machine", machineType: "Kaja" },
+    { kind: "machine", machineType: "Button" },
+    { kind: "machine", machineType: "Trimming" },
+    { kind: "machine", machineType: "Ironing" },
+    { kind: "machine", machineType: "Packing" },
+  ]);
+
+  const machineOptions = useMemo(
+    () => MACHINE_TYPES.filter((m) => m !== "Job Work") as Exclude<MachineType, "Job Work">[],
+    [],
+  );
+
+  const addStep = (next: NewPathStep) => setPath((p) => [...p, next]);
+  const removeStep = (i: number) => setPath((p) => p.filter((_, idx) => idx !== i));
+  const move = (i: number, dir: -1 | 1) =>
+    setPath((p) => {
+      const arr = p.slice();
+      const j = i + dir;
+      if (j < 0 || j >= arr.length) return arr;
+      const tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+      return arr;
+    });
+
+  const reset = () => {
+    setModelName("");
+    setQuantity(100);
+    setPath([{ kind: "machine", machineType: "Singer" }]);
+  };
+
+  const submit = () => {
+    if (!modelName.trim()) return;
+    props.onCreate({ modelName, quantity: Math.max(1, Math.floor(quantity)), path });
+    reset();
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{props.trigger ?? <Button size="sm"><Plus className="h-4 w-4"/> New Model</Button>}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>New Model / Batch</DialogTitle>
+          <DialogDescription>Define quantity and the exact path through machines or job work.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-medium">Model name</label>
+              <Input value={modelName} onChange={(e) => setModelName(e.target.value)} placeholder="e.g., KIDS TEE M1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Quantity</label>
+              <Input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Path</label>
+              <div className="flex gap-2">
+                <Select onValueChange={(v) => addStep({ kind: "machine", machineType: v as Exclude<MachineType, "Job Work"> })}>
+                  <SelectTrigger className="w-44"><SelectValue placeholder="Add machine"/></SelectTrigger>
+                  <SelectContent>
+                    {machineOptions.map((m) => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="secondary" onClick={() => addStep({ kind: "job", externalUnitName: "Job Work Unit" })}>Add Job Work</Button>
+              </div>
+            </div>
+            <div className="rounded-md border divide-y">
+              {path.map((st, i) => (
+                <div key={i} className="flex items-center gap-3 p-2">
+                  <span className="inline-flex min-w-8 justify-center text-xs text-muted-foreground">{i + 1}</span>
+                  <div className="flex-1">
+                    {st.kind === "machine" ? (
+                      <div className="font-medium">{st.machineType}</div>
+                    ) : (
+                      <div>
+                        <div className="text-sm font-medium">Job Work</div>
+                        <div className="text-xs text-muted-foreground">{st.externalUnitName}</div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4"/></Button>
+                    <Button variant="ghost" size="icon" onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4"/></Button>
+                    <Button variant="ghost" size="icon" onClick={() => removeStep(i)}><Trash2 className="h-4 w-4"/></Button>
+                  </div>
+                </div>
+              ))}
+              {path.length === 0 && (
+                <div className="p-4 text-sm text-muted-foreground">No steps yet. Add machines or job work above.</div>
+              )}
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={submit}>Create</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
