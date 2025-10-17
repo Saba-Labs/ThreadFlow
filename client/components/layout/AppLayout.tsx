@@ -28,6 +28,41 @@ export default function AppLayout() {
             >
               Dashboard
             </NavLink>
+            <div className="hidden sm:flex items-center gap-1">
+              <NavLink
+                to="/models/all"
+                className={({ isActive }) =>
+                  cn(
+                    "rounded-md px-3 py-2 text-sm font-medium",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )
+                }
+              >
+                All
+              </NavLink>
+              <NavLink
+                to="/models/running"
+                className={({ isActive }) =>
+                  cn(
+                    "rounded-md px-3 py-2 text-sm font-medium",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )
+                }
+              >
+                Running
+              </NavLink>
+              <NavLink
+                to="/models/hold"
+                className={({ isActive }) =>
+                  cn(
+                    "rounded-md px-3 py-2 text-sm font-medium",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )
+                }
+              >
+                On Hold
+              </NavLink>
+            </div>
             <NavLink
               to="/settings"
               className={({ isActive }) =>
