@@ -87,12 +87,7 @@ export default function ModelList(props: {
         </tbody>
       </table>
 
-      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Path — {editing?.modelName}</DialogTitle>
-            <DialogDescription>Reorder, add, or remove steps as plans change.</DialogDescription>
-          </DialogHeader>
+      <SimpleModal open={!!editing} onOpenChange={(v) => !v && setEditing(null)} title={`Edit Path — ${editing?.modelName}`} footer={<div className="flex justify-end"><Button onClick={() => setEditing(null)}>Close</Button></div>}>
           <div className="space-y-2">
             {editing && (
               <div className="rounded-md border divide-y">
@@ -113,29 +108,16 @@ export default function ModelList(props: {
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button onClick={() => setEditing(null)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      </SimpleModal>
 
-      <Dialog open={!!splitFor} onOpenChange={(v) => !v && setSplitFor(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Split into Batches — {splitFor?.modelName}</DialogTitle>
-            <DialogDescription>Enter quantities for new batches. Total must be less than the original ({splitFor?.quantity}). Remainder stays in the original.</DialogDescription>
-          </DialogHeader>
+      <SimpleModal open={!!splitFor} onOpenChange={(v) => !v && setSplitFor(null)} title={`Split into Batches — ${splitFor?.modelName}`} footer={<div className="flex justify-end"><Button onClick={() => { if (!splitFor) return; props.onSplit(splitFor.id, splitInputs); setSplitFor(null); }}>Split</Button></div>}>
           <div className="space-y-2">
             {splitInputs.map((q, i) => (
               <Input key={i} type="number" value={q} onChange={(e) => setSplitInputs((arr) => arr.map((v, idx) => idx === i ? Number(e.target.value) : v))} />
             ))}
             <Button variant="secondary" onClick={() => setSplitInputs((arr) => [...arr, 0])}>Add batch</Button>
           </div>
-          <DialogFooter>
-            <Button onClick={() => { if (!splitFor) return; props.onSplit(splitFor.id, splitInputs); setSplitFor(null); }}>Split</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      </SimpleModal>
     </div>
   );
 }
