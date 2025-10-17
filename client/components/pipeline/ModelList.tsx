@@ -37,18 +37,19 @@ export default function ModelList(props: {
 
   return (
     <div className="rounded-lg border overflow-hidden">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/50">
-          <tr>
-            <th className="p-3 text-left font-medium">Model</th>
-            <th className="p-3 text-left font-medium">Qty</th>
-            <th className="p-3 text-left font-medium">Current</th>
-            <th className="p-3 text-left font-medium">Status</th>
-            <th className="p-3 text-left font-medium">Path</th>
-            <th className="p-3 text-left font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="p-3 text-left font-medium">Model</th>
+              <th className="p-3 text-left font-medium hidden sm:table-cell">Qty</th>
+              <th className="p-3 text-left font-medium hidden sm:table-cell">Current</th>
+              <th className="p-3 text-left font-medium">Status</th>
+              <th className="p-3 text-left font-medium hidden lg:table-cell">Path</th>
+              <th className="p-3 text-left font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
           {sorted.map((o) => {
             const i = o.currentStepIndex;
             const step = o.steps[i];
@@ -136,6 +137,7 @@ export default function ModelList(props: {
           )}
         </tbody>
       </table>
+      </div>
 
       <SimpleModal
         open={!!editing}
