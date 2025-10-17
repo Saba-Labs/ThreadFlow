@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
@@ -65,7 +71,6 @@ export interface PipelineState {
   orders: WorkOrder[];
 }
 
-
 // Module-level shared store so multiple components see the same data
 let STORE: PipelineState = (function load() {
   try {
@@ -94,7 +99,11 @@ function subscribe(cb: () => void) {
 }
 
 export function useProductionPipeline() {
-  const state = useSyncExternalStore(subscribe, () => STORE, () => STORE);
+  const state = useSyncExternalStore(
+    subscribe,
+    () => STORE,
+    () => STORE,
+  );
 
   const createWorkOrder = useCallback(
     (input: {
@@ -162,7 +171,9 @@ export function useProductionPipeline() {
       setStore((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
-          const steps = o.steps.map((st, i) => (i === stepIndex ? { ...st, ...patch } : st));
+          const steps = o.steps.map((st, i) =>
+            i === stepIndex ? { ...st, ...patch } : st,
+          );
           return { ...o, steps };
         }),
       }));
@@ -178,7 +189,11 @@ export function useProductionPipeline() {
         const idx = o.currentStepIndex;
         const steps = o.steps.slice();
         if (steps[idx])
-          steps[idx] = { ...steps[idx], status: "completed", activeMachines: 0 };
+          steps[idx] = {
+            ...steps[idx],
+            status: "completed",
+            activeMachines: 0,
+          };
         const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
         return { ...o, steps, currentStepIndex: nextIndex };
       }),
@@ -199,7 +214,9 @@ export function useProductionPipeline() {
     setStore((s) => {
       const src = s.orders.find((o) => o.id === orderId);
       if (!src) return s;
-      const valid = quantities.map((q) => Math.max(0, Math.floor(q))).filter((q) => q > 0);
+      const valid = quantities
+        .map((q) => Math.max(0, Math.floor(q)))
+        .filter((q) => q > 0);
       const sum = valid.reduce((a, b) => a + b, 0);
       if (sum <= 0 || sum >= src.quantity) return s;
       const remainder = src.quantity - sum;
@@ -208,7 +225,13 @@ export function useProductionPipeline() {
         modelName: src.modelName,
         quantity: q,
         createdAt: Date.now(),
-        steps: src.steps.map((st) => ({ ...st, id: uid("step"), status: st.status === "completed" ? "completed" : "pending", activeMachines: 0, quantityDone: 0 })),
+        steps: src.steps.map((st) => ({
+          ...st,
+          id: uid("step"),
+          status: st.status === "completed" ? "completed" : "pending",
+          activeMachines: 0,
+          quantityDone: 0,
+        })),
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
       });
@@ -220,7 +243,9 @@ export function useProductionPipeline() {
   }, []);
 
   const board = useMemo(() => {
-    const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(MACHINE_TYPES.map((m) => [m, [] as WorkOrder[]])) as Record<MachineType, WorkOrder[]>;
+    const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(
+      MACHINE_TYPES.map((m) => [m, [] as WorkOrder[]]),
+    ) as Record<MachineType, WorkOrder[]>;
     for (const o of state.orders) {
       const idx = o.currentStepIndex;
       if (idx < 0 || idx >= o.steps.length) continue;

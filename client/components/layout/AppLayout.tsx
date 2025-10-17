@@ -107,7 +107,11 @@ export default function AppLayout() {
                 onClick={() => setMenuOpen((s) => !s)}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
               >
-                {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {menuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </button>
             </div>
           </nav>
