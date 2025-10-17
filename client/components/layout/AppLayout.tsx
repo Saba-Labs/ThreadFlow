@@ -96,7 +96,7 @@ export default function AppLayout() {
               </NavLink>
 
               <Button asChild size="sm" className="ml-2">
-                <Link to={location.pathname + "#new-model"}>New Model</Link>
+                <Link to="/models/new">New Model</Link>
               </Button>
             </div>
 
