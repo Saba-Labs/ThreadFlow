@@ -176,7 +176,7 @@ export default function AppLayout() {
                     )
                   }
                 >
-                  On Hold
+                  Hold
                 </NavLink>
                 <NavLink
                   to="/settings"
@@ -193,7 +193,7 @@ export default function AppLayout() {
                   Settings
                 </NavLink>
                 <Button asChild size="sm" className="mt-2">
-                  <Link to={location.pathname + "#new-model"} onClick={() => setMenuOpen(false)}>
+                  <Link to="/models/new" onClick={() => setMenuOpen(false)}>
                     New Model
                   </Link>
                 </Button>
