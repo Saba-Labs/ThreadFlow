@@ -24,7 +24,10 @@ export default function SimpleModal(props: {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={() => onOpenChange?.(false)} />
+      <div
+        className="absolute inset-0 bg-black/40"
+        onClick={() => onOpenChange?.(false)}
+      />
       <div className="relative z-10 w-full max-w-2xl rounded-lg bg-background shadow-lg">
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="text-lg font-semibold">{title}</h3>

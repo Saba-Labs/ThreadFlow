@@ -11,14 +11,23 @@ export default function Index() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Garments Production Dashboard</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Garments Production Dashboard
+          </h1>
           <p className="text-muted-foreground max-w-prose">
-            Track models across machines (Singer, Folding, Roll, Fleet, Overlock 3T, Elastic, 5 Thread Joint, Kaja, Button, Ring Button) and finishing (Trimming, Ironing, Packing). Set custom paths, mark running/hold, and move to next steps.
+            Track models across machines (Singer, Folding, Roll, Fleet, Overlock
+            3T, Elastic, 5 Thread Joint, Kaja, Button, Ring Button) and
+            finishing (Trimming, Ironing, Packing). Set custom paths, mark
+            running/hold, and move to next steps.
           </p>
         </div>
         <ModelForm
           onCreate={(data) => {
-            pipeline.createWorkOrder({ modelName: data.modelName, quantity: data.quantity, path: data.path as any });
+            pipeline.createWorkOrder({
+              modelName: data.modelName,
+              quantity: data.quantity,
+              path: data.path as any,
+            });
           }}
           trigger={<Button>New Model</Button>}
         />
@@ -27,12 +36,18 @@ export default function Index() {
       <MachineBoard
         data={pipeline.board}
         onRun={(o) => {
-          if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return;
-          pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "running" });
+          if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
+            return;
+          pipeline.updateStepStatus(o.id, o.currentStepIndex, {
+            status: "running",
+          });
         }}
         onHold={(o) => {
-          if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return;
-          pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "hold" });
+          if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
+            return;
+          pipeline.updateStepStatus(o.id, o.currentStepIndex, {
+            status: "hold",
+          });
         }}
         onNext={(o) => pipeline.moveToNextStep(o.id)}
       />

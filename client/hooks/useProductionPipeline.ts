@@ -84,8 +84,10 @@ export function useProductionPipeline() {
     (input: {
       modelName: string;
       quantity: number;
-      path: (| { kind: "machine"; machineType: Exclude<MachineType, "Job Work"> }
-        | { kind: "job"; externalUnitName: string })[];
+      path: (
+        | { kind: "machine"; machineType: Exclude<MachineType, "Job Work"> }
+        | { kind: "job"; externalUnitName: string }
+      )[];
     }) => {
       const steps: PathStep[] = input.path.map((p) => ({
         id: uid("step"),
@@ -114,10 +116,7 @@ export function useProductionPipeline() {
   }, []);
 
   const editPath = useCallback(
-    (
-      orderId: string,
-      editor: (steps: PathStep[]) => PathStep[],
-    ) => {
+    (orderId: string, editor: (steps: PathStep[]) => PathStep[]) => {
       setState((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
@@ -139,7 +138,9 @@ export function useProductionPipeline() {
     (
       orderId: string,
       stepIndex: number,
-      patch: Partial<Pick<PathStep, "status" | "activeMachines" | "quantityDone">>,
+      patch: Partial<
+        Pick<PathStep, "status" | "activeMachines" | "quantityDone">
+      >,
     ) => {
       setState((s) => ({
         orders: s.orders.map((o) => {
@@ -160,7 +161,12 @@ export function useProductionPipeline() {
         if (o.currentStepIndex < 0) return o;
         const idx = o.currentStepIndex;
         const steps = o.steps.slice();
-        if (steps[idx]) steps[idx] = { ...steps[idx], status: "completed", activeMachines: 0 };
+        if (steps[idx])
+          steps[idx] = {
+            ...steps[idx],
+            status: "completed",
+            activeMachines: 0,
+          };
         const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length; // length means done
         return { ...o, steps, currentStepIndex: nextIndex };
       }),
@@ -177,33 +183,37 @@ export function useProductionPipeline() {
     }));
   }, []);
 
-  const splitOrder = useCallback(
-    (orderId: string, quantities: number[]) => {
-      setState((s) => {
-        const src = s.orders.find((o) => o.id === orderId);
-        if (!src) return s;
-        const valid = quantities
-          .map((q) => Math.max(0, Math.floor(q)))
-          .filter((q) => q > 0);
-        const sum = valid.reduce((a, b) => a + b, 0);
-        if (sum <= 0 || sum >= src.quantity) return s; // avoid invalid
-        const remainder = src.quantity - sum;
-        const base = (q: number): WorkOrder => ({
-          id: uid("order"),
-          modelName: src.modelName,
-          quantity: q,
-          createdAt: Date.now(),
-          steps: src.steps.map((st) => ({ ...st, id: uid("step"), status: st.status === "completed" ? "completed" : "pending", activeMachines: 0, quantityDone: 0 })),
-          currentStepIndex: src.currentStepIndex,
-          parentId: src.id,
-        });
-        const children = valid.map((q) => base(q));
-        const remainderOrder = base(remainder);
-        const withoutSrc = s.orders.filter((o) => o.id !== src.id);
-        return { orders: [remainderOrder, ...children, ...withoutSrc] };
+  const splitOrder = useCallback((orderId: string, quantities: number[]) => {
+    setState((s) => {
+      const src = s.orders.find((o) => o.id === orderId);
+      if (!src) return s;
+      const valid = quantities
+        .map((q) => Math.max(0, Math.floor(q)))
+        .filter((q) => q > 0);
+      const sum = valid.reduce((a, b) => a + b, 0);
+      if (sum <= 0 || sum >= src.quantity) return s; // avoid invalid
+      const remainder = src.quantity - sum;
+      const base = (q: number): WorkOrder => ({
+        id: uid("order"),
+        modelName: src.modelName,
+        quantity: q,
+        createdAt: Date.now(),
+        steps: src.steps.map((st) => ({
+          ...st,
+          id: uid("step"),
+          status: st.status === "completed" ? "completed" : "pending",
+          activeMachines: 0,
+          quantityDone: 0,
+        })),
+        currentStepIndex: src.currentStepIndex,
+        parentId: src.id,
       });
-    },
-  );
+      const children = valid.map((q) => base(q));
+      const remainderOrder = base(remainder);
+      const withoutSrc = s.orders.filter((o) => o.id !== src.id);
+      return { orders: [remainderOrder, ...children, ...withoutSrc] };
+    });
+  });
 
   const board = useMemo(() => {
     const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(

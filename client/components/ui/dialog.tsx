@@ -19,12 +19,18 @@ function DialogPortal({ children }: any) {
 }
 
 function DialogOverlay({ className = "", ...props }: any) {
-  return <div className={cn("fixed inset-0 bg-black/40", className)} {...props} />;
+  return (
+    <div className={cn("fixed inset-0 bg-black/40", className)} {...props} />
+  );
 }
 
 function DialogClose({ children, ...props }: any) {
   return (
-    <button {...props} aria-label="Close" className="rounded p-1 hover:bg-muted/20">
+    <button
+      {...props}
+      aria-label="Close"
+      className="rounded p-1 hover:bg-muted/20"
+    >
       {children ?? <X className="h-4 w-4" />}
     </button>
   );
@@ -32,22 +38,46 @@ function DialogClose({ children, ...props }: any) {
 
 function DialogContent({ children, className = "", ...props }: any) {
   return (
-    <div className={cn("relative z-50 w-full max-w-2xl rounded-lg bg-background shadow-lg", className)} {...props}>
+    <div
+      className={cn(
+        "relative z-50 w-full max-w-2xl rounded-lg bg-background shadow-lg",
+        className,
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
 }
 
 const DialogHeader = ({ className = "", ...props }: any) => (
-  <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className,
+    )}
+    {...props}
+  />
 );
 
 const DialogFooter = ({ className = "", ...props }: any) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)} {...props} />
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className,
+    )}
+    {...props}
+  />
 );
 
 const DialogTitle = ({ children, className = "", ...props }: any) => (
-  <h3 className={cn("text-lg font-semibold leading-none tracking-tight", className)} {...props}>
+  <h3
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className,
+    )}
+    {...props}
+  >
     {children}
   </h3>
 );

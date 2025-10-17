@@ -31,15 +31,29 @@ export default function Models() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{filter === "all" ? "All Models" : filter === "running" ? "Running Models" : "On-hold Models"}</h1>
+        <h1 className="text-2xl font-semibold">
+          {filter === "all"
+            ? "All Models"
+            : filter === "running"
+              ? "Running Models"
+              : "On-hold Models"}
+        </h1>
         <p className="text-sm text-muted-foreground">View: {filter}</p>
       </div>
 
       <section>
         <MachineBoard
           data={pipeline.board}
-          onRun={(o) => pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "running" })}
-          onHold={(o) => pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "hold" })}
+          onRun={(o) =>
+            pipeline.updateStepStatus(o.id, o.currentStepIndex, {
+              status: "running",
+            })
+          }
+          onHold={(o) =>
+            pipeline.updateStepStatus(o.id, o.currentStepIndex, {
+              status: "hold",
+            })
+          }
           onNext={(o) => pipeline.moveToNextStep(o.id)}
         />
       </section>

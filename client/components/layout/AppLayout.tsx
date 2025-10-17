@@ -22,7 +22,9 @@ export default function AppLayout() {
               className={({ isActive }) =>
                 cn(
                   "rounded-md px-3 py-2 text-sm font-medium",
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )
               }
             >
@@ -34,7 +36,9 @@ export default function AppLayout() {
                 className={({ isActive }) =>
                   cn(
                     "rounded-md px-3 py-2 text-sm font-medium",
-                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )
                 }
               >
@@ -45,7 +49,9 @@ export default function AppLayout() {
                 className={({ isActive }) =>
                   cn(
                     "rounded-md px-3 py-2 text-sm font-medium",
-                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )
                 }
               >
@@ -56,7 +62,9 @@ export default function AppLayout() {
                 className={({ isActive }) =>
                   cn(
                     "rounded-md px-3 py-2 text-sm font-medium",
-                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )
                 }
               >
@@ -68,11 +76,15 @@ export default function AppLayout() {
               className={({ isActive }) =>
                 cn(
                   "rounded-md px-3 py-2 text-sm font-medium",
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )
               }
             >
-              <span className="inline-flex items-center gap-2"><Settings className="h-4 w-4"/> Settings</span>
+              <span className="inline-flex items-center gap-2">
+                <Settings className="h-4 w-4" /> Settings
+              </span>
             </NavLink>
             <Button asChild size="sm" className="ml-2 hidden sm:inline-flex">
               <Link to={location.pathname + "#new-model"}>New Model</Link>
