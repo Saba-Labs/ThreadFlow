@@ -1,62 +1,54 @@
-import { DemoResponse } from "@shared/api";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import ModelForm from "@/components/pipeline/ModelForm";
+import MachineBoard from "@/components/pipeline/MachineBoard";
+import ModelList from "@/components/pipeline/ModelList";
+import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 
 export default function Index() {
-  const [exampleFromServer, setExampleFromServer] = useState("");
-  // Fetch users on component mount
-  useEffect(() => {
-    fetchDemo();
-  }, []);
-
-  // Example of how to fetch data from the server (if needed)
-  const fetchDemo = async () => {
-    try {
-      const response = await fetch("/api/demo");
-      const data = (await response.json()) as DemoResponse;
-      setExampleFromServer(data.message);
-    } catch (error) {
-      console.error("Error fetching hello:", error);
-    }
-  };
+  const pipeline = useProductionPipeline();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="text-center">
-        {/* TODO: FUSION_GENERATION_APP_PLACEHOLDER replace everything here with the actual app! */}
-        <h1 className="text-2xl font-semibold text-slate-800 flex items-center justify-center gap-3">
-          <svg
-            className="animate-spin h-8 w-8 text-slate-400"
-            viewBox="0 0 50 50"
-          >
-            <circle
-              className="opacity-30"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-            />
-            <circle
-              className="text-slate-600"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset="75"
-            />
-          </svg>
-          Generating your app...
-        </h1>
-        <p className="mt-4 text-slate-600 max-w-md">
-          Watch the chat on the left for updates that might need your attention
-          to finish generating
-        </p>
-        <p className="mt-4 hidden max-w-md">{exampleFromServer}</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Garments Production Dashboard</h1>
+          <p className="text-muted-foreground max-w-prose">
+            Track models across machines (Singer, Folding, Roll, Fleet, Overlock 3T, Elastic, 5 Thread Joint, Kaja, Button, Ring Button) and finishing (Trimming, Ironing, Packing). Set custom paths, mark running/hold, and move to next steps.
+          </p>
+        </div>
+        <ModelForm
+          onCreate={(data) => {
+            pipeline.createWorkOrder({ modelName: data.modelName, quantity: data.quantity, path: data.path as any });
+          }}
+          trigger={<Button>New Model</Button>}
+        />
       </div>
+
+      <MachineBoard
+        data={pipeline.board}
+        onRun={(o) => {
+          if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return;
+          pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "running" });
+        }}
+        onHold={(o) => {
+          if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return;
+          pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "hold" });
+        }}
+        onNext={(o) => pipeline.moveToNextStep(o.id)}
+      />
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">All Models</h2>
+        </div>
+        <ModelList
+          orders={pipeline.orders}
+          onDelete={pipeline.deleteOrder}
+          onNext={(id) => pipeline.moveToNextStep(id)}
+          onEditPath={pipeline.editPath}
+          onSplit={pipeline.splitOrder}
+        />
+      </section>
     </div>
   );
 }
