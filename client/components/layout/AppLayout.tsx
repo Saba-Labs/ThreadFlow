@@ -148,7 +148,7 @@ export default function AppLayout() {
                     )
                   }
                 >
-                  All
+                  All Models
                 </NavLink>
                 <NavLink
                   to="/models/running"
