@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as React from "react";
+import { forwardRef, type ElementRef, type ComponentPropsWithoutRef, type HTMLAttributes } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
