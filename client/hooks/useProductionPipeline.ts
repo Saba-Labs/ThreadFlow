@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
@@ -65,7 +65,6 @@ export interface PipelineState {
   orders: WorkOrder[];
 }
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 // Module-level shared store so multiple components see the same data
 let STORE: PipelineState = (function load() {
