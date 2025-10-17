@@ -65,20 +65,37 @@ export interface PipelineState {
   orders: WorkOrder[];
 }
 
-export function useProductionPipeline() {
-  const [state, setState] = useState<PipelineState>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw) as PipelineState;
-    } catch {}
-    return { orders: [] };
-  });
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {}
-  }, [state]);
+// Module-level shared store so multiple components see the same data
+let STORE: PipelineState = (function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw) as PipelineState;
+  } catch {}
+  return { orders: [] };
+})();
+
+const subscribers = new Set<() => void>();
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(STORE));
+  } catch {}
+}
+
+function setStore(updater: (s: PipelineState) => PipelineState) {
+  STORE = updater(STORE);
+  persist();
+  for (const s of Array.from(subscribers)) s();
+}
+
+function subscribe(cb: () => void) {
+  subscribers.add(cb);
+  return () => subscribers.delete(cb);
+}
+
+export function useProductionPipeline() {
+  const state = useSyncExternalStore(subscribe, () => STORE, () => STORE);
 
   const createWorkOrder = useCallback(
     (input: {
@@ -106,23 +123,23 @@ export function useProductionPipeline() {
         steps,
         currentStepIndex: steps.length > 0 ? 0 : -1,
       };
-      setState((s) => ({ orders: [order, ...s.orders] }));
+      setStore((s) => ({ orders: [order, ...s.orders] }));
       return order.id;
     },
+    [],
   );
 
   const deleteOrder = useCallback((orderId: string) => {
-    setState((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
+    setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
   }, []);
 
   const editPath = useCallback(
     (orderId: string, editor: (steps: PathStep[]) => PathStep[]) => {
-      setState((s) => ({
+      setStore((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
           const currentStepId = o.steps[o.currentStepIndex]?.id;
           const nextSteps = editor([...o.steps]);
-          // Try to keep pointer on same step id if still exists
           const newIndex = currentStepId
             ? nextSteps.findIndex((st) => st.id === currentStepId)
             : nextSteps.length > 0
@@ -132,6 +149,7 @@ export function useProductionPipeline() {
         }),
       }));
     },
+    [],
   );
 
   const updateStepStatus = useCallback(
@@ -142,39 +160,34 @@ export function useProductionPipeline() {
         Pick<PathStep, "status" | "activeMachines" | "quantityDone">
       >,
     ) => {
-      setState((s) => ({
+      setStore((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
-          const steps = o.steps.map((st, i) =>
-            i === stepIndex ? { ...st, ...patch } : st,
-          );
+          const steps = o.steps.map((st, i) => (i === stepIndex ? { ...st, ...patch } : st));
           return { ...o, steps };
         }),
       }));
     },
+    [],
   );
 
   const moveToNextStep = useCallback((orderId: string) => {
-    setState((s) => ({
+    setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
         if (o.currentStepIndex < 0) return o;
         const idx = o.currentStepIndex;
         const steps = o.steps.slice();
         if (steps[idx])
-          steps[idx] = {
-            ...steps[idx],
-            status: "completed",
-            activeMachines: 0,
-          };
-        const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length; // length means done
+          steps[idx] = { ...steps[idx], status: "completed", activeMachines: 0 };
+        const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
         return { ...o, steps, currentStepIndex: nextIndex };
       }),
     }));
   }, []);
 
   const setCurrentStep = useCallback((orderId: string, index: number) => {
-    setState((s) => ({
+    setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
         const bounded = Math.max(-1, Math.min(index, o.steps.length));
@@ -184,27 +197,19 @@ export function useProductionPipeline() {
   }, []);
 
   const splitOrder = useCallback((orderId: string, quantities: number[]) => {
-    setState((s) => {
+    setStore((s) => {
       const src = s.orders.find((o) => o.id === orderId);
       if (!src) return s;
-      const valid = quantities
-        .map((q) => Math.max(0, Math.floor(q)))
-        .filter((q) => q > 0);
+      const valid = quantities.map((q) => Math.max(0, Math.floor(q))).filter((q) => q > 0);
       const sum = valid.reduce((a, b) => a + b, 0);
-      if (sum <= 0 || sum >= src.quantity) return s; // avoid invalid
+      if (sum <= 0 || sum >= src.quantity) return s;
       const remainder = src.quantity - sum;
       const base = (q: number): WorkOrder => ({
         id: uid("order"),
         modelName: src.modelName,
         quantity: q,
         createdAt: Date.now(),
-        steps: src.steps.map((st) => ({
-          ...st,
-          id: uid("step"),
-          status: st.status === "completed" ? "completed" : "pending",
-          activeMachines: 0,
-          quantityDone: 0,
-        })),
+        steps: src.steps.map((st) => ({ ...st, id: uid("step"), status: st.status === "completed" ? "completed" : "pending", activeMachines: 0, quantityDone: 0 })),
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
       });
@@ -213,12 +218,10 @@ export function useProductionPipeline() {
       const withoutSrc = s.orders.filter((o) => o.id !== src.id);
       return { orders: [remainderOrder, ...children, ...withoutSrc] };
     });
-  });
+  }, []);
 
   const board = useMemo(() => {
-    const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(
-      MACHINE_TYPES.map((m) => [m, [] as WorkOrder[]]),
-    ) as Record<MachineType, WorkOrder[]>;
+    const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(MACHINE_TYPES.map((m) => [m, [] as WorkOrder[]])) as Record<MachineType, WorkOrder[]>;
     for (const o of state.orders) {
       const idx = o.currentStepIndex;
       if (idx < 0 || idx >= o.steps.length) continue;
