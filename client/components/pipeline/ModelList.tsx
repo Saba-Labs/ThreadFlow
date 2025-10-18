@@ -160,7 +160,10 @@ export default function ModelList(props: ModelListProps) {
                             >
                               Edit Path
                             </Button>
-                            <Button size="sm" onClick={() => props.onNext(o.id)}>
+                            <Button
+                              size="sm"
+                              onClick={() => props.onNext(o.id)}
+                            >
                               <SkipForward className="h-4 w-4 mr-1" /> Next
                             </Button>
                             <Button
@@ -418,7 +421,8 @@ export default function ModelList(props: ModelListProps) {
           >
             <div className="space-y-3">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Enter quantities for each batch. Total available: {splitFor?.quantity || 0}
+                Enter quantities for each batch. Total available:{" "}
+                {splitFor?.quantity || 0}
               </p>
 
               <div className="space-y-2">
