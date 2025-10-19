@@ -27,7 +27,7 @@ export default function ModelsAll() {
         />
       </div>
 
-      <div className="-mx-6 sm:-mx-8 px-6 sm:px-8">
+      <div className="-mx-4 sm:-mx-6 px-0 sm:px-0">
         <ModelList
           orders={pipeline.orders}
           onDelete={pipeline.deleteOrder}
