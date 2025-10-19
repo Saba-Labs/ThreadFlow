@@ -278,7 +278,7 @@ export default function ModelList(props: ModelListProps) {
                         <Badge
                           variant={
                             step.status === "running"
-                              ? "default"
+                              ? "success"
                               : step.status === "hold"
                                 ? "destructive"
                                 : "secondary"
