@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
-import { MACHINE_TYPES, MachineType } from "@/hooks/useProductionPipeline";
+import { useMachineTypes } from "@/lib/machineTypes";
 
 export interface NewPathStep {
   kind: "machine" | "job";
