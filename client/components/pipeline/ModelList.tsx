@@ -404,7 +404,7 @@ export default function ModelList(props: ModelListProps) {
                             <Badge variant={
                               editing.steps[editing.currentStepIndex].status === "running" ? "success" : editing.steps[editing.currentStepIndex].status === "hold" ? "destructive" : "secondary"
                             }>
-                              {editing.steps[editing.currentStepIndex].status}
+                              {cap(editing.steps[editing.currentStepIndex].status)}
                             </Badge>
                           )}
                         </div>
