@@ -276,36 +276,39 @@ export default function ModelList(props: ModelListProps) {
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
-                      {i >= 0 && i < o.steps.length && (
-                        <>
-                          <button onClick={() => toggleCardStatus(o)}>
-                            <Badge
-                              variant={
-                                step.status === "running"
-                                  ? "success"
-                                  : step.status === "hold"
-                                    ? "destructive"
-                                    : "secondary"
-                              }
-                              className="shrink-0 cursor-pointer"
-                            >
-                              {cap(step.status)}
-                            </Badge>
-                          </button>
+                      {i >= 0 && i < o.steps.length && (() => {
+                        const displayStatus = step.status === "pending" ? "hold" : step.status;
+                        return (
+                          <>
+                            <div className="text-sm text-right">
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
+                                {i < 0
+                                  ? "Not started"
+                                  : i >= o.steps.length
+                                    ? "Completed"
+                                    : step.kind === "machine"
+                                      ? step.machineType
+                                      : "Job Work"}
+                              </span>
+                            </div>
 
-                          <div className="text-sm mt-1 text-right">
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {i < 0
-                                ? "Not started"
-                                : i >= o.steps.length
-                                  ? "Completed"
-                                  : step.kind === "machine"
-                                    ? step.machineType
-                                    : "Job Work"}
-                            </span>
-                          </div>
-                        </>
-                      )}
+                            <button onClick={() => toggleCardStatus(o)}>
+                              <Badge
+                                variant={
+                                  displayStatus === "running"
+                                    ? "success"
+                                    : displayStatus === "hold"
+                                      ? "destructive"
+                                      : "secondary"
+                                }
+                                className="shrink-0 cursor-pointer"
+                              >
+                                {cap(displayStatus)}
+                              </Badge>
+                            </button>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
