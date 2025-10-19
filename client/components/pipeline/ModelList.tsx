@@ -27,6 +27,11 @@ interface ModelListProps {
     editor: (steps: PathStep[]) => PathStep[],
   ) => void;
   onSplit: (orderId: string, quantities: number[]) => void;
+  onSetStepStatus: (
+    orderId: string,
+    stepIndex: number,
+    status: "pending" | "running" | "hold" | "completed",
+  ) => void;
 }
 
 export default function ModelList(props: ModelListProps) {
@@ -63,14 +68,35 @@ export default function ModelList(props: ModelListProps) {
 
   const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
 
+  const statusBgClass = (o: WorkOrder) => {
+    const i = o.currentStepIndex;
+    if (i < 0 || i >= o.steps.length) {
+      // completed
+      return "bg-green-50 dark:bg-green-900/20";
+    }
+    const st = o.steps[i];
+    if (st.status === "hold") return "bg-red-50 dark:bg-red-900/20";
+    if (st.status === "running") return "bg-amber-50 dark:bg-amber-900/20";
+    return "";
+  };
+
+  const toggleCardStatus = (o: WorkOrder) => {
+    const i = o.currentStepIndex;
+    if (i < 0 || i >= o.steps.length) return;
+    const st = o.steps[i];
+    const newStatus = st.status === "running" ? "hold" : "running";
+    props.onSetStepStatus(o.id, i, newStatus);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4">
+      <div className="mx-auto max-w-none px-4">
         <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
           Production Orders
         </h1>
 
         <div className="space-y-3">
+          {/* Desktop table */}
           <div className="hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
@@ -92,9 +118,6 @@ export default function ModelList(props: ModelListProps) {
                       Status
                     </th>
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Path
-                    </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Actions
                     </th>
                   </tr>
@@ -103,16 +126,22 @@ export default function ModelList(props: ModelListProps) {
                   {sorted.map((o) => {
                     const i = o.currentStepIndex;
                     const step = o.steps[i];
+                    const bg = statusBgClass(o);
                     return (
                       <tr
                         key={o.id}
-                        className="border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                        className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
                       >
                         <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                           {formatDate(o.createdAt)}
                         </td>
                         <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
-                          {o.modelName}
+                          <button
+                            onClick={() => setEditingId(o.id)}
+                            className="text-left w-full truncate"
+                          >
+                            {o.modelName}
+                          </button>
                         </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
                           {o.quantity}
@@ -130,38 +159,22 @@ export default function ModelList(props: ModelListProps) {
                           {i < 0 || i >= o.steps.length ? (
                             <Badge variant="secondary">—</Badge>
                           ) : (
-                            <Badge
-                              variant={
-                                step.status === "running"
-                                  ? "default"
-                                  : step.status === "hold"
-                                    ? "destructive"
-                                    : "secondary"
-                              }
-                            >
-                              {step.status}
-                            </Badge>
-                          )}
-                        </td>
-                        <td className="p-3 max-w-[320px]">
-                          <div className="flex flex-wrap gap-1">
-                            {o.steps.map((s, idx) => (
-                              <span
-                                key={s.id}
-                                className={`rounded-full px-2 py-0.5 text-xs border ${
-                                  idx < i
-                                    ? "bg-green-100 border-green-200 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                    : idx === i
-                                      ? "bg-amber-100 border-amber-200 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                                      : "text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-700"
-                                }`}
+                            <button onClick={() => toggleCardStatus(o)}>
+                              <Badge
+                                variant={
+                                  step.status === "running"
+                                    ? "default"
+                                    : step.status === "hold"
+                                      ? "destructive"
+                                      : "secondary"
+                                }
+                                className="cursor-pointer"
+                                aria-label={`Set status for ${o.modelName}`}
                               >
-                                {s.kind === "machine"
-                                  ? s.machineType
-                                  : "Job Work"}
-                              </span>
-                            ))}
-                          </div>
+                                {step.status}
+                              </Badge>
+                            </button>
+                          )}
                         </td>
                         <td className="p-3">
                           <div className="flex items-center gap-1">
@@ -169,8 +182,8 @@ export default function ModelList(props: ModelListProps) {
                               size="icon"
                               variant="ghost"
                               onClick={() => setEditingId(o.id)}
-                              title="Edit path"
-                              aria-label="Edit path"
+                              title="Details"
+                              aria-label="Details"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -220,7 +233,7 @@ export default function ModelList(props: ModelListProps) {
                   {sorted.length === 0 && (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={6}
                         className="p-8 text-center text-gray-500 dark:text-gray-400"
                       >
                         No models yet. Create one to get started.
@@ -232,19 +245,26 @@ export default function ModelList(props: ModelListProps) {
             </div>
           </div>
 
+          {/* Mobile cards */}
           <div className="lg:hidden space-y-3">
             {sorted.map((o) => {
               const i = o.currentStepIndex;
               const step = o.steps[i];
+              const bg = statusBgClass(o);
               return (
                 <div
                   key={o.id}
-                  className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 space-y-3 shadow-sm"
+                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 space-y-3 shadow-sm w-full`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
-                        {o.modelName}
+                        <button
+                          onClick={() => setEditingId(o.id)}
+                          className="text-left w-full truncate"
+                        >
+                          {o.modelName}
+                        </button>
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
                         <span className="inline-flex items-center gap-1">
@@ -254,26 +274,26 @@ export default function ModelList(props: ModelListProps) {
                       </div>
                     </div>
                     {i >= 0 && i < o.steps.length && (
-                      <Badge
-                        variant={
-                          step.status === "running"
-                            ? "default"
-                            : step.status === "hold"
-                              ? "destructive"
-                              : "secondary"
-                        }
-                        className="shrink-0"
-                      >
-                        {step.status}
-                      </Badge>
+                      <button onClick={() => toggleCardStatus(o)}>
+                        <Badge
+                          variant={
+                            step.status === "running"
+                              ? "default"
+                              : step.status === "hold"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                          className="shrink-0 cursor-pointer"
+                        >
+                          {step.status}
+                        </Badge>
+                      </button>
                     )}
                   </div>
 
                   <div className="space-y-2">
                     <div className="text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Current: {" "}
-                      </span>
+                      <span className="text-gray-600 dark:text-gray-400">Current: {" "}</span>
                       <span className="font-medium text-gray-900 dark:text-gray-100">
                         {i < 0
                           ? "Not started"
@@ -284,28 +304,6 @@ export default function ModelList(props: ModelListProps) {
                               : "Job Work"}
                       </span>
                     </div>
-
-                    <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1.5">
-                        Production Path:
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {o.steps.map((s, idx) => (
-                          <span
-                            key={s.id}
-                            className={`rounded-full px-2.5 py-1 text-xs border font-medium ${
-                              idx < i
-                                ? "bg-green-100 border-green-200 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                : idx === i
-                                  ? "bg-amber-100 border-amber-200 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                                  : "text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-700"
-                            }`}
-                          >
-                            {s.kind === "machine" ? s.machineType : "Job Work"}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-2">
@@ -314,8 +312,8 @@ export default function ModelList(props: ModelListProps) {
                         size="icon"
                         variant="ghost"
                         onClick={() => setEditingId(o.id)}
-                        title="Edit path"
-                        aria-label="Edit path"
+                        title="Details"
+                        aria-label="Details"
                       >
                         <Pencil className="h-5 w-5" />
                       </Button>
@@ -367,17 +365,16 @@ export default function ModelList(props: ModelListProps) {
             })}
             {sorted.length === 0 && (
               <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center">
-                <p className="text-gray-500 dark:text-gray-400">
-                  No models yet. Create one to get started.
-                </p>
+                <p className="text-gray-500 dark:text-gray-400">No models yet. Create one to get started.</p>
               </div>
             )}
           </div>
 
+          {/* Edit Path / Details Modal */}
           <SimpleModal
             open={!!editing}
             onOpenChange={(v) => !v && setEditingId(null)}
-            title={`Edit Path — ${editing?.modelName}`}
+            title={`Model Details — ${editing?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setEditingId(null)}>
@@ -389,66 +386,90 @@ export default function ModelList(props: ModelListProps) {
             <div className="space-y-3">
               {editing && (
                 <div className="rounded-lg border border-gray-200 dark:border-gray-800 divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900">
-                  {editing.steps.map((st, idx) => (
-                    <div
-                      key={st.id}
-                      className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                    >
-                      <div className="min-w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-400 shrink-0">
-                        {idx + 1}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Model</div>
+                        <div className="font-medium text-lg">{editing.modelName}</div>
+                        <div className="text-sm text-muted-foreground">Qty: {editing.quantity}</div>
+                        <div className="text-sm text-muted-foreground">Date: {formatDate(editing.createdAt)}</div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate text-gray-900 dark:text-gray-100">
-                          {st.kind === "machine" ? st.machineType : "Job Work"}
+                      <div>
+                        <div className="text-sm text-muted-foreground">Current status</div>
+                        <div className="mt-1">
+                          {editing.currentStepIndex < 0 || editing.currentStepIndex >= editing.steps.length ? (
+                            <Badge variant="secondary">Completed</Badge>
+                          ) : (
+                            <Badge variant={
+                              editing.steps[editing.currentStepIndex].status === "running" ? "default" : editing.steps[editing.currentStepIndex].status === "hold" ? "destructive" : "secondary"
+                            }>
+                              {editing.steps[editing.currentStepIndex].status}
+                            </Badge>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          disabled={idx === 0}
-                          onClick={() =>
-                            props.onEditPath(editing.id, (steps) => {
-                              const j = idx - 1;
-                              if (j < 0) return steps;
-                              const arr = steps.slice();
-                              const tmp = arr[idx];
-                              arr[idx] = arr[j];
-                              arr[j] = tmp;
-                              return arr;
-                            })
-                          }
-                          className="h-8 w-8"
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          disabled={idx === editing.steps.length - 1}
-                          onClick={() =>
-                            props.onEditPath(editing.id, (steps) => {
-                              const j = idx + 1;
-                              if (j >= steps.length) return steps;
-                              const arr = steps.slice();
-                              const tmp = arr[idx];
-                              arr[idx] = arr[j];
-                              arr[j] = tmp;
-                              return arr;
-                            })
-                          }
-                          className="h-8 w-8"
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="p-3">
+                    <div className="text-sm text-muted-foreground mb-2">Production Path</div>
+                    <div className="space-y-2">
+                      {editing.steps.map((st, idx) => (
+                        <div key={st.id} className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                          <div>
+                            <div className="text-sm font-medium">{st.kind === "machine" ? st.machineType : "Job Work"}</div>
+                            <div className="text-xs text-muted-foreground">Status: {st.status}</div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              disabled={idx === 0}
+                              onClick={() =>
+                                props.onEditPath(editing.id, (steps) => {
+                                  const j = idx - 1;
+                                  if (j < 0) return steps;
+                                  const arr = steps.slice();
+                                  const tmp = arr[idx];
+                                  arr[idx] = arr[j];
+                                  arr[j] = tmp;
+                                  return arr;
+                                })
+                              }
+                              className="h-8 w-8"
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              disabled={idx === editing.steps.length - 1}
+                              onClick={() =>
+                                props.onEditPath(editing.id, (steps) => {
+                                  const j = idx + 1;
+                                  if (j >= steps.length) return steps;
+                                  const arr = steps.slice();
+                                  const tmp = arr[idx];
+                                  arr[idx] = arr[j];
+                                  arr[j] = tmp;
+                                  return arr;
+                                })
+                              }
+                              className="h-8 w-8"
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </SimpleModal>
 
+          {/* Split modal */}
           <SimpleModal
             open={!!splitFor}
             onOpenChange={(v) => !v && setSplitForId(null)}
@@ -465,10 +486,7 @@ export default function ModelList(props: ModelListProps) {
             }
           >
             <div className="space-y-3">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Enter quantities for each batch. Total available: {" "}
-                {splitFor?.quantity || 0}
-              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Enter quantities for each batch. Total available: {splitFor?.quantity || 0}</p>
 
               <div className="space-y-2">
                 {splitInputs.map((q, i) => (
@@ -503,20 +521,14 @@ export default function ModelList(props: ModelListProps) {
                 ))}
               </div>
 
-              <Button
-                variant="outline"
-                onClick={() => setSplitInputs((arr) => [...arr, 0])}
-                className="w-full"
-              >
+              <Button variant="outline" onClick={() => setSplitInputs((arr) => [...arr, 0])} className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Another Batch
               </Button>
 
               {splitInputs.filter((q) => q > 0).length > 0 && (
                 <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-sm">
-                  <div className="font-medium mb-1 text-gray-900 dark:text-gray-100">
-                    Summary:
-                  </div>
+                  <div className="font-medium mb-1 text-gray-900 dark:text-gray-100">Summary:</div>
                   <div className="space-y-1 text-gray-600 dark:text-gray-400">
                     {splitInputs.map(
                       (q, i) =>
@@ -526,9 +538,7 @@ export default function ModelList(props: ModelListProps) {
                           </div>
                         ),
                     )}
-                    <div className="pt-1 border-t border-gray-200 dark:border-gray-700 font-medium text-gray-900 dark:text-gray-100">
-                      Total: {splitInputs.reduce((sum, q) => sum + q, 0)} units
-                    </div>
+                    <div className="pt-1 border-t border-gray-200 dark:border-gray-700 font-medium text-gray-900 dark:text-gray-100">Total: {splitInputs.reduce((sum, q) => sum + q, 0)} units</div>
                   </div>
                 </div>
               )}
