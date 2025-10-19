@@ -30,7 +30,7 @@ let STORE: string[] = (function load() {
 const subscribers = new Set<() => void>();
 
 export function getMachineTypes() {
-  return STORE.slice();
+  return STORE;
 }
 
 export function setMachineTypes(list: string[]) {
