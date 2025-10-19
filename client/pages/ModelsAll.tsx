@@ -19,6 +19,7 @@ export default function ModelsAll() {
             pipeline.createWorkOrder({
               modelName: data.modelName,
               quantity: data.quantity,
+              createdAt: data.createdAt,
               path: data.path as any,
             });
           }}
@@ -30,6 +31,7 @@ export default function ModelsAll() {
         orders={pipeline.orders}
         onDelete={pipeline.deleteOrder}
         onNext={(id) => pipeline.moveToNextStep(id)}
+        onPrev={(id) => pipeline.moveToPrevStep(id)}
         onEditPath={pipeline.editPath}
         onSplit={pipeline.splitOrder}
       />
