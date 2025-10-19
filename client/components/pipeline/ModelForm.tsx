@@ -44,13 +44,10 @@ export default function ModelForm(props: {
     { kind: "machine", machineType: "Packing" },
   ]);
 
+  const machineTypes = useMachineTypes();
   const machineOptions = useMemo(
-    () =>
-      MACHINE_TYPES.filter((m) => m !== "Job Work") as Exclude<
-        MachineType,
-        "Job Work"
-      >[],
-    [],
+    () => machineTypes.filter((m) => m !== "Job Work"),
+    [machineTypes],
   );
 
   const addStep = (next: NewPathStep) => setPath((p) => [...p, next]);
