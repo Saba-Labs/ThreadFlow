@@ -76,7 +76,7 @@ export default function ModelList(props: ModelListProps) {
     }
     const st = o.steps[i];
     if (st.status === "hold") return "bg-red-50 dark:bg-red-900/20";
-    if (st.status === "running") return "bg-amber-50 dark:bg-amber-900/20";
+    if (st.status === "running") return "bg-green-50 dark:bg-green-900/20";
     return "";
   };
 
