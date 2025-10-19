@@ -41,6 +41,13 @@ export default function ModelForm(props: {
     [machineTypes],
   );
 
+  // populate default path when modal opens if path is empty
+  useEffect(() => {
+    if (open && path.length === 0 && machineOptions.length > 0) {
+      setPath(machineOptions.map((m) => ({ kind: "machine", machineType: m })));
+    }
+  }, [open, machineOptions]);
+
   const addStep = (next: NewPathStep) => setPath((p) => [...p, next]);
   const removeStep = (i: number) =>
     setPath((p) => p.filter((_, idx) => idx !== i));
