@@ -90,7 +90,7 @@ export default function ModelList(props: ModelListProps) {
 
   return (
     <div className="min-h-screen p-4">
-      <div className="mx-auto max-w-none px-4">
+      <div className="-mx-4 sm:-mx-6 px-4 sm:px-6">
         <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
           Production Orders
         </h1>
@@ -254,7 +254,7 @@ export default function ModelList(props: ModelListProps) {
               return (
                 <div
                   key={o.id}
-                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 space-y-3 shadow-sm w-full`}
+                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -364,7 +364,7 @@ export default function ModelList(props: ModelListProps) {
               );
             })}
             {sorted.length === 0 && (
-              <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center">
+              <div className="rounded-lg border border-gray-200 dark:border-gray-800 p-8 text-center bg-white dark:bg-gray-900">
                 <p className="text-gray-500 dark:text-gray-400">No models yet. Create one to get started.</p>
               </div>
             )}
