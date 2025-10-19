@@ -1,10 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  MACHINE_TYPES,
-  MachineType,
-  WorkOrder,
-} from "@/hooks/useProductionPipeline";
+import { WorkOrder } from "@/hooks/useProductionPipeline";
+import { useMachineTypes } from "@/lib/machineTypes";
 import {
   ChevronRight,
   PauseCircle,
