@@ -172,7 +172,7 @@ export default function ModelList(props: ModelListProps) {
                                 className="cursor-pointer"
                                 aria-label={`Set status for ${o.modelName}`}
                               >
-                                {step.status}
+                                {cap(step.status)}
                               </Badge>
                             </button>
                           )}
@@ -286,7 +286,7 @@ export default function ModelList(props: ModelListProps) {
                           }
                           className="shrink-0 cursor-pointer"
                         >
-                          {step.status}
+                          {cap(step.status)}
                         </Badge>
                       </button>
                     )}
