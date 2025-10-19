@@ -274,36 +274,38 @@ export default function ModelList(props: ModelListProps) {
                         <span>Qty: {o.quantity}</span>
                       </div>
                     </div>
-                    {i >= 0 && i < o.steps.length && (
-                      <button onClick={() => toggleCardStatus(o)}>
-                        <Badge
-                          variant={
-                            step.status === "running"
-                              ? "success"
-                              : step.status === "hold"
-                                ? "destructive"
-                                : "secondary"
-                          }
-                          className="shrink-0 cursor-pointer"
-                        >
-                          {cap(step.status)}
-                        </Badge>
-                      </button>
-                    )}
-                  </div>
 
-                  <div className="space-y-2">
-                    <div className="text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Current: {" "}</span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {i < 0
-                          ? "Not started"
-                          : i >= o.steps.length
-                            ? "Completed"
-                            : step.kind === "machine"
-                              ? step.machineType
-                              : "Job Work"}
-                      </span>
+                    <div className="flex flex-col items-end gap-1">
+                      {i >= 0 && i < o.steps.length && (
+                        <>
+                          <button onClick={() => toggleCardStatus(o)}>
+                            <Badge
+                              variant={
+                                step.status === "running"
+                                  ? "success"
+                                  : step.status === "hold"
+                                    ? "destructive"
+                                    : "secondary"
+                              }
+                              className="shrink-0 cursor-pointer"
+                            >
+                              {cap(step.status)}
+                            </Badge>
+                          </button>
+
+                          <div className="text-sm mt-1 text-right">
+                            <span className="font-medium text-gray-900 dark:text-gray-100">
+                              {i < 0
+                                ? "Not started"
+                                : i >= o.steps.length
+                                  ? "Completed"
+                                  : step.kind === "machine"
+                                    ? step.machineType
+                                    : "Job Work"}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
 
