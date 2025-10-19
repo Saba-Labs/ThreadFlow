@@ -90,7 +90,7 @@ export default function ModelList(props: ModelListProps) {
 
   return (
     <div className="min-h-screen p-4">
-      <div className="-mx-4 sm:-mx-6 px-4 sm:px-6">
+      <div className="px-2 sm:px-4">
         <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
           Production Orders
         </h1>
