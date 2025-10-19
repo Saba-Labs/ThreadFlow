@@ -14,7 +14,7 @@ import { useMachineTypes } from "@/lib/machineTypes";
 
 export interface NewPathStep {
   kind: "machine" | "job";
-  machineType?: Exclude<MachineType, "Job Work">;
+  machineType?: string;
   externalUnitName?: string;
 }
 
