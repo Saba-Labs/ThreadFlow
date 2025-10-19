@@ -118,7 +118,7 @@ export function useProductionPipeline() {
         kind: p.kind,
         machineType: p.kind === "machine" ? p.machineType : undefined,
         externalUnitName: p.kind === "job" ? p.externalUnitName : undefined,
-        status: "pending",
+        status: "hold",
         activeMachines: 0,
         quantityDone: 0,
       }));
@@ -213,7 +213,7 @@ export function useProductionPipeline() {
         if (target >= 0 && steps[target]) {
           steps[target] = {
             ...steps[target],
-            status: "pending",
+            status: "hold",
             activeMachines: 0,
           };
         }
