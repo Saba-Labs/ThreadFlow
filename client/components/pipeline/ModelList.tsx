@@ -411,11 +411,14 @@ export default function ModelList(props: ModelListProps) {
                           {editing.currentStepIndex < 0 || editing.currentStepIndex >= editing.steps.length ? (
                             <Badge variant="secondary">Completed</Badge>
                           ) : (
-                            <Badge variant={
-                              editing.steps[editing.currentStepIndex].status === "running" ? "success" : editing.steps[editing.currentStepIndex].status === "hold" ? "destructive" : "secondary"
-                            }>
-                              {cap(editing.steps[editing.currentStepIndex].status)}
-                            </Badge>
+                            (() => {
+                              const ds = editing.steps[editing.currentStepIndex].status === "pending" ? "hold" : editing.steps[editing.currentStepIndex].status;
+                              return (
+                                <Badge variant={ds === "running" ? "success" : ds === "hold" ? "destructive" : "secondary"}>
+                                  {cap(ds)}
+                                </Badge>
+                              );
+                            })()
                           )}
                         </div>
                       </div>
