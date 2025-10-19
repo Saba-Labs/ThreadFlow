@@ -8,9 +8,12 @@ import {
   ArrowUp,
   Scissors,
   SkipForward,
+  SkipBack,
   Trash2,
   X,
   Plus,
+  Pencil,
+  CalendarDays,
 } from "lucide-react";
 import type { PathStep, WorkOrder } from "@/hooks/useProductionPipeline";
 
@@ -18,6 +21,7 @@ interface ModelListProps {
   orders: WorkOrder[];
   onDelete: (id: string) => void;
   onNext: (id: string) => void;
+  onPrev: (id: string) => void;
   onEditPath: (
     orderId: string,
     editor: (steps: PathStep[]) => PathStep[],
@@ -57,6 +61,8 @@ export default function ModelList(props: ModelListProps) {
     setSplitInputs((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
       <div className="max-w-7xl mx-auto">
@@ -70,6 +76,9 @@ export default function ModelList(props: ModelListProps) {
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      Date
+                    </th>
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Model
                     </th>
@@ -99,6 +108,9 @@ export default function ModelList(props: ModelListProps) {
                         key={o.id}
                         className="border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                       >
+                        <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                          {formatDate(o.createdAt)}
+                        </td>
                         <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
                           {o.modelName}
                         </td>
@@ -152,19 +164,32 @@ export default function ModelList(props: ModelListProps) {
                           </div>
                         </td>
                         <td className="p-3">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
                             <Button
-                              size="sm"
-                              variant="outline"
+                              size="icon"
+                              variant="ghost"
                               onClick={() => setEditingId(o.id)}
+                              title="Edit path"
+                              aria-label="Edit path"
                             >
-                              Edit Path
+                              <Pencil className="h-4 w-4" />
                             </Button>
                             <Button
-                              size="sm"
-                              onClick={() => props.onNext(o.id)}
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => props.onPrev(o.id)}
+                              title="Previous step"
+                              aria-label="Previous step"
                             >
-                              <SkipForward className="h-4 w-4 mr-1" /> Next
+                              <SkipBack className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              onClick={() => props.onNext(o.id)}
+                              title="Next step"
+                              aria-label="Next step"
+                            >
+                              <SkipForward className="h-4 w-4" />
                             </Button>
                             <Button
                               size="icon"
@@ -174,6 +199,7 @@ export default function ModelList(props: ModelListProps) {
                                 setSplitInputs([0, 0]);
                               }}
                               title="Split into batches"
+                              aria-label="Split into batches"
                             >
                               <Scissors className="h-4 w-4" />
                             </Button>
@@ -182,6 +208,7 @@ export default function ModelList(props: ModelListProps) {
                               variant="ghost"
                               onClick={() => props.onDelete(o.id)}
                               title="Delete"
+                              aria-label="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -193,7 +220,7 @@ export default function ModelList(props: ModelListProps) {
                   {sorted.length === 0 && (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="p-8 text-center text-gray-500 dark:text-gray-400"
                       >
                         No models yet. Create one to get started.
@@ -219,9 +246,12 @@ export default function ModelList(props: ModelListProps) {
                       <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
                         {o.modelName}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                        Quantity: {o.quantity}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="h-3.5 w-3.5" /> {formatDate(o.createdAt)}
+                        </span>
+                        <span>Qty: {o.quantity}</span>
+                      </div>
                     </div>
                     {i >= 0 && i < o.steps.length && (
                       <Badge
@@ -242,7 +272,7 @@ export default function ModelList(props: ModelListProps) {
                   <div className="space-y-2">
                     <div className="text-sm">
                       <span className="text-gray-600 dark:text-gray-400">
-                        Current:{" "}
+                        Current: {" "}
                       </span>
                       <span className="font-medium text-gray-900 dark:text-gray-100">
                         {i < 0
@@ -278,44 +308,59 @@ export default function ModelList(props: ModelListProps) {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditingId(o.id)}
-                      className="flex-1"
-                    >
-                      Edit Path
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => props.onNext(o.id)}
-                      className="flex-1"
-                    >
-                      <SkipForward className="h-4 w-4 mr-1" /> Next
-                    </Button>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setSplitForId(o.id);
-                        setSplitInputs([0, 0]);
-                      }}
-                      className="flex-1"
-                    >
-                      <Scissors className="h-4 w-4 mr-1.5" /> Split Batches
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => props.onDelete(o.id)}
-                      className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1.5" /> Delete
-                    </Button>
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setEditingId(o.id)}
+                        title="Edit path"
+                        aria-label="Edit path"
+                      >
+                        <Pencil className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => props.onPrev(o.id)}
+                        title="Previous step"
+                        aria-label="Previous step"
+                      >
+                        <SkipBack className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        onClick={() => props.onNext(o.id)}
+                        title="Next step"
+                        aria-label="Next step"
+                      >
+                        <SkipForward className="h-5 w-5" />
+                      </Button>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => {
+                          setSplitForId(o.id);
+                          setSplitInputs([0, 0]);
+                        }}
+                        title="Split into batches"
+                        aria-label="Split into batches"
+                      >
+                        <Scissors className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => props.onDelete(o.id)}
+                        title="Delete"
+                        aria-label="Delete"
+                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               );
@@ -421,7 +466,7 @@ export default function ModelList(props: ModelListProps) {
           >
             <div className="space-y-3">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Enter quantities for each batch. Total available:{" "}
+                Enter quantities for each batch. Total available: {" "}
                 {splitFor?.quantity || 0}
               </p>
 
