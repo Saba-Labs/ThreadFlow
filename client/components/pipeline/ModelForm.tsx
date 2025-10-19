@@ -22,6 +22,7 @@ export default function ModelForm(props: {
   onCreate: (data: {
     modelName: string;
     quantity: number;
+    createdAt: number;
     path: NewPathStep[];
   }) => void;
   trigger?: React.ReactNode;
@@ -29,6 +30,9 @@ export default function ModelForm(props: {
   const [open, setOpen] = useState(false);
   const [modelName, setModelName] = useState("");
   const [quantity, setQuantity] = useState(100);
+  const [dateStr, setDateStr] = useState(() =>
+    new Date().toISOString().slice(0, 10),
+  );
   const [path, setPath] = useState<NewPathStep[]>([
     { kind: "machine", machineType: "Singer" },
     { kind: "machine", machineType: "Folding" },
@@ -66,6 +70,7 @@ export default function ModelForm(props: {
   const reset = () => {
     setModelName("");
     setQuantity(100);
+    setDateStr(new Date().toISOString().slice(0, 10));
     setPath([{ kind: "machine", machineType: "Singer" }]);
   };
 
@@ -74,6 +79,7 @@ export default function ModelForm(props: {
     props.onCreate({
       modelName,
       quantity: Math.max(1, Math.floor(quantity)),
+      createdAt: new Date(dateStr).getTime(),
       path,
     });
     reset();
@@ -100,10 +106,11 @@ export default function ModelForm(props: {
         }
       >
         <p className="text-sm text-muted-foreground mb-4">
-          Define quantity and the exact path through machines or job work.
+          Define quantity, date, and the exact path through machines or job
+          work.
         </p>
         <div className="grid gap-4">
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-3">
             <div>
               <label className="text-sm font-medium">Model name</label>
               <Input
@@ -118,6 +125,14 @@ export default function ModelForm(props: {
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date</label>
+              <Input
+                type="date"
+                value={dateStr}
+                onChange={(e) => setDateStr(e.target.value)}
               />
             </div>
           </div>
