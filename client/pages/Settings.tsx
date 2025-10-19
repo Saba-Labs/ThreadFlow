@@ -9,9 +9,13 @@ export default function Settings() {
   const [local, setLocal] = useState<string[]>(() => getMachineTypes());
 
   // keep local in sync if global changes externally
-  if (JSON.stringify(local) !== JSON.stringify(types)) {
-    setTimeout(() => setLocal(types), 0);
-  }
+  useEffect(() => {
+    try {
+      if (JSON.stringify(local) !== JSON.stringify(types)) {
+        setLocal(types);
+      }
+    } catch (_) {}
+  }, [types]);
 
   const update = (idx: number, val: string) => {
     setLocal((s) => s.map((x, i) => (i === idx ? val : x)));
