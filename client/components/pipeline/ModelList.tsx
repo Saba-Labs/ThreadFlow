@@ -1,390 +1,55 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import SimpleModal from "@/components/ui/SimpleModal";
+import {
+  ArrowDown,
+  ArrowUp,
+  Scissors,
+  SkipForward,
+  Trash2,
+  X,
+  Plus,
+} from "lucide-react";
+import type { PathStep, WorkOrder } from "@/hooks/useProductionPipeline";
 
-// Mock types based on the original code
-interface PathStep {
-  id: string;
-  kind: "machine" | "jobwork";
-  machineType?: string;
-  status?: "running" | "hold" | "waiting";
+interface ModelListProps {
+  orders: WorkOrder[];
+  onDelete: (id: string) => void;
+  onNext: (id: string) => void;
+  onEditPath: (
+    orderId: string,
+    editor: (steps: PathStep[]) => PathStep[],
+  ) => void;
+  onSplit: (orderId: string, quantities: number[]) => void;
 }
 
-interface WorkOrder {
-  id: string;
-  modelName: string;
-  quantity: number;
-  currentStepIndex: number;
-  steps: PathStep[];
-  createdAt: number;
-}
-
-// Simple Badge Component
-const Badge = ({
-  children,
-  variant = "default",
-  className = "",
-}: {
-  children: React.ReactNode;
-  variant?: "default" | "secondary" | "destructive";
-  className?: string;
-}) => {
-  const variants = {
-    default: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    secondary: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
-    destructive: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}
-    >
-      {children}
-    </span>
-  );
-};
-
-// Simple Button Component
-const Button = ({
-  children,
-  onClick,
-  variant = "default",
-  size = "default",
-  disabled = false,
-  className = "",
-  title,
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  variant?: "default" | "outline" | "ghost" | "secondary";
-  size?: "default" | "sm" | "icon";
-  disabled?: boolean;
-  className?: string;
-  title?: string;
-}) => {
-  const variants = {
-    default:
-      "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700",
-    outline:
-      "border border-gray-300 bg-transparent hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800",
-    ghost: "hover:bg-gray-100 dark:hover:bg-gray-800",
-    secondary:
-      "bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
-  };
-
-  const sizes = {
-    default: "px-4 py-2 text-sm",
-    sm: "px-3 py-1.5 text-sm",
-    icon: "p-2",
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      className={`inline-flex items-center justify-center font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
-    >
-      {children}
-    </button>
-  );
-};
-
-// Simple Input Component
-const Input = ({
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-  min,
-  className = "",
-}: {
-  type?: string;
-  value: string | number;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  min?: string;
-  className?: string;
-}) => {
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      min={min}
-      className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 ${className}`}
-    />
-  );
-};
-
-// Simple Modal Component
-const SimpleModal = ({
-  open,
-  onOpenChange,
-  title,
-  children,
-  footer,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  children: React.ReactNode;
-  footer: React.ReactNode;
-}) => {
-  if (!open) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-      onClick={() => onOpenChange(false)}
-    >
-      <div
-        className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between p-4 border-b dark:border-gray-800">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-        <div className="p-4 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {children}
-        </div>
-        <div className="p-4 border-t dark:border-gray-800">{footer}</div>
-      </div>
-    </div>
-  );
-};
-
-// Icons as SVG components
-const SkipForward = ({ className = "" }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M13 5l7 7-7 7M5 5l7 7-7 7"
-    />
-  </svg>
-);
-
-const Scissors = ({ className = "" }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"
-    />
-  </svg>
-);
-
-const Trash2 = ({ className = "" }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-    />
-  </svg>
-);
-
-const ArrowUp = ({ className = "" }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M5 15l7-7 7 7"
-    />
-  </svg>
-);
-
-const ArrowDown = ({ className = "" }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 9l-7 7-7-7"
-    />
-  </svg>
-);
-
-const X = ({ className = "" }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M6 18L18 6M6 6l12 12"
-    />
-  </svg>
-);
-
-const Plus = ({ className = "" }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 4v16m8-8H4"
-    />
-  </svg>
-);
-
-// Demo data
-const DEMO_ORDERS: WorkOrder[] = [
-  {
-    id: "1",
-    modelName: "Model A-100",
-    quantity: 50,
-    currentStepIndex: 1,
-    createdAt: Date.now() - 1000000,
-    steps: [
-      { id: "s1", kind: "machine", machineType: "Cutting", status: "running" },
-      { id: "s2", kind: "machine", machineType: "Sewing", status: "running" },
-      { id: "s3", kind: "jobwork", status: "waiting" },
-      {
-        id: "s4",
-        kind: "machine",
-        machineType: "Finishing",
-        status: "waiting",
-      },
-    ],
-  },
-  {
-    id: "2",
-    modelName: "Model B-200",
-    quantity: 100,
-    currentStepIndex: 0,
-    createdAt: Date.now() - 2000000,
-    steps: [
-      { id: "s1", kind: "machine", machineType: "Cutting", status: "hold" },
-      { id: "s2", kind: "jobwork", status: "waiting" },
-      { id: "s3", kind: "machine", machineType: "Packing", status: "waiting" },
-    ],
-  },
-  {
-    id: "3",
-    modelName: "Model C-300",
-    quantity: 75,
-    currentStepIndex: 3,
-    createdAt: Date.now() - 3000000,
-    steps: [
-      { id: "s1", kind: "machine", machineType: "Cutting", status: "running" },
-      { id: "s2", kind: "machine", machineType: "Sewing", status: "running" },
-      {
-        id: "s3",
-        kind: "machine",
-        machineType: "Finishing",
-        status: "running",
-      },
-    ],
-  },
-];
-
-export default function ModelList() {
-  const [orders, setOrders] = useState<WorkOrder[]>(DEMO_ORDERS);
-  const [editing, setEditing] = useState<WorkOrder | null>(null);
-  const [splitFor, setSplitFor] = useState<WorkOrder | null>(null);
+export default function ModelList(props: ModelListProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0, 0]);
 
   const sorted = useMemo(
-    () => orders.slice().sort((a, b) => b.createdAt - a.createdAt),
-    [orders],
+    () => props.orders.slice().sort((a, b) => b.createdAt - a.createdAt),
+    [props.orders],
   );
 
-  const handleDelete = (id: string) => {
-    setOrders((prev) => prev.filter((o) => o.id !== id));
-  };
-
-  const handleNext = (id: string) => {
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id ? { ...o, currentStepIndex: o.currentStepIndex + 1 } : o,
-      ),
-    );
-  };
-
-  const handleEditPath = (
-    orderId: string,
-    editor: (steps: PathStep[]) => PathStep[],
-  ) => {
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === orderId ? { ...o, steps: editor(o.steps) } : o,
-      ),
-    );
-    if (editing) {
-      setEditing((prev) =>
-        prev && prev.id === orderId
-          ? { ...prev, steps: editor(prev.steps) }
-          : prev,
-      );
-    }
-  };
+  const editing = editingId
+    ? sorted.find((o) => o.id === editingId) || null
+    : null;
+  const splitFor = splitForId
+    ? sorted.find((o) => o.id === splitForId) || null
+    : null;
 
   const handleSplit = () => {
-    if (!splitFor) return;
-    const validQuantities = splitInputs.filter((q) => q > 0);
+    if (!splitForId) return;
+    const validQuantities = splitInputs
+      .map((q) => Math.max(0, Math.floor(q)))
+      .filter((q) => q > 0);
     if (validQuantities.length === 0) return;
-
-    // In real implementation, this would create multiple orders
-    console.log("Splitting", splitFor.id, "into batches:", validQuantities);
-
-    setSplitFor(null);
+    props.onSplit(splitForId, validQuantities);
+    setSplitForId(null);
     setSplitInputs([0, 0]);
   };
 
@@ -400,7 +65,6 @@ export default function ModelList() {
         </h1>
 
         <div className="space-y-3">
-          {/* Desktop Table View */}
           <div className="hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
@@ -492,18 +156,21 @@ export default function ModelList() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => setEditing(o)}
+                              onClick={() => setEditingId(o.id)}
                             >
                               Edit Path
                             </Button>
-                            <Button size="sm" onClick={() => handleNext(o.id)}>
+                            <Button
+                              size="sm"
+                              onClick={() => props.onNext(o.id)}
+                            >
                               <SkipForward className="h-4 w-4 mr-1" /> Next
                             </Button>
                             <Button
                               size="icon"
                               variant="ghost"
                               onClick={() => {
-                                setSplitFor(o);
+                                setSplitForId(o.id);
                                 setSplitInputs([0, 0]);
                               }}
                               title="Split into batches"
@@ -513,7 +180,7 @@ export default function ModelList() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => handleDelete(o.id)}
+                              onClick={() => props.onDelete(o.id)}
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -538,7 +205,6 @@ export default function ModelList() {
             </div>
           </div>
 
-          {/* Mobile Card View */}
           <div className="lg:hidden space-y-3">
             {sorted.map((o) => {
               const i = o.currentStepIndex;
@@ -616,14 +282,14 @@ export default function ModelList() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setEditing(o)}
+                      onClick={() => setEditingId(o.id)}
                       className="flex-1"
                     >
                       Edit Path
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => handleNext(o.id)}
+                      onClick={() => props.onNext(o.id)}
                       className="flex-1"
                     >
                       <SkipForward className="h-4 w-4 mr-1" /> Next
@@ -635,7 +301,7 @@ export default function ModelList() {
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        setSplitFor(o);
+                        setSplitForId(o.id);
                         setSplitInputs([0, 0]);
                       }}
                       className="flex-1"
@@ -645,7 +311,7 @@ export default function ModelList() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDelete(o.id)}
+                      onClick={() => props.onDelete(o.id)}
                       className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                     >
                       <Trash2 className="h-4 w-4 mr-1.5" /> Delete
@@ -663,14 +329,13 @@ export default function ModelList() {
             )}
           </div>
 
-          {/* Edit Path Modal */}
           <SimpleModal
             open={!!editing}
-            onOpenChange={(v) => !v && setEditing(null)}
+            onOpenChange={(v) => !v && setEditingId(null)}
             title={`Edit Path — ${editing?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditing(null)}>
+                <Button variant="outline" onClick={() => setEditingId(null)}>
                   Close
                 </Button>
               </div>
@@ -698,7 +363,7 @@ export default function ModelList() {
                           variant="ghost"
                           disabled={idx === 0}
                           onClick={() =>
-                            handleEditPath(editing.id, (steps) => {
+                            props.onEditPath(editing.id, (steps) => {
                               const j = idx - 1;
                               if (j < 0) return steps;
                               const arr = steps.slice();
@@ -717,7 +382,7 @@ export default function ModelList() {
                           variant="ghost"
                           disabled={idx === editing.steps.length - 1}
                           onClick={() =>
-                            handleEditPath(editing.id, (steps) => {
+                            props.onEditPath(editing.id, (steps) => {
                               const j = idx + 1;
                               if (j >= steps.length) return steps;
                               const arr = steps.slice();
@@ -739,14 +404,13 @@ export default function ModelList() {
             </div>
           </SimpleModal>
 
-          {/* Split Modal */}
           <SimpleModal
             open={!!splitFor}
-            onOpenChange={(v) => !v && setSplitFor(null)}
+            onOpenChange={(v) => !v && setSplitForId(null)}
             title={`Split into Batches — ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setSplitFor(null)}>
+                <Button variant="outline" onClick={() => setSplitForId(null)}>
                   Cancel
                 </Button>
                 <Button onClick={handleSplit}>
@@ -767,7 +431,7 @@ export default function ModelList() {
                     <div className="flex-1">
                       <Input
                         type="number"
-                        min="0"
+                        min={0}
                         placeholder={`Batch ${i + 1} quantity`}
                         value={q || ""}
                         onChange={(e) =>
