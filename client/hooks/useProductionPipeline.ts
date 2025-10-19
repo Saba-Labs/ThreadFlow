@@ -6,38 +6,9 @@ import {
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
-export type MachineType =
-  | "Singer"
-  | "Folding"
-  | "Roll"
-  | "Fleet"
-  | "Overlock 3T"
-  | "Elastic"
-  | "5 Thread Joint"
-  | "Kaja"
-  | "Button"
-  | "Ring Button"
-  | "Trimming"
-  | "Ironing"
-  | "Packing"
-  | "Job Work";
+import { useMachineTypes } from "@/lib/machineTypes";
 
-export const MACHINE_TYPES: MachineType[] = [
-  "Singer",
-  "Folding",
-  "Roll",
-  "Fleet",
-  "Overlock 3T",
-  "Elastic",
-  "5 Thread Joint",
-  "Kaja",
-  "Button",
-  "Ring Button",
-  "Trimming",
-  "Ironing",
-  "Packing",
-  "Job Work",
-];
+export type MachineType = string;
 
 export interface PathStep {
   id: string;
