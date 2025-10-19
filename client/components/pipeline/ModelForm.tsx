@@ -33,16 +33,7 @@ export default function ModelForm(props: {
   const [dateStr, setDateStr] = useState(() =>
     new Date().toISOString().slice(0, 10),
   );
-  const [path, setPath] = useState<NewPathStep[]>([
-    { kind: "machine", machineType: "Singer" },
-    { kind: "machine", machineType: "Folding" },
-    { kind: "machine", machineType: "5 Thread Joint" },
-    { kind: "machine", machineType: "Kaja" },
-    { kind: "machine", machineType: "Button" },
-    { kind: "machine", machineType: "Trimming" },
-    { kind: "machine", machineType: "Ironing" },
-    { kind: "machine", machineType: "Packing" },
-  ]);
+  const [path, setPath] = useState<NewPathStep[]>([]);
 
   const machineTypes = useMachineTypes();
   const machineOptions = useMemo(
