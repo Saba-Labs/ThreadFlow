@@ -103,22 +103,22 @@ export default function ModelList(props: ModelListProps) {
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
-                    <th className="py-2 px-[5px] text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Date
                     </th>
-                    <th className="py-2 px-[5px] text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Model
                     </th>
-                    <th className="py-2 px-[5px] text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Qty
                     </th>
-                    <th className="py-2 px-[5px] text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Current
                     </th>
-                    <th className="py-2 px-[5px] text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Status
                     </th>
-                    <th className="py-2 px-[5px] text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Actions
                     </th>
                   </tr>
@@ -133,10 +133,10 @@ export default function ModelList(props: ModelListProps) {
                         key={o.id}
                         className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
                       >
-                        <td className="py-2 px-[5px] text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                        <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                           {formatDate(o.createdAt)}
                         </td>
-                        <td className="py-2 px-[5px] font-medium text-gray-900 dark:text-gray-100">
+                        <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
                           <button
                             onClick={() => setEditingId(o.id)}
                             className="text-left w-full truncate"
@@ -144,10 +144,10 @@ export default function ModelList(props: ModelListProps) {
                             {o.modelName}
                           </button>
                         </td>
-                        <td className="py-2 px-[5px] text-gray-700 dark:text-gray-300">
+                        <td className="p-3 text-gray-700 dark:text-gray-300">
                           {o.quantity}
                         </td>
-                        <td className="py-2 px-[5px] text-gray-700 dark:text-gray-300">
+                        <td className="p-3 text-gray-700 dark:text-gray-300">
                           {i < 0
                             ? "Not started"
                             : i >= o.steps.length
@@ -156,7 +156,7 @@ export default function ModelList(props: ModelListProps) {
                                 ? step.machineType
                                 : "Job Work"}
                         </td>
-                        <td className="py-2 px-[5px]">
+                        <td className="p-3">
                           {i < 0 || i >= o.steps.length ? (
                             <Badge variant="secondary">—</Badge>
                           ) : (
@@ -177,7 +177,7 @@ export default function ModelList(props: ModelListProps) {
                             </button>
                           )}
                         </td>
-                        <td className="py-2 px-[5px]">
+                        <td className="p-3">
                           <div className="flex items-center gap-1">
                             <Button
                               size="icon"
@@ -412,7 +412,7 @@ export default function ModelList(props: ModelListProps) {
                     </div>
                   </div>
 
-                  <div className="py-2 px-[5px]">
+                  <div className="p-3">
                     <div className="text-sm text-muted-foreground mb-2">Production Path</div>
                     <div className="space-y-2">
                       {editing.steps.map((st, idx) => (
