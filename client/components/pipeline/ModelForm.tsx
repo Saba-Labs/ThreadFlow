@@ -139,7 +139,7 @@ export default function ModelForm(props: {
                   onValueChange={(v) =>
                     addStep({
                       kind: "machine",
-                      machineType: v as Exclude<MachineType, "Job Work">,
+                      machineType: v as string,
                     })
                   }
                 >
