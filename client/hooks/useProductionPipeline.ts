@@ -241,22 +241,26 @@ export function useProductionPipeline() {
     });
   }, []);
 
+  const machineTypes = useMachineTypes();
+
   const board = useMemo(() => {
     const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(
-      MACHINE_TYPES.map((m) => [m, [] as WorkOrder[]]),
+      machineTypes.map((m) => [m, [] as WorkOrder[]]),
     ) as Record<MachineType, WorkOrder[]>;
     for (const o of state.orders) {
       const idx = o.currentStepIndex;
       if (idx < 0 || idx >= o.steps.length) continue;
       const step = o.steps[idx];
       if (step.kind === "machine" && step.machineType) {
+        if (!map[step.machineType]) map[step.machineType] = [];
         map[step.machineType].push(o);
       } else {
+        if (!map["Job Work"]) map["Job Work"] = [];
         map["Job Work"].push(o);
       }
     }
     return map;
-  }, [state.orders]);
+  }, [state.orders, machineTypes]);
 
   const progressOf = useMemo(
     () => (o: WorkOrder) => {
