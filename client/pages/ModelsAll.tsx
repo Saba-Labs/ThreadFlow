@@ -19,6 +19,7 @@ export default function ModelsAll() {
             pipeline.createWorkOrder({
               modelName: data.modelName,
               quantity: data.quantity,
+              createdAt: data.createdAt,
               path: data.path as any,
             });
           }}
@@ -26,13 +27,17 @@ export default function ModelsAll() {
         />
       </div>
 
-      <ModelList
-        orders={pipeline.orders}
-        onDelete={pipeline.deleteOrder}
-        onNext={(id) => pipeline.moveToNextStep(id)}
-        onEditPath={pipeline.editPath}
-        onSplit={pipeline.splitOrder}
-      />
+      <div className="-mx-4 sm:-mx-6 px-0 sm:px-0">
+        <ModelList
+          orders={pipeline.orders}
+          onDelete={pipeline.deleteOrder}
+          onNext={(id) => pipeline.moveToNextStep(id)}
+          onPrev={(id) => pipeline.moveToPrevStep(id)}
+          onEditPath={pipeline.editPath}
+          onSplit={pipeline.splitOrder}
+          onSetStepStatus={(id, idx, status) => pipeline.updateStepStatus(id, idx, { status })}
+        />
+      </div>
     </div>
   );
 }

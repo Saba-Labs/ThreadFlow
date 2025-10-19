@@ -14,6 +14,7 @@ export default function NewModel() {
           pipeline.createWorkOrder({
             modelName: data.modelName,
             quantity: data.quantity,
+            createdAt: data.createdAt,
             path: data.path as any,
           });
         }}

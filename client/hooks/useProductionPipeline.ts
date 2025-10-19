@@ -1,45 +1,14 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
-  useState,
   useSyncExternalStore,
 } from "react";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
-export type MachineType =
-  | "Singer"
-  | "Folding"
-  | "Roll"
-  | "Fleet"
-  | "Overlock 3T"
-  | "Elastic"
-  | "5 Thread Joint"
-  | "Kaja"
-  | "Button"
-  | "Ring Button"
-  | "Trimming"
-  | "Ironing"
-  | "Packing"
-  | "Job Work";
+import { useMachineTypes } from "@/lib/machineTypes";
 
-export const MACHINE_TYPES: MachineType[] = [
-  "Singer",
-  "Folding",
-  "Roll",
-  "Fleet",
-  "Overlock 3T",
-  "Elastic",
-  "5 Thread Joint",
-  "Kaja",
-  "Button",
-  "Ring Button",
-  "Trimming",
-  "Ironing",
-  "Packing",
-  "Job Work",
-];
+export type MachineType = string;
 
 export interface PathStep {
   id: string;
@@ -109,6 +78,7 @@ export function useProductionPipeline() {
     (input: {
       modelName: string;
       quantity: number;
+      createdAt?: number; // allow custom creation date
       path: (
         | { kind: "machine"; machineType: Exclude<MachineType, "Job Work"> }
         | { kind: "job"; externalUnitName: string }
@@ -119,7 +89,7 @@ export function useProductionPipeline() {
         kind: p.kind,
         machineType: p.kind === "machine" ? p.machineType : undefined,
         externalUnitName: p.kind === "job" ? p.externalUnitName : undefined,
-        status: "pending",
+        status: "hold",
         activeMachines: 0,
         quantityDone: 0,
       }));
@@ -127,7 +97,7 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: input.modelName.trim(),
         quantity: Math.max(1, Math.floor(input.quantity)),
-        createdAt: Date.now(),
+        createdAt: typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
         currentStepIndex: steps.length > 0 ? 0 : -1,
       };
@@ -195,7 +165,36 @@ export function useProductionPipeline() {
             activeMachines: 0,
           };
         const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+        if (nextIndex < steps.length && steps[nextIndex]) {
+          steps[nextIndex] = {
+            ...steps[nextIndex],
+            status: steps[nextIndex].status === "completed" ? "completed" : "hold",
+          };
+        }
         return { ...o, steps, currentStepIndex: nextIndex };
+      }),
+    }));
+  }, []);
+
+  const moveToPrevStep = useCallback((orderId: string) => {
+    setStore((s) => ({
+      orders: s.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        if (o.currentStepIndex <= 0 && o.steps.length > 0) {
+          // already at first or not started
+          return { ...o, currentStepIndex: 0 };
+        }
+        const steps = o.steps.slice();
+        const idx = o.currentStepIndex;
+        const target = idx >= steps.length ? steps.length - 1 : idx - 1;
+        if (target >= 0 && steps[target]) {
+          steps[target] = {
+            ...steps[target],
+            status: "hold",
+            activeMachines: 0,
+          };
+        }
+        return { ...o, steps, currentStepIndex: Math.max(0, target) };
       }),
     }));
   }, []);
@@ -228,7 +227,7 @@ export function useProductionPipeline() {
         steps: src.steps.map((st) => ({
           ...st,
           id: uid("step"),
-          status: st.status === "completed" ? "completed" : "pending",
+          status: st.status === "completed" ? "completed" : "hold",
           activeMachines: 0,
           quantityDone: 0,
         })),
@@ -242,28 +241,35 @@ export function useProductionPipeline() {
     });
   }, []);
 
+  const machineTypes = useMachineTypes();
+
   const board = useMemo(() => {
     const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(
-      MACHINE_TYPES.map((m) => [m, [] as WorkOrder[]]),
+      machineTypes.map((m) => [m, [] as WorkOrder[]]),
     ) as Record<MachineType, WorkOrder[]>;
     for (const o of state.orders) {
       const idx = o.currentStepIndex;
       if (idx < 0 || idx >= o.steps.length) continue;
       const step = o.steps[idx];
       if (step.kind === "machine" && step.machineType) {
+        if (!map[step.machineType]) map[step.machineType] = [];
         map[step.machineType].push(o);
       } else {
+        if (!map["Job Work"]) map["Job Work"] = [];
         map["Job Work"].push(o);
       }
     }
     return map;
-  }, [state.orders]);
+  }, [state.orders, machineTypes]);
 
-  const progressOf = useCallback((o: WorkOrder) => {
-    if (o.steps.length === 0) return 1;
-    const completed = o.steps.filter((s) => s.status === "completed").length;
-    return completed / o.steps.length;
-  }, []);
+  const progressOf = useMemo(
+    () => (o: WorkOrder) => {
+      if (o.steps.length === 0) return 1;
+      const completed = o.steps.filter((s) => s.status === "completed").length;
+      return completed / o.steps.length;
+    },
+    [],
+  );
 
   return {
     orders: state.orders,
@@ -272,6 +278,7 @@ export function useProductionPipeline() {
     editPath,
     updateStepStatus,
     moveToNextStep,
+    moveToPrevStep,
     setCurrentStep,
     splitOrder,
     board,

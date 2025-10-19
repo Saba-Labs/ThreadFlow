@@ -63,8 +63,10 @@ export default function Models() {
           orders={filteredOrders}
           onDelete={pipeline.deleteOrder}
           onNext={(id) => pipeline.moveToNextStep(id)}
+          onPrev={(id) => pipeline.moveToPrevStep(id)}
           onEditPath={pipeline.editPath}
           onSplit={pipeline.splitOrder}
+          onSetStepStatus={(id, idx, status) => pipeline.updateStepStatus(id, idx, { status })}
         />
       </section>
     </div>

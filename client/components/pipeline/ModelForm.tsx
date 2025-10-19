@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
@@ -10,11 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
-import { MACHINE_TYPES, MachineType } from "@/hooks/useProductionPipeline";
+import { useMachineTypes } from "@/lib/machineTypes";
 
 export interface NewPathStep {
   kind: "machine" | "job";
-  machineType?: Exclude<MachineType, "Job Work">;
+  machineType?: string;
   externalUnitName?: string;
 }
 
@@ -22,6 +22,7 @@ export default function ModelForm(props: {
   onCreate: (data: {
     modelName: string;
     quantity: number;
+    createdAt: number;
     path: NewPathStep[];
   }) => void;
   trigger?: React.ReactNode;
@@ -29,25 +30,23 @@ export default function ModelForm(props: {
   const [open, setOpen] = useState(false);
   const [modelName, setModelName] = useState("");
   const [quantity, setQuantity] = useState(100);
-  const [path, setPath] = useState<NewPathStep[]>([
-    { kind: "machine", machineType: "Singer" },
-    { kind: "machine", machineType: "Folding" },
-    { kind: "machine", machineType: "5 Thread Joint" },
-    { kind: "machine", machineType: "Kaja" },
-    { kind: "machine", machineType: "Button" },
-    { kind: "machine", machineType: "Trimming" },
-    { kind: "machine", machineType: "Ironing" },
-    { kind: "machine", machineType: "Packing" },
-  ]);
-
-  const machineOptions = useMemo(
-    () =>
-      MACHINE_TYPES.filter((m) => m !== "Job Work") as Exclude<
-        MachineType,
-        "Job Work"
-      >[],
-    [],
+  const [dateStr, setDateStr] = useState(() =>
+    new Date().toISOString().slice(0, 10),
   );
+  const [path, setPath] = useState<NewPathStep[]>([]);
+
+  const machineTypes = useMachineTypes();
+  const machineOptions = useMemo(
+    () => machineTypes.filter((m) => m !== "Job Work"),
+    [machineTypes],
+  );
+
+  // populate default path when modal opens if path is empty
+  useEffect(() => {
+    if (open && path.length === 0 && machineOptions.length > 0) {
+      setPath(machineOptions.map((m) => ({ kind: "machine", machineType: m })));
+    }
+  }, [open, machineOptions]);
 
   const addStep = (next: NewPathStep) => setPath((p) => [...p, next]);
   const removeStep = (i: number) =>
@@ -66,6 +65,7 @@ export default function ModelForm(props: {
   const reset = () => {
     setModelName("");
     setQuantity(100);
+    setDateStr(new Date().toISOString().slice(0, 10));
     setPath([{ kind: "machine", machineType: "Singer" }]);
   };
 
@@ -74,6 +74,7 @@ export default function ModelForm(props: {
     props.onCreate({
       modelName,
       quantity: Math.max(1, Math.floor(quantity)),
+      createdAt: new Date(dateStr).getTime(),
       path,
     });
     reset();
@@ -100,10 +101,11 @@ export default function ModelForm(props: {
         }
       >
         <p className="text-sm text-muted-foreground mb-4">
-          Define quantity and the exact path through machines or job work.
+          Define quantity, date, and the exact path through machines or job
+          work.
         </p>
         <div className="grid gap-4">
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-3">
             <div>
               <label className="text-sm font-medium">Model name</label>
               <Input
@@ -120,6 +122,14 @@ export default function ModelForm(props: {
                 onChange={(e) => setQuantity(Number(e.target.value))}
               />
             </div>
+            <div>
+              <label className="text-sm font-medium">Date</label>
+              <Input
+                type="date"
+                value={dateStr}
+                onChange={(e) => setDateStr(e.target.value)}
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -129,7 +139,7 @@ export default function ModelForm(props: {
                   onValueChange={(v) =>
                     addStep({
                       kind: "machine",
-                      machineType: v as Exclude<MachineType, "Job Work">,
+                      machineType: v as string,
                     })
                   }
                 >
