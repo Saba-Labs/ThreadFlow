@@ -160,21 +160,26 @@ export default function ModelList(props: ModelListProps) {
                           {i < 0 || i >= o.steps.length ? (
                             <Badge variant="secondary">—</Badge>
                           ) : (
-                            <button onClick={() => toggleCardStatus(o)}>
-                              <Badge
-                                variant={
-                                  step.status === "running"
-                                    ? "success"
-                                    : step.status === "hold"
-                                      ? "destructive"
-                                      : "secondary"
-                                }
-                                className="cursor-pointer"
-                                aria-label={`Set status for ${o.modelName}`}
-                              >
-                                {cap(step.status)}
-                              </Badge>
-                            </button>
+                            (() => {
+                              const displayStatus = step.status === "pending" ? "hold" : step.status;
+                              return (
+                                <button onClick={() => toggleCardStatus(o)}>
+                                  <Badge
+                                    variant={
+                                      displayStatus === "running"
+                                        ? "success"
+                                        : displayStatus === "hold"
+                                          ? "destructive"
+                                          : "secondary"
+                                    }
+                                    className="cursor-pointer"
+                                    aria-label={`Set status for ${o.modelName}`}
+                                  >
+                                    {cap(displayStatus)}
+                                  </Badge>
+                                </button>
+                              );
+                            })()
                           )}
                         </td>
                         <td className="p-3">
