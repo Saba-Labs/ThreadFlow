@@ -255,7 +255,7 @@ export default function ModelList(props: ModelListProps) {
               return (
                 <div
                   key={o.id}
-                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
+                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 py-3 px-[5px] space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
