@@ -22,6 +22,7 @@ export default function ModelsHold() {
         orders={orders}
         onDelete={pipeline.deleteOrder}
         onNext={(id) => pipeline.moveToNextStep(id)}
+        onPrev={(id) => pipeline.moveToPrevStep(id)}
         onEditPath={pipeline.editPath}
         onSplit={pipeline.splitOrder}
       />
