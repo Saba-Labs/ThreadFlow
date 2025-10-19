@@ -67,6 +67,7 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
+  const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
   const statusBgClass = (o: WorkOrder) => {
     const i = o.currentStepIndex;
