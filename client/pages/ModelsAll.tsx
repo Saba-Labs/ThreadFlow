@@ -27,15 +27,17 @@ export default function ModelsAll() {
         />
       </div>
 
-      <ModelList
-        orders={pipeline.orders}
-        onDelete={pipeline.deleteOrder}
-        onNext={(id) => pipeline.moveToNextStep(id)}
-        onPrev={(id) => pipeline.moveToPrevStep(id)}
-        onEditPath={pipeline.editPath}
-        onSplit={pipeline.splitOrder}
-        onSetStepStatus={(id, idx, status) => pipeline.updateStepStatus(id, idx, { status })}
-      />
+      <div className="-mx-4 sm:-mx-6 px-4 sm:px-6">
+        <ModelList
+          orders={pipeline.orders}
+          onDelete={pipeline.deleteOrder}
+          onNext={(id) => pipeline.moveToNextStep(id)}
+          onPrev={(id) => pipeline.moveToPrevStep(id)}
+          onEditPath={pipeline.editPath}
+          onSplit={pipeline.splitOrder}
+          onSetStepStatus={(id, idx, status) => pipeline.updateStepStatus(id, idx, { status })}
+        />
+      </div>
     </div>
   );
 }
