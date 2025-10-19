@@ -1,8 +1,6 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
-  useState,
   useSyncExternalStore,
 } from "react";
 
@@ -109,6 +107,7 @@ export function useProductionPipeline() {
     (input: {
       modelName: string;
       quantity: number;
+      createdAt?: number; // allow custom creation date
       path: (
         | { kind: "machine"; machineType: Exclude<MachineType, "Job Work"> }
         | { kind: "job"; externalUnitName: string }
@@ -127,7 +126,7 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: input.modelName.trim(),
         quantity: Math.max(1, Math.floor(input.quantity)),
-        createdAt: Date.now(),
+        createdAt: typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
         currentStepIndex: steps.length > 0 ? 0 : -1,
       };
@@ -200,6 +199,29 @@ export function useProductionPipeline() {
     }));
   }, []);
 
+  const moveToPrevStep = useCallback((orderId: string) => {
+    setStore((s) => ({
+      orders: s.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        if (o.currentStepIndex <= 0 && o.steps.length > 0) {
+          // already at first or not started
+          return { ...o, currentStepIndex: 0 };
+        }
+        const steps = o.steps.slice();
+        const idx = o.currentStepIndex;
+        const target = idx >= steps.length ? steps.length - 1 : idx - 1;
+        if (target >= 0 && steps[target]) {
+          steps[target] = {
+            ...steps[target],
+            status: "pending",
+            activeMachines: 0,
+          };
+        }
+        return { ...o, steps, currentStepIndex: Math.max(0, target) };
+      }),
+    }));
+  }, []);
+
   const setCurrentStep = useCallback((orderId: string, index: number) => {
     setStore((s) => ({
       orders: s.orders.map((o) => {
@@ -259,11 +281,14 @@ export function useProductionPipeline() {
     return map;
   }, [state.orders]);
 
-  const progressOf = useCallback((o: WorkOrder) => {
-    if (o.steps.length === 0) return 1;
-    const completed = o.steps.filter((s) => s.status === "completed").length;
-    return completed / o.steps.length;
-  }, []);
+  const progressOf = useMemo(
+    () => (o: WorkOrder) => {
+      if (o.steps.length === 0) return 1;
+      const completed = o.steps.filter((s) => s.status === "completed").length;
+      return completed / o.steps.length;
+    },
+    [],
+  );
 
   return {
     orders: state.orders,
@@ -272,6 +297,7 @@ export function useProductionPipeline() {
     editPath,
     updateStepStatus,
     moveToNextStep,
+    moveToPrevStep,
     setCurrentStep,
     splitOrder,
     board,
