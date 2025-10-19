@@ -194,6 +194,12 @@ export function useProductionPipeline() {
             activeMachines: 0,
           };
         const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+        if (nextIndex < steps.length && steps[nextIndex]) {
+          steps[nextIndex] = {
+            ...steps[nextIndex],
+            status: steps[nextIndex].status === "completed" ? "completed" : "hold",
+          };
+        }
         return { ...o, steps, currentStepIndex: nextIndex };
       }),
     }));
