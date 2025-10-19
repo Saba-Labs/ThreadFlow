@@ -15,9 +15,10 @@ export default function MachineBoard(props: {
   onHold: (o: WorkOrder) => void;
   onNext: (o: WorkOrder) => void;
 }) {
+  const machineTypes = useMachineTypes();
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {MACHINE_TYPES.map((mt) => (
+      {machineTypes.map((mt) => (
         <section
           key={mt}
           className="rounded-lg border bg-gradient-to-br from-card/50 via-accent/5 to-background/50"
