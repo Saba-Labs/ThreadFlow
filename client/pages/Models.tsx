@@ -66,6 +66,7 @@ export default function Models() {
           onPrev={(id) => pipeline.moveToPrevStep(id)}
           onEditPath={pipeline.editPath}
           onSplit={pipeline.splitOrder}
+          onSetStepStatus={(id, idx, status) => pipeline.updateStepStatus(id, idx, { status })}
         />
       </section>
     </div>
