@@ -34,6 +34,7 @@ export interface WorkOrder {
   steps: PathStep[];
   currentStepIndex: number; // -1 if not started, len if completed
   parentId?: string; // if split from another
+  parallelGroups: ParallelMachineGroup[]; // groups of machines running in parallel
 }
 
 function uid(prefix = "id") {
