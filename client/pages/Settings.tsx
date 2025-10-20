@@ -81,7 +81,19 @@ export default function Settings() {
           {local.map((t, i) => (
             <div key={i} className="flex items-center gap-2">
               <div className="flex-1">
-                <Input value={t} onChange={(e) => update(i, e.target.value)} />
+                <Input
+                  placeholder="Path name"
+                  value={t.name}
+                  onChange={(e) => updateName(i, e.target.value)}
+                />
+              </div>
+              <div className="w-20">
+                <Input
+                  placeholder="Letter/Symbol"
+                  maxLength={3}
+                  value={t.letter}
+                  onChange={(e) => updateLetter(i, e.target.value)}
+                />
               </div>
               <div className="flex items-center gap-1">
                 <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}>
