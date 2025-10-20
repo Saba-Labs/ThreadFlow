@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMachineTypes, getMachineTypes, setMachineTypes } from "@/lib/machineTypes";
+import { useMachineTypes, getMachineTypes, setMachineTypes, type MachineTypeConfig } from "@/lib/machineTypes";
 import { ArrowUp, ArrowDown, Trash2, Plus } from "lucide-react";
 
 export default function Settings() {
   const types = useMachineTypes();
-  const [local, setLocal] = useState<string[]>(() => getMachineTypes());
+  const [local, setLocal] = useState<MachineTypeConfig[]>(() => getMachineTypes());
 
   // keep local in sync if global changes externally
   useEffect(() => {
@@ -17,10 +17,15 @@ export default function Settings() {
     } catch (_) {}
   }, [types]);
 
-  const update = (idx: number, val: string) => {
-    setLocal((s) => s.map((x, i) => (i === idx ? val : x)));
+  const updateName = (idx: number, name: string) => {
+    setLocal((s) => s.map((x, i) => (i === idx ? { ...x, name } : x)));
   };
-  const add = () => setLocal((s) => [...s, "New Step"]);
+
+  const updateLetter = (idx: number, letter: string) => {
+    setLocal((s) => s.map((x, i) => (i === idx ? { ...x, letter } : x)));
+  };
+
+  const add = () => setLocal((s) => [...s, { name: "New Step", letter: "N" }]);
   const remove = (idx: number) => setLocal((s) => s.filter((_, i) => i !== idx));
   const move = (idx: number, dir: -1 | 1) =>
     setLocal((s) => {
@@ -34,7 +39,12 @@ export default function Settings() {
     });
 
   const save = () => {
-    const cleaned = local.map((s) => s.trim()).filter(Boolean);
+    const cleaned = local
+      .filter((c) => c.name.trim() && c.letter.trim())
+      .map((c) => ({
+        name: c.name.trim(),
+        letter: c.letter.trim(),
+      }));
     if (cleaned.length === 0) return;
     setMachineTypes(cleaned);
     alert("Production path saved");
