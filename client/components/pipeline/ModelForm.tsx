@@ -51,16 +51,6 @@ export default function ModelForm(props: {
   const addStep = (next: NewPathStep) => setPath((p) => [...p, next]);
   const removeStep = (i: number) =>
     setPath((p) => p.filter((_, idx) => idx !== i));
-  const move = (i: number, dir: -1 | 1) =>
-    setPath((p) => {
-      const arr = p.slice();
-      const j = i + dir;
-      if (j < 0 || j >= arr.length) return arr;
-      const tmp = arr[i];
-      arr[i] = arr[j];
-      arr[j] = tmp;
-      return arr;
-    });
 
   const reset = () => {
     setModelName("");
