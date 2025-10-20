@@ -311,6 +311,9 @@ export default function ModelList(props: ModelListProps) {
                         </span>
                         <span>Qty: {o.quantity}</span>
                       </div>
+                      <div className="flex flex-wrap items-center gap-1 mt-2">
+                        {getPathLetterPills(o)}
+                      </div>
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
