@@ -20,6 +20,12 @@ export interface PathStep {
   quantityDone: number; // optional tracking of pieces done in this step
 }
 
+export interface ParallelMachineGroup {
+  stepIndex: number;
+  machineIndices: number[]; // indices of machines in the parallel group
+  status: StepStatus;
+}
+
 export interface WorkOrder {
   id: string;
   modelName: string;
