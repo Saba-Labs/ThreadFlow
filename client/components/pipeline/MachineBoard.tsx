@@ -76,7 +76,7 @@ export default function MachineBoard(props: {
                 </div>
               </article>
             ))}
-            {(props.data[mt]?.length ?? 0) === 0 && (
+            {(props.data[mtConfig.name]?.length ?? 0) === 0 && (
               <div className="p-4 text-sm text-muted-foreground">
                 No models on this machine.
               </div>
