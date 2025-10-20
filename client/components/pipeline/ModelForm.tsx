@@ -1,15 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import SimpleModal from "@/components/ui/SimpleModal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useMachineTypes } from "@/lib/machineTypes";
 
 export interface NewPathStep {
@@ -33,24 +27,50 @@ export default function ModelForm(props: {
   const [dateStr, setDateStr] = useState(() =>
     new Date().toISOString().slice(0, 10),
   );
-  const [path, setPath] = useState<NewPathStep[]>([]);
+  const [selectedMachines, setSelectedMachines] = useState<Set<string>>(new Set());
+  const [includeJobWork, setIncludeJobWork] = useState(false);
 
   const machineTypes = useMachineTypes();
-  const machineOptions = useMemo(
-    () => machineTypes.filter((m) => m.name !== "Job Work").map((m) => m.name),
-    [machineTypes],
-  );
 
   // populate default path when modal opens if path is empty
   useEffect(() => {
-    if (open && path.length === 0 && machineOptions.length > 0) {
-      setPath(machineOptions.map((m) => ({ kind: "machine", machineType: m })));
+    if (open && selectedMachines.size === 0) {
+      const allMachines = machineTypes
+        .filter((m) => m.name !== "Job Work")
+        .map((m) => m.name);
+      setSelectedMachines(new Set(allMachines));
     }
-  }, [open, machineOptions]);
+  }, [open, machineTypes]);
 
-  const addStep = (next: NewPathStep) => setPath((p) => [...p, next]);
-  const removeStep = (i: number) =>
-    setPath((p) => p.filter((_, idx) => idx !== i));
+  const toggleMachine = (machineName: string) => {
+    setSelectedMachines((prev) => {
+      const next = new Set(prev);
+      if (next.has(machineName)) {
+        next.delete(machineName);
+      } else {
+        next.add(machineName);
+      }
+      return next;
+    });
+  };
+
+  const buildPath = (): NewPathStep[] => {
+    const steps: NewPathStep[] = [];
+
+    // Add machines in order they appear in machineTypes
+    machineTypes.forEach((mt) => {
+      if (mt.name !== "Job Work" && selectedMachines.has(mt.name)) {
+        steps.push({ kind: "machine", machineType: mt.name });
+      }
+    });
+
+    // Add Job Work if selected
+    if (includeJobWork) {
+      steps.push({ kind: "job", externalUnitName: "Job Work Unit" });
+    }
+
+    return steps;
+  };
 
   const reset = () => {
     setModelName("");
