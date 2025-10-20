@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMachineTypes, getMachineTypes, setMachineTypes, type MachineTypeConfig } from "@/lib/machineTypes";
-import { ArrowUp, ArrowDown, Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, GripVertical } from "lucide-react";
 
 export default function Settings() {
   const types = useMachineTypes();
   const [local, setLocal] = useState<MachineTypeConfig[]>(() => getMachineTypes());
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
 
   // keep local in sync if global changes externally
   useEffect(() => {
@@ -27,16 +28,27 @@ export default function Settings() {
 
   const add = () => setLocal((s) => [...s, { name: "New Step", letter: "N" }]);
   const remove = (idx: number) => setLocal((s) => s.filter((_, i) => i !== idx));
-  const move = (idx: number, dir: -1 | 1) =>
+
+  const handleDragStart = (idx: number) => {
+    setDraggedIdx(idx);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (targetIdx: number) => {
+    if (draggedIdx === null || draggedIdx === targetIdx) return;
+
     setLocal((s) => {
       const arr = s.slice();
-      const j = idx + dir;
-      if (j < 0 || j >= arr.length) return arr;
-      const tmp = arr[idx];
-      arr[idx] = arr[j];
-      arr[j] = tmp;
+      const dragged = arr[draggedIdx];
+      arr.splice(draggedIdx, 1);
+      arr.splice(targetIdx, 0, dragged);
       return arr;
     });
+    setDraggedIdx(null);
+  };
 
   const save = () => {
     const cleaned = local
