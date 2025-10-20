@@ -115,8 +115,7 @@ export default function ModelForm(props: {
         }
       >
         <p className="text-sm text-muted-foreground mb-4">
-          Define quantity, date, and the exact path through machines or job
-          work.
+          Define quantity, date, and select which production paths to include.
         </p>
         <div className="grid gap-4">
           <div className="grid gap-2 sm:grid-cols-3">
@@ -145,69 +144,48 @@ export default function ModelForm(props: {
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Path</label>
-              <div className="flex gap-2">
-                <Select
-                  onValueChange={(v) =>
-                    addStep({
-                      kind: "machine",
-                      machineType: v as string,
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-44">
-                    <SelectValue placeholder="Add machine" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {machineOptions.map((m) => (
-                      <SelectItem key={m} value={m}>
-                        {m}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="secondary"
-                  onClick={() =>
-                    addStep({ kind: "job", externalUnitName: "Job Work Unit" })
-                  }
-                >
-                  Add Job Work
-                </Button>
-              </div>
-            </div>
-            <div className="rounded-md border divide-y">
-              {path.map((st, i) => (
-                <div key={i} className="flex items-center gap-3 p-2">
-                  <span className="inline-flex min-w-8 justify-center text-xs text-muted-foreground">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1">
-                    {st.kind === "machine" ? (
-                      <div className="font-medium">{st.machineType}</div>
-                    ) : (
-                      <div>
-                        <div className="text-sm font-medium">Job Work</div>
-                        <div className="text-xs text-muted-foreground">
-                          {st.externalUnitName}
-                        </div>
-                      </div>
-                    )}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Production Path</label>
+            <div className="rounded-md border p-3 space-y-2 bg-muted/30">
+              {machineTypes.map((mt) => {
+                if (mt.name === "Job Work") {
+                  return (
+                    <div key={mt.name} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`jobwork-${mt.name}`}
+                        checked={includeJobWork}
+                        onCheckedChange={(checked) =>
+                          setIncludeJobWork(checked === true)
+                        }
+                      />
+                      <label
+                        htmlFor={`jobwork-${mt.name}`}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {mt.name}
+                      </label>
+                    </div>
+                  );
+                }
+                return (
+                  <div key={mt.name} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`machine-${mt.name}`}
+                      checked={selectedMachines.has(mt.name)}
+                      onCheckedChange={() => toggleMachine(mt.name)}
+                    />
+                    <label
+                      htmlFor={`machine-${mt.name}`}
+                      className="text-sm cursor-pointer flex-1"
+                    >
+                      {mt.name}
+                    </label>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeStep(i)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              {path.length === 0 && (
-                <div className="p-4 text-sm text-muted-foreground">
-                  No steps yet. Add machines or job work above.
+                );
+              })}
+              {machineTypes.length === 0 && (
+                <div className="p-4 text-sm text-muted-foreground text-center">
+                  No production paths configured. Add them in Settings.
                 </div>
               )}
             </div>
