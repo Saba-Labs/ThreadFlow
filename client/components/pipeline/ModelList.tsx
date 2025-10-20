@@ -4,14 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import {
-  ArrowDown,
-  ArrowUp,
   Scissors,
   SkipForward,
   SkipBack,
   Trash2,
   X,
-  Plus,
   Pencil,
   CalendarDays,
 } from "lucide-react";
