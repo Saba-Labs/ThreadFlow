@@ -80,19 +80,20 @@ export default function Settings() {
         <div className="space-y-2">
           {local.map((t, i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <Input
                   placeholder="Path name"
                   value={t.name}
                   onChange={(e) => updateName(i, e.target.value)}
                 />
               </div>
-              <div className="w-20">
+              <div className="w-14">
                 <Input
-                  placeholder="Letter/Symbol"
+                  placeholder="Letter"
                   maxLength={3}
                   value={t.letter}
                   onChange={(e) => updateLetter(i, e.target.value)}
+                  className="text-center text-sm"
                 />
               </div>
               <div className="flex items-center gap-1">
