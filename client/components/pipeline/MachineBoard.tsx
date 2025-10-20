@@ -18,14 +18,14 @@ export default function MachineBoard(props: {
   const machineTypes = useMachineTypes();
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {machineTypes.map((mt) => (
+      {machineTypes.map((mtConfig) => (
         <section
-          key={mt}
+          key={mtConfig.name}
           className="rounded-lg border bg-gradient-to-br from-card/50 via-accent/5 to-background/50"
         >
           <header className="flex items-center justify-between border-b p-3 bg-gradient-to-r from-primary/5 to-accent/3">
-            <h3 className="text-sm font-semibold text-primary">{mt}</h3>
-            <Badge variant="secondary">{props.data[mt]?.length ?? 0}</Badge>
+            <h3 className="text-sm font-semibold text-primary">{mtConfig.name}</h3>
+            <Badge variant="secondary">{props.data[mtConfig.name]?.length ?? 0}</Badge>
           </header>
           <div className="divide-y">
             {(props.data[mt] ?? []).map((o, idx) => (
