@@ -76,11 +76,15 @@ export default function ModelForm(props: {
     setModelName("");
     setQuantity(100);
     setDateStr(new Date().toISOString().slice(0, 10));
-    setPath([{ kind: "machine", machineType: "Singer" }]);
+    setSelectedMachines(new Set());
+    setIncludeJobWork(false);
   };
 
   const submit = () => {
     if (!modelName.trim()) return;
+    const path = buildPath();
+    if (path.length === 0) return;
+
     props.onCreate({
       modelName,
       quantity: Math.max(1, Math.floor(quantity)),
