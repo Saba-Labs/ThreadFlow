@@ -37,7 +37,7 @@ export default function ModelForm(props: {
 
   const machineTypes = useMachineTypes();
   const machineOptions = useMemo(
-    () => machineTypes.filter((m) => m !== "Job Work"),
+    () => machineTypes.filter((m) => m.name !== "Job Work").map((m) => m.name),
     [machineTypes],
   );
 
