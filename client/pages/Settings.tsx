@@ -91,7 +91,21 @@ export default function Settings() {
 
         <div className="space-y-2">
           {local.map((t, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div
+              key={i}
+              draggable
+              onDragStart={() => handleDragStart(i)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(i)}
+              className={`flex items-center gap-2 p-2 rounded border transition-colors cursor-move ${
+                draggedIdx === i
+                  ? "bg-primary/10 border-primary"
+                  : "bg-transparent border-transparent hover:bg-muted/50"
+              }`}
+            >
+              <div className="flex items-center justify-center text-muted-foreground cursor-grab active:cursor-grabbing">
+                <GripVertical className="h-5 w-5" />
+              </div>
               <div className="flex-1 min-w-0">
                 <Input
                   placeholder="Path name"
@@ -108,17 +122,9 @@ export default function Settings() {
                   className="text-center text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1">
-                <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}>
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={i === local.length - 1}>
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(i)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button size="icon" variant="ghost" onClick={() => remove(i)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))}
         </div>
