@@ -28,7 +28,7 @@ export default function MachineBoard(props: {
             <Badge variant="secondary">{props.data[mtConfig.name]?.length ?? 0}</Badge>
           </header>
           <div className="divide-y">
-            {(props.data[mt] ?? []).map((o, idx) => (
+            {(props.data[mtConfig.name] ?? []).map((o, idx) => (
               <article
                 key={o.id}
                 className={`flex items-center gap-3 p-3 ${idx % 2 === 0 ? "bg-white/40" : "bg-muted/10"}`}
