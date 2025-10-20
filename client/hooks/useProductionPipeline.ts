@@ -245,7 +245,7 @@ export function useProductionPipeline() {
 
   const board = useMemo(() => {
     const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(
-      machineTypes.map((m) => [m, [] as WorkOrder[]]),
+      machineTypes.map((m) => [m.name, [] as WorkOrder[]]),
     ) as Record<MachineType, WorkOrder[]>;
     for (const o of state.orders) {
       const idx = o.currentStepIndex;
