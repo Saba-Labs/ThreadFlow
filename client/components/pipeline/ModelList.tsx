@@ -11,6 +11,7 @@ import {
   X,
   Pencil,
   CalendarDays,
+  Plus,
 } from "lucide-react";
 import type { PathStep, WorkOrder } from "@/hooks/useProductionPipeline";
 import { useMachineTypes, getMachineTypeConfig } from "@/lib/machineTypes";
