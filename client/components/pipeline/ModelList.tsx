@@ -469,51 +469,11 @@ export default function ModelList(props: ModelListProps) {
                   <div className="p-3">
                     <div className="text-sm text-muted-foreground mb-2">Production Path</div>
                     <div className="space-y-2">
-                      {editing.steps.map((st, idx) => (
-                        <div key={st.id} className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                          <div>
+                      {editing.steps.map((st) => (
+                        <div key={st.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                          <div className="flex-1">
                             <div className="text-sm font-medium">{st.kind === "machine" ? st.machineType : "Job Work"}</div>
                             <div className="text-xs text-muted-foreground">Status: {st.status}</div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              disabled={idx === 0}
-                              onClick={() =>
-                                props.onEditPath(editing.id, (steps) => {
-                                  const j = idx - 1;
-                                  if (j < 0) return steps;
-                                  const arr = steps.slice();
-                                  const tmp = arr[idx];
-                                  arr[idx] = arr[j];
-                                  arr[j] = tmp;
-                                  return arr;
-                                })
-                              }
-                              className="h-8 w-8"
-                            >
-                              <ArrowUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              disabled={idx === editing.steps.length - 1}
-                              onClick={() =>
-                                props.onEditPath(editing.id, (steps) => {
-                                  const j = idx + 1;
-                                  if (j >= steps.length) return steps;
-                                  const arr = steps.slice();
-                                  const tmp = arr[idx];
-                                  arr[idx] = arr[j];
-                                  arr[j] = tmp;
-                                  return arr;
-                                })
-                              }
-                              className="h-8 w-8"
-                            >
-                              <ArrowDown className="h-4 w-4" />
-                            </Button>
                           </div>
                         </div>
                       ))}
