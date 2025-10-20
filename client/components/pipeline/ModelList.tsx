@@ -71,6 +71,37 @@ export default function ModelList(props: ModelListProps) {
   const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
   const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
+  const getPathLetterPills = (o: WorkOrder) => {
+    return o.steps.map((step, idx) => {
+      const machineType = step.kind === "machine" ? step.machineType : "Job Work";
+      const config = getMachineTypeConfig(machineType || "");
+      const letter = config?.letter || machineType?.charAt(0).toUpperCase() || "?";
+      const isCurrent = idx === o.currentStepIndex;
+      const isCompleted = step.status === "completed";
+
+      let variantClass = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
+      if (isCurrent) {
+        if (step.status === "running") {
+          variantClass = "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
+        } else if (step.status === "hold") {
+          variantClass = "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
+        }
+      } else if (isCompleted) {
+        variantClass = "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
+      }
+
+      return (
+        <span
+          key={step.id}
+          className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${variantClass}`}
+          title={`${machineType}${isCurrent ? " (current)" : ""}`}
+        >
+          {letter}
+        </span>
+      );
+    });
+  };
+
   const statusBgClass = (o: WorkOrder) => {
     const i = o.currentStepIndex;
     if (i < 0 || i >= o.steps.length) {
