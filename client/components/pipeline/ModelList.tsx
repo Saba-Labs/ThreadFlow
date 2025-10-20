@@ -183,6 +183,11 @@ export default function ModelList(props: ModelListProps) {
                         <td className="p-3 text-gray-700 dark:text-gray-300">
                           {o.quantity}
                         </td>
+                        <td className="p-3">
+                          <div className="flex flex-wrap items-center gap-1">
+                            {getPathLetterPills(o)}
+                          </div>
+                        </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
                           {i < 0
                             ? "Not started"
