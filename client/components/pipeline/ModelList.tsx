@@ -146,6 +146,9 @@ export default function ModelList(props: ModelListProps) {
                       Qty
                     </th>
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      Path
+                    </th>
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Current
                     </th>
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
