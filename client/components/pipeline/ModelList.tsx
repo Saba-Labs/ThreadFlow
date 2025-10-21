@@ -209,7 +209,7 @@ export default function ModelList(props: ModelListProps) {
                         </td>
                         <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
                           <button
-                            onClick={() => setEditingId(o.id)}
+                            onClick={() => navigate(`/models/${o.id}/edit`)}
                             className="text-left w-full truncate"
                           >
                             {o.modelName}
@@ -386,7 +386,7 @@ export default function ModelList(props: ModelListProps) {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
                         <button
-                          onClick={() => setEditingId(o.id)}
+                          onClick={() => navigate(`/models/${o.id}/edit`)}
                           className="text-left w-full truncate"
                         >
                           {o.modelName}
@@ -480,7 +480,7 @@ export default function ModelList(props: ModelListProps) {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => setEditingId(o.id)}
+                        onClick={() => navigate(`/models/${o.id}/edit`)}
                         title="Details"
                         aria-label="Details"
                       >
