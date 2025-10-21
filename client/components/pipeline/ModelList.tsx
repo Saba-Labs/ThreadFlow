@@ -577,6 +577,81 @@ export default function ModelList(props: ModelListProps) {
               )}
             </div>
           </SimpleModal>
+
+          {/* Parallel machines selection modal */}
+          {parallelSelectId && parallelStepIdx !== null && (() => {
+            const order = props.data.find((o) => o.id === parallelSelectId);
+            if (!order || parallelStepIdx < 0 || parallelStepIdx >= order.steps.length) {
+              return null;
+            }
+            const step = order.steps[parallelStepIdx];
+            const parallelGroup = order.parallelGroups.find((g) => g.stepIndex === parallelStepIdx);
+            const selectedIndices = parallelGroup?.machineIndices || [];
+
+            return (
+              <SimpleModal
+                open={!!parallelSelectId}
+                onOpenChange={(v) => {
+                  if (!v) {
+                    setParallelSelectId(null);
+                    setParallelStepIdx(null);
+                  }
+                }}
+                title={`Select parallel machines for ${step.kind === "machine" ? step.machineType : "Job Work"}`}
+                footer={
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setParallelSelectId(null);
+                        setParallelStepIdx(null);
+                      }}
+                    >
+                      Close
+                    </Button>
+                  </div>
+                }
+              >
+                <p className="text-sm text-muted-foreground mb-4">
+                  Click machines to select them to run in parallel. Selected machines will be highlighted above the current step.
+                </p>
+                <div className="space-y-2">
+                  {machineTypes.map((mt, idx) => {
+                    if (mt.name === "Job Work" || step.kind === "job") return null;
+
+                    const isSelected = selectedIndices.includes(idx);
+                    return (
+                      <button
+                        key={mt.name}
+                        onClick={() => {
+                          props.onToggleParallelMachine(parallelSelectId, parallelStepIdx, idx);
+                        }}
+                        className={`w-full text-left p-3 rounded-md border-2 transition-colors ${
+                          isSelected
+                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-6 h-6 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700">
+                            {getMachineTypeConfig(mt.name)?.letter || mt.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {mt.name}
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <div className="text-blue-600 dark:text-blue-400 font-medium">✓</div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </SimpleModal>
+            );
+          })()}
         </div>
       </div>
     </div>
