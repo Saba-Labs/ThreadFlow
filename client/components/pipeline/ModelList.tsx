@@ -98,11 +98,15 @@ export default function ModelList(props: ModelListProps) {
 
     // next paint: measure after and animate using WAAPI
     requestAnimationFrame(() => {
-      const elsAfter = Array.from(document.querySelectorAll<HTMLElement>("[data-order-id]")) as HTMLElement[];
-      const rectsAfter = new Map<string, DOMRect>();
+      const elsAfter = Array.from(document.querySelectorAll<HTMLElement>('[data-order-id]')) as HTMLElement[];
+      // build a map of id -> all elements after
+      const elsAfterById = new Map<string, HTMLElement[]>();
       elsAfter.forEach((el) => {
         const id = el.getAttribute('data-order-id');
-        if (id) rectsAfter.set(id, el.getBoundingClientRect());
+        if (!id) return;
+        const arr = elsAfterById.get(id) || [];
+        arr.push(el);
+        elsAfterById.set(id, arr);
       });
 
       const DURATION = 3000;
@@ -110,41 +114,40 @@ export default function ModelList(props: ModelListProps) {
 
       const animations: Animation[] = [];
 
-      elsAfter.forEach((el) => {
-        const id = el.getAttribute('data-order-id')!;
-        const before = rectsBefore.get(id) || sourceRect;
-        const after = rectsAfter.get(id);
-        if (!after || !before) return;
+      // animate all elements grouped by id
+      elsAfterById.forEach((els, id) => {
+        const beforeRect = rectsBefore.get(id) || sourceRect;
+        if (!beforeRect) return;
+        els.forEach((el) => {
+          const afterRect = el.getBoundingClientRect();
+          const dx = beforeRect.left - afterRect.left;
+          const dy = beforeRect.top - afterRect.top;
+          const sx = beforeRect.width / afterRect.width;
+          const sy = beforeRect.height / afterRect.height;
 
-        const dx = before.left - after.left;
-        const dy = before.top - after.top;
-        const sx = before.width / after.width;
-        const sy = before.height / after.height;
+          const from = {
+            transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+            opacity: 0.85,
+          };
+          const to = { transform: 'none', opacity: 1 };
 
-        const from = {
-          transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
-          opacity: 0.8,
-        };
-        const to = { transform: 'none', opacity: 1 };
-
-        // use WAAPI animate
-        try {
-          const anim = el.animate([from, to], {
-            duration: DURATION,
-            easing: EASING,
-            fill: 'both',
-          });
-          animations.push(anim);
-        } catch (e) {
-          // fallback to CSS transition if WAAPI unavailable
-          el.style.transition = `transform ${DURATION}ms ${EASING}, opacity ${Math.min(600, DURATION)}ms linear`;
-          el.style.transform = from.transform;
-          el.style.opacity = String(from.opacity);
-          requestAnimationFrame(() => {
-            el.style.transform = '';
-            el.style.opacity = '';
-          });
-        }
+          try {
+            const anim = el.animate([from, to], {
+              duration: DURATION,
+              easing: EASING,
+              fill: 'both',
+            });
+            animations.push(anim);
+          } catch (e) {
+            el.style.transition = `transform ${DURATION}ms ${EASING}, opacity ${Math.min(600, DURATION)}ms linear`;
+            el.style.transform = from.transform;
+            el.style.opacity = String(from.opacity);
+            requestAnimationFrame(() => {
+              el.style.transform = '';
+              el.style.opacity = '';
+            });
+          }
+        });
       });
 
       // when all animations finish, ensure cleanup
