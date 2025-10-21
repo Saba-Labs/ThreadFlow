@@ -31,7 +31,11 @@ interface ModelListProps {
     stepIndex: number,
     status: "pending" | "running" | "hold" | "completed",
   ) => void;
-  onToggleParallelMachine: (orderId: string, stepIndex: number, machineIndex: number) => void;
+  onToggleParallelMachine: (
+    orderId: string,
+    stepIndex: number,
+    machineIndex: number,
+  ) => void;
 }
 
 export default function ModelList(props: ModelListProps) {
@@ -75,25 +79,35 @@ export default function ModelList(props: ModelListProps) {
     onPillClick?: (orderId: string, stepIndex: number) => void,
   ) => {
     return o.steps.map((step, idx) => {
-      const machineType = step.kind === "machine" ? step.machineType : "Job Work";
+      const machineType =
+        step.kind === "machine" ? step.machineType : "Job Work";
       const config = getMachineTypeConfig(machineType || "");
-      const letter = config?.letter || machineType?.charAt(0).toUpperCase() || "?";
+      const letter =
+        config?.letter || machineType?.charAt(0).toUpperCase() || "?";
       const isCurrent = idx === o.currentStepIndex;
       const isCompleted = step.status === "completed";
-      const parallelGroup = (o.parallelGroups || []).find((g) => g.stepIndex === idx);
-      const isInParallelGroup = parallelGroup && parallelGroup.machineIndices.length > 0;
+      const parallelGroup = (o.parallelGroups || []).find(
+        (g) => g.stepIndex === idx,
+      );
+      const isInParallelGroup =
+        parallelGroup && parallelGroup.machineIndices.length > 0;
 
-      let variantClass = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
+      let variantClass =
+        "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
       if (isInParallelGroup) {
-        variantClass = "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500";
+        variantClass =
+          "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500";
       } else if (isCurrent) {
         if (step.status === "running") {
-          variantClass = "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
+          variantClass =
+            "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
         } else if (step.status === "hold") {
-          variantClass = "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
+          variantClass =
+            "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
         }
       } else if (isCompleted) {
-        variantClass = "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
+        variantClass =
+          "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
       }
 
       const isClickable = step.status === "running" && !isCompleted;
@@ -102,7 +116,9 @@ export default function ModelList(props: ModelListProps) {
         <span
           key={step.id}
           className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${variantClass} ${
-            isClickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
+            isClickable
+              ? "cursor-pointer hover:opacity-80 transition-opacity"
+              : ""
           }`}
           title={`${machineType}${
             isClickable
@@ -206,10 +222,19 @@ export default function ModelList(props: ModelListProps) {
                           <div className="flex flex-wrap items-center gap-1">
                             {getPathLetterPills(o, (orderId, stepIdx) => {
                               const currentStep = o.steps[stepIdx];
-                              if (currentStep.kind === "machine" && currentStep.machineType) {
-                                const machineIndex = machineTypes.findIndex(m => m.name === currentStep.machineType);
+                              if (
+                                currentStep.kind === "machine" &&
+                                currentStep.machineType
+                              ) {
+                                const machineIndex = machineTypes.findIndex(
+                                  (m) => m.name === currentStep.machineType,
+                                );
                                 if (machineIndex >= 0) {
-                                  props.onToggleParallelMachine(orderId, stepIdx, machineIndex);
+                                  props.onToggleParallelMachine(
+                                    orderId,
+                                    stepIdx,
+                                    machineIndex,
+                                  );
                                 }
                               }
                             })}
@@ -222,11 +247,14 @@ export default function ModelList(props: ModelListProps) {
                               ? "Completed"
                               : (() => {
                                   const primaryMachine =
-                                    step.kind === "machine" ? step.machineType : "Job Work";
-                                  const parallelGroup = (o.parallelGroups || []).find(
-                                    (g) => g.stepIndex === i,
-                                  );
-                                  const selectedIndices = parallelGroup?.machineIndices || [];
+                                    step.kind === "machine"
+                                      ? step.machineType
+                                      : "Job Work";
+                                  const parallelGroup = (
+                                    o.parallelGroups || []
+                                  ).find((g) => g.stepIndex === i);
+                                  const selectedIndices =
+                                    parallelGroup?.machineIndices || [];
 
                                   if (selectedIndices.length === 0) {
                                     return primaryMachine;
@@ -237,7 +265,9 @@ export default function ModelList(props: ModelListProps) {
                                     .filter(Boolean);
                                   return (
                                     <div className="flex flex-col gap-0.5">
-                                      <div className="font-medium">{primaryMachine}</div>
+                                      <div className="font-medium">
+                                        {primaryMachine}
+                                      </div>
                                       {selectedMachines.map((machine, idx) => (
                                         <div
                                           key={idx}
@@ -255,7 +285,10 @@ export default function ModelList(props: ModelListProps) {
                             <Badge variant="secondary">—</Badge>
                           ) : (
                             (() => {
-                              const displayStatus = step.status === "pending" ? "hold" : step.status;
+                              const displayStatus =
+                                step.status === "pending"
+                                  ? "hold"
+                                  : step.status;
                               return (
                                 <button onClick={() => toggleCardStatus(o)}>
                                   <Badge
@@ -368,41 +401,57 @@ export default function ModelList(props: ModelListProps) {
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
                         <span className="inline-flex items-center gap-1">
-                          <CalendarDays className="h-3.5 w-3.5" /> {formatDate(o.createdAt)}
+                          <CalendarDays className="h-3.5 w-3.5" />{" "}
+                          {formatDate(o.createdAt)}
                         </span>
                         <span>Qty: {o.quantity}</span>
                       </div>
-                      {i >= 0 && i < o.steps.length && (() => {
-                        const parallelGroup = (o.parallelGroups || []).find(
-                          (g) => g.stepIndex === i,
-                        );
-                        const selectedIndices = parallelGroup?.machineIndices || [];
-                        if (selectedIndices.length > 0) {
-                          const selectedMachines = selectedIndices
-                            .map((idx) => machineTypes[idx]?.name)
-                            .filter(Boolean);
-                          return (
-                            <div className="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700">
-                              <div className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                                Also running in:
-                              </div>
-                              {selectedMachines.map((machine, idx) => (
-                                <div key={idx} className="text-xs text-blue-600 dark:text-blue-400">
-                                  • {machine}
-                                </div>
-                              ))}
-                            </div>
+                      {i >= 0 &&
+                        i < o.steps.length &&
+                        (() => {
+                          const parallelGroup = (o.parallelGroups || []).find(
+                            (g) => g.stepIndex === i,
                           );
-                        }
-                        return null;
-                      })()}
+                          const selectedIndices =
+                            parallelGroup?.machineIndices || [];
+                          if (selectedIndices.length > 0) {
+                            const selectedMachines = selectedIndices
+                              .map((idx) => machineTypes[idx]?.name)
+                              .filter(Boolean);
+                            return (
+                              <div className="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700">
+                                <div className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                                  Also running in:
+                                </div>
+                                {selectedMachines.map((machine, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="text-xs text-blue-600 dark:text-blue-400"
+                                  >
+                                    • {machine}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                       <div className="flex flex-wrap items-center gap-1 mt-2">
                         {getPathLetterPills(o, (orderId, stepIdx) => {
                           const currentStep = o.steps[stepIdx];
-                          if (currentStep.kind === "machine" && currentStep.machineType) {
-                            const machineIndex = machineTypes.findIndex(m => m.name === currentStep.machineType);
+                          if (
+                            currentStep.kind === "machine" &&
+                            currentStep.machineType
+                          ) {
+                            const machineIndex = machineTypes.findIndex(
+                              (m) => m.name === currentStep.machineType,
+                            );
                             if (machineIndex >= 0) {
-                              props.onToggleParallelMachine(orderId, stepIdx, machineIndex);
+                              props.onToggleParallelMachine(
+                                orderId,
+                                stepIdx,
+                                machineIndex,
+                              );
                             }
                           }
                         })}
@@ -410,39 +459,42 @@ export default function ModelList(props: ModelListProps) {
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
-                      {i >= 0 && i < o.steps.length && (() => {
-                        const displayStatus = step.status === "pending" ? "hold" : step.status;
-                        return (
-                          <>
-                            <div className="text-sm text-right">
-                              <span className="font-medium text-gray-900 dark:text-gray-100">
-                                {i < 0
-                                  ? "Not started"
-                                  : i >= o.steps.length
-                                    ? "Completed"
-                                    : step.kind === "machine"
-                                      ? step.machineType
-                                      : "Job Work"}
-                              </span>
-                            </div>
+                      {i >= 0 &&
+                        i < o.steps.length &&
+                        (() => {
+                          const displayStatus =
+                            step.status === "pending" ? "hold" : step.status;
+                          return (
+                            <>
+                              <div className="text-sm text-right">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  {i < 0
+                                    ? "Not started"
+                                    : i >= o.steps.length
+                                      ? "Completed"
+                                      : step.kind === "machine"
+                                        ? step.machineType
+                                        : "Job Work"}
+                                </span>
+                              </div>
 
-                            <button onClick={() => toggleCardStatus(o)}>
-                              <Badge
-                                variant={
-                                  displayStatus === "running"
-                                    ? "success"
-                                    : displayStatus === "hold"
-                                      ? "destructive"
-                                      : "secondary"
-                                }
-                                className="shrink-0 cursor-pointer"
-                              >
-                                {cap(displayStatus)}
-                              </Badge>
-                            </button>
-                          </>
-                        );
-                      })()}
+                              <button onClick={() => toggleCardStatus(o)}>
+                                <Badge
+                                  variant={
+                                    displayStatus === "running"
+                                      ? "success"
+                                      : displayStatus === "hold"
+                                        ? "destructive"
+                                        : "secondary"
+                                  }
+                                  className="shrink-0 cursor-pointer"
+                                >
+                                  {cap(displayStatus)}
+                                </Badge>
+                              </button>
+                            </>
+                          );
+                        })()}
                     </div>
                   </div>
 
@@ -505,7 +557,9 @@ export default function ModelList(props: ModelListProps) {
             })}
             {sorted.length === 0 && (
               <div className="rounded-lg border border-gray-200 dark:border-gray-800 p-8 text-center bg-white dark:bg-gray-900">
-                <p className="text-gray-500 dark:text-gray-400">No models yet. Create one to get started.</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  No models yet. Create one to get started.
+                </p>
               </div>
             )}
           </div>
@@ -529,21 +583,45 @@ export default function ModelList(props: ModelListProps) {
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <div className="text-sm text-muted-foreground">Model</div>
-                        <div className="font-medium text-lg">{editing.modelName}</div>
-                        <div className="text-sm text-muted-foreground">Qty: {editing.quantity}</div>
-                        <div className="text-sm text-muted-foreground">Date: {formatDate(editing.createdAt)}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Model
+                        </div>
+                        <div className="font-medium text-lg">
+                          {editing.modelName}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Qty: {editing.quantity}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Date: {formatDate(editing.createdAt)}
+                        </div>
                       </div>
                       <div>
-                        <div className="text-sm text-muted-foreground">Current status</div>
+                        <div className="text-sm text-muted-foreground">
+                          Current status
+                        </div>
                         <div className="mt-1">
-                          {editing.currentStepIndex < 0 || editing.currentStepIndex >= editing.steps.length ? (
+                          {editing.currentStepIndex < 0 ||
+                          editing.currentStepIndex >= editing.steps.length ? (
                             <Badge variant="secondary">Completed</Badge>
                           ) : (
                             (() => {
-                              const ds = editing.steps[editing.currentStepIndex].status === "pending" ? "hold" : editing.steps[editing.currentStepIndex].status;
+                              const ds =
+                                editing.steps[editing.currentStepIndex]
+                                  .status === "pending"
+                                  ? "hold"
+                                  : editing.steps[editing.currentStepIndex]
+                                      .status;
                               return (
-                                <Badge variant={ds === "running" ? "success" : ds === "hold" ? "destructive" : "secondary"}>
+                                <Badge
+                                  variant={
+                                    ds === "running"
+                                      ? "success"
+                                      : ds === "hold"
+                                        ? "destructive"
+                                        : "secondary"
+                                  }
+                                >
                                   {cap(ds)}
                                 </Badge>
                               );
@@ -555,13 +633,24 @@ export default function ModelList(props: ModelListProps) {
                   </div>
 
                   <div className="p-3">
-                    <div className="text-sm text-muted-foreground mb-2">Production Path</div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      Production Path
+                    </div>
                     <div className="space-y-2">
                       {editing.steps.map((st) => (
-                        <div key={st.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <div
+                          key={st.id}
+                          className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                        >
                           <div className="flex-1">
-                            <div className="text-sm font-medium">{st.kind === "machine" ? st.machineType : "Job Work"}</div>
-                            <div className="text-xs text-muted-foreground">Status: {st.status}</div>
+                            <div className="text-sm font-medium">
+                              {st.kind === "machine"
+                                ? st.machineType
+                                : "Job Work"}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Status: {st.status}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -589,7 +678,10 @@ export default function ModelList(props: ModelListProps) {
             }
           >
             <div className="space-y-3">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Enter quantities for each batch. Total available: {splitFor?.quantity || 0}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Enter quantities for each batch. Total available:{" "}
+                {splitFor?.quantity || 0}
+              </p>
 
               <div className="space-y-2">
                 {splitInputs.map((q, i) => (
@@ -624,14 +716,20 @@ export default function ModelList(props: ModelListProps) {
                 ))}
               </div>
 
-              <Button variant="outline" onClick={() => setSplitInputs((arr) => [...arr, 0])} className="w-full">
+              <Button
+                variant="outline"
+                onClick={() => setSplitInputs((arr) => [...arr, 0])}
+                className="w-full"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Another Batch
               </Button>
 
               {splitInputs.filter((q) => q > 0).length > 0 && (
                 <div className="rounded-lg bg-gray-100 dark:bg-gray-800 p-3 text-sm">
-                  <div className="font-medium mb-1 text-gray-900 dark:text-gray-100">Summary:</div>
+                  <div className="font-medium mb-1 text-gray-900 dark:text-gray-100">
+                    Summary:
+                  </div>
                   <div className="space-y-1 text-gray-600 dark:text-gray-400">
                     {splitInputs.map(
                       (q, i) =>
@@ -641,7 +739,9 @@ export default function ModelList(props: ModelListProps) {
                           </div>
                         ),
                     )}
-                    <div className="pt-1 border-t border-gray-200 dark:border-gray-700 font-medium text-gray-900 dark:text-gray-100">Total: {splitInputs.reduce((sum, q) => sum + q, 0)} units</div>
+                    <div className="pt-1 border-t border-gray-200 dark:border-gray-700 font-medium text-gray-900 dark:text-gray-100">
+                      Total: {splitInputs.reduce((sum, q) => sum + q, 0)} units
+                    </div>
                   </div>
                 </div>
               )}

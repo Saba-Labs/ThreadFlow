@@ -1,8 +1,4 @@
-import {
-  useCallback,
-  useMemo,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
@@ -104,7 +100,8 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: input.modelName.trim(),
         quantity: Math.max(1, Math.floor(input.quantity)),
-        createdAt: typeof input.createdAt === "number" ? input.createdAt : Date.now(),
+        createdAt:
+          typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
         currentStepIndex: steps.length > 0 ? 0 : -1,
         parallelGroups: [],
@@ -176,7 +173,8 @@ export function useProductionPipeline() {
         if (nextIndex < steps.length && steps[nextIndex]) {
           steps[nextIndex] = {
             ...steps[nextIndex],
-            status: steps[nextIndex].status === "completed" ? "completed" : "hold",
+            status:
+              steps[nextIndex].status === "completed" ? "completed" : "hold",
           };
         }
 
@@ -224,7 +222,12 @@ export function useProductionPipeline() {
           })
           .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
 
-        return { ...o, steps, currentStepIndex: Math.max(0, target), parallelGroups };
+        return {
+          ...o,
+          steps,
+          currentStepIndex: Math.max(0, target),
+          parallelGroups,
+        };
       }),
     }));
   }, []);
@@ -244,12 +247,21 @@ export function useProductionPipeline() {
       setStore((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
-          const existing = o.parallelGroups.find((g) => g.stepIndex === stepIndex);
+          const existing = o.parallelGroups.find(
+            (g) => g.stepIndex === stepIndex,
+          );
           if (existing) {
             if (existing.machineIndices.includes(machineIndex)) {
-              existing.machineIndices = existing.machineIndices.filter((m) => m !== machineIndex);
+              existing.machineIndices = existing.machineIndices.filter(
+                (m) => m !== machineIndex,
+              );
               if (existing.machineIndices.length === 0) {
-                return { ...o, parallelGroups: o.parallelGroups.filter((g) => g.stepIndex !== stepIndex) };
+                return {
+                  ...o,
+                  parallelGroups: o.parallelGroups.filter(
+                    (g) => g.stepIndex !== stepIndex,
+                  ),
+                };
               }
             } else {
               existing.machineIndices.push(machineIndex);
