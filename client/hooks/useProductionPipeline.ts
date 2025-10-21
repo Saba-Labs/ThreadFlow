@@ -31,6 +31,7 @@ export interface WorkOrder {
   currentStepIndex: number; // -1 if not started, len if completed
   parentId?: string; // if split from another
   parallelGroups: ParallelMachineGroup[]; // groups of machines running in parallel
+  jobWorkIds?: string[];
 }
 
 function uid(prefix = "id") {
@@ -105,6 +106,7 @@ export function useProductionPipeline() {
         steps,
         currentStepIndex: steps.length > 0 ? 0 : -1,
         parallelGroups: [],
+        jobWorkIds: [],
       };
       setStore((s) => ({ orders: [order, ...s.orders] }));
       return order.id;
@@ -366,6 +368,13 @@ export function useProductionPipeline() {
     setCurrentStep,
     splitOrder,
     toggleParallelMachine,
+    setOrderJobWorks: (orderId: string, ids: string[]) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) =>
+          o.id === orderId ? { ...o, jobWorkIds: ids.slice() } : o,
+        ),
+      }));
+    },
     // update an existing order's basic properties (modelName, quantity, createdAt, path)
     updateOrder: (
       orderId: string,

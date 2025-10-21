@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { WorkOrder } from "@/hooks/useProductionPipeline";
 import type { MachineType } from "@/hooks/useProductionPipeline";
 import { useMachineTypes } from "@/lib/machineTypes";

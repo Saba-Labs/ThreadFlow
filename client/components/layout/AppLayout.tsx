@@ -52,7 +52,7 @@ export default function AppLayout() {
               </NavLink>
 
               <NavLink
-                to="/models/running"
+                to="/job-work"
                 className={({ isActive }) =>
                   cn(
                     "rounded-md px-3 py-2 text-sm font-medium",
@@ -62,21 +62,7 @@ export default function AppLayout() {
                   )
                 }
               >
-                Running
-              </NavLink>
-
-              <NavLink
-                to="/models/hold"
-                className={({ isActive }) =>
-                  cn(
-                    "rounded-md px-3 py-2 text-sm font-medium",
-                    isActive
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )
-                }
-              >
-                Hold
+                Job Work
               </NavLink>
 
               <NavLink
@@ -155,7 +141,7 @@ export default function AppLayout() {
                   All Models
                 </NavLink>
                 <NavLink
-                  to="/models/running"
+                  to="/job-work"
                   onClick={() => setMenuOpen(false)}
                   className={({ isActive }) =>
                     cn(
@@ -166,21 +152,7 @@ export default function AppLayout() {
                     )
                   }
                 >
-                  Running
-                </NavLink>
-                <NavLink
-                  to="/models/hold"
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  Hold
+                  Job Work
                 </NavLink>
                 <NavLink
                   to="/settings"
@@ -210,13 +182,6 @@ export default function AppLayout() {
       <main className="container py-6">
         <Outlet />
       </main>
-
-      {/* Mobile floating action button */}
-      <div className="fixed bottom-4 right-4 sm:hidden">
-        <Button asChild size="sm">
-          <Link to={location.pathname + "#new-model"}>New Model</Link>
-        </Button>
-      </div>
     </div>
   );
 }

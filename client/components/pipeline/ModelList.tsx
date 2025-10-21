@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useJobWorks } from "@/lib/jobWorks";
 import {
   Scissors,
   SkipForward,
@@ -37,6 +39,7 @@ interface ModelListProps {
     stepIndex: number,
     machineIndex: number,
   ) => void;
+  setOrderJobWorks?: (orderId: string, ids: string[]) => void;
 }
 
 export default function ModelList(props: ModelListProps) {
@@ -45,6 +48,9 @@ export default function ModelList(props: ModelListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0, 0]);
+  const jobWorks = useJobWorks();
+  const [jwForId, setJwForId] = useState<string | null>(null);
+  const [jwSelected, setJwSelected] = useState<string[]>([]);
 
   const sorted = useMemo(
     () => props.orders.slice().sort((a, b) => b.createdAt - a.createdAt),
@@ -160,7 +166,12 @@ export default function ModelList(props: ModelListProps) {
     }
     const st = o.steps[i];
     if (st.status === "hold") return "bg-red-50 dark:bg-red-900/20";
-    if (st.status === "running") return "bg-green-50 dark:bg-green-900/20";
+    if (st.status === "running") {
+      const hasJW = ((o as any).jobWorkIds || []).length > 0;
+      return hasJW
+        ? "bg-yellow-50 dark:bg-yellow-900/20"
+        : "bg-green-50 dark:bg-green-900/20";
+    }
     return "";
   };
 
@@ -337,6 +348,20 @@ export default function ModelList(props: ModelListProps) {
                               aria-label="Details"
                             >
                               <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                setJwForId(o.id);
+                                setJwSelected(
+                                  ((o as any).jobWorkIds || []) as string[],
+                                );
+                              }}
+                              title="Job Work"
+                              aria-label="Job Work"
+                            >
+                              JW
                             </Button>
                             <Button
                               size="icon"
@@ -530,6 +555,20 @@ export default function ModelList(props: ModelListProps) {
                       <Button
                         size="icon"
                         variant="ghost"
+                        onClick={() => {
+                          setJwForId(o.id);
+                          setJwSelected(
+                            ((o as any).jobWorkIds || []) as string[],
+                          );
+                        }}
+                        title="Job Work"
+                        aria-label="Job Work"
+                      >
+                        JW
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
                         onClick={() => props.onPrev(o.id)}
                         title="Previous step"
                         aria-label="Previous step"
@@ -581,6 +620,70 @@ export default function ModelList(props: ModelListProps) {
               </div>
             )}
           </div>
+
+          {/* JW modal */}
+          <SimpleModal
+            open={!!jwForId}
+            onOpenChange={(v) => !v && setJwForId(null)}
+            title="Select Job Work"
+            footer={
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setJwForId(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    const o = sorted.find((x) => x.id === jwForId);
+                    if (o) {
+                      const idx = o.currentStepIndex;
+                      if (idx >= 0 && idx < o.steps.length) {
+                        props.onSetStepStatus(o.id, idx, "running");
+                      }
+                      props.setOrderJobWorks?.(o.id, jwSelected);
+                    }
+                    setJwForId(null);
+                  }}
+                >
+                  Save
+                </Button>
+              </div>
+            }
+          >
+            <div className="space-y-2">
+              {jobWorks.map((j) => (
+                <label
+                  key={j.id}
+                  className="flex items-center gap-2 p-2 rounded hover:bg-muted/50 cursor-pointer"
+                >
+                  <Checkbox
+                    id={`jw-${j.id}`}
+                    checked={jwSelected.includes(j.id)}
+                    onCheckedChange={(c) => {
+                      setJwSelected((prev) => {
+                        const has = prev.includes(j.id);
+                        if (c && !has) return [...prev, j.id];
+                        if (!c && has) return prev.filter((x) => x !== j.id);
+                        return prev;
+                      });
+                    }}
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium">{j.name}</div>
+                    {j.description && (
+                      <div className="text-xs text-muted-foreground">
+                        {j.description}
+                      </div>
+                    )}
+                  </div>
+                </label>
+              ))}
+              {jobWorks.length === 0 && (
+                <div className="text-sm text-muted-foreground">
+                  No job works yet. Add them in Job Work.
+                </div>
+              )}
+            </div>
+          </SimpleModal>
 
           {/* Edit Path / Details Modal */}
           <SimpleModal

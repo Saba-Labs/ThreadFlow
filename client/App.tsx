@@ -9,10 +9,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
+import SettingsProductionPath from "./pages/SettingsProductionPath";
 import AppLayout from "@/components/layout/AppLayout";
 import ModelsAll from "./pages/ModelsAll";
-import ModelsRunning from "./pages/ModelsRunning";
-import ModelsHold from "./pages/ModelsHold";
+import JobWork from "./pages/JobWork";
 import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
 
@@ -28,9 +28,12 @@ const App = () => (
           <Route element={<AppLayout />}>
             <Route path="/" element={<Index />} />
             <Route path="/settings" element={<Settings />} />
+            <Route
+              path="/settings/production-path"
+              element={<SettingsProductionPath />}
+            />
             <Route path="/models/all" element={<ModelsAll />} />
-            <Route path="/models/running" element={<ModelsRunning />} />
-            <Route path="/models/hold" element={<ModelsHold />} />
+            <Route path="/job-work" element={<JobWork />} />
             <Route path="/models/new" element={<NewModel />} />
             <Route path="/models/:id/edit" element={<EditModel />} />
           </Route>
