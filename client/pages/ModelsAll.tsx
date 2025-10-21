@@ -45,7 +45,7 @@ export default function ModelsAll() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Models</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">All Models</h1>
           <Button
             variant="ghost"
             size="icon"
