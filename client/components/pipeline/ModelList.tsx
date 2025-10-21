@@ -253,7 +253,13 @@ export default function ModelList(props: ModelListProps) {
                     return (
                       <tr
                         key={o.id}
-                        className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
+                        className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
+                          splitAnim && splitAnim.parentId === o.id
+                            ? "split-source"
+                            : splitAnim && o.parentId === splitAnim.parentId && (o.createdAt || 0) >= (splitAnim.at - 5000)
+                              ? "split-target"
+                              : ""
+                        }`}
                       >
                         {showDetails && (
                           <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
