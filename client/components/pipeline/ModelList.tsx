@@ -220,9 +220,35 @@ export default function ModelList(props: ModelListProps) {
                             ? "Not started"
                             : i >= o.steps.length
                               ? "Completed"
-                              : step.kind === "machine"
-                                ? step.machineType
-                                : "Job Work"}
+                              : (() => {
+                                  const primaryMachine =
+                                    step.kind === "machine" ? step.machineType : "Job Work";
+                                  const parallelGroup = (o.parallelGroups || []).find(
+                                    (g) => g.stepIndex === i,
+                                  );
+                                  const selectedIndices = parallelGroup?.machineIndices || [];
+
+                                  if (selectedIndices.length === 0) {
+                                    return primaryMachine;
+                                  }
+
+                                  const selectedMachines = selectedIndices
+                                    .map((idx) => machineTypes[idx]?.name)
+                                    .filter(Boolean);
+                                  return (
+                                    <div className="flex flex-col gap-0.5">
+                                      <div className="font-medium">{primaryMachine}</div>
+                                      {selectedMachines.map((machine, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="text-xs text-blue-600 dark:text-blue-400"
+                                        >
+                                          {machine}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
                         </td>
                         <td className="p-3">
                           {i < 0 || i >= o.steps.length ? (
