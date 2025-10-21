@@ -47,6 +47,7 @@ export default function EditModel() {
           });
           navigate("/models/all");
         }}
+        onCancel={() => navigate("/models/all")}
       />
     </div>
   );
