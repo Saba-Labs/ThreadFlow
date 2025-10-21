@@ -66,15 +66,23 @@ export default function ModelList(props: ModelListProps) {
     ? sorted.find((o) => o.id === splitForId) || null
     : null;
 
+  const [splitAnim, setSplitAnim] = useState<{ parentId: string; at: number } | null>(null);
+
   const handleSplit = () => {
     if (!splitForId) return;
     const validQuantities = splitInputs
       .map((q) => Math.max(0, Math.floor(q)))
       .filter((q) => q > 0);
     if (validQuantities.length === 0) return;
+
+    // trigger animation: mark parent and timestamp, animate children when they appear
+    setSplitAnim({ parentId: splitForId, at: Date.now() });
     props.onSplit(splitForId, validQuantities);
     setSplitForId(null);
     setSplitInputs([0]);
+
+    // clear animation state after 2s
+    setTimeout(() => setSplitAnim(null), 2000);
   };
 
   const handleRemoveBatch = (index: number) => {
