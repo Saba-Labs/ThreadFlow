@@ -31,6 +31,7 @@ interface ModelListProps {
     stepIndex: number,
     status: "pending" | "running" | "hold" | "completed",
   ) => void;
+  onToggleParallelMachine: (orderId: string, stepIndex: number, machineIndex: number) => void;
 }
 
 export default function ModelList(props: ModelListProps) {
