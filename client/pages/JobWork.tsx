@@ -94,16 +94,6 @@ export default function JobWork() {
 
       {/* All Job Works list (card-style) */}
     <div className="">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-lg font-medium">All Job Works</div>
-        <div>
-          <Button variant="outline" size="sm" onClick={saveAll}>
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-        </div>
-      </div>
-
       <div className="space-y-3">
         {local.map((j) => {
           const linked = linkedModelsFor(j.id);
