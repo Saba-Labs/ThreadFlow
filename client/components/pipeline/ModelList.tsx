@@ -83,33 +83,46 @@ export default function ModelList(props: ModelListProps) {
     const currentIdx = o.currentStepIndex;
     const currentStep = o.steps[currentIdx];
     const isCurrentRunning =
-      currentIdx >= 0 && currentIdx < o.steps.length && currentStep?.status === "running";
-    const currentGroup = (o.parallelGroups || []).find((g) => g.stepIndex === currentIdx);
+      currentIdx >= 0 &&
+      currentIdx < o.steps.length &&
+      currentStep?.status === "running";
+    const currentGroup = (o.parallelGroups || []).find(
+      (g) => g.stepIndex === currentIdx,
+    );
     const selectedIndices = currentGroup?.machineIndices || [];
 
     return o.steps.map((step, idx) => {
-      const machineType = step.kind === "machine" ? step.machineType : "Job Work";
+      const machineType =
+        step.kind === "machine" ? step.machineType : "Job Work";
       const config = getMachineTypeConfig(machineType || "");
-      const letter = config?.letter || machineType?.charAt(0).toUpperCase() || "?";
+      const letter =
+        config?.letter || machineType?.charAt(0).toUpperCase() || "?";
       const isCurrent = idx === currentIdx;
       const isCompleted = step.status === "completed";
 
-      const machineIndex = machineTypes.findIndex((m) => m.name === machineType);
+      const machineIndex = machineTypes.findIndex(
+        (m) => m.name === machineType,
+      );
       const isSelectedInCurrent = selectedIndices.includes(machineIndex);
 
-      let variantClass = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
+      let variantClass =
+        "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
       if (isCurrent) {
         if (step.status === "running") {
-          variantClass = "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
+          variantClass =
+            "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
         } else if (step.status === "hold") {
-          variantClass = "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
+          variantClass =
+            "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
         }
       } else if (isCompleted) {
-        variantClass = "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
+        variantClass =
+          "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
       }
 
       if (isSelectedInCurrent) {
-        variantClass += " ring-2 ring-blue-500 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300";
+        variantClass +=
+          " ring-2 ring-blue-500 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300";
       }
 
       const isClickable = isCurrentRunning && machineIndex >= 0;
@@ -118,7 +131,9 @@ export default function ModelList(props: ModelListProps) {
         <span
           key={step.id}
           className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${variantClass} ${
-            isClickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
+            isClickable
+              ? "cursor-pointer hover:opacity-80 transition-opacity"
+              : ""
           }`}
           title={`${machineType}${
             isClickable
@@ -222,12 +237,19 @@ export default function ModelList(props: ModelListProps) {
                           <div className="flex flex-wrap items-center gap-1">
                             {getPathLetterPills(o, (orderId, stepIdx) => {
                               const stepAtIdx = o.steps[stepIdx];
-                              if (stepAtIdx.kind === "machine" && stepAtIdx.machineType) {
+                              if (
+                                stepAtIdx.kind === "machine" &&
+                                stepAtIdx.machineType
+                              ) {
                                 const machineIndex = machineTypes.findIndex(
                                   (m) => m.name === stepAtIdx.machineType,
                                 );
                                 if (machineIndex >= 0) {
-                                  props.onToggleParallelMachine(orderId, o.currentStepIndex, machineIndex);
+                                  props.onToggleParallelMachine(
+                                    orderId,
+                                    o.currentStepIndex,
+                                    machineIndex,
+                                  );
                                 }
                               }
                             })}
@@ -255,7 +277,10 @@ export default function ModelList(props: ModelListProps) {
 
                                   const selectedMachines = selectedIndices
                                     .map((idx) => machineTypes[idx]?.name)
-                                    .filter((name) => !!name && name !== primaryMachine);
+                                    .filter(
+                                      (name) =>
+                                        !!name && name !== primaryMachine,
+                                    );
                                   return (
                                     <div className="flex flex-col gap-0.5">
                                       <div className="font-medium">
@@ -402,12 +427,19 @@ export default function ModelList(props: ModelListProps) {
                       <div className="flex flex-wrap items-center gap-1 mt-2">
                         {getPathLetterPills(o, (orderId, stepIdx) => {
                           const stepAtIdx = o.steps[stepIdx];
-                          if (stepAtIdx.kind === "machine" && stepAtIdx.machineType) {
+                          if (
+                            stepAtIdx.kind === "machine" &&
+                            stepAtIdx.machineType
+                          ) {
                             const machineIndex = machineTypes.findIndex(
                               (m) => m.name === stepAtIdx.machineType,
                             );
                             if (machineIndex >= 0) {
-                              props.onToggleParallelMachine(orderId, o.currentStepIndex, machineIndex);
+                              props.onToggleParallelMachine(
+                                orderId,
+                                o.currentStepIndex,
+                                machineIndex,
+                              );
                             }
                           }
                         })}
@@ -435,19 +467,28 @@ export default function ModelList(props: ModelListProps) {
                               </div>
 
                               {(() => {
-                                const parallelGroup = (o.parallelGroups || []).find(
-                                  (g) => g.stepIndex === i,
-                                );
-                                const selectedIndices = parallelGroup?.machineIndices || [];
-                                const primaryMachine = step.kind === "machine" ? step.machineType : "Job Work";
+                                const parallelGroup = (
+                                  o.parallelGroups || []
+                                ).find((g) => g.stepIndex === i);
+                                const selectedIndices =
+                                  parallelGroup?.machineIndices || [];
+                                const primaryMachine =
+                                  step.kind === "machine"
+                                    ? step.machineType
+                                    : "Job Work";
                                 const selectedMachines = selectedIndices
                                   .map((idx) => machineTypes[idx]?.name)
-                                  .filter((name) => !!name && name !== primaryMachine);
+                                  .filter(
+                                    (name) => !!name && name !== primaryMachine,
+                                  );
                                 if (selectedMachines.length === 0) return null;
                                 return (
                                   <div className="text-sm text-right">
                                     {selectedMachines.map((m, idx) => (
-                                      <div key={idx} className="font-medium text-gray-900 dark:text-gray-100">
+                                      <div
+                                        key={idx}
+                                        className="font-medium text-gray-900 dark:text-gray-100"
+                                      >
                                         {m}
                                       </div>
                                     ))}

@@ -21,7 +21,12 @@ export default function ModelForm(props: {
   }) => void;
   trigger?: React.ReactNode;
   inline?: boolean;
-  initialData?: { modelName: string; quantity: number; createdAt: number; path: NewPathStep[] };
+  initialData?: {
+    modelName: string;
+    quantity: number;
+    createdAt: number;
+    path: NewPathStep[];
+  };
   onCancel?: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -30,7 +35,9 @@ export default function ModelForm(props: {
   const [dateStr, setDateStr] = useState(() =>
     new Date().toISOString().slice(0, 10),
   );
-  const [selectedMachines, setSelectedMachines] = useState<Set<string>>(new Set());
+  const [selectedMachines, setSelectedMachines] = useState<Set<string>>(
+    new Set(),
+  );
   const [includeJobWork, setIncludeJobWork] = useState(false);
 
   const machineTypes = useMachineTypes();
@@ -40,7 +47,9 @@ export default function ModelForm(props: {
     if (props.initialData) {
       setModelName(props.initialData.modelName || "");
       setQuantity(props.initialData.quantity ?? 100);
-      setDateStr(new Date(props.initialData.createdAt).toISOString().slice(0, 10));
+      setDateStr(
+        new Date(props.initialData.createdAt).toISOString().slice(0, 10),
+      );
       const sel = new Set<string>();
       let job = false;
       for (const p of props.initialData.path) {
@@ -198,7 +207,9 @@ export default function ModelForm(props: {
             Cancel
           </Button>
         )}
-        <Button onClick={submit}>{props.initialData ? "Save" : "Create"}</Button>
+        <Button onClick={submit}>
+          {props.initialData ? "Save" : "Create"}
+        </Button>
       </div>
     </>
   );
@@ -220,7 +231,22 @@ export default function ModelForm(props: {
         open={open}
         onOpenChange={setOpen}
         title="New Model / Batch"
-        footer={<div className="flex justify-end">{props.onCancel && (<Button variant="outline" className="mr-2" onClick={props.onCancel}>Cancel</Button>)}<Button onClick={submit}>{props.initialData ? "Save" : "Create"}</Button></div>}
+        footer={
+          <div className="flex justify-end">
+            {props.onCancel && (
+              <Button
+                variant="outline"
+                className="mr-2"
+                onClick={props.onCancel}
+              >
+                Cancel
+              </Button>
+            )}
+            <Button onClick={submit}>
+              {props.initialData ? "Save" : "Create"}
+            </Button>
+          </div>
+        }
       >
         {formContent}
       </SimpleModal>

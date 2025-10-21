@@ -173,7 +173,11 @@ export function useProductionPipeline() {
 
         // Set next step explicitly to hold
         if (nextIndex < steps.length && steps[nextIndex]) {
-          steps[nextIndex] = { ...steps[nextIndex], status: "hold", activeMachines: 0 };
+          steps[nextIndex] = {
+            ...steps[nextIndex],
+            status: "hold",
+            activeMachines: 0,
+          };
         }
 
         // Clear any parallel machine selections when moving steps
@@ -201,7 +205,11 @@ export function useProductionPipeline() {
 
         // Set target step explicitly to hold
         if (target >= 0 && steps[target]) {
-          steps[target] = { ...steps[target], status: "hold", activeMachines: 0 };
+          steps[target] = {
+            ...steps[target],
+            status: "hold",
+            activeMachines: 0,
+          };
         }
 
         // Clear any parallel machine selections when moving steps
@@ -239,7 +247,9 @@ export function useProductionPipeline() {
             const existing = groups[idx];
             const has = existing.machineIndices.includes(machineIndex);
             if (has) {
-              const newIndices = existing.machineIndices.filter((m) => m !== machineIndex);
+              const newIndices = existing.machineIndices.filter(
+                (m) => m !== machineIndex,
+              );
               if (newIndices.length === 0) {
                 // remove the group entirely
                 return {
@@ -252,7 +262,10 @@ export function useProductionPipeline() {
               newGroups[idx] = newGroup;
               return { ...o, parallelGroups: newGroups };
             } else {
-              const newGroup = { ...existing, machineIndices: [...existing.machineIndices, machineIndex] };
+              const newGroup = {
+                ...existing,
+                machineIndices: [...existing.machineIndices, machineIndex],
+              };
               const newGroups = groups.slice();
               newGroups[idx] = newGroup;
               return { ...o, parallelGroups: newGroups };
@@ -260,7 +273,11 @@ export function useProductionPipeline() {
           }
 
           // otherwise add new group
-          const added = { stepIndex, machineIndices: [machineIndex], status: "hold" as StepStatus };
+          const added = {
+            stepIndex,
+            machineIndices: [machineIndex],
+            status: "hold" as StepStatus,
+          };
           return { ...o, parallelGroups: [...groups, added] };
         }),
       }));
@@ -286,13 +303,20 @@ export function useProductionPipeline() {
         steps: src.steps.map((st) => ({
           ...st,
           id: uid("step"),
-          status: st.status === "completed" ? ("completed" as StepStatus) : ("hold" as StepStatus),
+          status:
+            st.status === "completed"
+              ? ("completed" as StepStatus)
+              : ("hold" as StepStatus),
           activeMachines: 0,
           quantityDone: 0,
         })),
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
-        parallelGroups: (src.parallelGroups || []).map((g) => ({ stepIndex: g.stepIndex, machineIndices: g.machineIndices.slice(), status: g.status as StepStatus })),
+        parallelGroups: (src.parallelGroups || []).map((g) => ({
+          stepIndex: g.stepIndex,
+          machineIndices: g.machineIndices.slice(),
+          status: g.status as StepStatus,
+        })),
       });
       const children = valid.map((q) => base(q));
       const remainderOrder = base(remainder);
@@ -343,20 +367,36 @@ export function useProductionPipeline() {
     splitOrder,
     toggleParallelMachine,
     // update an existing order's basic properties (modelName, quantity, createdAt, path)
-    updateOrder: (orderId: string, data: { modelName: string; quantity: number; createdAt: number; path: ({ kind: "machine"; machineType: string } | { kind: "job"; externalUnitName: string })[] }) => {
+    updateOrder: (
+      orderId: string,
+      data: {
+        modelName: string;
+        quantity: number;
+        createdAt: number;
+        path: (
+          | { kind: "machine"; machineType: string }
+          | { kind: "job"; externalUnitName: string }
+        )[];
+      },
+    ) => {
       setStore((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
           const newSteps = data.path.map((p) => ({
             id: uid("step"),
             kind: p.kind as "machine" | "job",
-            machineType: p.kind === "machine" ? (p.machineType as string) : undefined,
-            externalUnitName: p.kind === "job" ? (p.externalUnitName as string) : undefined,
+            machineType:
+              p.kind === "machine" ? (p.machineType as string) : undefined,
+            externalUnitName:
+              p.kind === "job" ? (p.externalUnitName as string) : undefined,
             status: "hold" as StepStatus,
             activeMachines: 0,
             quantityDone: 0,
           }));
-          const newIndex = Math.max(0, Math.min(o.currentStepIndex, newSteps.length - 1));
+          const newIndex = Math.max(
+            0,
+            Math.min(o.currentStepIndex, newSteps.length - 1),
+          );
           return {
             ...o,
             modelName: data.modelName,

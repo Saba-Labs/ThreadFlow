@@ -12,7 +12,9 @@ export default function EditModel() {
     return (
       <div>
         <h1 className="text-2xl font-semibold">Model not found</h1>
-        <p className="text-sm text-muted-foreground">The requested model was not found.</p>
+        <p className="text-sm text-muted-foreground">
+          The requested model was not found.
+        </p>
       </div>
     );
   }
@@ -24,7 +26,10 @@ export default function EditModel() {
     path: order.steps.map((st) =>
       st.kind === "machine"
         ? { kind: "machine", machineType: st.machineType! }
-        : { kind: "job", externalUnitName: st.externalUnitName || "Job Work Unit" },
+        : {
+            kind: "job",
+            externalUnitName: st.externalUnitName || "Job Work Unit",
+          },
     ),
   };
 
@@ -32,7 +37,9 @@ export default function EditModel() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Edit Model</h1>
-        <p className="text-muted-foreground">Update the work order details below.</p>
+        <p className="text-muted-foreground">
+          Update the work order details below.
+        </p>
       </div>
       <ModelForm
         inline
