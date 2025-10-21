@@ -342,6 +342,33 @@ export function useProductionPipeline() {
     setCurrentStep,
     splitOrder,
     toggleParallelMachine,
+    // update an existing order's basic properties (modelName, quantity, createdAt, path)
+    updateOrder: (orderId: string, data: { modelName: string; quantity: number; createdAt: number; path: ({ kind: "machine"; machineType: string } | { kind: "job"; externalUnitName: string })[] }) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const newSteps = data.path.map((p) => ({
+            id: uid("step"),
+            kind: p.kind,
+            machineType: p.kind === "machine" ? p.machineType : undefined,
+            externalUnitName: p.kind === "job" ? p.externalUnitName : undefined,
+            status: "hold",
+            activeMachines: 0,
+            quantityDone: 0,
+          }));
+          const newIndex = Math.max(0, Math.min(o.currentStepIndex, newSteps.length - 1));
+          return {
+            ...o,
+            modelName: data.modelName,
+            quantity: data.quantity,
+            createdAt: data.createdAt,
+            steps: newSteps,
+            currentStepIndex: newSteps.length === 0 ? -1 : newIndex,
+            parallelGroups: [],
+          };
+        }),
+      }));
+    },
     board,
     progressOf,
   };
