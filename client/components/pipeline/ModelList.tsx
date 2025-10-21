@@ -114,46 +114,52 @@ export default function ModelList(props: ModelListProps) {
 
       const animations: Animation[] = [];
 
-      // animate all elements grouped by id
-      elsAfterById.forEach((els, id) => {
-        const beforeRect = rectsBefore.get(id) || sourceRect;
+      // Only animate elements belonging to the affected parentId (parent row + its new children)
+      const elsToAnimate = elsAfter.filter((el) => {
+        const id = el.getAttribute('data-order-id');
+        const p = el.getAttribute('data-parent-id');
+        return id === parentId || p === parentId;
+      });
+
+      elsToAnimate.forEach((el) => {
+        const id = el.getAttribute('data-order-id')!;
+        const beforeRect = rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
         if (!beforeRect) return;
-        els.forEach((el) => {
-          const afterRect = el.getBoundingClientRect();
-          const dx = beforeRect.left - afterRect.left;
-          const dy = beforeRect.top - afterRect.top;
-          const sx = beforeRect.width / afterRect.width;
-          const sy = beforeRect.height / afterRect.height;
+        const afterRect = el.getBoundingClientRect();
 
-          const from = {
-            transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
-            opacity: 0.85,
-          };
-          const to = { transform: 'none', opacity: 1 };
+        const dx = beforeRect.left - afterRect.left;
+        const dy = beforeRect.top - afterRect.top;
+        const sx = beforeRect.width / afterRect.width;
+        const sy = beforeRect.height / afterRect.height;
 
-          try {
-            const anim = el.animate([from, to], {
-              duration: DURATION,
-              easing: EASING,
-              fill: 'both',
-            });
-            animations.push(anim);
-          } catch (e) {
-            el.style.transition = `transform ${DURATION}ms ${EASING}, opacity ${Math.min(600, DURATION)}ms linear`;
-            el.style.transform = from.transform;
-            el.style.opacity = String(from.opacity);
-            requestAnimationFrame(() => {
-              el.style.transform = '';
-              el.style.opacity = '';
-            });
-          }
-        });
+        const from = {
+          transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+          opacity: 0.85,
+        };
+        const to = { transform: 'none', opacity: 1 };
+
+        try {
+          const anim = el.animate([from, to], {
+            duration: DURATION,
+            easing: EASING,
+            fill: 'both',
+          });
+          animations.push(anim);
+        } catch (e) {
+          el.style.transition = `transform ${DURATION}ms ${EASING}, opacity ${Math.min(600, DURATION)}ms linear`;
+          el.style.transform = from.transform;
+          el.style.opacity = String(from.opacity);
+          requestAnimationFrame(() => {
+            el.style.transform = '';
+            el.style.opacity = '';
+          });
+        }
       });
 
       // when all animations finish, ensure cleanup
       if (animations.length > 0) {
         Promise.all(animations.map((a) => a.finished)).then(() => {
-          elsAfter.forEach((el) => {
+          elsToAnimate.forEach((el) => {
             el.style.transition = '';
             el.style.transform = '';
             el.style.opacity = '';
@@ -162,7 +168,7 @@ export default function ModelList(props: ModelListProps) {
       } else {
         // fallback cleanup after duration
         setTimeout(() => {
-          elsAfter.forEach((el) => {
+          elsToAnimate.forEach((el) => {
             el.style.transition = '';
             el.style.transform = '';
             el.style.opacity = '';
