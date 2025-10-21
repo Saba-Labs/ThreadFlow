@@ -45,7 +45,22 @@ export default function ModelsAll() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">All Models</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight">All Models</h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={showDetails ? "Hide details" : "Show details"}
+              onClick={() => setShowDetails((s) => !s)}
+              title={showDetails ? "Hide details" : "Show details"}
+            >
+              {showDetails ? (
+                <Eye className="h-4 w-4" />
+              ) : (
+                <EyeOff className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
           <p className="text-muted-foreground max-w-prose">
             A list of all work orders in the system.
           </p>
