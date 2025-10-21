@@ -77,34 +77,75 @@ export default function ModelList(props: ModelListProps) {
       .filter((q) => q > 0);
     if (validQuantities.length === 0) return;
 
-    const sum = validQuantities.reduce((a, b) => a + b, 0);
-    const src = splitFor;
-    const remainder = src ? src.quantity - sum : 0;
-    const resultCount = validQuantities.length + (remainder > 0 ? 1 : 0);
-
-    // start shrink animation on the parent
     const parentId = splitForId!;
-    setSplitting({ parentId, count: resultCount });
 
-    // close the modal immediately so user can continue
+    // close modal immediately
     setSplitForId(null);
     setSplitInputs([0]);
 
-    // keep timings in sync with CSS so there's no pause between shrink and expand
-    const SOURCE_ANIM_MS = 2200; // must match .split-source animation duration in CSS
-    const SHRINK_MS = SOURCE_ANIM_MS; // perform split exactly when source animation completes
+    // FLIP: capture before rects
+    const elsBefore = Array.from(document.querySelectorAll<HTMLElement>('[data-order-id]')) as HTMLElement[];
+    const rectsBefore = new Map<string, DOMRect>();
+    elsBefore.forEach((el) => {
+      const id = el.getAttribute('data-order-id');
+      if (id) rectsBefore.set(id, el.getBoundingClientRect());
+    });
 
-    // after the source has fully shrunk, create children and animate them from the shrunk state
-    setTimeout(() => {
-      props.onSplit(parentId, validQuantities);
-      setSplitAnim({ parentId, at: Date.now() });
+    const sourceRect = rectsBefore.get(parentId) || null;
 
-      // clear splitting (source) after the source animation completes
-      setSplitting(null);
+    // perform split (update data/state)
+    props.onSplit(parentId, validQuantities);
 
-      // clear target animation after it finishes (give some buffer)
-      setTimeout(() => setSplitAnim(null), 3600 + 200);
-    }, SHRINK_MS);
+    // next frame, measure after rects and apply inverse transforms
+    requestAnimationFrame(() => {
+      const elsAfter = Array.from(document.querySelectorAll<HTMLElement>('[data-order-id]')) as HTMLElement[];
+      const rectsAfter = new Map<string, DOMRect>();
+      elsAfter.forEach((el) => {
+        const id = el.getAttribute('data-order-id');
+        if (id) rectsAfter.set(id, el.getBoundingClientRect());
+      });
+
+      const DURATION = 3000;
+      const EASE = 'cubic-bezier(.2,.9,.3,1)';
+
+      // apply inverse transforms
+      elsAfter.forEach((el) => {
+        const id = el.getAttribute('data-order-id')!;
+        const before = rectsBefore.get(id) || sourceRect;
+        const after = rectsAfter.get(id);
+        if (!after || !before) return;
+
+        const dx = before.left - after.left;
+        const dy = before.top - after.top;
+        const sx = before.width / after.width;
+        const sy = before.height / after.height;
+
+        el.style.transition = 'none';
+        el.style.transformOrigin = 'center';
+        el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+        el.style.opacity = '0.8';
+      });
+
+      // force reflow and animate to identity
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          elsAfter.forEach((el) => {
+            el.style.transition = `transform ${DURATION}ms ${EASE}, opacity ${Math.min(600, DURATION)}ms linear`;
+            el.style.transform = '';
+            el.style.opacity = '';
+          });
+        });
+      });
+
+      // cleanup
+      setTimeout(() => {
+        elsAfter.forEach((el) => {
+          el.style.transition = '';
+          el.style.transform = '';
+          el.style.opacity = '';
+        });
+      }, DURATION + 200);
+    });
   };
 
   const handleRemoveBatch = (index: number) => {
