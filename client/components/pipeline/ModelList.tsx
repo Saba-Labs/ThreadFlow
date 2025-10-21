@@ -67,6 +67,7 @@ export default function ModelList(props: ModelListProps) {
     : null;
 
   const [splitAnim, setSplitAnim] = useState<{ parentId: string; at: number } | null>(null);
+  const [splitting, setSplitting] = useState<{ parentId: string; count: number } | null>(null);
 
   const handleSplit = () => {
     if (!splitForId) return;
@@ -75,14 +76,30 @@ export default function ModelList(props: ModelListProps) {
       .filter((q) => q > 0);
     if (validQuantities.length === 0) return;
 
-    // trigger animation: mark parent and timestamp, animate children when they appear
-    setSplitAnim({ parentId: splitForId, at: Date.now() });
-    props.onSplit(splitForId, validQuantities);
-    setSplitForId(null);
-    setSplitInputs([0]);
+    const sum = validQuantities.reduce((a, b) => a + b, 0);
+    const src = splitFor;
+    const remainder = src ? src.quantity - sum : 0;
+    const resultCount = validQuantities.length + (remainder > 0 ? 1 : 0);
 
-    // clear animation state after 2s
-    setTimeout(() => setSplitAnim(null), 2000);
+    // start shrink animation on the parent
+    setSplitting({ parentId: splitForId, count: resultCount });
+
+    const SHRINK_MS = 420;
+    setTimeout(() => {
+      // perform actual split which updates the orders list
+      props.onSplit(splitForId!, validQuantities);
+
+      // animate targets (new children) when they appear
+      setSplitAnim({ parentId: splitForId!, at: Date.now() });
+
+      // reset modal inputs
+      setSplitForId(null);
+      setSplitInputs([0]);
+
+      // clear splitting marker, keep target anim for a bit
+      setSplitting(null);
+      setTimeout(() => setSplitAnim(null), 1200);
+    }, SHRINK_MS);
   };
 
   const handleRemoveBatch = (index: number) => {
