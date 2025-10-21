@@ -67,7 +67,6 @@ export default function ModelList(props: ModelListProps) {
     : null;
 
   const [splitAnim, setSplitAnim] = useState<{ parentId: string; at: number } | null>(null);
-  const [splitting, setSplitting] = useState<{ parentId: string; count: number } | null>(null);
 
 
   const handleSplit = () => {
