@@ -107,6 +107,7 @@ export function useProductionPipeline() {
         createdAt: typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
         currentStepIndex: steps.length > 0 ? 0 : -1,
+        parallelGroups: [],
       };
       setStore((s) => ({ orders: [order, ...s.orders] }));
       return order.id;
