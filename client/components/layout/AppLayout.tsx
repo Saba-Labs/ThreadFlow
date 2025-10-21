@@ -119,6 +119,13 @@ export default function AppLayout() {
               </Button>
             </div>
 
+            {/* Install button (shows when PWA install available) */}
+            {canInstall && (
+              <div className="hidden sm:block mr-2">
+                <Button onClick={handleInstallClick} size="sm">Install</Button>
+              </div>
+            )}
+
             {/* Mobile menu button */}
             <div className="sm:hidden">
               <button
