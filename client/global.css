@@ -124,14 +124,14 @@
   }
 
   .split-source {
-    animation: split-source-anim 900ms cubic-bezier(.2,.8,.2,1) forwards;
+    animation: split-source-anim 2200ms cubic-bezier(.2,.8,.2,1) forwards;
     transform-origin: center;
   }
   .split-source > * {
     transform-origin: center;
   }
   .split-target {
-    animation: split-target-anim 1400ms cubic-bezier(.2,.9,.3,1) forwards;
-    box-shadow: 0 8px 28px rgba(16, 185, 129, 0.14);
+    animation: split-target-anim 3600ms cubic-bezier(.2,.9,.3,1) forwards;
+    box-shadow: 0 10px 38px rgba(16, 185, 129, 0.16);
   }
 }
