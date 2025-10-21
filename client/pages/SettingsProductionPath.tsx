@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useMachineTypes, getMachineTypes, setMachineTypes, type MachineTypeConfig } from "@/lib/machineTypes";
+import { Trash2, Plus, GripVertical, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
 
-export default function Settings() {
+export default function SettingsProductionPath() {
   const types = useMachineTypes();
   const [local, setLocal] = useState<MachineTypeConfig[]>(() => getMachineTypes());
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
 
-  // keep local in sync if global changes externally
   useEffect(() => {
     try {
       if (JSON.stringify(local) !== JSON.stringify(types)) {
@@ -39,7 +39,6 @@ export default function Settings() {
 
   const handleDrop = (targetIdx: number) => {
     if (draggedIdx === null || draggedIdx === targetIdx) return;
-
     setLocal((s) => {
       const arr = s.slice();
       const dragged = arr[draggedIdx];
@@ -53,10 +52,7 @@ export default function Settings() {
   const save = () => {
     const cleaned = local
       .filter((c) => c.name.trim() && c.letter.trim())
-      .map((c) => ({
-        name: c.name.trim(),
-        letter: c.letter.trim(),
-      }));
+      .map((c) => ({ name: c.name.trim(), letter: c.letter.trim() }));
     if (cleaned.length === 0) return;
     setMachineTypes(cleaned);
     alert("Production path saved");
@@ -64,20 +60,23 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground max-w-prose">
-          Configure user roles, default machine sequences, and job work units
-          here. Changes to the production path are saved to your browser and
-          will be applied immediately.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Production Path</h1>
+          <p className="text-muted-foreground max-w-prose">
+            Add, reorder or remove steps used in production paths.
+          </p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/settings"><ArrowLeft className="h-4 w-4 mr-2" /> Back to Settings</Link>
+        </Button>
       </div>
 
       <section className="rounded-lg border bg-white p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-lg font-medium">Production Path</h2>
-            <p className="text-sm text-muted-foreground">Add, reorder or remove steps used in production paths.</p>
+            <h2 className="text-lg font-medium">Steps</h2>
+            <p className="text-sm text-muted-foreground">Configure the machines and job work order.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={add} size="sm">
