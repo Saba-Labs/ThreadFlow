@@ -85,29 +85,24 @@ export default function ModelList(props: ModelListProps) {
     const parentId = splitForId!;
     setSplitting({ parentId, count: resultCount });
 
-    // ensure splitting class stays for the duration of the source animation
-    const SOURCE_ANIM_MS = 2200; // must match CSS duration
-    const SHRINK_MS = 1800; // time before performing split
-    const clearSplittingTimer = setTimeout(() => setSplitting(null), SOURCE_ANIM_MS);
-
     // close the modal immediately so user can continue
     setSplitForId(null);
     setSplitInputs([0]);
 
-    setTimeout(() => {
-      // perform actual split which updates the orders list
-      props.onSplit(parentId, validQuantities);
+    // keep timings in sync with CSS so there's no pause between shrink and expand
+    const SOURCE_ANIM_MS = 2200; // must match .split-source animation duration in CSS
+    const SHRINK_MS = SOURCE_ANIM_MS; // perform split exactly when source animation completes
 
-      // animate targets (new children) when they appear
+    // after the source has fully shrunk, create children and animate them from the shrunk state
+    setTimeout(() => {
+      props.onSplit(parentId, validQuantities);
       setSplitAnim({ parentId, at: Date.now() });
 
-      // keep target animation visible for a bit
-      setTimeout(() => setSplitAnim(null), 4000);
+      // clear splitting (source) after the source animation completes
+      setSplitting(null);
 
-      // clear the splitting timer if it's still pending
-      clearTimeout(clearSplittingTimer);
-      // ensure splitting is cleared after SOURCE_ANIM_MS in case timer was cleared
-      setTimeout(() => setSplitting(null), Math.max(0, SOURCE_ANIM_MS - SHRINK_MS));
+      // clear target animation after it finishes (give some buffer)
+      setTimeout(() => setSplitAnim(null), 3600 + 200);
     }, SHRINK_MS);
   };
 
