@@ -14,6 +14,7 @@ import ModelsAll from "./pages/ModelsAll";
 import ModelsRunning from "./pages/ModelsRunning";
 import ModelsHold from "./pages/ModelsHold";
 import NewModel from "./pages/NewModel";
+import EditModel from "./pages/EditModel";
 
 const queryClient = new QueryClient();
 
