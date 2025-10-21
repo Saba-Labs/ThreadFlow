@@ -92,54 +92,67 @@ export default function JobWork() {
         </p>
       </div>
 
-      {/* All Job Works list */}
-      <div className="rounded-lg border bg-white">
-        <div className="flex items-center justify-between p-3 border-b">
-          <div className="font-medium">All Job Works</div>
+      {/* All Job Works list (card-style) */}
+    <div className="">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-lg font-medium">All Job Works</div>
+        <div>
           <Button variant="outline" size="sm" onClick={saveAll}>
             <Save className="h-4 w-4 mr-2" />
             Save
           </Button>
         </div>
-        <div className="divide-y">
-          {local.map((j) => {
-            const linked = linkedModelsFor(j.id);
-            return (
-              <div key={j.id} className="p-3 flex items-center justify-between gap-2">
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">{j.name}</div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {linked.length > 0 ? linked.join(", ") : <span className="italic text-xs text-gray-400">No models linked</span>}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    title="Edit"
-                    aria-label="Edit"
-                    onClick={() => openEdit(j)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handleDelete(j.id)}
-                    title="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+      </div>
+
+      <div className="space-y-3">
+        {local.map((j) => {
+          const linked = linkedModelsFor(j.id);
+          return (
+            <div
+              key={j.id}
+              className="p-4 rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800 flex items-center justify-between"
+            >
+              <div className="flex-1">
+                <div className="font-medium text-gray-900 dark:text-gray-100">{j.name}</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {linked.length > 0 ? (
+                    linked.map((m) => (
+                      <div key={m} className="">{m}</div>
+                    ))
+                  ) : (
+                    <div className="italic text-xs text-gray-400">No models linked</div>
+                  )}
                 </div>
               </div>
-            );
-          })}
 
-          {local.length === 0 && (
-            <div className="p-6 text-sm text-muted-foreground">No job works yet.</div>
-          )}
-        </div>
+              <div className="flex items-center gap-2 ml-4">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  title="Edit"
+                  aria-label="Edit"
+                  onClick={() => openEdit(j)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleDelete(j.id)}
+                  title="Delete"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+
+        {local.length === 0 && (
+          <div className="p-6 text-sm text-muted-foreground">No job works yet.</div>
+        )}
       </div>
+    </div>
 
       {/* Floating Add Button */}
       <button
