@@ -29,7 +29,14 @@ export default function ModelsAll() {
       return s === "pending" ? "hold" : (s as "hold" | "running" | "completed");
     };
     if (filter === "all") return pipeline.orders;
-    return pipeline.orders.filter((o) => statusOf(o) === filter);
+    if (filter === "job") {
+      return pipeline.orders.filter((o) => {
+        const idx = o.currentStepIndex;
+        if (idx < 0 || idx >= o.steps.length) return false;
+        return o.steps[idx].kind === "job";
+      });
+    }
+    return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
 
   return (
