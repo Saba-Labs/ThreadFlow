@@ -217,6 +217,35 @@ export function useProductionPipeline() {
     }));
   }, []);
 
+  const toggleParallelMachine = useCallback(
+    (orderId: string, stepIndex: number, machineIndex: number) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const existing = o.parallelGroups.find((g) => g.stepIndex === stepIndex);
+          if (existing) {
+            if (existing.machineIndices.includes(machineIndex)) {
+              existing.machineIndices = existing.machineIndices.filter((m) => m !== machineIndex);
+              if (existing.machineIndices.length === 0) {
+                return { ...o, parallelGroups: o.parallelGroups.filter((g) => g.stepIndex !== stepIndex) };
+              }
+            } else {
+              existing.machineIndices.push(machineIndex);
+            }
+          } else {
+            o.parallelGroups.push({
+              stepIndex,
+              machineIndices: [machineIndex],
+              status: "hold",
+            });
+          }
+          return o;
+        }),
+      }));
+    },
+    [],
+  );
+
   const splitOrder = useCallback((orderId: string, quantities: number[]) => {
     setStore((s) => {
       const src = s.orders.find((o) => o.id === orderId);
