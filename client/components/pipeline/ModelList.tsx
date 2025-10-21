@@ -397,39 +397,6 @@ export default function ModelList(props: ModelListProps) {
                         </span>
                         <span>Qty: {o.quantity}</span>
                       </div>
-                      {i >= 0 &&
-                        i < o.steps.length &&
-                        (() => {
-                          const parallelGroup = (o.parallelGroups || []).find(
-                            (g) => g.stepIndex === i,
-                          );
-                          const selectedIndices =
-                            parallelGroup?.machineIndices || [];
-                          if (selectedIndices.length > 0) {
-                            const primaryMachine =
-                              step.kind === "machine" ? step.machineType : "Job Work";
-                            const selectedMachines = selectedIndices
-                              .map((idx) => machineTypes[idx]?.name)
-                              .filter((name) => !!name && name !== primaryMachine);
-                            if (selectedMachines.length === 0) return null;
-                            return (
-                              <div className="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700">
-                                <div className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                                  Also running in:
-                                </div>
-                                {selectedMachines.map((machine, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="text-xs text-blue-600 dark:text-blue-400"
-                                  >
-                                    • {machine}
-                                  </div>
-                                ))}
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
                       <div className="flex flex-wrap items-center gap-1 mt-2">
                         {getPathLetterPills(o, (orderId, stepIdx) => {
                           const stepAtIdx = o.steps[stepIdx];
@@ -464,6 +431,27 @@ export default function ModelList(props: ModelListProps) {
                                         : "Job Work"}
                                 </span>
                               </div>
+
+                              {(() => {
+                                const parallelGroup = (o.parallelGroups || []).find(
+                                  (g) => g.stepIndex === i,
+                                );
+                                const selectedIndices = parallelGroup?.machineIndices || [];
+                                const primaryMachine = step.kind === "machine" ? step.machineType : "Job Work";
+                                const selectedMachines = selectedIndices
+                                  .map((idx) => machineTypes[idx]?.name)
+                                  .filter((name) => !!name && name !== primaryMachine);
+                                if (selectedMachines.length === 0) return null;
+                                return (
+                                  <div className="text-sm text-right">
+                                    {selectedMachines.map((m, idx) => (
+                                      <div key={idx} className="font-medium text-gray-900 dark:text-gray-100">
+                                        {m}
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              })()}
 
                               <button onClick={() => toggleCardStatus(o)}>
                                 <Badge
