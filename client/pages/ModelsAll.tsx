@@ -89,6 +89,11 @@ export default function ModelsAll() {
           setOrderJobWorks={pipeline.setOrderJobWorks}
           showDetails={showDetails}
         />
+        <Button asChild size="icon" className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg z-50">
+          <Link to="/models/new" aria-label="New Model">
+            <Plus className="h-6 w-6" />
+          </Link>
+        </Button>
       </div>
     </div>
   );
