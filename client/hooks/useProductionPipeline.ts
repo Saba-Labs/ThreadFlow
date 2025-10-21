@@ -213,7 +213,18 @@ export function useProductionPipeline() {
             activeMachines: 0,
           };
         }
-        return { ...o, steps, currentStepIndex: Math.max(0, target) };
+
+        // Move parallel groups to previous step
+        const parallelGroups = (o.parallelGroups || [])
+          .map((g) => {
+            if (g.stepIndex === idx) {
+              return { ...g, stepIndex: target, status: "hold" };
+            }
+            return g;
+          })
+          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
+
+        return { ...o, steps, currentStepIndex: Math.max(0, target), parallelGroups };
       }),
     }));
   }, []);
