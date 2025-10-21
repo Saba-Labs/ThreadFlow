@@ -319,6 +319,7 @@ export function useProductionPipeline() {
     moveToPrevStep,
     setCurrentStep,
     splitOrder,
+    toggleParallelMachine,
     board,
     progressOf,
   };
