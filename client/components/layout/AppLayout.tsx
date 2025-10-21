@@ -211,12 +211,6 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      {/* Mobile floating action button */}
-      <div className="fixed bottom-4 right-4 sm:hidden">
-        <Button asChild size="sm">
-          <Link to={location.pathname + "#new-model"}>New Model</Link>
-        </Button>
-      </div>
     </div>
   );
 }
