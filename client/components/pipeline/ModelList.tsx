@@ -52,6 +52,7 @@ export default function ModelList(props: ModelListProps) {
   const jobWorks = useJobWorks();
   const [jwForId, setJwForId] = useState<string | null>(null);
   const [jwSelected, setJwSelected] = useState<string[]>([]);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const sorted = useMemo(
     () => props.orders.slice().sort((a, b) => b.createdAt - a.createdAt),
