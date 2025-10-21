@@ -58,6 +58,7 @@ export default function ModelsAll() {
               <SelectItem value="hold">Hold</SelectItem>
               <SelectItem value="running">Running</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="job">Job Work</SelectItem>
             </SelectContent>
           </Select>
           <Button asChild>
