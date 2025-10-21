@@ -15,10 +15,13 @@ export default function AppLayout() {
           <Link to="/" className="flex items-center gap-2 font-semibold">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary" aria-hidden>
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <circle cx="12" cy="12" r="4" />
-                <path d="M8 7l8-3" />
-                <path d="M8 17l8 3" />
-                <path d="M12 8v8" />
+                <rect x="7" y="6" width="10" height="12" rx="2" />
+                <path d="M7 9h10" />
+                <path d="M7 15h10" />
+                <path d="M9 8c1 1 3 1 5 0" />
+                <path d="M9 16c1-1 3-1 5 0" />
+                <path d="M4 4c3 2 5 3 8 3s5-1 8-3" strokeDasharray="2 2" />
+                <path d="M20 2l1 2-2-1z" fill="currentColor" stroke="none" />
               </svg>
             </span>
             <span className="tracking-tight">ThreadFlow</span>
