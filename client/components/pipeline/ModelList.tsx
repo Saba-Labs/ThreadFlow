@@ -84,7 +84,7 @@ export default function ModelList(props: ModelListProps) {
     // start shrink animation on the parent
     setSplitting({ parentId: splitForId, count: resultCount });
 
-    const SHRINK_MS = 420;
+    const SHRINK_MS = 900; // longer shrink to be more visible
     setTimeout(() => {
       // perform actual split which updates the orders list
       props.onSplit(splitForId!, validQuantities);
@@ -98,7 +98,8 @@ export default function ModelList(props: ModelListProps) {
 
       // clear splitting marker, keep target anim for a bit
       setSplitting(null);
-      setTimeout(() => setSplitAnim(null), 1200);
+      // keep target animation visible for longer
+      setTimeout(() => setSplitAnim(null), 2400);
     }, SHRINK_MS);
   };
 
