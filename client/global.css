@@ -113,27 +113,48 @@
 
   /* Split animations */
   @keyframes split-source-anim {
-    0% { transform: none; opacity: 1; }
-    40% { transform: translateY(-10px) scale(0.85); opacity: 0.95; }
-    100% { transform: translateY(-28px) scale(0.5); opacity: 0.6; }
+    0% {
+      transform: none;
+      opacity: 1;
+    }
+    40% {
+      transform: translateY(-10px) scale(0.85);
+      opacity: 0.95;
+    }
+    100% {
+      transform: translateY(-28px) scale(0.5);
+      opacity: 0.6;
+    }
   }
   @keyframes split-target-anim {
     /* start from the same final transform as the source (shrunk) */
-    0% { transform: translateY(-28px) scale(0.5); opacity: 0; }
-    40% { transform: translateY(-6px) scale(0.85); opacity: 0.6; }
-    80% { transform: translateY(2px) scale(1.02); opacity: 0.95; }
-    100% { transform: none; opacity: 1; }
+    0% {
+      transform: translateY(-28px) scale(0.5);
+      opacity: 0;
+    }
+    40% {
+      transform: translateY(-6px) scale(0.85);
+      opacity: 0.6;
+    }
+    80% {
+      transform: translateY(2px) scale(1.02);
+      opacity: 0.95;
+    }
+    100% {
+      transform: none;
+      opacity: 1;
+    }
   }
 
   .split-source {
-    animation: split-source-anim 2200ms cubic-bezier(.2,.8,.2,1) forwards;
+    animation: split-source-anim 2200ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     transform-origin: center;
   }
   .split-source > * {
     transform-origin: center;
   }
   .split-target {
-    animation: split-target-anim 3600ms cubic-bezier(.2,.9,.3,1) forwards;
+    animation: split-target-anim 3600ms cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
     box-shadow: 0 10px 38px rgba(16, 185, 129, 0.16);
   }
 }

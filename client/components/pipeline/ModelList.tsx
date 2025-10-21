@@ -66,8 +66,10 @@ export default function ModelList(props: ModelListProps) {
     ? sorted.find((o) => o.id === splitForId) || null
     : null;
 
-  const [splitAnim, setSplitAnim] = useState<{ parentId: string; at: number } | null>(null);
-
+  const [splitAnim, setSplitAnim] = useState<{
+    parentId: string;
+    at: number;
+  } | null>(null);
 
   const handleSplit = () => {
     if (!splitForId) return;
@@ -83,10 +85,12 @@ export default function ModelList(props: ModelListProps) {
     setSplitInputs([0]);
 
     // FLIP with WAAPI: measure before
-    const elsBefore = Array.from(document.querySelectorAll<HTMLElement>("[data-order-id]")) as HTMLElement[];
+    const elsBefore = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-order-id]"),
+    ) as HTMLElement[];
     const rectsBefore = new Map<string, DOMRect>();
     elsBefore.forEach((el) => {
-      const id = el.getAttribute('data-order-id');
+      const id = el.getAttribute("data-order-id");
       if (id) rectsBefore.set(id, el.getBoundingClientRect());
     });
 
@@ -97,11 +101,13 @@ export default function ModelList(props: ModelListProps) {
 
     // next paint: measure after and animate using WAAPI
     requestAnimationFrame(() => {
-      const elsAfter = Array.from(document.querySelectorAll<HTMLElement>('[data-order-id]')) as HTMLElement[];
+      const elsAfter = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-order-id]"),
+      ) as HTMLElement[];
       // build a map of id -> all elements after
       const elsAfterById = new Map<string, HTMLElement[]>();
       elsAfter.forEach((el) => {
-        const id = el.getAttribute('data-order-id');
+        const id = el.getAttribute("data-order-id");
         if (!id) return;
         const arr = elsAfterById.get(id) || [];
         arr.push(el);
@@ -109,20 +115,21 @@ export default function ModelList(props: ModelListProps) {
       });
 
       const DURATION = 3000;
-      const EASING = 'cubic-bezier(.2,.9,.3,1)';
+      const EASING = "cubic-bezier(.2,.9,.3,1)";
 
       const animations: Animation[] = [];
 
       // Only animate elements belonging to the affected parentId (parent row + its new children)
       const elsToAnimate = elsAfter.filter((el) => {
-        const id = el.getAttribute('data-order-id');
-        const p = el.getAttribute('data-parent-id');
+        const id = el.getAttribute("data-order-id");
+        const p = el.getAttribute("data-parent-id");
         return id === parentId || p === parentId;
       });
 
       elsToAnimate.forEach((el) => {
-        const id = el.getAttribute('data-order-id')!;
-        const beforeRect = rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
+        const id = el.getAttribute("data-order-id")!;
+        const beforeRect =
+          rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
         if (!beforeRect) return;
         const afterRect = el.getBoundingClientRect();
 
@@ -135,13 +142,13 @@ export default function ModelList(props: ModelListProps) {
           transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
           opacity: 0.85,
         };
-        const to = { transform: 'none', opacity: 1 };
+        const to = { transform: "none", opacity: 1 };
 
         try {
           const anim = el.animate([from, to], {
             duration: DURATION,
             easing: EASING,
-            fill: 'both',
+            fill: "both",
           });
           animations.push(anim);
         } catch (e) {
@@ -149,8 +156,8 @@ export default function ModelList(props: ModelListProps) {
           el.style.transform = from.transform;
           el.style.opacity = String(from.opacity);
           requestAnimationFrame(() => {
-            el.style.transform = '';
-            el.style.opacity = '';
+            el.style.transform = "";
+            el.style.opacity = "";
           });
         }
       });
@@ -159,18 +166,18 @@ export default function ModelList(props: ModelListProps) {
       if (animations.length > 0) {
         Promise.all(animations.map((a) => a.finished)).then(() => {
           elsToAnimate.forEach((el) => {
-            el.style.transition = '';
-            el.style.transform = '';
-            el.style.opacity = '';
+            el.style.transition = "";
+            el.style.transform = "";
+            el.style.opacity = "";
           });
         });
       } else {
         // fallback cleanup after duration
         setTimeout(() => {
           elsToAnimate.forEach((el) => {
-            el.style.transition = '';
-            el.style.transform = '';
-            el.style.opacity = '';
+            el.style.transition = "";
+            el.style.transform = "";
+            el.style.opacity = "";
           });
         }, DURATION + 100);
       }
@@ -1029,7 +1036,9 @@ export default function ModelList(props: ModelListProps) {
                     </Button>
                   );
                 })}
-                <div className="ml-2 text-sm text-muted-foreground">Or enter manually</div>
+                <div className="ml-2 text-sm text-muted-foreground">
+                  Or enter manually
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -1104,7 +1113,10 @@ export default function ModelList(props: ModelListProps) {
             title="Confirm delete"
             footer={
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteConfirmId(null)}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -1121,7 +1133,8 @@ export default function ModelList(props: ModelListProps) {
           >
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Are you sure you want to delete this model? This action cannot be undone.
+                Are you sure you want to delete this model? This action cannot
+                be undone.
               </p>
             </div>
           </SimpleModal>

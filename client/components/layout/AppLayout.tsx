@@ -15,11 +15,11 @@ export default function AppLayout() {
       setCanInstall(!!(window as any).deferredPrompt);
     };
     checkPrompt();
-    window.addEventListener('pwa-beforeinstallprompt', checkPrompt);
-    window.addEventListener('pwa-appinstalled', checkPrompt);
+    window.addEventListener("pwa-beforeinstallprompt", checkPrompt);
+    window.addEventListener("pwa-appinstalled", checkPrompt);
     return () => {
-      window.removeEventListener('pwa-beforeinstallprompt', checkPrompt);
-      window.removeEventListener('pwa-appinstalled', checkPrompt);
+      window.removeEventListener("pwa-beforeinstallprompt", checkPrompt);
+      window.removeEventListener("pwa-appinstalled", checkPrompt);
     };
   }, []);
 
@@ -32,9 +32,9 @@ export default function AppLayout() {
       // hide the prompt after user choice
       (window as any).deferredPrompt = null;
       setCanInstall(false);
-      console.log('PWA install choice', choice);
+      console.log("PWA install choice", choice);
     } catch (err) {
-      console.warn('Install prompt failed', err);
+      console.warn("Install prompt failed", err);
     }
   };
 
@@ -122,7 +122,9 @@ export default function AppLayout() {
             {/* Install button (shows when PWA install available) */}
             {canInstall && (
               <div className="hidden sm:block mr-2">
-                <Button onClick={handleInstallClick} size="sm">Install</Button>
+                <Button onClick={handleInstallClick} size="sm">
+                  Install
+                </Button>
               </div>
             )}
 
