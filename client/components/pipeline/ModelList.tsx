@@ -494,32 +494,39 @@ export default function ModelList(props: ModelListProps) {
                         </button>
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                        <span className="inline-flex items-center gap-1">
-                          <CalendarDays className="h-3.5 w-3.5" />{" "}
-                          {formatDate(o.createdAt)}
-                        </span>
-                        <span>Qty: {o.quantity}</span>
+                        {showDetails ? (
+                          <>
+                            <span className="inline-flex items-center gap-1">
+                              <CalendarDays className="h-3.5 w-3.5" /> {formatDate(o.createdAt)}
+                            </span>
+                            <span>Qty: {o.quantity}</span>
+                          </>
+                        ) : (
+                          <span>Qty: {o.quantity}</span>
+                        )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-1 mt-2">
-                        {getPathLetterPills(o, (orderId, stepIdx) => {
-                          const stepAtIdx = o.steps[stepIdx];
-                          if (
-                            stepAtIdx.kind === "machine" &&
-                            stepAtIdx.machineType
-                          ) {
-                            const machineIndex = machineTypes.findIndex(
-                              (m) => m.name === stepAtIdx.machineType,
-                            );
-                            if (machineIndex >= 0) {
-                              props.onToggleParallelMachine(
-                                orderId,
-                                o.currentStepIndex,
-                                machineIndex,
+                      {showDetails && (
+                        <div className="flex flex-wrap items-center gap-1 mt-2">
+                          {getPathLetterPills(o, (orderId, stepIdx) => {
+                            const stepAtIdx = o.steps[stepIdx];
+                            if (
+                              stepAtIdx.kind === "machine" &&
+                              stepAtIdx.machineType
+                            ) {
+                              const machineIndex = machineTypes.findIndex(
+                                (m) => m.name === stepAtIdx.machineType,
                               );
+                              if (machineIndex >= 0) {
+                                props.onToggleParallelMachine(
+                                  orderId,
+                                  o.currentStepIndex,
+                                  machineIndex,
+                                );
+                              }
                             }
-                          }
-                        })}
-                      </div>
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
