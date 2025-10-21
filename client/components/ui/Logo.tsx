@@ -3,21 +3,23 @@ import React from "react";
 export default function Logo({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 24 24"
-      className={className || "h-5 w-5"}
+      viewBox="0 0 48 48"
+      className={className || "h-6 w-6"}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden
     >
-      {/* Minimal TF monogram: shared vertical stem, T top bar, F arms to the right */}
-      <g stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-        {/* Top bar for T (spans left and right) */}
-        <path d="M3.5 5.5h17" />
+      {/* Modern TF monogram: left T, right F sharing a vertical stem, geometric and balanced */}
+      <g fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+        {/* Top bar of T */}
+        <path d="M8 10 H30" />
         {/* Shared vertical stem */}
-        <path d="M11.75 5.5v13" />
-        {/* F arms to the right */}
-        <path d="M11.75 9.5h6.5" />
-        <path d="M11.75 13.5h5" />
+        <path d="M19 10 V38" />
+        {/* F arms on the right side */}
+        <path d="M19 18 H36" />
+        <path d="M19 26 H32" />
+        {/* Subtle diagonal cut to make it unique */}
+        <path d="M12 33 L22 25" strokeWidth={1.6} />
       </g>
     </svg>
   );
