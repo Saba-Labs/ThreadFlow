@@ -205,9 +205,8 @@ export default function ModelList(props: ModelListProps) {
                         <td className="p-3">
                           <div className="flex flex-wrap items-center gap-1">
                             {getPathLetterPills(o, (orderId, stepIdx) => {
-                              const machineTypeConfig = machineTypes[stepIdx];
                               const currentStep = o.steps[stepIdx];
-                              if (currentStep.kind === "machine" && machineTypeConfig) {
+                              if (currentStep.kind === "machine" && currentStep.machineType) {
                                 const machineIndex = machineTypes.findIndex(m => m.name === currentStep.machineType);
                                 if (machineIndex >= 0) {
                                   props.onToggleParallelMachine(orderId, stepIdx, machineIndex);
