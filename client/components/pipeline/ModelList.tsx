@@ -341,14 +341,20 @@ export default function ModelList(props: ModelListProps) {
                                       {cap(displayStatus)}
                                     </Badge>
                                   </button>
-                                  {(((o as any).jobWorkIds || []).length > 0) && (
+                                  {((o as any).jobWorkIds || []).length > 0 && (
                                     <div className="mt-1">
                                       {jobWorks
                                         .filter((j) =>
-                                          (((o as any).jobWorkIds || []) as string[]).includes(j.id),
+                                          (
+                                            ((o as any).jobWorkIds ||
+                                              []) as string[]
+                                          ).includes(j.id),
                                         )
                                         .map((j) => (
-                                          <div key={j.id} className="text-sm text-muted-foreground">
+                                          <div
+                                            key={j.id}
+                                            className="text-sm text-muted-foreground"
+                                          >
                                             {j.name}
                                           </div>
                                         ))}
@@ -372,7 +378,11 @@ export default function ModelList(props: ModelListProps) {
                             </Button>
                             <Button
                               size="icon"
-                              variant={(((o as any).jobWorkIds || []).length > 0) ? "default" : "ghost"}
+                              variant={
+                                ((o as any).jobWorkIds || []).length > 0
+                                  ? "default"
+                                  : "ghost"
+                              }
                               onClick={() => {
                                 setJwForId(o.id);
                                 setJwSelected(
@@ -557,14 +567,20 @@ export default function ModelList(props: ModelListProps) {
                                     {cap(displayStatus)}
                                   </Badge>
                                 </button>
-                                {(((o as any).jobWorkIds || []).length > 0) && (
+                                {((o as any).jobWorkIds || []).length > 0 && (
                                   <div className="mt-1 text-right">
                                     {jobWorks
                                       .filter((j) =>
-                                        (((o as any).jobWorkIds || []) as string[]).includes(j.id),
+                                        (
+                                          ((o as any).jobWorkIds ||
+                                            []) as string[]
+                                        ).includes(j.id),
                                       )
                                       .map((j) => (
-                                        <div key={j.id} className="text-sm text-muted-foreground">
+                                        <div
+                                          key={j.id}
+                                          className="text-sm text-muted-foreground"
+                                        >
                                           {j.name}
                                         </div>
                                       ))}
@@ -590,7 +606,11 @@ export default function ModelList(props: ModelListProps) {
                       </Button>
                       <Button
                         size="icon"
-                        variant={(((o as any).jobWorkIds || []).length > 0) ? "default" : "ghost"}
+                        variant={
+                          ((o as any).jobWorkIds || []).length > 0
+                            ? "default"
+                            : "ghost"
+                        }
                         onClick={() => {
                           setJwForId(o.id);
                           setJwSelected(

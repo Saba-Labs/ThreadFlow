@@ -66,7 +66,9 @@ export function subscribe(cb: () => void) {
   return () => subscribers.delete(cb);
 }
 
-export function getMachineTypeConfig(name: string): MachineTypeConfig | undefined {
+export function getMachineTypeConfig(
+  name: string,
+): MachineTypeConfig | undefined {
   return getMachineTypes().find((m) => m.name === name);
 }
 

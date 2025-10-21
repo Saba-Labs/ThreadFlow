@@ -70,10 +70,16 @@ export default function SettingsProductionPath() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/settings" aria-label="Back to settings" className="text-muted-foreground hover:text-foreground">
+          <Link
+            to="/settings"
+            aria-label="Back to settings"
+            className="text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">Production Path</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Production Path
+          </h1>
         </div>
       </div>
 

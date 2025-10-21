@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
-import { useJobWorks, getJobWorks, addJobWork, updateJobWork, deleteJobWork, type JobWork } from "@/lib/jobWorks";
+import {
+  useJobWorks,
+  getJobWorks,
+  addJobWork,
+  updateJobWork,
+  deleteJobWork,
+  type JobWork,
+} from "@/lib/jobWorks";
 import { Trash2, Save, Plus, Pencil } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 
@@ -68,7 +75,9 @@ export default function JobWork() {
     }));
     // reuse setJobWorks through update functions by replacing store
     // jobWorks lib exposes setJobWorks only internally here; to persist we update each
-    cleaned.forEach((j) => updateJobWork(j.id, { name: j.name, description: j.description }));
+    cleaned.forEach((j) =>
+      updateJobWork(j.id, { name: j.name, description: j.description }),
+    );
   };
 
   // helper: return unique model names that reference this job work id
@@ -76,7 +85,10 @@ export default function JobWork() {
     const orders = pipeline.orders || [];
     const set = new Set<string>();
     for (const o of orders) {
-      if ((o as any).jobWorkIds && ((o as any).jobWorkIds as string[]).includes(jwId)) {
+      if (
+        (o as any).jobWorkIds &&
+        ((o as any).jobWorkIds as string[]).includes(jwId)
+      ) {
         set.add(o.modelName);
       }
     }
@@ -93,56 +105,67 @@ export default function JobWork() {
       </div>
 
       {/* All Job Works list (card-style) */}
-    <div className="">
-      <div className="space-y-3">
-        {local.map((j) => {
-          const linked = linkedModelsFor(j.id);
-          return (
-            <div
-              key={j.id}
-              className="p-4 rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800 flex items-center justify-between"
-            >
-              <div className="flex-1">
-                <div className="font-medium text-gray-900 dark:text-gray-100">{j.name}</div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  {linked.length > 0 ? (
-                    linked.map((m) => (
-                      <div key={m} className="text-red-600 dark:text-red-400 font-medium">{m}</div>
-                    ))
-                  ) : (
-                    <div className="italic text-xs text-gray-400">No models linked</div>
-                  )}
+      <div className="">
+        <div className="space-y-3">
+          {local.map((j) => {
+            const linked = linkedModelsFor(j.id);
+            return (
+              <div
+                key={j.id}
+                className="p-4 rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800 flex items-center justify-between"
+              >
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {j.name}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {linked.length > 0 ? (
+                      linked.map((m) => (
+                        <div
+                          key={m}
+                          className="text-red-600 dark:text-red-400 font-medium"
+                        >
+                          {m}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="italic text-xs text-gray-400">
+                        No models linked
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 ml-4">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Edit"
+                    aria-label="Edit"
+                    onClick={() => openEdit(j)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleDelete(j.id)}
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
+            );
+          })}
 
-              <div className="flex items-center gap-2 ml-4">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  title="Edit"
-                  aria-label="Edit"
-                  onClick={() => openEdit(j)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleDelete(j.id)}
-                  title="Delete"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+          {local.length === 0 && (
+            <div className="p-6 text-sm text-muted-foreground">
+              No job works yet.
             </div>
-          );
-        })}
-
-        {local.length === 0 && (
-          <div className="p-6 text-sm text-muted-foreground">No job works yet.</div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
 
       {/* Floating Add Button */}
       <button
@@ -169,8 +192,16 @@ export default function JobWork() {
         }
       >
         <div className="space-y-3">
-          <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-          <Input placeholder="Description" value={desc} onChange={(e) => setDesc(e.target.value)} />
+          <Input
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Input
+            placeholder="Description"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+          />
         </div>
       </SimpleModal>
     </div>

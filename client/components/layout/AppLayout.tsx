@@ -14,7 +14,10 @@ export default function AppLayout() {
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
         <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
           <Link to="/" className="flex items-center gap-2 font-semibold">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary" aria-hidden>
+            <span
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary"
+              aria-hidden
+            >
               <Logo className="h-5 w-5" />
             </span>
             <span className="tracking-tight">ThreadFlow</span>
