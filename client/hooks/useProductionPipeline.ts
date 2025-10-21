@@ -163,32 +163,25 @@ export function useProductionPipeline() {
         if (o.currentStepIndex < 0) return o;
         const idx = o.currentStepIndex;
         const steps = o.steps.slice();
-        if (steps[idx])
-          steps[idx] = {
-            ...steps[idx],
-            status: "completed",
-            activeMachines: 0,
-          };
+
+        // Do NOT mark previous step as completed; keep it as hold
+        if (steps[idx]) {
+          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+        }
+
         const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+
+        // Set next step explicitly to hold
         if (nextIndex < steps.length && steps[nextIndex]) {
           steps[nextIndex] = {
             ...steps[nextIndex],
-            status:
-              steps[nextIndex].status === "completed" ? "completed" : "hold",
+            status: "hold",
+            activeMachines: 0,
           };
         }
 
-        // Move parallel groups to next step
-        const parallelGroups = (o.parallelGroups || [])
-          .map((g) => {
-            if (g.stepIndex === idx) {
-              return { ...g, stepIndex: nextIndex, status: "hold" };
-            }
-            return g;
-          })
-          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
-
-        return { ...o, steps, currentStepIndex: nextIndex, parallelGroups };
+        // Clear any parallel machine selections when moving steps
+        return { ...o, steps, currentStepIndex: nextIndex, parallelGroups: [] };
       }),
     }));
   }, []);
@@ -204,6 +197,13 @@ export function useProductionPipeline() {
         const steps = o.steps.slice();
         const idx = o.currentStepIndex;
         const target = idx >= steps.length ? steps.length - 1 : idx - 1;
+
+        // Ensure current step remains/sets to hold
+        if (idx >= 0 && steps[idx]) {
+          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+        }
+
+        // Set target step explicitly to hold
         if (target >= 0 && steps[target]) {
           steps[target] = {
             ...steps[target],
@@ -212,21 +212,12 @@ export function useProductionPipeline() {
           };
         }
 
-        // Move parallel groups to previous step
-        const parallelGroups = (o.parallelGroups || [])
-          .map((g) => {
-            if (g.stepIndex === idx) {
-              return { ...g, stepIndex: target, status: "hold" };
-            }
-            return g;
-          })
-          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
-
+        // Clear any parallel machine selections when moving steps
         return {
           ...o,
           steps,
           currentStepIndex: Math.max(0, target),
-          parallelGroups,
+          parallelGroups: [],
         };
       }),
     }));
@@ -247,33 +238,47 @@ export function useProductionPipeline() {
       setStore((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
-          const existing = o.parallelGroups.find(
-            (g) => g.stepIndex === stepIndex,
-          );
-          if (existing) {
-            if (existing.machineIndices.includes(machineIndex)) {
-              existing.machineIndices = existing.machineIndices.filter(
+
+          const groups = (o.parallelGroups || []).slice();
+          const idx = groups.findIndex((g) => g.stepIndex === stepIndex);
+
+          // If a group exists for this stepIndex, toggle the machineIndex immutably
+          if (idx >= 0) {
+            const existing = groups[idx];
+            const has = existing.machineIndices.includes(machineIndex);
+            if (has) {
+              const newIndices = existing.machineIndices.filter(
                 (m) => m !== machineIndex,
               );
-              if (existing.machineIndices.length === 0) {
+              if (newIndices.length === 0) {
+                // remove the group entirely
                 return {
                   ...o,
-                  parallelGroups: o.parallelGroups.filter(
-                    (g) => g.stepIndex !== stepIndex,
-                  ),
+                  parallelGroups: groups.filter((_, i) => i !== idx),
                 };
               }
+              const newGroup = { ...existing, machineIndices: newIndices };
+              const newGroups = groups.slice();
+              newGroups[idx] = newGroup;
+              return { ...o, parallelGroups: newGroups };
             } else {
-              existing.machineIndices.push(machineIndex);
+              const newGroup = {
+                ...existing,
+                machineIndices: [...existing.machineIndices, machineIndex],
+              };
+              const newGroups = groups.slice();
+              newGroups[idx] = newGroup;
+              return { ...o, parallelGroups: newGroups };
             }
-          } else {
-            o.parallelGroups.push({
-              stepIndex,
-              machineIndices: [machineIndex],
-              status: "hold",
-            });
           }
-          return o;
+
+          // otherwise add new group
+          const added = {
+            stepIndex,
+            machineIndices: [machineIndex],
+            status: "hold" as StepStatus,
+          };
+          return { ...o, parallelGroups: [...groups, added] };
         }),
       }));
     },
@@ -298,13 +303,20 @@ export function useProductionPipeline() {
         steps: src.steps.map((st) => ({
           ...st,
           id: uid("step"),
-          status: st.status === "completed" ? "completed" : "hold",
+          status:
+            st.status === "completed"
+              ? ("completed" as StepStatus)
+              : ("hold" as StepStatus),
           activeMachines: 0,
           quantityDone: 0,
         })),
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
-        parallelGroups: JSON.parse(JSON.stringify(src.parallelGroups)),
+        parallelGroups: (src.parallelGroups || []).map((g) => ({
+          stepIndex: g.stepIndex,
+          machineIndices: g.machineIndices.slice(),
+          status: g.status as StepStatus,
+        })),
       });
       const children = valid.map((q) => base(q));
       const remainderOrder = base(remainder);
@@ -354,6 +366,49 @@ export function useProductionPipeline() {
     setCurrentStep,
     splitOrder,
     toggleParallelMachine,
+    // update an existing order's basic properties (modelName, quantity, createdAt, path)
+    updateOrder: (
+      orderId: string,
+      data: {
+        modelName: string;
+        quantity: number;
+        createdAt: number;
+        path: (
+          | { kind: "machine"; machineType: string }
+          | { kind: "job"; externalUnitName: string }
+        )[];
+      },
+    ) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const newSteps = data.path.map((p) => ({
+            id: uid("step"),
+            kind: p.kind as "machine" | "job",
+            machineType:
+              p.kind === "machine" ? (p.machineType as string) : undefined,
+            externalUnitName:
+              p.kind === "job" ? (p.externalUnitName as string) : undefined,
+            status: "hold" as StepStatus,
+            activeMachines: 0,
+            quantityDone: 0,
+          }));
+          const newIndex = Math.max(
+            0,
+            Math.min(o.currentStepIndex, newSteps.length - 1),
+          );
+          return {
+            ...o,
+            modelName: data.modelName,
+            quantity: data.quantity,
+            createdAt: data.createdAt,
+            steps: newSteps,
+            currentStepIndex: newSteps.length === 0 ? -1 : newIndex,
+            parallelGroups: [],
+          };
+        }),
+      }));
+    },
     board,
     progressOf,
   };

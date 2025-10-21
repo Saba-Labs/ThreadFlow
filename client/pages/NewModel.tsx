@@ -10,6 +10,7 @@ export default function NewModel() {
         Use the form below to add a new work order.
       </p>
       <ModelForm
+        inline
         onCreate={(data) => {
           pipeline.createWorkOrder({
             modelName: data.modelName,

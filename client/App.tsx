@@ -14,6 +14,7 @@ import ModelsAll from "./pages/ModelsAll";
 import ModelsRunning from "./pages/ModelsRunning";
 import ModelsHold from "./pages/ModelsHold";
 import NewModel from "./pages/NewModel";
+import EditModel from "./pages/EditModel";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/models/running" element={<ModelsRunning />} />
             <Route path="/models/hold" element={<ModelsHold />} />
             <Route path="/models/new" element={<NewModel />} />
+            <Route path="/models/:id/edit" element={<EditModel />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { WorkOrder } from "@/hooks/useProductionPipeline";
+import type { MachineType } from "@/hooks/useProductionPipeline";
 import { useMachineTypes } from "@/lib/machineTypes";
 import {
   ChevronRight,
@@ -24,8 +26,12 @@ export default function MachineBoard(props: {
           className="rounded-lg border bg-gradient-to-br from-card/50 via-accent/5 to-background/50"
         >
           <header className="flex items-center justify-between border-b p-3 bg-gradient-to-r from-primary/5 to-accent/3">
-            <h3 className="text-sm font-semibold text-primary">{mtConfig.name}</h3>
-            <Badge variant="secondary">{props.data[mtConfig.name]?.length ?? 0}</Badge>
+            <h3 className="text-sm font-semibold text-primary">
+              {mtConfig.name}
+            </h3>
+            <Badge variant="secondary">
+              {props.data[mtConfig.name]?.length ?? 0}
+            </Badge>
           </header>
           <div className="divide-y">
             {(props.data[mtConfig.name] ?? []).map((o, idx) => (
