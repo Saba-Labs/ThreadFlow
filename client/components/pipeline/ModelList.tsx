@@ -48,7 +48,7 @@ export default function ModelList(props: ModelListProps) {
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
-  const [splitInputs, setSplitInputs] = useState<number[]>([0, 0]);
+  const [splitInputs, setSplitInputs] = useState<number[]>([0]);
   const jobWorks = useJobWorks();
   const [jwForId, setJwForId] = useState<string | null>(null);
   const [jwSelected, setJwSelected] = useState<string[]>([]);
@@ -73,7 +73,7 @@ export default function ModelList(props: ModelListProps) {
     if (validQuantities.length === 0) return;
     props.onSplit(splitForId, validQuantities);
     setSplitForId(null);
-    setSplitInputs([0, 0]);
+    setSplitInputs([0]);
   };
 
   const handleRemoveBatch = (index: number) => {
@@ -441,7 +441,7 @@ export default function ModelList(props: ModelListProps) {
                                 variant="ghost"
                                 onClick={() => {
                                   setSplitForId(o.id);
-                                  setSplitInputs([0, 0]);
+                                  setSplitInputs([0]);
                                 }}
                                 title="Split into batches"
                                 aria-label="Split into batches"
@@ -686,7 +686,7 @@ export default function ModelList(props: ModelListProps) {
                           variant="ghost"
                           onClick={() => {
                             setSplitForId(o.id);
-                            setSplitInputs([0, 0]);
+                            setSplitInputs([0]);
                           }}
                           title="Split into batches"
                           aria-label="Split into batches"
