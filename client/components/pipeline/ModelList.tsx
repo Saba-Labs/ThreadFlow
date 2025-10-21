@@ -305,7 +305,7 @@ export default function ModelList(props: ModelListProps) {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => setEditingId(o.id)}
+                              onClick={() => navigate(`/models/${o.id}/edit`)}
                               title="Details"
                               aria-label="Details"
                             >
