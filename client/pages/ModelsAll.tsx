@@ -36,6 +36,7 @@ export default function ModelsAll() {
           onEditPath={pipeline.editPath}
           onSplit={pipeline.splitOrder}
           onSetStepStatus={(id, idx, status) => pipeline.updateStepStatus(id, idx, { status })}
+          onToggleParallelMachine={pipeline.toggleParallelMachine}
         />
       </div>
     </div>
