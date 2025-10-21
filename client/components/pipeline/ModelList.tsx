@@ -525,6 +525,8 @@ export default function ModelList(props: ModelListProps) {
               return (
                 <div
                   key={o.id}
+                  data-order-id={o.id}
+                  data-parent-id={o.parentId ?? ""}
                   className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"} ${
                     splitting && splitting.parentId === o.id
                       ? "split-source"
