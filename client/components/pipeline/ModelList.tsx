@@ -79,7 +79,7 @@ export default function ModelList(props: ModelListProps) {
       const letter = config?.letter || machineType?.charAt(0).toUpperCase() || "?";
       const isCurrent = idx === o.currentStepIndex;
       const isCompleted = step.status === "completed";
-      const parallelGroup = o.parallelGroups.find((g) => g.stepIndex === idx);
+      const parallelGroup = (o.parallelGroups || []).find((g) => g.stepIndex === idx);
       const isInParallelGroup = parallelGroup && parallelGroup.machineIndices.length > 0;
 
       let variantClass = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
