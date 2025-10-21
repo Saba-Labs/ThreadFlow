@@ -179,7 +179,18 @@ export function useProductionPipeline() {
             status: steps[nextIndex].status === "completed" ? "completed" : "hold",
           };
         }
-        return { ...o, steps, currentStepIndex: nextIndex };
+
+        // Move parallel groups to next step
+        const parallelGroups = (o.parallelGroups || [])
+          .map((g) => {
+            if (g.stepIndex === idx) {
+              return { ...g, stepIndex: nextIndex, status: "hold" };
+            }
+            return g;
+          })
+          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
+
+        return { ...o, steps, currentStepIndex: nextIndex, parallelGroups };
       }),
     }));
   }, []);
