@@ -97,6 +97,7 @@ export default function ModelsAll() {
           }
           onToggleParallelMachine={pipeline.toggleParallelMachine}
           setOrderJobWorks={pipeline.setOrderJobWorks}
+          showDetails={showDetails}
         />
       </div>
     </div>
