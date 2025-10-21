@@ -95,15 +95,17 @@ export default function ModelList(props: ModelListProps) {
         variantClass = "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
       }
 
+      const isClickable = isCurrent && !isCompleted;
+
       return (
         <span
           key={step.id}
           className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${variantClass} ${
-            isCurrent ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
+            isClickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
           }`}
-          title={`${machineType}${isCurrent ? " (current - click to select parallel)" : ""}`}
+          title={`${machineType}${isClickable ? " (click to select parallel machines)" : ""}`}
           onClick={() => {
-            if (isCurrent && onPillClick) onPillClick(idx);
+            if (isClickable && onPillClick) onPillClick(idx);
           }}
         >
           {letter}
