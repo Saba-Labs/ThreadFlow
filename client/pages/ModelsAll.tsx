@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect, useState, useMemo } from "react";
 import { Eye, EyeOff, Plus } from "lucide-react";
 
 export default function ModelsAll() {
@@ -40,6 +41,26 @@ export default function ModelsAll() {
   }, [pipeline.orders, filter]);
 
   const [showDetails, setShowDetails] = useState(false);
+
+  // Persist showDetails across navigation using localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("modelsAll.showDetails");
+      if (stored !== null) {
+        setShowDetails(stored === "true");
+      }
+    } catch (e) {
+      // ignore (e.g., SSR or privacy settings)
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("modelsAll.showDetails", showDetails ? "true" : "false");
+    } catch (e) {
+      // ignore
+    }
+  }, [showDetails]);
 
   return (
     <div className="space-y-6">
