@@ -256,8 +256,11 @@ export default function ModelList(props: ModelListProps) {
                             onClick={() => navigate(`/models/${o.id}/edit`)}
                             className="text-left w-full truncate"
                           >
-                            {o.modelName} {!showDetails && (
-                              <span className="text-muted-foreground">({o.quantity})</span>
+                            {o.modelName}{" "}
+                            {!showDetails && (
+                              <span className="text-muted-foreground">
+                                ({o.quantity})
+                              </span>
                             )}
                           </button>
                         </td>
@@ -360,7 +363,8 @@ export default function ModelList(props: ModelListProps) {
                                         {cap(displayStatus)}
                                       </Badge>
                                     </button>
-                                    {((o as any).jobWorkIds || []).length > 0 && (
+                                    {((o as any).jobWorkIds || []).length >
+                                      0 && (
                                       <div className="mt-1">
                                         {jobWorks
                                           .filter((j) =>
@@ -396,7 +400,7 @@ export default function ModelList(props: ModelListProps) {
                                 aria-label="Details"
                               >
                                 <Pencil className="h-4 w-4" />
-                                </Button>
+                              </Button>
                               <Button
                                 size="icon"
                                 variant={
@@ -492,8 +496,11 @@ export default function ModelList(props: ModelListProps) {
                           onClick={() => navigate(`/models/${o.id}/edit`)}
                           className="text-left w-full truncate"
                         >
-                          {o.modelName} {!showDetails && (
-                            <span className="text-muted-foreground">({o.quantity})</span>
+                          {o.modelName}{" "}
+                          {!showDetails && (
+                            <span className="text-muted-foreground">
+                              ({o.quantity})
+                            </span>
                           )}
                         </button>
                       </h3>
@@ -501,7 +508,8 @@ export default function ModelList(props: ModelListProps) {
                         {showDetails && (
                           <>
                             <span className="inline-flex items-center gap-1">
-                              <CalendarDays className="h-3.5 w-3.5" /> {formatDate(o.createdAt)}
+                              <CalendarDays className="h-3.5 w-3.5" />{" "}
+                              {formatDate(o.createdAt)}
                             </span>
                             <span>Qty: {o.quantity}</span>
                           </>

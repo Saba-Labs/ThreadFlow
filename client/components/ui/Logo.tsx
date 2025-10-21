@@ -10,7 +10,13 @@ export default function Logo({ className }: { className?: string }) {
       aria-label="ThreadFlow icon"
       role="img"
     >
-      <g fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         {/* Top bar of the T */}
         <path d="M10 16 H54" />
         {/* Angled stem connecting T to F */}
