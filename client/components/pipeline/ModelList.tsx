@@ -79,7 +79,13 @@ export default function ModelList(props: ModelListProps) {
     setSplitInputs((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
+  const formatDate = (ts: number) => {
+    const d = new Date(ts);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(d.getFullYear());
+    return `${dd}/${mm}/${yyyy}`;
+  };
   const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
   const getPathLetterPills = (
