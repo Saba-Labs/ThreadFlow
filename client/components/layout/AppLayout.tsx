@@ -14,11 +14,7 @@ export default function AppLayout() {
         <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
           <Link to="/" className="flex items-center gap-2 font-semibold">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary" aria-hidden>
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <path d="M12 3c-3 0-5 2-5 4 0 2 2 4 5 4s5-2 5-4c0-2-2-4-5-4z" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <path d="M8 14c1.5-1.5 6.5-1.5 8 0" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
-                <path d="M12 9v8" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
-              </svg>
+              <Logo className="h-5 w-5" />
             </span>
             <span className="tracking-tight">ThreadFlow</span>
           </Link>
