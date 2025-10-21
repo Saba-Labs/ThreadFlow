@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import {
@@ -40,6 +41,7 @@ interface ModelListProps {
 
 export default function ModelList(props: ModelListProps) {
   const machineTypes = useMachineTypes();
+  const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0, 0]);
