@@ -44,9 +44,7 @@ export function addJobWork(input: { name: string; description: string }) {
 }
 
 export function updateJobWork(id: string, patch: Partial<JobWork>) {
-  setJobWorks(
-    STORE.map((j) => (j.id === id ? { ...j, ...patch } : j)),
-  );
+  setJobWorks(STORE.map((j) => (j.id === id ? { ...j, ...patch } : j)));
 }
 
 export function deleteJobWork(id: string) {

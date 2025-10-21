@@ -14,10 +14,14 @@ import {
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
-  const [filter, setFilter] = useState<"all" | "hold" | "running" | "completed">("all");
+  const [filter, setFilter] = useState<
+    "all" | "hold" | "running" | "completed"
+  >("all");
 
   const filtered = useMemo(() => {
-    const statusOf = (o: (typeof pipeline.orders)[number]): "hold" | "running" | "completed" => {
+    const statusOf = (
+      o: (typeof pipeline.orders)[number],
+    ): "hold" | "running" | "completed" => {
       if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) {
         return "completed";
       }

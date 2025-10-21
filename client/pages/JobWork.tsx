@@ -49,31 +49,74 @@ export default function JobWork() {
 
       <div className="rounded-lg border bg-white p-4 space-y-3">
         <div className="grid gap-2 sm:grid-cols-2">
-          <Input placeholder="Name" value={newName} onChange={(e) => setNewName(e.target.value)} />
-          <Input placeholder="Description" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
+          <Input
+            placeholder="Name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+          <Input
+            placeholder="Description"
+            value={newDesc}
+            onChange={(e) => setNewDesc(e.target.value)}
+          />
         </div>
         <div className="flex justify-end">
-          <Button onClick={add}><Plus className="h-4 w-4 mr-2"/>Add</Button>
+          <Button onClick={add}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add
+          </Button>
         </div>
       </div>
 
       <div className="rounded-lg border bg-white">
         <div className="flex items-center justify-between p-3 border-b">
           <div className="font-medium">All Job Works</div>
-          <Button variant="outline" size="sm" onClick={saveAll}><Save className="h-4 w-4 mr-2"/>Save</Button>
+          <Button variant="outline" size="sm" onClick={saveAll}>
+            <Save className="h-4 w-4 mr-2" />
+            Save
+          </Button>
         </div>
         <div className="divide-y">
           {local.map((j) => (
             <div key={j.id} className="p-3 flex items-center gap-2">
               <div className="flex-1 grid gap-2 sm:grid-cols-2">
-                <Input value={j.name} onChange={(e) => setLocal((s)=> s.map((x)=> x.id===j.id? { ...x, name: e.target.value}: x))} />
-                <Input value={j.description} onChange={(e) => setLocal((s)=> s.map((x)=> x.id===j.id? { ...x, description: e.target.value}: x))} />
+                <Input
+                  value={j.name}
+                  onChange={(e) =>
+                    setLocal((s) =>
+                      s.map((x) =>
+                        x.id === j.id ? { ...x, name: e.target.value } : x,
+                      ),
+                    )
+                  }
+                />
+                <Input
+                  value={j.description}
+                  onChange={(e) =>
+                    setLocal((s) =>
+                      s.map((x) =>
+                        x.id === j.id
+                          ? { ...x, description: e.target.value }
+                          : x,
+                      ),
+                    )
+                  }
+                />
               </div>
-              <Button size="icon" variant="ghost" onClick={()=> deleteJobWork(j.id)} title="Delete"><Trash2 className="h-4 w-4"/></Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => deleteJobWork(j.id)}
+                title="Delete"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))}
           {local.length === 0 && (
-            <div className="p-6 text-sm text-muted-foreground">No job works yet.</div>
+            <div className="p-6 text-sm text-muted-foreground">
+              No job works yet.
+            </div>
           )}
         </div>
       </div>

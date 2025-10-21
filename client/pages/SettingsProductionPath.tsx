@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMachineTypes, getMachineTypes, setMachineTypes, type MachineTypeConfig } from "@/lib/machineTypes";
+import {
+  useMachineTypes,
+  getMachineTypes,
+  setMachineTypes,
+  type MachineTypeConfig,
+} from "@/lib/machineTypes";
 import { Trash2, Plus, GripVertical, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function SettingsProductionPath() {
   const types = useMachineTypes();
-  const [local, setLocal] = useState<MachineTypeConfig[]>(() => getMachineTypes());
+  const [local, setLocal] = useState<MachineTypeConfig[]>(() =>
+    getMachineTypes(),
+  );
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
 
   useEffect(() => {
@@ -27,7 +34,8 @@ export default function SettingsProductionPath() {
   };
 
   const add = () => setLocal((s) => [...s, { name: "New Step", letter: "N" }]);
-  const remove = (idx: number) => setLocal((s) => s.filter((_, i) => i !== idx));
+  const remove = (idx: number) =>
+    setLocal((s) => s.filter((_, i) => i !== idx));
 
   const handleDragStart = (idx: number) => {
     setDraggedIdx(idx);
@@ -62,13 +70,17 @@ export default function SettingsProductionPath() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Production Path</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Production Path
+          </h1>
           <p className="text-muted-foreground max-w-prose">
             Add, reorder or remove steps used in production paths.
           </p>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link to="/settings"><ArrowLeft className="h-4 w-4 mr-2" /> Back to Settings</Link>
+          <Link to="/settings">
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Settings
+          </Link>
         </Button>
       </div>
 
@@ -76,7 +88,9 @@ export default function SettingsProductionPath() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-lg font-medium">Steps</h2>
-            <p className="text-sm text-muted-foreground">Configure the machines and job work order.</p>
+            <p className="text-sm text-muted-foreground">
+              Configure the machines and job work order.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={add} size="sm">

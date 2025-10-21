@@ -28,7 +28,10 @@ const App = () => (
           <Route element={<AppLayout />}>
             <Route path="/" element={<Index />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/settings/production-path" element={<SettingsProductionPath />} />
+            <Route
+              path="/settings/production-path"
+              element={<SettingsProductionPath />}
+            />
             <Route path="/models/all" element={<ModelsAll />} />
             <Route path="/job-work" element={<JobWork />} />
             <Route path="/models/new" element={<NewModel />} />

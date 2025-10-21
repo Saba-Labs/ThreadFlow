@@ -182,7 +182,6 @@ export default function AppLayout() {
       <main className="container py-6">
         <Outlet />
       </main>
-
     </div>
   );
 }

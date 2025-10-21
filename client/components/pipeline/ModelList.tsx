@@ -168,7 +168,9 @@ export default function ModelList(props: ModelListProps) {
     if (st.status === "hold") return "bg-red-50 dark:bg-red-900/20";
     if (st.status === "running") {
       const hasJW = ((o as any).jobWorkIds || []).length > 0;
-      return hasJW ? "bg-yellow-50 dark:bg-yellow-900/20" : "bg-green-50 dark:bg-green-900/20";
+      return hasJW
+        ? "bg-yellow-50 dark:bg-yellow-900/20"
+        : "bg-green-50 dark:bg-green-900/20";
     }
     return "";
   };
@@ -352,7 +354,9 @@ export default function ModelList(props: ModelListProps) {
                               variant="ghost"
                               onClick={() => {
                                 setJwForId(o.id);
-                                setJwSelected(((o as any).jobWorkIds || []) as string[]);
+                                setJwSelected(
+                                  ((o as any).jobWorkIds || []) as string[],
+                                );
                               }}
                               title="Job Work"
                               aria-label="Job Work"
@@ -553,7 +557,9 @@ export default function ModelList(props: ModelListProps) {
                         variant="ghost"
                         onClick={() => {
                           setJwForId(o.id);
-                          setJwSelected(((o as any).jobWorkIds || []) as string[]);
+                          setJwSelected(
+                            ((o as any).jobWorkIds || []) as string[],
+                          );
                         }}
                         title="Job Work"
                         aria-label="Job Work"
@@ -622,24 +628,33 @@ export default function ModelList(props: ModelListProps) {
             title="Select Job Work"
             footer={
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setJwForId(null)}>Cancel</Button>
-                <Button onClick={() => {
-                  const o = sorted.find((x) => x.id === jwForId);
-                  if (o) {
-                    const idx = o.currentStepIndex;
-                    if (idx >= 0 && idx < o.steps.length) {
-                      props.onSetStepStatus(o.id, idx, "running");
+                <Button variant="outline" onClick={() => setJwForId(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    const o = sorted.find((x) => x.id === jwForId);
+                    if (o) {
+                      const idx = o.currentStepIndex;
+                      if (idx >= 0 && idx < o.steps.length) {
+                        props.onSetStepStatus(o.id, idx, "running");
+                      }
+                      props.setOrderJobWorks?.(o.id, jwSelected);
                     }
-                    props.setOrderJobWorks?.(o.id, jwSelected);
-                  }
-                  setJwForId(null);
-                }}>Save</Button>
+                    setJwForId(null);
+                  }}
+                >
+                  Save
+                </Button>
               </div>
             }
           >
             <div className="space-y-2">
               {jobWorks.map((j) => (
-                <label key={j.id} className="flex items-center gap-2 p-2 rounded hover:bg-muted/50 cursor-pointer">
+                <label
+                  key={j.id}
+                  className="flex items-center gap-2 p-2 rounded hover:bg-muted/50 cursor-pointer"
+                >
                   <Checkbox
                     id={`jw-${j.id}`}
                     checked={jwSelected.includes(j.id)}
@@ -655,13 +670,17 @@ export default function ModelList(props: ModelListProps) {
                   <div className="flex-1">
                     <div className="font-medium">{j.name}</div>
                     {j.description && (
-                      <div className="text-xs text-muted-foreground">{j.description}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {j.description}
+                      </div>
                     )}
                   </div>
                 </label>
               ))}
               {jobWorks.length === 0 && (
-                <div className="text-sm text-muted-foreground">No job works yet. Add them in Job Work.</div>
+                <div className="text-sm text-muted-foreground">
+                  No job works yet. Add them in Job Work.
+                </div>
               )}
             </div>
           </SimpleModal>

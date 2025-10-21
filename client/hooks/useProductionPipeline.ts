@@ -370,7 +370,9 @@ export function useProductionPipeline() {
     toggleParallelMachine,
     setOrderJobWorks: (orderId: string, ids: string[]) => {
       setStore((s) => ({
-        orders: s.orders.map((o) => (o.id === orderId ? { ...o, jobWorkIds: ids.slice() } : o)),
+        orders: s.orders.map((o) =>
+          o.id === orderId ? { ...o, jobWorkIds: ids.slice() } : o,
+        ),
       }));
     },
     // update an existing order's basic properties (modelName, quantity, createdAt, path)
