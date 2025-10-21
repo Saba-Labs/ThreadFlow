@@ -592,13 +592,7 @@ export default function ModelList(props: ModelListProps) {
                   key={o.id}
                   data-order-id={o.id}
                   data-parent-id={o.parentId ?? ""}
-                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"} ${
-                    splitting && splitting.parentId === o.id
-                      ? "split-source"
-                      : splitAnim && o.parentId === splitAnim.parentId && (o.createdAt || 0) >= (splitAnim.at - 5000)
-                        ? "split-target"
-                        : ""
-                  }`}
+                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
