@@ -579,41 +579,43 @@ export default function ModelList(props: ModelListProps) {
                                 );
                               })()}
 
-                              <>
-                                <button onClick={() => toggleCardStatus(o)}>
-                                  <Badge
-                                    variant={
-                                      displayStatus === "running"
-                                        ? "success"
-                                        : displayStatus === "hold"
-                                          ? "destructive"
-                                          : "secondary"
-                                    }
-                                    className="shrink-0 cursor-pointer"
-                                  >
-                                    {cap(displayStatus)}
-                                  </Badge>
-                                </button>
-                                {((o as any).jobWorkIds || []).length > 0 && (
-                                  <div className="mt-1 text-right">
-                                    {jobWorks
-                                      .filter((j) =>
-                                        (
-                                          ((o as any).jobWorkIds ||
-                                            []) as string[]
-                                        ).includes(j.id),
-                                      )
-                                      .map((j) => (
-                                        <div
-                                          key={j.id}
-                                          className="text-sm text-muted-foreground"
-                                        >
-                                          {j.name}
-                                        </div>
-                                      ))}
-                                  </div>
-                                )}
-                              </>
+                              {showDetails && (
+                                <>
+                                  <button onClick={() => toggleCardStatus(o)}>
+                                    <Badge
+                                      variant={
+                                        displayStatus === "running"
+                                          ? "success"
+                                          : displayStatus === "hold"
+                                            ? "destructive"
+                                            : "secondary"
+                                      }
+                                      className="shrink-0 cursor-pointer"
+                                    >
+                                      {cap(displayStatus)}
+                                    </Badge>
+                                  </button>
+                                  {((o as any).jobWorkIds || []).length > 0 && (
+                                    <div className="mt-1 text-right">
+                                      {jobWorks
+                                        .filter((j) =>
+                                          (
+                                            ((o as any).jobWorkIds ||
+                                              []) as string[]
+                                          ).includes(j.id),
+                                        )
+                                        .map((j) => (
+                                          <div
+                                            key={j.id}
+                                            className="text-sm text-muted-foreground"
+                                          >
+                                            {j.name}
+                                          </div>
+                                        ))}
+                                    </div>
+                                  )}
+                                </>
+                              )}
                             </>
                           );
                         })()}
