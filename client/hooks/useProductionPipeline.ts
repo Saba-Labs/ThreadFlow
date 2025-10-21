@@ -260,7 +260,7 @@ export function useProductionPipeline() {
           }
 
           // otherwise add new group
-          const added = { stepIndex, machineIndices: [machineIndex], status: "hold" };
+          const added = { stepIndex, machineIndices: [machineIndex], status: "hold" as StepStatus };
           return { ...o, parallelGroups: [...groups, added] };
         }),
       }));
@@ -286,13 +286,13 @@ export function useProductionPipeline() {
         steps: src.steps.map((st) => ({
           ...st,
           id: uid("step"),
-          status: st.status === "completed" ? "completed" : "hold",
+          status: st.status === "completed" ? ("completed" as StepStatus) : ("hold" as StepStatus),
           activeMachines: 0,
           quantityDone: 0,
         })),
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
-        parallelGroups: JSON.parse(JSON.stringify(src.parallelGroups)),
+        parallelGroups: (src.parallelGroups || []).map((g) => ({ stepIndex: g.stepIndex, machineIndices: g.machineIndices.slice(), status: g.status as StepStatus })),
       });
       const children = valid.map((q) => base(q));
       const remainderOrder = base(remainder);
@@ -349,10 +349,10 @@ export function useProductionPipeline() {
           if (o.id !== orderId) return o;
           const newSteps = data.path.map((p) => ({
             id: uid("step"),
-            kind: p.kind,
-            machineType: p.kind === "machine" ? p.machineType : undefined,
-            externalUnitName: p.kind === "job" ? p.externalUnitName : undefined,
-            status: "hold",
+            kind: p.kind as "machine" | "job",
+            machineType: p.kind === "machine" ? (p.machineType as string) : undefined,
+            externalUnitName: p.kind === "job" ? (p.externalUnitName as string) : undefined,
+            status: "hold" as StepStatus,
             activeMachines: 0,
             quantityDone: 0,
           }));
