@@ -124,7 +124,11 @@
   }
 
   .split-source {
-    animation: split-source-anim 700ms ease forwards;
+    animation: split-source-anim 420ms cubic-bezier(.2,.8,.2,1) forwards;
+    transform-origin: center;
+  }
+  .split-source > * {
+    transform-origin: center;
   }
   .split-target {
     animation: split-target-anim 700ms cubic-bezier(.2,.9,.3,1) forwards;
