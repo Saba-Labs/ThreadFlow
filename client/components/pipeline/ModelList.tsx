@@ -85,11 +85,15 @@ export default function ModelList(props: ModelListProps) {
     const parentId = splitForId!;
     setSplitting({ parentId, count: resultCount });
 
+    // ensure splitting class stays for the duration of the source animation
+    const SOURCE_ANIM_MS = 2200; // must match CSS duration
+    const SHRINK_MS = 1800; // time before performing split
+    const clearSplittingTimer = setTimeout(() => setSplitting(null), SOURCE_ANIM_MS);
+
     // close the modal immediately so user can continue
     setSplitForId(null);
     setSplitInputs([0]);
 
-    const SHRINK_MS = 1800; // slow visible shrink
     setTimeout(() => {
       // perform actual split which updates the orders list
       props.onSplit(parentId, validQuantities);
@@ -97,11 +101,13 @@ export default function ModelList(props: ModelListProps) {
       // animate targets (new children) when they appear
       setSplitAnim({ parentId, at: Date.now() });
 
-      // clear splitting marker (source has finished shrinking)
-      setSplitting(null);
-
       // keep target animation visible for a bit
       setTimeout(() => setSplitAnim(null), 4000);
+
+      // clear the splitting timer if it's still pending
+      clearTimeout(clearSplittingTimer);
+      // ensure splitting is cleared after SOURCE_ANIM_MS in case timer was cleared
+      setTimeout(() => setSplitting(null), Math.max(0, SOURCE_ANIM_MS - SHRINK_MS));
     }, SHRINK_MS);
   };
 
