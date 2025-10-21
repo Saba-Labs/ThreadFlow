@@ -247,33 +247,38 @@ export function useProductionPipeline() {
       setStore((s) => ({
         orders: s.orders.map((o) => {
           if (o.id !== orderId) return o;
-          const existing = o.parallelGroups.find(
-            (g) => g.stepIndex === stepIndex,
-          );
-          if (existing) {
-            if (existing.machineIndices.includes(machineIndex)) {
-              existing.machineIndices = existing.machineIndices.filter(
-                (m) => m !== machineIndex,
-              );
-              if (existing.machineIndices.length === 0) {
+
+          const groups = (o.parallelGroups || []).slice();
+          const idx = groups.findIndex((g) => g.stepIndex === stepIndex);
+
+          // If a group exists for this stepIndex, toggle the machineIndex immutably
+          if (idx >= 0) {
+            const existing = groups[idx];
+            const has = existing.machineIndices.includes(machineIndex);
+            if (has) {
+              const newIndices = existing.machineIndices.filter((m) => m !== machineIndex);
+              if (newIndices.length === 0) {
+                // remove the group entirely
                 return {
                   ...o,
-                  parallelGroups: o.parallelGroups.filter(
-                    (g) => g.stepIndex !== stepIndex,
-                  ),
+                  parallelGroups: groups.filter((_, i) => i !== idx),
                 };
               }
+              const newGroup = { ...existing, machineIndices: newIndices };
+              const newGroups = groups.slice();
+              newGroups[idx] = newGroup;
+              return { ...o, parallelGroups: newGroups };
             } else {
-              existing.machineIndices.push(machineIndex);
+              const newGroup = { ...existing, machineIndices: [...existing.machineIndices, machineIndex] };
+              const newGroups = groups.slice();
+              newGroups[idx] = newGroup;
+              return { ...o, parallelGroups: newGroups };
             }
-          } else {
-            o.parallelGroups.push({
-              stepIndex,
-              machineIndices: [machineIndex],
-              status: "hold",
-            });
           }
-          return o;
+
+          // otherwise add new group
+          const added = { stepIndex, machineIndices: [machineIndex], status: "hold" };
+          return { ...o, parallelGroups: [...groups, added] };
         }),
       }));
     },
