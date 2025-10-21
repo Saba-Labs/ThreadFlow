@@ -207,27 +207,35 @@ export default function ModelList(props: ModelListProps) {
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Date
-                    </th>
+                    {showDetails && (
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        Date
+                      </th>
+                    )}
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Model
                     </th>
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Qty
                     </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Path
-                    </th>
+                    {showDetails && (
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        Path
+                      </th>
+                    )}
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Current
                     </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Status
-                    </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Actions
-                    </th>
+                    {showDetails && (
+                      <>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                          Status
+                        </th>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                          Actions
+                        </th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
