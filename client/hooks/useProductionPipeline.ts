@@ -193,12 +193,15 @@ export function useProductionPipeline() {
         const steps = o.steps.slice();
         const idx = o.currentStepIndex;
         const target = idx >= steps.length ? steps.length - 1 : idx - 1;
+
+        // Ensure current step remains/sets to hold
+        if (idx >= 0 && steps[idx]) {
+          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+        }
+
+        // Set target step explicitly to hold
         if (target >= 0 && steps[target]) {
-          steps[target] = {
-            ...steps[target],
-            status: steps[target].status === "completed" ? "completed" : "hold",
-            activeMachines: 0,
-          };
+          steps[target] = { ...steps[target], status: "hold", activeMachines: 0 };
         }
 
         // Clear any parallel machine selections when moving steps
