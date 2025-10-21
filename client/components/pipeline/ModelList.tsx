@@ -916,7 +916,7 @@ export default function ModelList(props: ModelListProps) {
                       onClick={() => {
                         if (!splitFor) return;
                         if (disabled) return;
-                        setSplitInputs([part, remainder]);
+                        setSplitInputs([part]);
                       }}
                       disabled={disabled}
                     >
