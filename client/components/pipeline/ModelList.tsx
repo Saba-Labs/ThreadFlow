@@ -69,16 +69,20 @@ export default function ModelList(props: ModelListProps) {
   const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
   const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
-  const getPathLetterPills = (o: WorkOrder) => {
+  const getPathLetterPills = (o: WorkOrder, onPillClick?: (stepIndex: number) => void) => {
     return o.steps.map((step, idx) => {
       const machineType = step.kind === "machine" ? step.machineType : "Job Work";
       const config = getMachineTypeConfig(machineType || "");
       const letter = config?.letter || machineType?.charAt(0).toUpperCase() || "?";
       const isCurrent = idx === o.currentStepIndex;
       const isCompleted = step.status === "completed";
+      const parallelGroup = o.parallelGroups.find((g) => g.stepIndex === idx);
+      const isInParallelGroup = parallelGroup && parallelGroup.machineIndices.length > 0;
 
       let variantClass = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
-      if (isCurrent) {
+      if (isInParallelGroup) {
+        variantClass = "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500";
+      } else if (isCurrent) {
         if (step.status === "running") {
           variantClass = "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
         } else if (step.status === "hold") {
@@ -91,8 +95,13 @@ export default function ModelList(props: ModelListProps) {
       return (
         <span
           key={step.id}
-          className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${variantClass}`}
-          title={`${machineType}${isCurrent ? " (current)" : ""}`}
+          className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${variantClass} ${
+            isCurrent ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
+          }`}
+          title={`${machineType}${isCurrent ? " (current - click to select parallel)" : ""}`}
+          onClick={() => {
+            if (isCurrent && onPillClick) onPillClick(idx);
+          }}
         >
           {letter}
         </span>
