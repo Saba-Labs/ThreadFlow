@@ -16,7 +16,7 @@ export default function AppLayout() {
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
               <Scissors className="h-4 w-4" />
             </span>
-            <span className="tracking-tight">StitchFlow</span>
+            <span className="tracking-tight">ThreadFlow</span>
           </Link>
 
           <nav className="flex items-center gap-1">
