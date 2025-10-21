@@ -1,8 +1,4 @@
-import {
-  useCallback,
-  useMemo,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
@@ -20,6 +16,12 @@ export interface PathStep {
   quantityDone: number; // optional tracking of pieces done in this step
 }
 
+export interface ParallelMachineGroup {
+  stepIndex: number;
+  machineIndices: number[]; // indices of machines in the parallel group
+  status: StepStatus;
+}
+
 export interface WorkOrder {
   id: string;
   modelName: string;
@@ -28,6 +30,7 @@ export interface WorkOrder {
   steps: PathStep[];
   currentStepIndex: number; // -1 if not started, len if completed
   parentId?: string; // if split from another
+  parallelGroups: ParallelMachineGroup[]; // groups of machines running in parallel
 }
 
 function uid(prefix = "id") {
@@ -97,9 +100,11 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: input.modelName.trim(),
         quantity: Math.max(1, Math.floor(input.quantity)),
-        createdAt: typeof input.createdAt === "number" ? input.createdAt : Date.now(),
+        createdAt:
+          typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
         currentStepIndex: steps.length > 0 ? 0 : -1,
+        parallelGroups: [],
       };
       setStore((s) => ({ orders: [order, ...s.orders] }));
       return order.id;
@@ -168,10 +173,22 @@ export function useProductionPipeline() {
         if (nextIndex < steps.length && steps[nextIndex]) {
           steps[nextIndex] = {
             ...steps[nextIndex],
-            status: steps[nextIndex].status === "completed" ? "completed" : "hold",
+            status:
+              steps[nextIndex].status === "completed" ? "completed" : "hold",
           };
         }
-        return { ...o, steps, currentStepIndex: nextIndex };
+
+        // Move parallel groups to next step
+        const parallelGroups = (o.parallelGroups || [])
+          .map((g) => {
+            if (g.stepIndex === idx) {
+              return { ...g, stepIndex: nextIndex, status: "hold" };
+            }
+            return g;
+          })
+          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
+
+        return { ...o, steps, currentStepIndex: nextIndex, parallelGroups };
       }),
     }));
   }, []);
@@ -194,7 +211,23 @@ export function useProductionPipeline() {
             activeMachines: 0,
           };
         }
-        return { ...o, steps, currentStepIndex: Math.max(0, target) };
+
+        // Move parallel groups to previous step
+        const parallelGroups = (o.parallelGroups || [])
+          .map((g) => {
+            if (g.stepIndex === idx) {
+              return { ...g, stepIndex: target, status: "hold" };
+            }
+            return g;
+          })
+          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
+
+        return {
+          ...o,
+          steps,
+          currentStepIndex: Math.max(0, target),
+          parallelGroups,
+        };
       }),
     }));
   }, []);
@@ -208,6 +241,44 @@ export function useProductionPipeline() {
       }),
     }));
   }, []);
+
+  const toggleParallelMachine = useCallback(
+    (orderId: string, stepIndex: number, machineIndex: number) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const existing = o.parallelGroups.find(
+            (g) => g.stepIndex === stepIndex,
+          );
+          if (existing) {
+            if (existing.machineIndices.includes(machineIndex)) {
+              existing.machineIndices = existing.machineIndices.filter(
+                (m) => m !== machineIndex,
+              );
+              if (existing.machineIndices.length === 0) {
+                return {
+                  ...o,
+                  parallelGroups: o.parallelGroups.filter(
+                    (g) => g.stepIndex !== stepIndex,
+                  ),
+                };
+              }
+            } else {
+              existing.machineIndices.push(machineIndex);
+            }
+          } else {
+            o.parallelGroups.push({
+              stepIndex,
+              machineIndices: [machineIndex],
+              status: "hold",
+            });
+          }
+          return o;
+        }),
+      }));
+    },
+    [],
+  );
 
   const splitOrder = useCallback((orderId: string, quantities: number[]) => {
     setStore((s) => {
@@ -233,6 +304,7 @@ export function useProductionPipeline() {
         })),
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
+        parallelGroups: JSON.parse(JSON.stringify(src.parallelGroups)),
       });
       const children = valid.map((q) => base(q));
       const remainderOrder = base(remainder);
@@ -245,7 +317,7 @@ export function useProductionPipeline() {
 
   const board = useMemo(() => {
     const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(
-      machineTypes.map((m) => [m, [] as WorkOrder[]]),
+      machineTypes.map((m) => [m.name, [] as WorkOrder[]]),
     ) as Record<MachineType, WorkOrder[]>;
     for (const o of state.orders) {
       const idx = o.currentStepIndex;
@@ -281,6 +353,7 @@ export function useProductionPipeline() {
     moveToPrevStep,
     setCurrentStep,
     splitOrder,
+    toggleParallelMachine,
     board,
     progressOf,
   };

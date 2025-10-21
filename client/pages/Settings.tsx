@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMachineTypes, getMachineTypes, setMachineTypes } from "@/lib/machineTypes";
-import { ArrowUp, ArrowDown, Trash2, Plus } from "lucide-react";
+import { useMachineTypes, getMachineTypes, setMachineTypes, type MachineTypeConfig } from "@/lib/machineTypes";
+import { Trash2, Plus, GripVertical } from "lucide-react";
 
 export default function Settings() {
   const types = useMachineTypes();
-  const [local, setLocal] = useState<string[]>(() => getMachineTypes());
+  const [local, setLocal] = useState<MachineTypeConfig[]>(() => getMachineTypes());
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
 
   // keep local in sync if global changes externally
   useEffect(() => {
@@ -17,24 +18,45 @@ export default function Settings() {
     } catch (_) {}
   }, [types]);
 
-  const update = (idx: number, val: string) => {
-    setLocal((s) => s.map((x, i) => (i === idx ? val : x)));
+  const updateName = (idx: number, name: string) => {
+    setLocal((s) => s.map((x, i) => (i === idx ? { ...x, name } : x)));
   };
-  const add = () => setLocal((s) => [...s, "New Step"]);
+
+  const updateLetter = (idx: number, letter: string) => {
+    setLocal((s) => s.map((x, i) => (i === idx ? { ...x, letter } : x)));
+  };
+
+  const add = () => setLocal((s) => [...s, { name: "New Step", letter: "N" }]);
   const remove = (idx: number) => setLocal((s) => s.filter((_, i) => i !== idx));
-  const move = (idx: number, dir: -1 | 1) =>
+
+  const handleDragStart = (idx: number) => {
+    setDraggedIdx(idx);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (targetIdx: number) => {
+    if (draggedIdx === null || draggedIdx === targetIdx) return;
+
     setLocal((s) => {
       const arr = s.slice();
-      const j = idx + dir;
-      if (j < 0 || j >= arr.length) return arr;
-      const tmp = arr[idx];
-      arr[idx] = arr[j];
-      arr[j] = tmp;
+      const dragged = arr[draggedIdx];
+      arr.splice(draggedIdx, 1);
+      arr.splice(targetIdx, 0, dragged);
       return arr;
     });
+    setDraggedIdx(null);
+  };
 
   const save = () => {
-    const cleaned = local.map((s) => s.trim()).filter(Boolean);
+    const cleaned = local
+      .filter((c) => c.name.trim() && c.letter.trim())
+      .map((c) => ({
+        name: c.name.trim(),
+        letter: c.letter.trim(),
+      }));
     if (cleaned.length === 0) return;
     setMachineTypes(cleaned);
     alert("Production path saved");
@@ -69,21 +91,40 @@ export default function Settings() {
 
         <div className="space-y-2">
           {local.map((t, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className="flex-1">
-                <Input value={t} onChange={(e) => update(i, e.target.value)} />
+            <div
+              key={i}
+              draggable
+              onDragStart={() => handleDragStart(i)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(i)}
+              className={`flex items-center gap-2 p-2 rounded border transition-colors cursor-move ${
+                draggedIdx === i
+                  ? "bg-primary/10 border-primary"
+                  : "bg-transparent border-transparent hover:bg-muted/50"
+              }`}
+            >
+              <div className="flex items-center justify-center text-muted-foreground cursor-grab active:cursor-grabbing">
+                <GripVertical className="h-5 w-5" />
               </div>
-              <div className="flex items-center gap-1">
-                <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}>
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={i === local.length - 1}>
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(i)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+              <div className="flex-1 min-w-0">
+                <Input
+                  placeholder="Path name"
+                  value={t.name}
+                  onChange={(e) => updateName(i, e.target.value)}
+                />
               </div>
+              <div className="w-14">
+                <Input
+                  placeholder="Letter"
+                  maxLength={3}
+                  value={t.letter}
+                  onChange={(e) => updateLetter(i, e.target.value)}
+                  className="text-center text-sm"
+                />
+              </div>
+              <Button size="icon" variant="ghost" onClick={() => remove(i)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))}
         </div>
