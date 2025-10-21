@@ -40,6 +40,7 @@ interface ModelListProps {
     machineIndex: number,
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
+  showDetails?: boolean;
 }
 
 export default function ModelList(props: ModelListProps) {
@@ -189,13 +190,12 @@ export default function ModelList(props: ModelListProps) {
     props.onSetStepStatus(o.id, i, newStatus);
   };
 
+  const showDetails = props.showDetails ?? true;
+  const emptyColSpan = showDetails ? 7 : 2;
+
   return (
     <div className="min-h-screen">
       <div className="px-0">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
-          Production Orders
-        </h1>
-
         <div className="space-y-3">
           {/* Desktop table */}
           <div className="hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
@@ -203,27 +203,37 @@ export default function ModelList(props: ModelListProps) {
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Date
-                    </th>
+                    {showDetails && (
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        Date
+                      </th>
+                    )}
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Model
                     </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Qty
-                    </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Path
-                    </th>
+                    {showDetails && (
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        Qty
+                      </th>
+                    )}
+                    {showDetails && (
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        Path
+                      </th>
+                    )}
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Current
                     </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Status
-                    </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Actions
-                    </th>
+                    {showDetails && (
+                      <>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                          Status
+                        </th>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                          Actions
+                        </th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -236,42 +246,53 @@ export default function ModelList(props: ModelListProps) {
                         key={o.id}
                         className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
                       >
-                        <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                          {formatDate(o.createdAt)}
-                        </td>
+                        {showDetails && (
+                          <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                            {formatDate(o.createdAt)}
+                          </td>
+                        )}
                         <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
                           <button
                             onClick={() => navigate(`/models/${o.id}/edit`)}
                             className="text-left w-full truncate"
                           >
-                            {o.modelName}
+                            {o.modelName}{" "}
+                            {!showDetails && (
+                              <span className="text-muted-foreground">
+                                ({o.quantity})
+                              </span>
+                            )}
                           </button>
                         </td>
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {o.quantity}
-                        </td>
-                        <td className="p-3">
-                          <div className="flex flex-wrap items-center gap-1">
-                            {getPathLetterPills(o, (orderId, stepIdx) => {
-                              const stepAtIdx = o.steps[stepIdx];
-                              if (
-                                stepAtIdx.kind === "machine" &&
-                                stepAtIdx.machineType
-                              ) {
-                                const machineIndex = machineTypes.findIndex(
-                                  (m) => m.name === stepAtIdx.machineType,
-                                );
-                                if (machineIndex >= 0) {
-                                  props.onToggleParallelMachine(
-                                    orderId,
-                                    o.currentStepIndex,
-                                    machineIndex,
+                        {showDetails && (
+                          <td className="p-3 text-gray-700 dark:text-gray-300">
+                            {o.quantity}
+                          </td>
+                        )}
+                        {showDetails && (
+                          <td className="p-3">
+                            <div className="flex flex-wrap items-center gap-1">
+                              {getPathLetterPills(o, (orderId, stepIdx) => {
+                                const stepAtIdx = o.steps[stepIdx];
+                                if (
+                                  stepAtIdx.kind === "machine" &&
+                                  stepAtIdx.machineType
+                                ) {
+                                  const machineIndex = machineTypes.findIndex(
+                                    (m) => m.name === stepAtIdx.machineType,
                                   );
+                                  if (machineIndex >= 0) {
+                                    props.onToggleParallelMachine(
+                                      orderId,
+                                      o.currentStepIndex,
+                                      machineIndex,
+                                    );
+                                  }
                                 }
-                              }
-                            })}
-                          </div>
-                        </td>
+                              })}
+                            </div>
+                          </td>
+                        )}
                         <td className="p-3 text-gray-700 dark:text-gray-300">
                           {i < 0
                             ? "Not started"
@@ -315,132 +336,137 @@ export default function ModelList(props: ModelListProps) {
                                   );
                                 })()}
                         </td>
-                        <td className="p-3">
-                          {i < 0 || i >= o.steps.length ? (
-                            <Badge variant="secondary">—</Badge>
-                          ) : (
-                            (() => {
-                              const displayStatus =
-                                step.status === "pending"
-                                  ? "hold"
-                                  : step.status;
-                              return (
-                                <>
-                                  <button onClick={() => toggleCardStatus(o)}>
-                                    <Badge
-                                      variant={
-                                        displayStatus === "running"
-                                          ? "success"
-                                          : displayStatus === "hold"
-                                            ? "destructive"
-                                            : "secondary"
-                                      }
-                                      className="cursor-pointer"
-                                      aria-label={`Set status for ${o.modelName}`}
-                                    >
-                                      {cap(displayStatus)}
-                                    </Badge>
-                                  </button>
-                                  {((o as any).jobWorkIds || []).length > 0 && (
-                                    <div className="mt-1">
-                                      {jobWorks
-                                        .filter((j) =>
-                                          (
-                                            ((o as any).jobWorkIds ||
-                                              []) as string[]
-                                          ).includes(j.id),
-                                        )
-                                        .map((j) => (
-                                          <div
-                                            key={j.id}
-                                            className="text-sm text-muted-foreground"
-                                          >
-                                            {j.name}
-                                          </div>
-                                        ))}
-                                    </div>
-                                  )}
-                                </>
-                              );
-                            })()
-                          )}
-                        </td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => navigate(`/models/${o.id}/edit`)}
-                              title="Details"
-                              aria-label="Details"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant={
-                                ((o as any).jobWorkIds || []).length > 0
-                                  ? "default"
-                                  : "ghost"
-                              }
-                              onClick={() => {
-                                setJwForId(o.id);
-                                setJwSelected(
-                                  ((o as any).jobWorkIds || []) as string[],
+                        {showDetails && (
+                          <td className="p-3">
+                            {i < 0 || i >= o.steps.length ? (
+                              <Badge variant="secondary">—</Badge>
+                            ) : (
+                              (() => {
+                                const displayStatus =
+                                  step.status === "pending"
+                                    ? "hold"
+                                    : step.status;
+                                return (
+                                  <>
+                                    <button onClick={() => toggleCardStatus(o)}>
+                                      <Badge
+                                        variant={
+                                          displayStatus === "running"
+                                            ? "success"
+                                            : displayStatus === "hold"
+                                              ? "destructive"
+                                              : "secondary"
+                                        }
+                                        className="cursor-pointer"
+                                        aria-label={`Set status for ${o.modelName}`}
+                                      >
+                                        {cap(displayStatus)}
+                                      </Badge>
+                                    </button>
+                                    {((o as any).jobWorkIds || []).length >
+                                      0 && (
+                                      <div className="mt-1">
+                                        {jobWorks
+                                          .filter((j) =>
+                                            (
+                                              ((o as any).jobWorkIds ||
+                                                []) as string[]
+                                            ).includes(j.id),
+                                          )
+                                          .map((j) => (
+                                            <div
+                                              key={j.id}
+                                              className="text-sm text-muted-foreground"
+                                            >
+                                              {j.name}
+                                            </div>
+                                          ))}
+                                      </div>
+                                    )}
+                                  </>
                                 );
-                              }}
-                              title="Job Work"
-                              aria-label="Job Work"
-                            >
-                              JW
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => props.onPrev(o.id)}
-                              title="Previous step"
-                              aria-label="Previous step"
-                            >
-                              <SkipBack className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              onClick={() => props.onNext(o.id)}
-                              title="Next step"
-                              aria-label="Next step"
-                            >
-                              <SkipForward className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => {
-                                setSplitForId(o.id);
-                                setSplitInputs([0, 0]);
-                              }}
-                              title="Split into batches"
-                              aria-label="Split into batches"
-                            >
-                              <Scissors className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => props.onDelete(o.id)}
-                              title="Delete"
-                              aria-label="Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </td>
+                              })()
+                            )}
+                          </td>
+                        )}
+                        {showDetails && (
+                          <td className="p-3">
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => navigate(`/models/${o.id}/edit`)}
+                                title="Details"
+                                aria-label="Details"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant={
+                                  ((o as any).jobWorkIds || []).length > 0
+                                    ? "default"
+                                    : "ghost"
+                                }
+                                onClick={() => {
+                                  setJwForId(o.id);
+                                  setJwSelected(
+                                    ((o as any).jobWorkIds || []) as string[],
+                                  );
+                                }}
+                                title="Job Work"
+                                aria-label="Job Work"
+                              >
+                                JW
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => props.onPrev(o.id)}
+                                title="Previous step"
+                                aria-label="Previous step"
+                              >
+                                <SkipBack className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                onClick={() => props.onNext(o.id)}
+                                title="Next step"
+                                aria-label="Next step"
+                              >
+                                <SkipForward className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => {
+                                  setSplitForId(o.id);
+                                  setSplitInputs([0, 0]);
+                                }}
+                                title="Split into batches"
+                                aria-label="Split into batches"
+                              >
+                                <Scissors className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => props.onDelete(o.id)}
+                                title="Delete"
+                                aria-label="Delete"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
                   {sorted.length === 0 && (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={emptyColSpan}
                         className="p-8 text-center text-gray-500 dark:text-gray-400"
                       >
                         No models yet. Create one to get started.
@@ -470,36 +496,47 @@ export default function ModelList(props: ModelListProps) {
                           onClick={() => navigate(`/models/${o.id}/edit`)}
                           className="text-left w-full truncate"
                         >
-                          {o.modelName}
+                          {o.modelName}{" "}
+                          {!showDetails && (
+                            <span className="text-muted-foreground">
+                              ({o.quantity})
+                            </span>
+                          )}
                         </button>
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                        <span className="inline-flex items-center gap-1">
-                          <CalendarDays className="h-3.5 w-3.5" />{" "}
-                          {formatDate(o.createdAt)}
-                        </span>
-                        <span>Qty: {o.quantity}</span>
+                        {showDetails && (
+                          <>
+                            <span className="inline-flex items-center gap-1">
+                              <CalendarDays className="h-3.5 w-3.5" />{" "}
+                              {formatDate(o.createdAt)}
+                            </span>
+                            <span>Qty: {o.quantity}</span>
+                          </>
+                        )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-1 mt-2">
-                        {getPathLetterPills(o, (orderId, stepIdx) => {
-                          const stepAtIdx = o.steps[stepIdx];
-                          if (
-                            stepAtIdx.kind === "machine" &&
-                            stepAtIdx.machineType
-                          ) {
-                            const machineIndex = machineTypes.findIndex(
-                              (m) => m.name === stepAtIdx.machineType,
-                            );
-                            if (machineIndex >= 0) {
-                              props.onToggleParallelMachine(
-                                orderId,
-                                o.currentStepIndex,
-                                machineIndex,
+                      {showDetails && (
+                        <div className="flex flex-wrap items-center gap-1 mt-2">
+                          {getPathLetterPills(o, (orderId, stepIdx) => {
+                            const stepAtIdx = o.steps[stepIdx];
+                            if (
+                              stepAtIdx.kind === "machine" &&
+                              stepAtIdx.machineType
+                            ) {
+                              const machineIndex = machineTypes.findIndex(
+                                (m) => m.name === stepAtIdx.machineType,
                               );
+                              if (machineIndex >= 0) {
+                                props.onToggleParallelMachine(
+                                  orderId,
+                                  o.currentStepIndex,
+                                  machineIndex,
+                                );
+                              }
                             }
-                          }
-                        })}
-                      </div>
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
@@ -552,119 +589,123 @@ export default function ModelList(props: ModelListProps) {
                                 );
                               })()}
 
-                              <>
-                                <button onClick={() => toggleCardStatus(o)}>
-                                  <Badge
-                                    variant={
-                                      displayStatus === "running"
-                                        ? "success"
-                                        : displayStatus === "hold"
-                                          ? "destructive"
-                                          : "secondary"
-                                    }
-                                    className="shrink-0 cursor-pointer"
-                                  >
-                                    {cap(displayStatus)}
-                                  </Badge>
-                                </button>
-                                {((o as any).jobWorkIds || []).length > 0 && (
-                                  <div className="mt-1 text-right">
-                                    {jobWorks
-                                      .filter((j) =>
-                                        (
-                                          ((o as any).jobWorkIds ||
-                                            []) as string[]
-                                        ).includes(j.id),
-                                      )
-                                      .map((j) => (
-                                        <div
-                                          key={j.id}
-                                          className="text-sm text-muted-foreground"
-                                        >
-                                          {j.name}
-                                        </div>
-                                      ))}
-                                  </div>
-                                )}
-                              </>
+                              {showDetails && (
+                                <>
+                                  <button onClick={() => toggleCardStatus(o)}>
+                                    <Badge
+                                      variant={
+                                        displayStatus === "running"
+                                          ? "success"
+                                          : displayStatus === "hold"
+                                            ? "destructive"
+                                            : "secondary"
+                                      }
+                                      className="shrink-0 cursor-pointer"
+                                    >
+                                      {cap(displayStatus)}
+                                    </Badge>
+                                  </button>
+                                  {((o as any).jobWorkIds || []).length > 0 && (
+                                    <div className="mt-1 text-right">
+                                      {jobWorks
+                                        .filter((j) =>
+                                          (
+                                            ((o as any).jobWorkIds ||
+                                              []) as string[]
+                                          ).includes(j.id),
+                                        )
+                                        .map((j) => (
+                                          <div
+                                            key={j.id}
+                                            className="text-sm text-muted-foreground"
+                                          >
+                                            {j.name}
+                                          </div>
+                                        ))}
+                                    </div>
+                                  )}
+                                </>
+                              )}
                             </>
                           );
                         })()}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => navigate(`/models/${o.id}/edit`)}
-                        title="Details"
-                        aria-label="Details"
-                      >
-                        <Pencil className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant={
-                          ((o as any).jobWorkIds || []).length > 0
-                            ? "default"
-                            : "ghost"
-                        }
-                        onClick={() => {
-                          setJwForId(o.id);
-                          setJwSelected(
-                            ((o as any).jobWorkIds || []) as string[],
-                          );
-                        }}
-                        title="Job Work"
-                        aria-label="Job Work"
-                      >
-                        JW
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => props.onPrev(o.id)}
-                        title="Previous step"
-                        aria-label="Previous step"
-                      >
-                        <SkipBack className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        onClick={() => props.onNext(o.id)}
-                        title="Next step"
-                        aria-label="Next step"
-                      >
-                        <SkipForward className="h-5 w-5" />
-                      </Button>
+                  {showDetails && (
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => navigate(`/models/${o.id}/edit`)}
+                          title="Details"
+                          aria-label="Details"
+                        >
+                          <Pencil className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant={
+                            ((o as any).jobWorkIds || []).length > 0
+                              ? "default"
+                              : "ghost"
+                          }
+                          onClick={() => {
+                            setJwForId(o.id);
+                            setJwSelected(
+                              ((o as any).jobWorkIds || []) as string[],
+                            );
+                          }}
+                          title="Job Work"
+                          aria-label="Job Work"
+                        >
+                          JW
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => props.onPrev(o.id)}
+                          title="Previous step"
+                          aria-label="Previous step"
+                        >
+                          <SkipBack className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          onClick={() => props.onNext(o.id)}
+                          title="Next step"
+                          aria-label="Next step"
+                        >
+                          <SkipForward className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => {
+                            setSplitForId(o.id);
+                            setSplitInputs([0, 0]);
+                          }}
+                          title="Split into batches"
+                          aria-label="Split into batches"
+                        >
+                          <Scissors className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => props.onDelete(o.id)}
+                          title="Delete"
+                          aria-label="Delete"
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => {
-                          setSplitForId(o.id);
-                          setSplitInputs([0, 0]);
-                        }}
-                        title="Split into batches"
-                        aria-label="Split into batches"
-                      >
-                        <Scissors className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => props.onDelete(o.id)}
-                        title="Delete"
-                        aria-label="Delete"
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                 </div>
               );
             })}

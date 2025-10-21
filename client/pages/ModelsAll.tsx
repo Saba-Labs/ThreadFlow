@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Eye, EyeOff, Plus } from "lucide-react";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
@@ -38,16 +39,26 @@ export default function ModelsAll() {
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
 
+  const [showDetails, setShowDetails] = useState(true);
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">All Models</h1>
-          <p className="text-muted-foreground max-w-prose">
-            A list of all work orders in the system.
-          </p>
-        </div>
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">All Models</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={showDetails ? "Hide details" : "Show details"}
+            onClick={() => setShowDetails((s) => !s)}
+            title={showDetails ? "Hide details" : "Show details"}
+          >
+            {showDetails ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
+          </Button>
           <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
             <SelectTrigger className="w-44">
               <SelectValue placeholder="All" />
@@ -60,9 +71,6 @@ export default function ModelsAll() {
               <SelectItem value="job">Job Work</SelectItem>
             </SelectContent>
           </Select>
-          <Button asChild>
-            <Link to="/models/new">New Model</Link>
-          </Button>
         </div>
       </div>
 
@@ -79,7 +87,17 @@ export default function ModelsAll() {
           }
           onToggleParallelMachine={pipeline.toggleParallelMachine}
           setOrderJobWorks={pipeline.setOrderJobWorks}
+          showDetails={showDetails}
         />
+        <Button
+          asChild
+          size="icon"
+          className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg z-50"
+        >
+          <Link to="/models/new" aria-label="New Model">
+            <Plus className="h-6 w-6" />
+          </Link>
+        </Button>
       </div>
     </div>
   );
