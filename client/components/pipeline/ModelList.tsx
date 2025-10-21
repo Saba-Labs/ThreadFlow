@@ -336,13 +336,16 @@ export default function ModelList(props: ModelListProps) {
                                     </Badge>
                                   </button>
                                   {(((o as any).jobWorkIds || []).length > 0) && (
-                                    <div className="text-xs text-muted-foreground mt-1">
+                                    <div className="mt-1">
                                       {jobWorks
                                         .filter((j) =>
                                           (((o as any).jobWorkIds || []) as string[]).includes(j.id),
                                         )
-                                        .map((j) => j.name)
-                                        .join(", ")}
+                                        .map((j) => (
+                                          <div key={j.id} className="text-sm text-muted-foreground">
+                                            {j.name}
+                                          </div>
+                                        ))}
                                     </div>
                                   )}
                                 </>
@@ -549,13 +552,16 @@ export default function ModelList(props: ModelListProps) {
                                   </Badge>
                                 </button>
                                 {(((o as any).jobWorkIds || []).length > 0) && (
-                                  <div className="text-xs text-muted-foreground mt-1 text-right">
+                                  <div className="mt-1 text-right">
                                     {jobWorks
                                       .filter((j) =>
                                         (((o as any).jobWorkIds || []) as string[]).includes(j.id),
                                       )
-                                      .map((j) => j.name)
-                                      .join(", ")}
+                                      .map((j) => (
+                                        <div key={j.id} className="text-sm text-muted-foreground">
+                                          {j.name}
+                                        </div>
+                                      ))}
                                   </div>
                                 )}
                               </>
