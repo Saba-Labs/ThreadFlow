@@ -6,7 +6,7 @@ export interface JobWork {
   description: string;
 }
 
-const STORAGE_KEY = "stitchflow_job_works_v1";
+const STORAGE_KEY = "threadflow_job_works_v1";
 
 let STORE: JobWork[] = (function load() {
   try {
