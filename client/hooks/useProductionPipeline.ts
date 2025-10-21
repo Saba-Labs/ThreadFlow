@@ -170,23 +170,30 @@ export function useProductionPipeline() {
             activeMachines: 0,
           };
         const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+
+        // Move parallel groups to next step (immutably) and preserve group status
+        const parallelGroups = (o.parallelGroups || []).map((g) => {
+          if (g.stepIndex === idx) {
+            return { ...g, stepIndex: nextIndex };
+          }
+          return g;
+        }).filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
+
+        // If a parallel group now exists at the nextIndex, ensure the step status reflects that group's status
+        const groupAtNext = parallelGroups.find((g) => g.stepIndex === nextIndex);
         if (nextIndex < steps.length && steps[nextIndex]) {
+          const desiredStatus = groupAtNext ? groupAtNext.status : (steps[nextIndex].status === "completed" ? "completed" : "hold");
           steps[nextIndex] = {
             ...steps[nextIndex],
-            status:
-              steps[nextIndex].status === "completed" ? "completed" : "hold",
+            status: desiredStatus,
           };
+          // if running, set activeMachines to number of machines in group
+          if (groupAtNext && groupAtNext.status === "running") {
+            steps[nextIndex] = { ...steps[nextIndex], activeMachines: groupAtNext.machineIndices.length };
+          } else {
+            steps[nextIndex] = { ...steps[nextIndex], activeMachines: 0 };
+          }
         }
-
-        // Move parallel groups to next step
-        const parallelGroups = (o.parallelGroups || [])
-          .map((g) => {
-            if (g.stepIndex === idx) {
-              return { ...g, stepIndex: nextIndex, status: "hold" };
-            }
-            return g;
-          })
-          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
 
         return { ...o, steps, currentStepIndex: nextIndex, parallelGroups };
       }),
@@ -205,22 +212,31 @@ export function useProductionPipeline() {
         const idx = o.currentStepIndex;
         const target = idx >= steps.length ? steps.length - 1 : idx - 1;
         if (target >= 0 && steps[target]) {
+          // We'll set its status based on any parallel group that moves here
           steps[target] = {
             ...steps[target],
-            status: "hold",
+            // tentative status; will adjust below if group exists
+            status: steps[target].status === "completed" ? "completed" : "hold",
             activeMachines: 0,
           };
         }
 
-        // Move parallel groups to previous step
-        const parallelGroups = (o.parallelGroups || [])
-          .map((g) => {
-            if (g.stepIndex === idx) {
-              return { ...g, stepIndex: target, status: "hold" };
-            }
-            return g;
-          })
-          .filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
+        // Move parallel groups to previous step (immutably)
+        const parallelGroups = (o.parallelGroups || []).map((g) => {
+          if (g.stepIndex === idx) {
+            return { ...g, stepIndex: target };
+          }
+          return g;
+        }).filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
+
+        const groupAtTarget = parallelGroups.find((g) => g.stepIndex === target);
+        if (groupAtTarget && target >= 0 && steps[target]) {
+          steps[target] = {
+            ...steps[target],
+            status: groupAtTarget.status,
+            activeMachines: groupAtTarget.status === "running" ? groupAtTarget.machineIndices.length : 0,
+          };
+        }
 
         return {
           ...o,
