@@ -14,17 +14,9 @@ export default function ModelsAll() {
             A list of all work orders in the system.
           </p>
         </div>
-        <ModelForm
-          onCreate={(data) => {
-            pipeline.createWorkOrder({
-              modelName: data.modelName,
-              quantity: data.quantity,
-              createdAt: data.createdAt,
-              path: data.path as any,
-            });
-          }}
-          trigger={<Button>New Model</Button>}
-        />
+        <Button asChild>
+          <Link to="/models/new">New Model</Link>
+        </Button>
       </div>
 
       <div className="-mx-4 sm:-mx-6 px-0 sm:px-0">
