@@ -69,6 +69,48 @@ export default function ModelList(props: ModelListProps) {
   const [splitAnim, setSplitAnim] = useState<{ parentId: string; at: number } | null>(null);
   const [splitting, setSplitting] = useState<{ parentId: string; count: number } | null>(null);
 
+  // Apply initial shrunk transform to newly inserted child elements to avoid pause
+  useEffect(() => {
+    if (!splitAnim) return;
+    const parentId = splitAnim.parentId;
+    // find elements that have parentId equal to this parent
+    const selector = `[data-parent-id="${parentId}"]`;
+    const els = Array.from(document.querySelectorAll<HTMLElement>(selector)) as HTMLElement[];
+    if (els.length === 0) return;
+
+    const START_TRANSFORM = 'translateY(-28px) scale(0.5)';
+    const TARGET_TRANSITION = 'transform 3600ms cubic-bezier(.2,.9,.3,1), opacity 600ms linear';
+
+    // set initial state before paint
+    els.forEach((el) => {
+      el.style.transition = 'none';
+      el.style.transform = START_TRANSFORM;
+      el.style.opacity = '0';
+    });
+
+    // force reflow then start transition to final
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        els.forEach((el) => {
+          el.style.transition = TARGET_TRANSITION;
+          el.style.transform = 'none';
+          el.style.opacity = '1';
+        });
+      });
+    });
+
+    // cleanup after animation completes
+    const cleanup = setTimeout(() => {
+      els.forEach((el) => {
+        el.style.transition = '';
+        el.style.transform = '';
+        el.style.opacity = '';
+      });
+    }, 3600 + 300);
+
+    return () => clearTimeout(cleanup);
+  }, [splitAnim]);
+
   const handleSplit = () => {
     if (!splitForId) return;
     const validQuantities = splitInputs
