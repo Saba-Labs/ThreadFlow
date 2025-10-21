@@ -329,7 +329,10 @@ export default function ModelList(props: ModelListProps) {
                         <span>Qty: {o.quantity}</span>
                       </div>
                       <div className="flex flex-wrap items-center gap-1 mt-2">
-                        {getPathLetterPills(o)}
+                        {getPathLetterPills(o, (stepIdx) => {
+                          setParallelSelectId(o.id);
+                          setParallelStepIdx(stepIdx);
+                        })}
                       </div>
                     </div>
 
