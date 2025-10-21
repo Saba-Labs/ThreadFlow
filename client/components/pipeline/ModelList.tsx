@@ -38,6 +38,8 @@ export default function ModelList(props: ModelListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0, 0]);
+  const [parallelSelectId, setParallelSelectId] = useState<string | null>(null);
+  const [parallelStepIdx, setParallelStepIdx] = useState<number | null>(null);
 
   const sorted = useMemo(
     () => props.orders.slice().sort((a, b) => b.createdAt - a.createdAt),
