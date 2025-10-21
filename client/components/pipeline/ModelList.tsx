@@ -190,6 +190,9 @@ export default function ModelList(props: ModelListProps) {
     props.onSetStepStatus(o.id, i, newStatus);
   };
 
+  const showDetails = props.showDetails ?? true;
+  const emptyColSpan = showDetails ? 7 : 3;
+
   return (
     <div className="min-h-screen">
       <div className="px-0">
