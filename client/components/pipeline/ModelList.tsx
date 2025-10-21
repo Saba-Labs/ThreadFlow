@@ -134,8 +134,8 @@ export default function ModelList(props: ModelListProps) {
       }
 
       if (isSelectedInCurrent) {
-        // When selected for parallel, give a strong blue background with white text and a ring
-        variantClass += " ring-2 ring-blue-500 bg-blue-700 text-white dark:bg-blue-600";
+        // Selected for parallel: use the same dark green pill (no outer ring)
+        variantClass = "bg-green-700 text-white dark:bg-green-600";
       }
 
       const isClickable = isCurrentRunning && machineIndex >= 0;
