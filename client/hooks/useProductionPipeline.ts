@@ -38,7 +38,7 @@ function uid(prefix = "id") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-const STORAGE_KEY = "stitchflow_pipeline_v1";
+const STORAGE_KEY = "threadflow_pipeline_v1";
 
 export interface PipelineState {
   orders: WorkOrder[];
