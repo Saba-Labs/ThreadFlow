@@ -30,12 +30,9 @@ export default function ModelsAll() {
     };
     if (filter === "all") return pipeline.orders;
     if (filter === "job") {
-      return pipeline.orders.filter((o) => {
-        const idx = o.currentStepIndex;
-        if (idx < 0 || idx >= o.steps.length) return false;
-        return o.steps[idx].kind === "job";
-      });
+      return pipeline.orders.filter((o) => ((o as any).jobWorkIds || []).length > 0);
     }
+
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
 
