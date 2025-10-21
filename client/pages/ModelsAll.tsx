@@ -67,6 +67,7 @@ export default function ModelsAll() {
             pipeline.updateStepStatus(id, idx, { status })
           }
           onToggleParallelMachine={pipeline.toggleParallelMachine}
+          setOrderJobWorks={pipeline.setOrderJobWorks}
         />
       </div>
     </div>
