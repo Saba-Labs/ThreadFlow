@@ -194,7 +194,10 @@ export default function ModelList(props: ModelListProps) {
                         </td>
                         <td className="p-3">
                           <div className="flex flex-wrap items-center gap-1">
-                            {getPathLetterPills(o)}
+                            {getPathLetterPills(o, (stepIdx) => {
+                              setParallelSelectId(o.id);
+                              setParallelStepIdx(stepIdx);
+                            })}
                           </div>
                         </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
