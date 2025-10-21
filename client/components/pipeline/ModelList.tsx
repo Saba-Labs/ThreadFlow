@@ -452,7 +452,7 @@ export default function ModelList(props: ModelListProps) {
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                onClick={() => props.onDelete(o.id)}
+                                onClick={() => setDeleteConfirmId(o.id)}
                                 title="Delete"
                                 aria-label="Delete"
                               >
