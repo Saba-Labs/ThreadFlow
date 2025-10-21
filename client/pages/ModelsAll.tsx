@@ -45,7 +45,7 @@ export default function ModelsAll() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">All Models</h1>
+          <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">All Models</h1>
           <Button
             variant="ghost"
             size="icon"
@@ -60,7 +60,7 @@ export default function ModelsAll() {
             )}
           </Button>
           <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
-            <SelectTrigger className="w-44">
+            <SelectTrigger className="w-32">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
