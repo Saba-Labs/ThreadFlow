@@ -191,7 +191,7 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const showDetails = props.showDetails ?? true;
-  const emptyColSpan = showDetails ? 7 : 3;
+  const emptyColSpan = showDetails ? 7 : 2;
 
   return (
     <div className="min-h-screen">
@@ -215,9 +215,11 @@ export default function ModelList(props: ModelListProps) {
                     <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Model
                     </th>
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
-                      Qty
-                    </th>
+                    {showDetails && (
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        Qty
+                      </th>
+                    )}
                     {showDetails && (
                       <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                         Path
@@ -258,12 +260,16 @@ export default function ModelList(props: ModelListProps) {
                             onClick={() => navigate(`/models/${o.id}/edit`)}
                             className="text-left w-full truncate"
                           >
-                            {o.modelName}
+                            {o.modelName} {!showDetails && (
+                              <span className="text-muted-foreground">({o.quantity})</span>
+                            )}
                           </button>
                         </td>
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {o.quantity}
-                        </td>
+                        {showDetails && (
+                          <td className="p-3 text-gray-700 dark:text-gray-300">
+                            {o.quantity}
+                          </td>
+                        )}
                         {showDetails && (
                           <td className="p-3">
                             <div className="flex flex-wrap items-center gap-1">
@@ -490,19 +496,19 @@ export default function ModelList(props: ModelListProps) {
                           onClick={() => navigate(`/models/${o.id}/edit`)}
                           className="text-left w-full truncate"
                         >
-                          {o.modelName}
+                          {o.modelName} {!showDetails && (
+                            <span className="text-muted-foreground">({o.quantity})</span>
+                          )}
                         </button>
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                        {showDetails ? (
+                        {showDetails && (
                           <>
                             <span className="inline-flex items-center gap-1">
                               <CalendarDays className="h-3.5 w-3.5" /> {formatDate(o.createdAt)}
                             </span>
                             <span>Qty: {o.quantity}</span>
                           </>
-                        ) : (
-                          <span>Qty: {o.quantity}</span>
                         )}
                       </div>
                       {showDetails && (
