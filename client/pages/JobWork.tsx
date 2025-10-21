@@ -107,7 +107,7 @@ export default function JobWork() {
                 <div className="text-sm text-muted-foreground mt-1">
                   {linked.length > 0 ? (
                     linked.map((m) => (
-                      <div key={m} className="">{m}</div>
+                      <div key={m} className="text-red-600 dark:text-red-400 font-medium">{m}</div>
                     ))
                   ) : (
                     <div className="italic text-xs text-gray-400">No models linked</div>
