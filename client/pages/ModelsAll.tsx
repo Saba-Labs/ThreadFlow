@@ -15,7 +15,7 @@ import {
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
   const [filter, setFilter] = useState<
-    "all" | "hold" | "running" | "completed"
+    "all" | "hold" | "running" | "completed" | "job"
   >("all");
 
   const filtered = useMemo(() => {
