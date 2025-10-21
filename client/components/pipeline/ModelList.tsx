@@ -372,6 +372,30 @@ export default function ModelList(props: ModelListProps) {
                         </span>
                         <span>Qty: {o.quantity}</span>
                       </div>
+                      {i >= 0 && i < o.steps.length && (() => {
+                        const parallelGroup = (o.parallelGroups || []).find(
+                          (g) => g.stepIndex === i,
+                        );
+                        const selectedIndices = parallelGroup?.machineIndices || [];
+                        if (selectedIndices.length > 0) {
+                          const selectedMachines = selectedIndices
+                            .map((idx) => machineTypes[idx]?.name)
+                            .filter(Boolean);
+                          return (
+                            <div className="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700">
+                              <div className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                                Also running in:
+                              </div>
+                              {selectedMachines.map((machine, idx) => (
+                                <div key={idx} className="text-xs text-blue-600 dark:text-blue-400">
+                                  • {machine}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                       <div className="flex flex-wrap items-center gap-1 mt-2">
                         {getPathLetterPills(o, (orderId, stepIdx) => {
                           const currentStep = o.steps[stepIdx];
