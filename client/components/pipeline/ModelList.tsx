@@ -70,7 +70,10 @@ export default function ModelList(props: ModelListProps) {
   const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
   const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
-  const getPathLetterPills = (o: WorkOrder, onPillClick?: (stepIndex: number) => void) => {
+  const getPathLetterPills = (
+    o: WorkOrder,
+    onPillClick?: (orderId: string, stepIndex: number) => void,
+  ) => {
     return o.steps.map((step, idx) => {
       const machineType = step.kind === "machine" ? step.machineType : "Job Work";
       const config = getMachineTypeConfig(machineType || "");
@@ -101,9 +104,15 @@ export default function ModelList(props: ModelListProps) {
           className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${variantClass} ${
             isClickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
           }`}
-          title={`${machineType}${isClickable ? " (click to select parallel machines)" : ""}`}
+          title={`${machineType}${
+            isClickable
+              ? isInParallelGroup
+                ? " (click to deselect)"
+                : " (click to select for parallel)"
+              : ""
+          }`}
           onClick={() => {
-            if (isClickable && onPillClick) onPillClick(idx);
+            if (isClickable && onPillClick) onPillClick(o.id, idx);
           }}
         >
           {letter}
