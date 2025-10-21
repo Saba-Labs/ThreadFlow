@@ -33,7 +33,7 @@ export default function Models() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">
           {filter === "all"
-            ? "Models"
+            ? "All Models"
             : filter === "running"
               ? "Running Models"
               : "On-hold Models"}
