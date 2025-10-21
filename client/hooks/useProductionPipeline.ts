@@ -270,6 +270,7 @@ export function useProductionPipeline() {
         })),
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
+        parallelGroups: JSON.parse(JSON.stringify(src.parallelGroups)),
       });
       const children = valid.map((q) => base(q));
       const remainderOrder = base(remainder);
