@@ -81,13 +81,10 @@ export default function SettingsProductionPath() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-lg font-medium">Steps</h2>
-            <p className="text-sm text-muted-foreground">
-              Configure the machines and job work order.
-            </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={add} size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Step
+            <Button onClick={add} size="sm" aria-label="Add step">
+              <Plus className="h-4 w-4" />
             </Button>
             <Button variant="default" size="sm" onClick={save}>
               Save
