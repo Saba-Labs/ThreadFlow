@@ -901,6 +901,32 @@ export default function ModelList(props: ModelListProps) {
                 {splitFor?.quantity || 0}
               </p>
 
+              {/* Fraction presets */}
+              <div className="flex items-center gap-2">
+                {([0.25, 0.5, 0.75] as const).map((f) => {
+                  const total = splitFor?.quantity || 0;
+                  const part = Math.floor(total * f);
+                  const remainder = total - part;
+                  const disabled = part < 1 || remainder < 1;
+                  return (
+                    <Button
+                      key={f}
+                      variant={"outline"}
+                      size="sm"
+                      onClick={() => {
+                        if (!splitFor) return;
+                        if (disabled) return;
+                        setSplitInputs([part, remainder]);
+                      }}
+                      disabled={disabled}
+                    >
+                      {f === 0.25 ? "1/4" : f === 0.5 ? "1/2" : "3/4"}
+                    </Button>
+                  );
+                })}
+                <div className="ml-2 text-sm text-muted-foreground">Or enter manually</div>
+              </div>
+
               <div className="space-y-2">
                 {splitInputs.map((q, i) => (
                   <div key={i} className="flex gap-2">
