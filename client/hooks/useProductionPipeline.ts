@@ -198,37 +198,19 @@ export function useProductionPipeline() {
         const idx = o.currentStepIndex;
         const target = idx >= steps.length ? steps.length - 1 : idx - 1;
         if (target >= 0 && steps[target]) {
-          // We'll set its status based on any parallel group that moves here
           steps[target] = {
             ...steps[target],
-            // tentative status; will adjust below if group exists
             status: steps[target].status === "completed" ? "completed" : "hold",
             activeMachines: 0,
           };
         }
 
-        // Move parallel groups to previous step (immutably)
-        const parallelGroups = (o.parallelGroups || []).map((g) => {
-          if (g.stepIndex === idx) {
-            return { ...g, stepIndex: target };
-          }
-          return g;
-        }).filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
-
-        const groupAtTarget = parallelGroups.find((g) => g.stepIndex === target);
-        if (groupAtTarget && target >= 0 && steps[target]) {
-          steps[target] = {
-            ...steps[target],
-            status: groupAtTarget.status,
-            activeMachines: groupAtTarget.status === "running" ? groupAtTarget.machineIndices.length : 0,
-          };
-        }
-
+        // Clear any parallel machine selections when moving steps
         return {
           ...o,
           steps,
           currentStepIndex: Math.max(0, target),
-          parallelGroups,
+          parallelGroups: [],
         };
       }),
     }));
