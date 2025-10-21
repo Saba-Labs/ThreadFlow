@@ -520,7 +520,7 @@ export default function ModelList(props: ModelListProps) {
                 <div
                   key={o.id}
                   className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"} ${
-                    splitAnim && splitAnim.parentId === o.id
+                    splitting && splitting.parentId === o.id
                       ? "split-source"
                       : splitAnim && o.parentId === splitAnim.parentId && (o.createdAt || 0) >= (splitAnim.at - 5000)
                         ? "split-target"
