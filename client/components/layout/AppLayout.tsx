@@ -8,6 +8,35 @@ import { Settings, Menu, X } from "lucide-react";
 export default function AppLayout() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    const checkPrompt = () => {
+      setCanInstall(!!(window as any).deferredPrompt);
+    };
+    checkPrompt();
+    window.addEventListener('pwa-beforeinstallprompt', checkPrompt);
+    window.addEventListener('pwa-appinstalled', checkPrompt);
+    return () => {
+      window.removeEventListener('pwa-beforeinstallprompt', checkPrompt);
+      window.removeEventListener('pwa-appinstalled', checkPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    const promptEvent = (window as any).deferredPrompt;
+    if (!promptEvent) return;
+    try {
+      promptEvent.prompt();
+      const choice = await promptEvent.userChoice;
+      // hide the prompt after user choice
+      (window as any).deferredPrompt = null;
+      setCanInstall(false);
+      console.log('PWA install choice', choice);
+    } catch (err) {
+      console.warn('Install prompt failed', err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
