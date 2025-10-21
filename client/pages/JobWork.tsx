@@ -115,19 +115,42 @@ export default function JobWork() {
                 className="p-4 rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800 flex items-center justify-between"
               >
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                          <div className="font-medium text-gray-900 dark:text-gray-100">
                     {j.name}
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">
                     {linked.length > 0 ? (
-                      linked.map((m) => (
-                        <div
-                          key={m}
-                          className="text-red-600 dark:text-red-400 font-medium"
-                        >
-                          {m}
-                        </div>
-                      ))
+                      // Show detailed linked orders with status and actions
+                      pipeline.orders
+                        .filter((o) => (o.jobWorkIds || []).includes(j.id))
+                        .map((o) => {
+                          const jobStepIndex = o.steps.findIndex((st) => st.kind === "job");
+                          const jobStep = jobStepIndex >= 0 ? o.steps[jobStepIndex] : null;
+                          const completed = jobStep?.status === "completed";
+                          return (
+                            <div key={o.id} className="flex items-center justify-between gap-2">
+                              <div className={`font-medium ${completed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {o.modelName} <span className="text-muted-foreground">({o.quantity})</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {!completed && jobStepIndex >= 0 && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      pipeline.updateStepStatus(o.id, jobStepIndex, { status: "completed" });
+                                      pipeline.moveToNextStep(o.id);
+                                    }}
+                                  >
+                                    Mark complete
+                                  </Button>
+                                )}
+                                {completed && (
+                                  <div className="text-sm text-muted-foreground">Completed</div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
                     ) : (
                       <div className="italic text-xs text-gray-400">
                         No models linked
