@@ -122,11 +122,11 @@ export default function ModelList(props: ModelListProps) {
         "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
       if (isCurrent) {
         if (step.status === "running") {
-          variantClass =
-            "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
+          // Use a dark pill with white text for running steps (matches status badge style)
+          variantClass = "bg-green-700 text-white dark:bg-green-600";
         } else if (step.status === "hold") {
-          variantClass =
-            "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
+          // Dark red pill with white text for hold
+          variantClass = "bg-red-600 text-white dark:bg-red-500";
         }
       } else if (isCompleted) {
         variantClass =
@@ -134,8 +134,8 @@ export default function ModelList(props: ModelListProps) {
       }
 
       if (isSelectedInCurrent) {
-        variantClass +=
-          " ring-2 ring-blue-500 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300";
+        // When selected for parallel, give a strong blue background with white text and a ring
+        variantClass += " ring-2 ring-blue-500 bg-blue-700 text-white dark:bg-blue-600";
       }
 
       const isClickable = isCurrentRunning && machineIndex >= 0;
