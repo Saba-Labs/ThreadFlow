@@ -586,7 +586,7 @@ export default function ModelList(props: ModelListProps) {
               return null;
             }
             const step = order.steps[parallelStepIdx];
-            const parallelGroup = order.parallelGroups.find((g) => g.stepIndex === parallelStepIdx);
+            const parallelGroup = (order.parallelGroups || []).find((g) => g.stepIndex === parallelStepIdx);
             const selectedIndices = parallelGroup?.machineIndices || [];
 
             return (
