@@ -2,7 +2,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Scissors, Settings, Menu, X } from "lucide-react";
+import { Settings, Menu, X } from "lucide-react";
 
 export default function AppLayout() {
   const location = useLocation();
