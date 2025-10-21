@@ -83,8 +83,8 @@ export default function ModelList(props: ModelListProps) {
     setSplitForId(null);
     setSplitInputs([0]);
 
-    // FLIP: capture before rects
-    const elsBefore = Array.from(document.querySelectorAll<HTMLElement>('[data-order-id]')) as HTMLElement[];
+    // FLIP with WAAPI: measure before
+    const elsBefore = Array.from(document.querySelectorAll<HTMLElement>("[data-order-id]")) as HTMLElement[];
     const rectsBefore = new Map<string, DOMRect>();
     elsBefore.forEach((el) => {
       const id = el.getAttribute('data-order-id');
@@ -93,12 +93,12 @@ export default function ModelList(props: ModelListProps) {
 
     const sourceRect = rectsBefore.get(parentId) || null;
 
-    // perform split (update data/state)
+    // perform split (synchronous state update)
     props.onSplit(parentId, validQuantities);
 
-    // next frame, measure after rects and apply inverse transforms
+    // next paint: measure after and animate using WAAPI
     requestAnimationFrame(() => {
-      const elsAfter = Array.from(document.querySelectorAll<HTMLElement>('[data-order-id]')) as HTMLElement[];
+      const elsAfter = Array.from(document.querySelectorAll<HTMLElement>("[data-order-id]")) as HTMLElement[];
       const rectsAfter = new Map<string, DOMRect>();
       elsAfter.forEach((el) => {
         const id = el.getAttribute('data-order-id');
@@ -106,9 +106,10 @@ export default function ModelList(props: ModelListProps) {
       });
 
       const DURATION = 3000;
-      const EASE = 'cubic-bezier(.2,.9,.3,1)';
+      const EASING = 'cubic-bezier(.2,.9,.3,1)';
 
-      // apply inverse transforms
+      const animations: Animation[] = [];
+
       elsAfter.forEach((el) => {
         const id = el.getAttribute('data-order-id')!;
         const before = rectsBefore.get(id) || sourceRect;
@@ -120,31 +121,51 @@ export default function ModelList(props: ModelListProps) {
         const sx = before.width / after.width;
         const sy = before.height / after.height;
 
-        el.style.transition = 'none';
-        el.style.transformOrigin = 'center';
-        el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-        el.style.opacity = '0.8';
+        const from = {
+          transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+          opacity: 0.8,
+        };
+        const to = { transform: 'none', opacity: 1 };
+
+        // use WAAPI animate
+        try {
+          const anim = el.animate([from, to], {
+            duration: DURATION,
+            easing: EASING,
+            fill: 'both',
+          });
+          animations.push(anim);
+        } catch (e) {
+          // fallback to CSS transition if WAAPI unavailable
+          el.style.transition = `transform ${DURATION}ms ${EASING}, opacity ${Math.min(600, DURATION)}ms linear`;
+          el.style.transform = from.transform;
+          el.style.opacity = String(from.opacity);
+          requestAnimationFrame(() => {
+            el.style.transform = '';
+            el.style.opacity = '';
+          });
+        }
       });
 
-      // force reflow and animate to identity
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
+      // when all animations finish, ensure cleanup
+      if (animations.length > 0) {
+        Promise.all(animations.map((a) => a.finished)).then(() => {
           elsAfter.forEach((el) => {
-            el.style.transition = `transform ${DURATION}ms ${EASE}, opacity ${Math.min(600, DURATION)}ms linear`;
+            el.style.transition = '';
             el.style.transform = '';
             el.style.opacity = '';
           });
         });
-      });
-
-      // cleanup
-      setTimeout(() => {
-        elsAfter.forEach((el) => {
-          el.style.transition = '';
-          el.style.transform = '';
-          el.style.opacity = '';
-        });
-      }, DURATION + 200);
+      } else {
+        // fallback cleanup after duration
+        setTimeout(() => {
+          elsAfter.forEach((el) => {
+            el.style.transition = '';
+            el.style.transform = '';
+            el.style.opacity = '';
+          });
+        }, DURATION + 100);
+      }
     });
   };
 
