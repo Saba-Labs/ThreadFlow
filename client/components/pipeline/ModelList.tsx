@@ -992,6 +992,35 @@ export default function ModelList(props: ModelListProps) {
               )}
             </div>
           </SimpleModal>
+
+          {/* Delete confirmation modal */}
+          <SimpleModal
+            open={!!deleteConfirmId}
+            onOpenChange={(v) => !v && setDeleteConfirmId(null)}
+            title="Confirm delete"
+            footer={
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (deleteConfirmId) props.onDelete(deleteConfirmId);
+                    setDeleteConfirmId(null);
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            }
+          >
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete this model? This action cannot be undone.
+              </p>
+            </div>
+          </SimpleModal>
         </div>
       </div>
     </div>
