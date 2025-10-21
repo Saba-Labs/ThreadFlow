@@ -118,8 +118,10 @@
     100% { transform: translateY(-28px) scale(0.5); opacity: 0.6; }
   }
   @keyframes split-target-anim {
-    0% { transform: translateY(-12px) scale(0.95); opacity: 0; }
-    60% { transform: translateY(4px) scale(1.02); opacity: 1; }
+    /* start from the same final transform as the source (shrunk) */
+    0% { transform: translateY(-28px) scale(0.5); opacity: 0; }
+    40% { transform: translateY(-6px) scale(0.85); opacity: 0.6; }
+    80% { transform: translateY(2px) scale(1.02); opacity: 0.95; }
     100% { transform: none; opacity: 1; }
   }
 
