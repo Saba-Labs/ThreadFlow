@@ -171,31 +171,17 @@ export function useProductionPipeline() {
           };
         const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
 
-        // Move parallel groups to next step (immutably) and preserve group status
-        const parallelGroups = (o.parallelGroups || []).map((g) => {
-          if (g.stepIndex === idx) {
-            return { ...g, stepIndex: nextIndex };
-          }
-          return g;
-        }).filter((g) => g.stepIndex >= 0 && g.stepIndex < steps.length);
-
-        // If a parallel group now exists at the nextIndex, ensure the step status reflects that group's status
-        const groupAtNext = parallelGroups.find((g) => g.stepIndex === nextIndex);
+        // Set next step status to hold unless already completed
         if (nextIndex < steps.length && steps[nextIndex]) {
-          const desiredStatus = groupAtNext ? groupAtNext.status : (steps[nextIndex].status === "completed" ? "completed" : "hold");
           steps[nextIndex] = {
             ...steps[nextIndex],
-            status: desiredStatus,
+            status: steps[nextIndex].status === "completed" ? "completed" : "hold",
+            activeMachines: 0,
           };
-          // if running, set activeMachines to number of machines in group
-          if (groupAtNext && groupAtNext.status === "running") {
-            steps[nextIndex] = { ...steps[nextIndex], activeMachines: groupAtNext.machineIndices.length };
-          } else {
-            steps[nextIndex] = { ...steps[nextIndex], activeMachines: 0 };
-          }
         }
 
-        return { ...o, steps, currentStepIndex: nextIndex, parallelGroups };
+        // Clear any parallel machine selections when moving steps
+        return { ...o, steps, currentStepIndex: nextIndex, parallelGroups: [] };
       }),
     }));
   }, []);
