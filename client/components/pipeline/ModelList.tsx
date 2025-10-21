@@ -96,7 +96,7 @@ export default function ModelList(props: ModelListProps) {
         variantClass = "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
       }
 
-      const isClickable = isCurrent && !isCompleted;
+      const isClickable = step.status === "running" && !isCompleted;
 
       return (
         <span
