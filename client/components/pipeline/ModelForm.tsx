@@ -21,6 +21,8 @@ export default function ModelForm(props: {
   }) => void;
   trigger?: React.ReactNode;
   inline?: boolean;
+  initialData?: { modelName: string; quantity: number; createdAt: number; path: NewPathStep[] };
+  onCancel?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [modelName, setModelName] = useState("");
@@ -33,15 +35,30 @@ export default function ModelForm(props: {
 
   const machineTypes = useMachineTypes();
 
-  // populate default path when modal opens or when rendered inline if empty
+  // initialize from initialData, otherwise populate default path when modal opens or when rendered inline
   useEffect(() => {
+    if (props.initialData) {
+      setModelName(props.initialData.modelName || "");
+      setQuantity(props.initialData.quantity ?? 100);
+      setDateStr(new Date(props.initialData.createdAt).toISOString().slice(0, 10));
+      const sel = new Set<string>();
+      let job = false;
+      for (const p of props.initialData.path) {
+        if (p.kind === "machine" && p.machineType) sel.add(p.machineType);
+        if (p.kind === "job") job = true;
+      }
+      setSelectedMachines(sel);
+      setIncludeJobWork(job);
+      return;
+    }
+
     if ((open || props.inline) && selectedMachines.size === 0) {
       const allMachines = machineTypes
         .filter((m) => m.name !== "Job Work")
         .map((m) => m.name);
       setSelectedMachines(new Set(allMachines));
     }
-  }, [open, props.inline, machineTypes]);
+  }, [open, props.inline, machineTypes, props.initialData]);
 
   const toggleMachine = (machineName: string) => {
     setSelectedMachines((prev) => {
@@ -176,7 +193,12 @@ export default function ModelForm(props: {
         </div>
       </div>
       <div className="flex justify-end mt-4">
-        <Button onClick={submit}>Create</Button>
+        {props.onCancel && (
+          <Button variant="outline" className="mr-2" onClick={props.onCancel}>
+            Cancel
+          </Button>
+        )}
+        <Button onClick={submit}>{props.initialData ? "Save" : "Create"}</Button>
       </div>
     </>
   );
@@ -198,7 +220,7 @@ export default function ModelForm(props: {
         open={open}
         onOpenChange={setOpen}
         title="New Model / Batch"
-        footer={<div className="flex justify-end"><Button onClick={submit}>Create</Button></div>}
+        footer={<div className="flex justify-end">{props.onCancel && (<Button variant="outline" className="mr-2" onClick={props.onCancel}>Cancel</Button>)}<Button onClick={submit}>{props.initialData ? "Save" : "Create"}</Button></div>}
       >
         {formContent}
       </SimpleModal>
