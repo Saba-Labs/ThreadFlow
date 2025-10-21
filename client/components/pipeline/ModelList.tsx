@@ -40,6 +40,7 @@ interface ModelListProps {
     machineIndex: number,
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
+  showDetails?: boolean;
 }
 
 export default function ModelList(props: ModelListProps) {
