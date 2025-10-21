@@ -622,78 +622,80 @@ export default function ModelList(props: ModelListProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => navigate(`/models/${o.id}/edit`)}
-                        title="Details"
-                        aria-label="Details"
-                      >
-                        <Pencil className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant={
-                          ((o as any).jobWorkIds || []).length > 0
-                            ? "default"
-                            : "ghost"
-                        }
-                        onClick={() => {
-                          setJwForId(o.id);
-                          setJwSelected(
-                            ((o as any).jobWorkIds || []) as string[],
-                          );
-                        }}
-                        title="Job Work"
-                        aria-label="Job Work"
-                      >
-                        JW
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => props.onPrev(o.id)}
-                        title="Previous step"
-                        aria-label="Previous step"
-                      >
-                        <SkipBack className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        onClick={() => props.onNext(o.id)}
-                        title="Next step"
-                        aria-label="Next step"
-                      >
-                        <SkipForward className="h-5 w-5" />
-                      </Button>
+                  {showDetails && (
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => navigate(`/models/${o.id}/edit`)}
+                          title="Details"
+                          aria-label="Details"
+                        >
+                          <Pencil className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant={
+                            ((o as any).jobWorkIds || []).length > 0
+                              ? "default"
+                              : "ghost"
+                          }
+                          onClick={() => {
+                            setJwForId(o.id);
+                            setJwSelected(
+                              ((o as any).jobWorkIds || []) as string[],
+                            );
+                          }}
+                          title="Job Work"
+                          aria-label="Job Work"
+                        >
+                          JW
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => props.onPrev(o.id)}
+                          title="Previous step"
+                          aria-label="Previous step"
+                        >
+                          <SkipBack className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          onClick={() => props.onNext(o.id)}
+                          title="Next step"
+                          aria-label="Next step"
+                        >
+                          <SkipForward className="h-5 w-5" />
+                        </Button>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => {
+                            setSplitForId(o.id);
+                            setSplitInputs([0, 0]);
+                          }}
+                          title="Split into batches"
+                          aria-label="Split into batches"
+                        >
+                          <Scissors className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => props.onDelete(o.id)}
+                          title="Delete"
+                          aria-label="Delete"
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => {
-                          setSplitForId(o.id);
-                          setSplitInputs([0, 0]);
-                        }}
-                        title="Split into batches"
-                        aria-label="Split into batches"
-                      >
-                        <Scissors className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => props.onDelete(o.id)}
-                        title="Delete"
-                        aria-label="Delete"
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
