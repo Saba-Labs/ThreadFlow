@@ -723,7 +723,7 @@ export default function ModelList(props: ModelListProps) {
           <SimpleModal
             open={!!jwForId}
             onOpenChange={(v) => !v && setJwForId(null)}
-            title="Select Job Work"
+            title="Assign to"
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setJwForId(null)}>
