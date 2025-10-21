@@ -15,7 +15,7 @@ import {
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
   const [filter, setFilter] = useState<
-    "all" | "hold" | "running" | "completed"
+    "all" | "hold" | "running" | "completed" | "job"
   >("all");
 
   const filtered = useMemo(() => {
@@ -29,7 +29,13 @@ export default function ModelsAll() {
       return s === "pending" ? "hold" : (s as "hold" | "running" | "completed");
     };
     if (filter === "all") return pipeline.orders;
-    return pipeline.orders.filter((o) => statusOf(o) === filter);
+    if (filter === "job") {
+      return pipeline.orders.filter(
+        (o) => ((o as any).jobWorkIds || []).length > 0,
+      );
+    }
+
+    return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
 
   return (
@@ -51,6 +57,7 @@ export default function ModelsAll() {
               <SelectItem value="hold">Hold</SelectItem>
               <SelectItem value="running">Running</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="job">Job Work</SelectItem>
             </SelectContent>
           </Select>
           <Button asChild>

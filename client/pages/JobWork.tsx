@@ -1,32 +1,70 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SimpleModal from "@/components/ui/SimpleModal";
 import {
   useJobWorks,
   getJobWorks,
-  setJobWorks,
   addJobWork,
   updateJobWork,
   deleteJobWork,
   type JobWork,
 } from "@/lib/jobWorks";
-import { Trash2, Save, Plus } from "lucide-react";
+import { Trash2, Save, Plus, Pencil } from "lucide-react";
+import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 
 export default function JobWork() {
   const list = useJobWorks();
+  const pipeline = useProductionPipeline();
+
   const [local, setLocal] = useState<JobWork[]>(() => getJobWorks());
-  const [newName, setNewName] = useState("");
-  const [newDesc, setNewDesc] = useState("");
 
   useEffect(() => {
     setLocal(list);
   }, [list]);
 
-  const add = () => {
-    if (!newName.trim()) return;
-    addJobWork({ name: newName, description: newDesc });
-    setNewName("");
-    setNewDesc("");
+  // Modal state for add / edit
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<JobWork | null>(null);
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
+
+  useEffect(() => {
+    if (!modalOpen) {
+      setEditing(null);
+      setName("");
+      setDesc("");
+    }
+  }, [modalOpen]);
+
+  const openAdd = () => {
+    setEditing(null);
+    setName("");
+    setDesc("");
+    setModalOpen(true);
+  };
+
+  const openEdit = (j: JobWork) => {
+    setEditing(j);
+    setName(j.name);
+    setDesc(j.description);
+    setModalOpen(true);
+  };
+
+  const save = () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (editing) {
+      updateJobWork(editing.id, { name: trimmed, description: desc.trim() });
+    } else {
+      addJobWork({ name: trimmed, description: desc.trim() });
+    }
+    setModalOpen(false);
+  };
+
+  const handleDelete = (id: string) => {
+    // simple delete
+    deleteJobWork(id);
   };
 
   const saveAll = () => {
@@ -35,7 +73,26 @@ export default function JobWork() {
       name: j.name.trim(),
       description: j.description.trim(),
     }));
-    setJobWorks(cleaned);
+    // reuse setJobWorks through update functions by replacing store
+    // jobWorks lib exposes setJobWorks only internally here; to persist we update each
+    cleaned.forEach((j) =>
+      updateJobWork(j.id, { name: j.name, description: j.description }),
+    );
+  };
+
+  // helper: return unique model names that reference this job work id
+  const linkedModelsFor = (jwId: string) => {
+    const orders = pipeline.orders || [];
+    const set = new Set<string>();
+    for (const o of orders) {
+      if (
+        (o as any).jobWorkIds &&
+        ((o as any).jobWorkIds as string[]).includes(jwId)
+      ) {
+        set.add(o.modelName);
+      }
+    }
+    return Array.from(set);
   };
 
   return (
@@ -47,72 +104,61 @@ export default function JobWork() {
         </p>
       </div>
 
-      <div className="rounded-lg border bg-white p-4 space-y-3">
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Input
-            placeholder="Name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-          />
-          <Input
-            placeholder="Description"
-            value={newDesc}
-            onChange={(e) => setNewDesc(e.target.value)}
-          />
-        </div>
-        <div className="flex justify-end">
-          <Button onClick={add}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add
-          </Button>
-        </div>
-      </div>
-
-      <div className="rounded-lg border bg-white">
-        <div className="flex items-center justify-between p-3 border-b">
-          <div className="font-medium">All Job Works</div>
-          <Button variant="outline" size="sm" onClick={saveAll}>
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-        </div>
-        <div className="divide-y">
-          {local.map((j) => (
-            <div key={j.id} className="p-3 flex items-center gap-2">
-              <div className="flex-1 grid gap-2 sm:grid-cols-2">
-                <Input
-                  value={j.name}
-                  onChange={(e) =>
-                    setLocal((s) =>
-                      s.map((x) =>
-                        x.id === j.id ? { ...x, name: e.target.value } : x,
-                      ),
-                    )
-                  }
-                />
-                <Input
-                  value={j.description}
-                  onChange={(e) =>
-                    setLocal((s) =>
-                      s.map((x) =>
-                        x.id === j.id
-                          ? { ...x, description: e.target.value }
-                          : x,
-                      ),
-                    )
-                  }
-                />
-              </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => deleteJobWork(j.id)}
-                title="Delete"
+      {/* All Job Works list (card-style) */}
+      <div className="">
+        <div className="space-y-3">
+          {local.map((j) => {
+            const linked = linkedModelsFor(j.id);
+            return (
+              <div
+                key={j.id}
+                className="p-4 rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800 flex items-center justify-between"
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {j.name}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {linked.length > 0 ? (
+                      linked.map((m) => (
+                        <div
+                          key={m}
+                          className="text-red-600 dark:text-red-400 font-medium"
+                        >
+                          {m}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="italic text-xs text-gray-400">
+                        No models linked
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 ml-4">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Edit"
+                    aria-label="Edit"
+                    onClick={() => openEdit(j)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleDelete(j.id)}
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+
           {local.length === 0 && (
             <div className="p-6 text-sm text-muted-foreground">
               No job works yet.
@@ -120,6 +166,44 @@ export default function JobWork() {
           )}
         </div>
       </div>
+
+      {/* Floating Add Button */}
+      <button
+        aria-label="Add Job Work"
+        onClick={openAdd}
+        className="fixed right-6 bottom-6 z-50 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-4 py-3 shadow-lg hover:bg-primary/90 focus:outline-none"
+      >
+        <Plus className="h-4 w-4" />
+        <span className="hidden sm:inline">Add Job Work</span>
+      </button>
+
+      {/* Modal for add/edit */}
+      <SimpleModal
+        open={modalOpen}
+        onOpenChange={(v) => setModalOpen(v)}
+        title={editing ? "Edit Job Work" : "Add Job Work"}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={save}>{editing ? "Save" : "Add"}</Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <Input
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Input
+            placeholder="Description"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+          />
+        </div>
+      </SimpleModal>
     </div>
   );
 }

@@ -79,7 +79,13 @@ export default function ModelList(props: ModelListProps) {
     setSplitInputs((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const formatDate = (ts: number) => new Date(ts).toLocaleDateString();
+  const formatDate = (ts: number) => {
+    const d = new Date(ts);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(d.getFullYear());
+    return `${dd}/${mm}/${yyyy}`;
+  };
   const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
   const getPathLetterPills = (
@@ -169,7 +175,7 @@ export default function ModelList(props: ModelListProps) {
     if (st.status === "running") {
       const hasJW = ((o as any).jobWorkIds || []).length > 0;
       return hasJW
-        ? "bg-yellow-50 dark:bg-yellow-900/20"
+        ? "bg-purple-50 dark:bg-purple-900/20"
         : "bg-green-50 dark:bg-green-900/20";
     }
     return "";
@@ -319,21 +325,42 @@ export default function ModelList(props: ModelListProps) {
                                   ? "hold"
                                   : step.status;
                               return (
-                                <button onClick={() => toggleCardStatus(o)}>
-                                  <Badge
-                                    variant={
-                                      displayStatus === "running"
-                                        ? "success"
-                                        : displayStatus === "hold"
-                                          ? "destructive"
-                                          : "secondary"
-                                    }
-                                    className="cursor-pointer"
-                                    aria-label={`Set status for ${o.modelName}`}
-                                  >
-                                    {cap(displayStatus)}
-                                  </Badge>
-                                </button>
+                                <>
+                                  <button onClick={() => toggleCardStatus(o)}>
+                                    <Badge
+                                      variant={
+                                        displayStatus === "running"
+                                          ? "success"
+                                          : displayStatus === "hold"
+                                            ? "destructive"
+                                            : "secondary"
+                                      }
+                                      className="cursor-pointer"
+                                      aria-label={`Set status for ${o.modelName}`}
+                                    >
+                                      {cap(displayStatus)}
+                                    </Badge>
+                                  </button>
+                                  {((o as any).jobWorkIds || []).length > 0 && (
+                                    <div className="mt-1">
+                                      {jobWorks
+                                        .filter((j) =>
+                                          (
+                                            ((o as any).jobWorkIds ||
+                                              []) as string[]
+                                          ).includes(j.id),
+                                        )
+                                        .map((j) => (
+                                          <div
+                                            key={j.id}
+                                            className="text-sm text-muted-foreground"
+                                          >
+                                            {j.name}
+                                          </div>
+                                        ))}
+                                    </div>
+                                  )}
+                                </>
                               );
                             })()
                           )}
@@ -351,7 +378,11 @@ export default function ModelList(props: ModelListProps) {
                             </Button>
                             <Button
                               size="icon"
-                              variant="ghost"
+                              variant={
+                                ((o as any).jobWorkIds || []).length > 0
+                                  ? "default"
+                                  : "ghost"
+                              }
                               onClick={() => {
                                 setJwForId(o.id);
                                 setJwSelected(
@@ -521,20 +552,41 @@ export default function ModelList(props: ModelListProps) {
                                 );
                               })()}
 
-                              <button onClick={() => toggleCardStatus(o)}>
-                                <Badge
-                                  variant={
-                                    displayStatus === "running"
-                                      ? "success"
-                                      : displayStatus === "hold"
-                                        ? "destructive"
-                                        : "secondary"
-                                  }
-                                  className="shrink-0 cursor-pointer"
-                                >
-                                  {cap(displayStatus)}
-                                </Badge>
-                              </button>
+                              <>
+                                <button onClick={() => toggleCardStatus(o)}>
+                                  <Badge
+                                    variant={
+                                      displayStatus === "running"
+                                        ? "success"
+                                        : displayStatus === "hold"
+                                          ? "destructive"
+                                          : "secondary"
+                                    }
+                                    className="shrink-0 cursor-pointer"
+                                  >
+                                    {cap(displayStatus)}
+                                  </Badge>
+                                </button>
+                                {((o as any).jobWorkIds || []).length > 0 && (
+                                  <div className="mt-1 text-right">
+                                    {jobWorks
+                                      .filter((j) =>
+                                        (
+                                          ((o as any).jobWorkIds ||
+                                            []) as string[]
+                                        ).includes(j.id),
+                                      )
+                                      .map((j) => (
+                                        <div
+                                          key={j.id}
+                                          className="text-sm text-muted-foreground"
+                                        >
+                                          {j.name}
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
+                              </>
                             </>
                           );
                         })()}
@@ -554,7 +606,11 @@ export default function ModelList(props: ModelListProps) {
                       </Button>
                       <Button
                         size="icon"
-                        variant="ghost"
+                        variant={
+                          ((o as any).jobWorkIds || []).length > 0
+                            ? "default"
+                            : "ghost"
+                        }
                         onClick={() => {
                           setJwForId(o.id);
                           setJwSelected(

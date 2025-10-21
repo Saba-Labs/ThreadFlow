@@ -69,32 +69,28 @@ export default function SettingsProductionPath() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/settings"
+            aria-label="Back to settings"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
           <h1 className="text-2xl font-semibold tracking-tight">
             Production Path
           </h1>
-          <p className="text-muted-foreground max-w-prose">
-            Add, reorder or remove steps used in production paths.
-          </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/settings">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Settings
-          </Link>
-        </Button>
       </div>
 
       <section className="rounded-lg border bg-white p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-lg font-medium">Steps</h2>
-            <p className="text-sm text-muted-foreground">
-              Configure the machines and job work order.
-            </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={add} size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Step
+            <Button onClick={add} size="sm" aria-label="Add step">
+              <Plus className="h-4 w-4" />
             </Button>
             <Button variant="default" size="sm" onClick={save}>
               Save
