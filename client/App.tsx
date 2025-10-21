@@ -45,4 +45,28 @@ const App = () => (
   </QueryClientProvider>
 );
 
+// PWA: register service worker and forward beforeinstallprompt event to React
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then(() => {
+        console.log("Service worker registered");
+      })
+      .catch((err) => console.warn("SW registration failed", err));
+  });
+}
+
+// Forward beforeinstallprompt to app
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  (window as any).deferredPrompt = e;
+  window.dispatchEvent(new CustomEvent("pwa-beforeinstallprompt"));
+});
+
+window.addEventListener("appinstalled", () => {
+  (window as any).deferredPrompt = null;
+  window.dispatchEvent(new CustomEvent("pwa-appinstalled"));
+});
+
 createRoot(document.getElementById("root")!).render(<App />);

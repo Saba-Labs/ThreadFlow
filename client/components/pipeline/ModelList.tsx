@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -48,10 +48,11 @@ export default function ModelList(props: ModelListProps) {
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
-  const [splitInputs, setSplitInputs] = useState<number[]>([0, 0]);
+  const [splitInputs, setSplitInputs] = useState<number[]>([0]);
   const jobWorks = useJobWorks();
   const [jwForId, setJwForId] = useState<string | null>(null);
   const [jwSelected, setJwSelected] = useState<string[]>([]);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const sorted = useMemo(
     () => props.orders.slice().sort((a, b) => b.createdAt - a.createdAt),
@@ -65,15 +66,122 @@ export default function ModelList(props: ModelListProps) {
     ? sorted.find((o) => o.id === splitForId) || null
     : null;
 
+  const [splitAnim, setSplitAnim] = useState<{
+    parentId: string;
+    at: number;
+  } | null>(null);
+
   const handleSplit = () => {
     if (!splitForId) return;
     const validQuantities = splitInputs
       .map((q) => Math.max(0, Math.floor(q)))
       .filter((q) => q > 0);
     if (validQuantities.length === 0) return;
-    props.onSplit(splitForId, validQuantities);
+
+    const parentId = splitForId!;
+
+    // close modal immediately
     setSplitForId(null);
-    setSplitInputs([0, 0]);
+    setSplitInputs([0]);
+
+    // FLIP with WAAPI: measure before
+    const elsBefore = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-order-id]"),
+    ) as HTMLElement[];
+    const rectsBefore = new Map<string, DOMRect>();
+    elsBefore.forEach((el) => {
+      const id = el.getAttribute("data-order-id");
+      if (id) rectsBefore.set(id, el.getBoundingClientRect());
+    });
+
+    const sourceRect = rectsBefore.get(parentId) || null;
+
+    // perform split (synchronous state update)
+    props.onSplit(parentId, validQuantities);
+
+    // next paint: measure after and animate using WAAPI
+    requestAnimationFrame(() => {
+      const elsAfter = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-order-id]"),
+      ) as HTMLElement[];
+      // build a map of id -> all elements after
+      const elsAfterById = new Map<string, HTMLElement[]>();
+      elsAfter.forEach((el) => {
+        const id = el.getAttribute("data-order-id");
+        if (!id) return;
+        const arr = elsAfterById.get(id) || [];
+        arr.push(el);
+        elsAfterById.set(id, arr);
+      });
+
+      const DURATION = 3000;
+      const EASING = "cubic-bezier(.2,.9,.3,1)";
+
+      const animations: Animation[] = [];
+
+      // Only animate elements belonging to the affected parentId (parent row + its new children)
+      const elsToAnimate = elsAfter.filter((el) => {
+        const id = el.getAttribute("data-order-id");
+        const p = el.getAttribute("data-parent-id");
+        return id === parentId || p === parentId;
+      });
+
+      elsToAnimate.forEach((el) => {
+        const id = el.getAttribute("data-order-id")!;
+        const beforeRect =
+          rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
+        if (!beforeRect) return;
+        const afterRect = el.getBoundingClientRect();
+
+        const dx = beforeRect.left - afterRect.left;
+        const dy = beforeRect.top - afterRect.top;
+        const sx = beforeRect.width / afterRect.width;
+        const sy = beforeRect.height / afterRect.height;
+
+        const from = {
+          transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+          opacity: 0.85,
+        };
+        const to = { transform: "none", opacity: 1 };
+
+        try {
+          const anim = el.animate([from, to], {
+            duration: DURATION,
+            easing: EASING,
+            fill: "both",
+          });
+          animations.push(anim);
+        } catch (e) {
+          el.style.transition = `transform ${DURATION}ms ${EASING}, opacity ${Math.min(600, DURATION)}ms linear`;
+          el.style.transform = from.transform;
+          el.style.opacity = String(from.opacity);
+          requestAnimationFrame(() => {
+            el.style.transform = "";
+            el.style.opacity = "";
+          });
+        }
+      });
+
+      // when all animations finish, ensure cleanup
+      if (animations.length > 0) {
+        Promise.all(animations.map((a) => a.finished)).then(() => {
+          elsToAnimate.forEach((el) => {
+            el.style.transition = "";
+            el.style.transform = "";
+            el.style.opacity = "";
+          });
+        });
+      } else {
+        // fallback cleanup after duration
+        setTimeout(() => {
+          elsToAnimate.forEach((el) => {
+            el.style.transition = "";
+            el.style.transform = "";
+            el.style.opacity = "";
+          });
+        }, DURATION + 100);
+      }
+    });
   };
 
   const handleRemoveBatch = (index: number) => {
@@ -122,11 +230,11 @@ export default function ModelList(props: ModelListProps) {
         "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
       if (isCurrent) {
         if (step.status === "running") {
-          variantClass =
-            "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
+          // Use a dark pill with white text for running steps (matches status badge style)
+          variantClass = "bg-green-700 text-white dark:bg-green-600";
         } else if (step.status === "hold") {
-          variantClass =
-            "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
+          // Dark red pill with white text for hold
+          variantClass = "bg-red-600 text-white dark:bg-red-500";
         }
       } else if (isCompleted) {
         variantClass =
@@ -134,8 +242,8 @@ export default function ModelList(props: ModelListProps) {
       }
 
       if (isSelectedInCurrent) {
-        variantClass +=
-          " ring-2 ring-blue-500 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300";
+        // Selected for parallel: use the same dark green pill (no outer ring)
+        variantClass = "bg-green-700 text-white dark:bg-green-600";
       }
 
       const isClickable = isCurrentRunning && machineIndex >= 0;
@@ -244,6 +352,8 @@ export default function ModelList(props: ModelListProps) {
                     return (
                       <tr
                         key={o.id}
+                        data-order-id={o.id}
+                        data-parent-id={o.parentId ?? ""}
                         className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
                       >
                         {showDetails && (
@@ -441,7 +551,7 @@ export default function ModelList(props: ModelListProps) {
                                 variant="ghost"
                                 onClick={() => {
                                   setSplitForId(o.id);
-                                  setSplitInputs([0, 0]);
+                                  setSplitInputs([0]);
                                 }}
                                 title="Split into batches"
                                 aria-label="Split into batches"
@@ -451,7 +561,7 @@ export default function ModelList(props: ModelListProps) {
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                onClick={() => props.onDelete(o.id)}
+                                onClick={() => setDeleteConfirmId(o.id)}
                                 title="Delete"
                                 aria-label="Delete"
                               >
@@ -487,6 +597,8 @@ export default function ModelList(props: ModelListProps) {
               return (
                 <div
                   key={o.id}
+                  data-order-id={o.id}
+                  data-parent-id={o.parentId ?? ""}
                   className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -686,7 +798,7 @@ export default function ModelList(props: ModelListProps) {
                           variant="ghost"
                           onClick={() => {
                             setSplitForId(o.id);
-                            setSplitInputs([0, 0]);
+                            setSplitInputs([0]);
                           }}
                           title="Split into batches"
                           aria-label="Split into batches"
@@ -696,7 +808,7 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => props.onDelete(o.id)}
+                          onClick={() => setDeleteConfirmId(o.id)}
                           title="Delete"
                           aria-label="Delete"
                           className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
@@ -722,7 +834,7 @@ export default function ModelList(props: ModelListProps) {
           <SimpleModal
             open={!!jwForId}
             onOpenChange={(v) => !v && setJwForId(null)}
-            title="Select Job Work"
+            title="Assign to"
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setJwForId(null)}>
@@ -901,6 +1013,34 @@ export default function ModelList(props: ModelListProps) {
                 {splitFor?.quantity || 0}
               </p>
 
+              {/* Fraction presets */}
+              <div className="flex items-center gap-2">
+                {([0.25, 0.5, 0.75] as const).map((f) => {
+                  const total = splitFor?.quantity || 0;
+                  const part = Math.floor(total * f);
+                  const remainder = total - part;
+                  const disabled = part < 1 || remainder < 1;
+                  return (
+                    <Button
+                      key={f}
+                      variant={"outline"}
+                      size="sm"
+                      onClick={() => {
+                        if (!splitFor) return;
+                        if (disabled) return;
+                        setSplitInputs([part]);
+                      }}
+                      disabled={disabled}
+                    >
+                      {f === 0.25 ? "1/4" : f === 0.5 ? "1/2" : "3/4"}
+                    </Button>
+                  );
+                })}
+                <div className="ml-2 text-sm text-muted-foreground">
+                  Or enter manually
+                </div>
+              </div>
+
               <div className="space-y-2">
                 {splitInputs.map((q, i) => (
                   <div key={i} className="flex gap-2">
@@ -963,6 +1103,39 @@ export default function ModelList(props: ModelListProps) {
                   </div>
                 </div>
               )}
+            </div>
+          </SimpleModal>
+
+          {/* Delete confirmation modal */}
+          <SimpleModal
+            open={!!deleteConfirmId}
+            onOpenChange={(v) => !v && setDeleteConfirmId(null)}
+            title="Confirm delete"
+            footer={
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteConfirmId(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (deleteConfirmId) props.onDelete(deleteConfirmId);
+                    setDeleteConfirmId(null);
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            }
+          >
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete this model? This action cannot
+                be undone.
+              </p>
             </div>
           </SimpleModal>
         </div>

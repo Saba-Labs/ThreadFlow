@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ModelList from "@/components/pipeline/ModelList";
 import ModelForm from "@/components/pipeline/ModelForm";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
@@ -39,13 +39,38 @@ export default function ModelsAll() {
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
 
-  const [showDetails, setShowDetails] = useState(true);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Persist showDetails across navigation using localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("modelsAll.showDetails");
+      if (stored !== null) {
+        setShowDetails(stored === "true");
+      }
+    } catch (e) {
+      // ignore (e.g., SSR or privacy settings)
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "modelsAll.showDetails",
+        showDetails ? "true" : "false",
+      );
+    } catch (e) {
+      // ignore
+    }
+  }, [showDetails]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">All Models</h1>
+          <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
+            All Models
+          </h1>
           <Button
             variant="ghost"
             size="icon"
@@ -60,7 +85,7 @@ export default function ModelsAll() {
             )}
           </Button>
           <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
-            <SelectTrigger className="w-44">
+            <SelectTrigger className="w-32">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
