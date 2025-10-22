@@ -267,7 +267,9 @@ export default function AppLayout() {
       </header>
 
       <main className="container py-6">
-        <Outlet />
+        <SearchProvider>
+          <Outlet />
+        </SearchProvider>
       </main>
     </div>
   );
