@@ -9,6 +9,9 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
+      <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 text-yellow-900">
+        Debug: font-size control injected for testing. If you don't see radio options below, the build might be stale. (Remove after verification)
+      </div>
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-muted-foreground max-w-prose">
