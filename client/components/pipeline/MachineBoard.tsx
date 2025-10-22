@@ -48,7 +48,7 @@ export default function MachineBoard(props: {
           <section key={mtConfig.name} className="rounded-lg border bg-card/50 shadow-sm overflow-hidden">
             {/* expanded above (incoming) */}
             {expandedAbove[mtConfig.name] && (
-              <div className="p-3 border-b bg-muted/10">
+              <div className="p-3 border-b bg-sky-50">
                 <div className="text-sm font-semibold mb-2">Incoming</div>
                 {incoming.length === 0 ? (
                   <div className="text-sm text-muted-foreground">No incoming models</div>
