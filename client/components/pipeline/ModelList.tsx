@@ -319,32 +319,32 @@ export default function ModelList(props: ModelListProps) {
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-20">
                         Date
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 flex-1 min-w-32">
                       Model
                     </th>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-16">
                         Qty
                       </th>
                     )}
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-40">
                         Path
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-40">
                       Current
                     </th>
                     {showDetails && (
                       <>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-24">
                           Status
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-32">
                           Actions
                         </th>
                       </>
