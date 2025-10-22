@@ -7,7 +7,6 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import SettingsProductionPath from "./pages/SettingsProductionPath";
-import { FontSizeProvider } from "@/hooks/use-font-size";
 import AppLayout from "@/components/layout/AppLayout";
 import ModelsAll from "./pages/ModelsAll";
 import JobWork from "./pages/JobWork";
