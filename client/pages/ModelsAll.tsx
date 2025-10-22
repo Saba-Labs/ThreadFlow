@@ -39,7 +39,7 @@ export default function ModelsAll() {
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
 
-  const [showDetails, setShowDetails] = useState(true);
+  const [showDetails, setShowDetails] = useState(false);
 
   // Persist showDetails across navigation using localStorage
   useEffect(() => {
