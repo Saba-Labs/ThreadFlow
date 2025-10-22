@@ -113,7 +113,6 @@ export default function ModelsAll() {
           onToggleParallelMachine={pipeline.toggleParallelMachine}
           setOrderJobWorks={pipeline.setOrderJobWorks}
           showDetails={showDetails}
-          resetExpandedSignal={resetExpandedIds}
         />
         <Button
           asChild
