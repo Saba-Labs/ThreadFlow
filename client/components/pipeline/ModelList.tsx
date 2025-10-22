@@ -332,7 +332,7 @@ export default function ModelList(props: ModelListProps) {
                       </th>
                     )}
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '160px'}}>
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '240px'}}>
                         Path
                       </th>
                     )}
