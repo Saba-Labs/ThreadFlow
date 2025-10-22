@@ -389,7 +389,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3" style={{width: '160px'}}>
+                            <td className="p-3" style={{width: '240px'}}>
                               <div className="flex flex-wrap items-center gap-1">
                                 {getPathLetterPills(o, (orderId, stepIdx) => {
                                   const stepAtIdx = o.steps[stepIdx];
