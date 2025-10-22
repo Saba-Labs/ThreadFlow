@@ -12,6 +12,7 @@ import {
 } from "@/lib/jobWorks";
 import { Trash2, Save, Plus, Pencil } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { useSearch } from "@/context/SearchContext";
 
 export default function JobWork() {
   const list = useJobWorks();
