@@ -112,7 +112,7 @@ export default function ModelsAll() {
 
       <div className="-mx-4 sm:-mx-6 px-0 sm:px-0">
         <ModelList
-          orders={filtered}
+          orders={visible}
           onDelete={pipeline.deleteOrder}
           onNext={(id) => pipeline.moveToNextStep(id)}
           onPrev={(id) => pipeline.moveToPrevStep(id)}
