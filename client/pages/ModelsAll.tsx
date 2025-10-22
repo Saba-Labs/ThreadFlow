@@ -77,6 +77,7 @@ export default function ModelsAll() {
             aria-label={showDetails ? "Hide details" : "Show details"}
             onClick={() => setShowDetails((s) => !s)}
             title={showDetails ? "Hide details" : "Show details"}
+            className="lg:hidden"
           >
             {showDetails ? (
               <Eye className="h-4 w-4" />
