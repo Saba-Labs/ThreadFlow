@@ -10,51 +10,61 @@ export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: 
       role="img"
     >
       <defs>
-        <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#0ea5e9" />
-          <stop offset="100%" stopColor="#06b6d4" />
+        {/* Left shape gradient - blue to deep blue */}
+        <linearGradient id="leftGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#22d3ee" />
+          <stop offset="100%" stopColor="#3b27f5" />
         </linearGradient>
         
-        <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#6366f1" />
+        {/* Right shape gradient - cyan to lime green */}
+        <linearGradient id="rightGrad" x1="100%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a3e635" />
+          <stop offset="100%" stopColor="#22d3ee" />
         </linearGradient>
+        
+        {/* Center overlap gradient */}
+        <radialGradient id="centerGrad">
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#0891b2" />
+        </radialGradient>
       </defs>
 
-      {/* Rounded square container */}
-      <rect 
-        x="15" 
-        y="15" 
-        width="170" 
-        height="170" 
-        rx="38" 
-        fill="url(#mainGrad)"
+      {/* Left flowing shape */}
+      <path
+        d="M 50 100 
+           C 50 65, 65 50, 85 50
+           C 105 50, 115 65, 115 85
+           C 115 105, 105 115, 100 120
+           C 95 125, 90 130, 90 140
+           C 90 150, 95 155, 100 155
+           C 85 155, 70 145, 60 130
+           C 50 120, 50 110, 50 100 Z"
+        fill="url(#leftGrad)"
+        opacity="0.95"
       />
 
-      {/* Bold letter T */}
+      {/* Right flowing shape */}
       <path
-        d="M 60 65 L 140 65 L 140 85 L 110 85 L 110 145 L 90 145 L 90 85 L 60 85 Z"
-        fill="#ffffff"
+        d="M 150 100
+           C 150 65, 135 50, 115 50
+           C 95 50, 85 65, 85 85
+           C 85 105, 95 115, 100 120
+           C 105 125, 110 130, 110 140
+           C 110 150, 105 155, 100 155
+           C 115 155, 130 145, 140 130
+           C 150 120, 150 110, 150 100 Z"
+        fill="url(#rightGrad)"
+        opacity="0.95"
       />
 
-      {/* Flow arrow integrated into T */}
-      <path
-        d="M 130 105 L 155 105 L 145 95 M 155 105 L 145 115"
-        stroke="#ffffff"
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-
-      {/* Thread line accent */}
-      <path
-        d="M 50 125 Q 100 115, 150 125"
-        stroke="url(#accentGrad)"
-        strokeWidth="4"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.8"
+      {/* Center overlap shape */}
+      <ellipse
+        cx="100"
+        cy="100"
+        rx="28"
+        ry="35"
+        fill="url(#centerGrad)"
+        opacity="0.85"
       />
     </svg>
   );
