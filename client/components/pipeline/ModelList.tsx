@@ -354,6 +354,7 @@ export default function ModelList(props: ModelListProps) {
                     const i = o.currentStepIndex;
                     const step = o.steps[i];
                     const bg = statusBgClass(o);
+                    const isExpanded = showDetails || expandedIds.includes(o.id);
                     return (
                       <tr
                         key={o.id}
