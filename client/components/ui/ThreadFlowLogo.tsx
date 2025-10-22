@@ -8,36 +8,44 @@ export default function ThreadFlowLogo({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 100"
+      viewBox="0 0 200 200"
       className={className}
       aria-label="ThreadFlow logo"
       role="img"
+      preserveAspectRatio="xMidYMid meet"
     >
       <defs>
-        <linearGradient id="bluGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#0891b2" />
+        <linearGradient id="leftGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#06b6d4" />
           <stop offset="100%" stopColor="#0369a1" />
         </linearGradient>
-        <linearGradient id="greenGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id="rightGradient" x1="100%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#84cc16" />
-          <stop offset="100%" stopColor="#22d3ee" />
+          <stop offset="100%" stopColor="#06b6d4" />
         </linearGradient>
+        <filter id="smoothFilter">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
+        </filter>
       </defs>
 
-      {/* Left blue shape */}
+      {/* Left blue rounded shape */}
       <path
-        d="M 30 15 Q 20 20 20 35 L 20 65 Q 20 80 30 85 Q 45 95 50 50 Q 45 5 30 15"
-        fill="url(#bluGradient)"
+        d="M 60 40 C 45 40 35 55 35 75 C 35 95 45 110 60 115 C 75 105 85 85 100 70 C 90 55 75 40 60 40 Z"
+        fill="url(#leftGradient)"
+        strokeLinejoin="round"
+        strokeLinecap="round"
       />
 
-      {/* Right green shape */}
+      {/* Right green/cyan rounded shape */}
       <path
-        d="M 70 15 Q 80 20 80 35 L 80 65 Q 80 80 70 85 Q 55 95 50 50 Q 55 5 70 15"
-        fill="url(#greenGradient)"
+        d="M 140 40 C 155 40 165 55 165 75 C 165 95 155 110 140 115 C 125 105 115 85 100 70 C 110 55 125 40 140 40 Z"
+        fill="url(#rightGradient)"
+        strokeLinejoin="round"
+        strokeLinecap="round"
       />
 
-      {/* Center overlap for depth */}
-      <ellipse cx="50" cy="50" rx="12" ry="18" fill="#0a7ea4" opacity="0.6" />
+      {/* Center overlap ellipse for depth effect */}
+      <ellipse cx="100" cy="72" rx="18" ry="24" fill="#0d9488" opacity="0.7" />
     </svg>
   );
 }
