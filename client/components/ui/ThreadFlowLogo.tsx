@@ -2,32 +2,72 @@ import React from "react";
 
 export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" className={className} aria-label="ThreadFlow logo" role="img">
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 200 200" 
+      className={className} 
+      aria-label="ThreadFlow logo" 
+      role="img"
+    >
       <defs>
-        <linearGradient id="gB" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#33d6d0" />
-          <stop offset="1" stopColor="#18b7ff" />
+        {/* Gradient from turquoise to lime */}
+        <linearGradient id="flowGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00d4d8" />
+          <stop offset="100%" stopColor="#7dd957" />
         </linearGradient>
+        
+        {/* Gradient from blue to turquoise */}
+        <linearGradient id="flowGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1e5aa8" />
+          <stop offset="100%" stopColor="#00b4d8" />
+        </linearGradient>
+        
+        {/* Center gradient */}
+        <radialGradient id="centerGradient">
+          <stop offset="0%" stopColor="#0891b2" />
+          <stop offset="100%" stopColor="#06b6d4" />
+        </radialGradient>
       </defs>
 
-      {/* Connected workflow nodes */}
-      <circle cx="16" cy="32" r="6" fill="#e8f4f8" stroke="#18b7ff" strokeWidth="2" />
-      <circle cx="32" cy="20" r="6" fill="#e8f4f8" stroke="#16c7b8" strokeWidth="2" />
-      <circle cx="48" cy="32" r="6" fill="#e8f4f8" stroke="#33d6d0" strokeWidth="2" />
+      {/* Left flowing shape */}
+      <path
+        d="M 60 100 
+           C 60 60, 80 40, 100 40
+           C 100 60, 90 80, 80 100
+           C 90 120, 100 140, 100 160
+           C 80 160, 60 140, 60 100 Z"
+        fill="url(#flowGradient2)"
+        opacity="0.9"
+      />
 
-      {/* Connection lines */}
-      <line x1="21" y1="29" x2="27" y2="23" stroke="url(#gB)" strokeWidth="2" strokeLinecap="round" />
-      <line x1="37" y1="23" x2="43" y2="29" stroke="url(#gB)" strokeWidth="2" strokeLinecap="round" />
+      {/* Right flowing shape */}
+      <path
+        d="M 140 100
+           C 140 60, 120 40, 100 40
+           C 100 60, 110 80, 120 100
+           C 110 120, 100 140, 100 160
+           C 120 160, 140 140, 140 100 Z"
+        fill="url(#flowGradient1)"
+        opacity="0.9"
+      />
 
-      {/* Progress indicators (dots) */}
-      <circle cx="16" cy="32" r="2.5" fill="#18b7ff" />
-      <circle cx="32" cy="20" r="2.5" fill="#16c7b8" />
-
-      {/* Completion check */}
-      <path d="M44 31 L47 34 L52 28" fill="none" stroke="#0b4d85" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-
-      {/* Thread element - flowing line */}
-      <path d="M16 44 Q32 48 48 44" fill="none" stroke="url(#gB)" strokeWidth="1.5" strokeDasharray="2,3" opacity="0.6" />
+      {/* Center connection point */}
+      <circle
+        cx="100"
+        cy="100"
+        r="18"
+        fill="url(#centerGradient)"
+        opacity="0.95"
+      />
+      
+      {/* Inner highlight */}
+      <circle
+        cx="100"
+        cy="100"
+        r="8"
+        fill="#ffffff"
+        opacity="0.3"
+      />
     </svg>
   );
 }
