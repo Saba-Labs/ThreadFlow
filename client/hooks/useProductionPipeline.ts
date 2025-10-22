@@ -100,7 +100,7 @@ export function useProductionPipeline() {
       const order: WorkOrder = {
         id: uid("order"),
         modelName: input.modelName.trim(),
-        quantity: Math.max(1, Math.floor(input.quantity)),
+        quantity: Math.max(0, Math.floor(input.quantity)),
         createdAt:
           typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
@@ -295,7 +295,8 @@ export function useProductionPipeline() {
         .map((q) => Math.max(0, Math.floor(q)))
         .filter((q) => q > 0);
       const sum = valid.reduce((a, b) => a + b, 0);
-      if (sum <= 0 || sum >= src.quantity) return s;
+      if (sum <= 0) return s;
+      if (src.quantity > 0 && sum >= src.quantity) return s;
       const remainder = src.quantity - sum;
       const base = (q: number): WorkOrder => ({
         id: uid("order"),

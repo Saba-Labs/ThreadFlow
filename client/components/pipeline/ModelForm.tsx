@@ -12,6 +12,32 @@ export interface NewPathStep {
   externalUnitName?: string;
 }
 
+function parseModelName(fullName: string) {
+  const regex = /^([^\(]+?)(?:\s*\(([^\)]+)\))?(?:\s*\(([^\)]+)\))?$/;
+  const match = fullName.trim().match(regex);
+
+  if (match) {
+    return {
+      part1: match[1].trim(),
+      part2: match[2] || "",
+      part3: match[3] || "",
+    };
+  }
+
+  return { part1: fullName, part2: "", part3: "" };
+}
+
+function combineModelName(part1: string, part2: string, part3: string): string {
+  let result = part1.trim();
+  if (part2.trim()) {
+    result += ` (${part2.trim()})`;
+  }
+  if (part3.trim()) {
+    result += ` (${part3.trim()})`;
+  }
+  return result;
+}
+
 export default function ModelForm(props: {
   onCreate: (data: {
     modelName: string;
@@ -30,8 +56,10 @@ export default function ModelForm(props: {
   onCancel?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [modelName, setModelName] = useState("");
-  const [quantity, setQuantity] = useState(100);
+  const [modelNamePart1, setModelNamePart1] = useState("");
+  const [modelNamePart2, setModelNamePart2] = useState("");
+  const [modelNamePart3, setModelNamePart3] = useState("");
+  const [quantity, setQuantity] = useState<number | null>(null);
   const [dateStr, setDateStr] = useState(() =>
     new Date().toISOString().slice(0, 10),
   );
@@ -45,8 +73,11 @@ export default function ModelForm(props: {
   // initialize from initialData, otherwise populate default path when modal opens or when rendered inline
   useEffect(() => {
     if (props.initialData) {
-      setModelName(props.initialData.modelName || "");
-      setQuantity(props.initialData.quantity ?? 100);
+      const parsed = parseModelName(props.initialData.modelName || "");
+      setModelNamePart1(parsed.part1);
+      setModelNamePart2(parsed.part2);
+      setModelNamePart3(parsed.part3);
+      setQuantity(props.initialData.quantity || null);
       setDateStr(
         new Date(props.initialData.createdAt).toISOString().slice(0, 10),
       );
@@ -100,21 +131,26 @@ export default function ModelForm(props: {
   };
 
   const reset = () => {
-    setModelName("");
-    setQuantity(100);
+    setModelNamePart1("");
+    setModelNamePart2("");
+    setModelNamePart3("");
+    setQuantity(null);
     setDateStr(new Date().toISOString().slice(0, 10));
     setSelectedMachines(new Set());
     setIncludeJobWork(false);
   };
 
   const submit = () => {
-    if (!modelName.trim()) return;
+    if (!modelNamePart1.trim()) return;
     const path = buildPath();
     if (path.length === 0) return;
 
+    const fullModelName = combineModelName(modelNamePart1, modelNamePart2, modelNamePart3);
+    const quantityValue = quantity ? Math.max(0, Math.floor(quantity)) : 0;
+
     props.onCreate({
-      modelName,
-      quantity: Math.max(1, Math.floor(quantity)),
+      modelName: fullModelName,
+      quantity: quantityValue,
       createdAt: new Date(dateStr).getTime(),
       path,
     });
@@ -128,21 +164,34 @@ export default function ModelForm(props: {
         Define quantity, date, and select which production paths to include.
       </p>
       <div className="grid gap-4">
-        <div className="grid gap-2 sm:grid-cols-3">
-          <div>
-            <label className="text-sm font-medium">Model name</label>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Model name</label>
+          <div className="grid gap-2 grid-cols-3">
             <Input
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
-              placeholder="e.g., KIDS TEE M1"
+              value={modelNamePart1}
+              onChange={(e) => setModelNamePart1(e.target.value)}
+              placeholder="e.g., Knot"
+            />
+            <Input
+              value={modelNamePart2}
+              onChange={(e) => setModelNamePart2(e.target.value)}
+              placeholder="e.g., L (optional)"
+            />
+            <Input
+              value={modelNamePart3}
+              onChange={(e) => setModelNamePart3(e.target.value)}
+              placeholder="e.g., Spl (optional)"
             />
           </div>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
           <div>
             <label className="text-sm font-medium">Quantity</label>
             <Input
               type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
+              value={quantity ?? ""}
+              onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : null)}
+              placeholder="Enter quantity"
             />
           </div>
           <div>
@@ -156,46 +205,49 @@ export default function ModelForm(props: {
         </div>
         <div className="space-y-3">
           <label className="text-sm font-medium">Production Path</label>
-          <div className="rounded-md border p-3 space-y-2 bg-muted/30">
-            {machineTypes.map((mt) => {
-              if (mt.name === "Job Work") {
-                return (
-                  <div key={mt.name} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`jobwork-${mt.name}`}
-                      checked={includeJobWork}
-                      onCheckedChange={(checked) =>
-                        setIncludeJobWork(checked === true)
-                      }
-                    />
-                    <label
-                      htmlFor={`jobwork-${mt.name}`}
-                      className="text-sm cursor-pointer flex-1"
-                    >
-                      {mt.name}
-                    </label>
-                  </div>
-                );
-              }
-              return (
-                <div key={mt.name} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`machine-${mt.name}`}
-                    checked={selectedMachines.has(mt.name)}
-                    onCheckedChange={() => toggleMachine(mt.name)}
-                  />
-                  <label
-                    htmlFor={`machine-${mt.name}`}
-                    className="text-sm cursor-pointer flex-1"
-                  >
-                    {mt.name}
-                  </label>
-                </div>
-              );
-            })}
-            {machineTypes.length === 0 && (
+          <div className="rounded-md border p-3 bg-muted/30">
+            {machineTypes.length === 0 ? (
               <div className="p-4 text-sm text-muted-foreground text-center">
                 No production paths configured. Add them in Settings.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {machineTypes.map((mt) => {
+                  if (mt.name === "Job Work") {
+                    return (
+                      <div key={mt.name} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`jobwork-${mt.name}`}
+                          checked={includeJobWork}
+                          onCheckedChange={(checked) =>
+                            setIncludeJobWork(checked === true)
+                          }
+                        />
+                        <label
+                          htmlFor={`jobwork-${mt.name}`}
+                          className="text-sm cursor-pointer flex-1"
+                        >
+                          {mt.name}
+                        </label>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={mt.name} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`machine-${mt.name}`}
+                        checked={selectedMachines.has(mt.name)}
+                        onCheckedChange={() => toggleMachine(mt.name)}
+                      />
+                      <label
+                        htmlFor={`machine-${mt.name}`}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {mt.name}
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

@@ -8,9 +8,6 @@ export default function NewModel() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Create New Model</h1>
-      <p className="text-muted-foreground">
-        Use the form below to add a new work order.
-      </p>
       <ModelForm
         inline
         onCreate={(data) => {

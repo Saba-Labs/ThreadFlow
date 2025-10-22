@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -359,9 +359,8 @@ export default function ModelList(props: ModelListProps) {
                     const isExpanded =
                       showDetails || expandedIds.includes(o.id);
                     return (
-                      <>
+                      <Fragment key={o.id}>
                         <tr
-                          key={o.id}
                           data-order-id={o.id}
                           data-parent-id={o.parentId ?? ""}
                           className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
@@ -377,14 +376,14 @@ export default function ModelList(props: ModelListProps) {
                               className="text-left w-full truncate"
                             >
                               {o.modelName}{" "}
-                              {!showDetails && (
+                              {!showDetails && o.quantity > 0 && (
                                 <span className="text-muted-foreground">
                                   ({o.quantity})
                                 </span>
                               )}
                             </button>
                           </td>
-                          {showDetails && (
+                          {showDetails && o.quantity > 0 && (
                             <td className="p-3 text-gray-700 dark:text-gray-300">
                               {o.quantity}
                             </td>
@@ -445,9 +444,9 @@ export default function ModelList(props: ModelListProps) {
                                           {primaryMachine}
                                         </div>
                                         {selectedMachines.map(
-                                          (machine, idx) => (
+                                          (machine) => (
                                             <div
-                                              key={idx}
+                                              key={machine}
                                               className="font-medium text-gray-900 dark:text-gray-100"
                                             >
                                               {machine}
@@ -595,9 +594,11 @@ export default function ModelList(props: ModelListProps) {
                                   <div className="text-sm text-muted-foreground">
                                     Date: {formatDate(o.createdAt)}
                                   </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Qty: {o.quantity}
-                                  </div>
+                                  {o.quantity > 0 && (
+                                    <div className="text-sm text-muted-foreground">
+                                      Qty: {o.quantity}
+                                    </div>
+                                  )}
                                   <div className="flex flex-wrap items-center gap-1">
                                     {getPathLetterPills(o)}
                                   </div>
@@ -616,7 +617,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     );
                   })}
                   {sorted.length === 0 && (
@@ -657,7 +658,7 @@ export default function ModelList(props: ModelListProps) {
                           className="text-left w-full truncate"
                         >
                           {o.modelName}{" "}
-                          {!showDetails && (
+                          {!showDetails && o.quantity > 0 && (
                             <span className="text-muted-foreground">
                               ({o.quantity})
                             </span>
@@ -671,7 +672,7 @@ export default function ModelList(props: ModelListProps) {
                               <CalendarDays className="h-3.5 w-3.5" />{" "}
                               {formatDate(o.createdAt)}
                             </span>
-                            <span>Qty: {o.quantity}</span>
+                            {o.quantity > 0 && <span>Qty: {o.quantity}</span>}
                           </>
                         )}
                       </div>
@@ -737,9 +738,9 @@ export default function ModelList(props: ModelListProps) {
                                 if (selectedMachines.length === 0) return null;
                                 return (
                                   <div className="text-sm text-right">
-                                    {selectedMachines.map((m, idx) => (
+                                    {selectedMachines.map((m) => (
                                       <div
-                                        key={idx}
+                                        key={m}
                                         className="font-medium text-gray-900 dark:text-gray-100"
                                       >
                                         {m}
@@ -1091,7 +1092,7 @@ export default function ModelList(props: ModelListProps) {
 
               <div className="space-y-2">
                 {splitInputs.map((q, i) => (
-                  <div key={i} className="flex gap-2">
+                  <div key={`split-${i}`} className="flex gap-2">
                     <div className="flex-1">
                       <Input
                         type="number"
@@ -1140,7 +1141,7 @@ export default function ModelList(props: ModelListProps) {
                     {splitInputs.map(
                       (q, i) =>
                         q > 0 && (
-                          <div key={i}>
+                          <div key={`batch-summary-${i}`}>
                             Batch {i + 1}: {q} units
                           </div>
                         ),
