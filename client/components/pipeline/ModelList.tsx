@@ -136,7 +136,7 @@ export default function ModelList(props: ModelListProps) {
         elsAfterById.set(id, arr);
       });
 
-      const DURATION = 200;
+      const DURATION = 1200;
       const EASING = "cubic-bezier(.2,.9,.3,1)";
 
       const animations: Animation[] = [];
