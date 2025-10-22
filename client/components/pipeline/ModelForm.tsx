@@ -205,46 +205,49 @@ export default function ModelForm(props: {
         </div>
         <div className="space-y-3">
           <label className="text-sm font-medium">Production Path</label>
-          <div className="rounded-md border p-3 space-y-2 bg-muted/30">
-            {machineTypes.map((mt) => {
-              if (mt.name === "Job Work") {
-                return (
-                  <div key={mt.name} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`jobwork-${mt.name}`}
-                      checked={includeJobWork}
-                      onCheckedChange={(checked) =>
-                        setIncludeJobWork(checked === true)
-                      }
-                    />
-                    <label
-                      htmlFor={`jobwork-${mt.name}`}
-                      className="text-sm cursor-pointer flex-1"
-                    >
-                      {mt.name}
-                    </label>
-                  </div>
-                );
-              }
-              return (
-                <div key={mt.name} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`machine-${mt.name}`}
-                    checked={selectedMachines.has(mt.name)}
-                    onCheckedChange={() => toggleMachine(mt.name)}
-                  />
-                  <label
-                    htmlFor={`machine-${mt.name}`}
-                    className="text-sm cursor-pointer flex-1"
-                  >
-                    {mt.name}
-                  </label>
-                </div>
-              );
-            })}
-            {machineTypes.length === 0 && (
+          <div className="rounded-md border p-3 bg-muted/30">
+            {machineTypes.length === 0 ? (
               <div className="p-4 text-sm text-muted-foreground text-center">
                 No production paths configured. Add them in Settings.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {machineTypes.map((mt) => {
+                  if (mt.name === "Job Work") {
+                    return (
+                      <div key={mt.name} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`jobwork-${mt.name}`}
+                          checked={includeJobWork}
+                          onCheckedChange={(checked) =>
+                            setIncludeJobWork(checked === true)
+                          }
+                        />
+                        <label
+                          htmlFor={`jobwork-${mt.name}`}
+                          className="text-sm cursor-pointer flex-1"
+                        >
+                          {mt.name}
+                        </label>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={mt.name} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`machine-${mt.name}`}
+                        checked={selectedMachines.has(mt.name)}
+                        onCheckedChange={() => toggleMachine(mt.name)}
+                      />
+                      <label
+                        htmlFor={`machine-${mt.name}`}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {mt.name}
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
