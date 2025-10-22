@@ -1,10 +1,6 @@
 import React from "react";
 
-export default function ThreadFlowLogo({
-  className = "h-8 w-8",
-}: {
-  className?: string;
-}) {
+export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -13,30 +9,24 @@ export default function ThreadFlowLogo({
       aria-label="ThreadFlow logo"
       role="img"
     >
-      {/* Left blue square rotated */}
-      <rect
-        x="8"
-        y="16"
-        width="24"
-        height="24"
-        rx="4"
-        fill="#0369a1"
-        transform="rotate(-15 20 28)"
-      />
+      <defs>
+        <linearGradient id="tfG" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor="#06B6D4" />
+          <stop offset="1" stopColor="#10B981" />
+        </linearGradient>
+      </defs>
 
-      {/* Right green square rotated opposite direction */}
-      <rect
-        x="32"
-        y="16"
-        width="24"
-        height="24"
-        rx="4"
-        fill="#22c55e"
-        transform="rotate(15 44 28)"
-      />
+      {/* Rounded square background */}
+      <rect x="2" y="2" width="60" height="60" rx="10" fill="url(#tfG)" />
 
-      {/* Center diamond shape for overlap */}
-      <polygon points="32,16 40,32 32,48 24,32" fill="#06b6d4" />
+      {/* Stylized thread mark: vertical stem + flowing curve */}
+      <g transform="translate(0,0)" fill="none" stroke="#0F172A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M32 14 L32 32" strokeOpacity="0.95" strokeWidth="4" />
+        <path d="M32 32 C 44 36, 46 48, 38 54 C 30 60, 18 58, 14 46" strokeOpacity="0.95" strokeWidth="4" />
+      </g>
+
+      {/* Small dot to represent the thread head */}
+      <circle cx="32" cy="12" r="3" fill="#0F172A" />
     </svg>
   );
 }
