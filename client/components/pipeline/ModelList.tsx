@@ -356,6 +356,7 @@ export default function ModelList(props: ModelListProps) {
                     const bg = statusBgClass(o);
                     const isExpanded = showDetails || expandedIds.includes(o.id);
                     return (
+                      <>
                       <tr
                         key={o.id}
                         data-order-id={o.id}
@@ -577,6 +578,23 @@ export default function ModelList(props: ModelListProps) {
                           </td>
                         )}
                       </tr>
+                      {expandedIds.includes(o.id) && (
+                        <tr>
+                          <td colSpan={emptyColSpan} className="p-2">
+                            <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-3 rounded">
+                              <div className="flex flex-col gap-2">
+                                <div className="text-sm text-muted-foreground">Date: {formatDate(o.createdAt)}</div>
+                                <div className="text-sm text-muted-foreground">Qty: {o.quantity}</div>
+                                <div className="flex flex-wrap items-center gap-1">{getPathLetterPills(o)}</div>
+                                <div className="mt-2">
+                                  <Button size="sm" onClick={() => navigate(`/models/${o.id}/edit`)}>Open</Button>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
                     );
                   })}
                   {sorted.length === 0 && (
