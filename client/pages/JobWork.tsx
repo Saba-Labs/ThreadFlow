@@ -96,6 +96,21 @@ export default function JobWork() {
     return Array.from(set);
   };
 
+  const { query } = useSearch();
+  const displayed = ((): typeof local => {
+    const q = (query || "").trim().toLowerCase();
+    if (!q) return local;
+    return local.filter((j) => {
+      if (j.name.toLowerCase().includes(q)) return true;
+      const linked = linkedModelsFor(j.id);
+      if (linked.some((m) => m.toLowerCase().includes(q))) return true;
+      // search model names in pipeline orders linked to this job work
+      return pipeline.orders.some(
+        (o) => ((o.jobWorkIds || []).includes(j.id) && o.modelName.toLowerCase().includes(q)),
+      );
+    });
+  })();
+
   return (
     <div className="space-y-6">
       <div>
