@@ -123,7 +123,7 @@ export default function JobWork() {
       {/* All Job Works list (card-style) */}
       <div className="">
         <div className="space-y-3">
-          {local.map((j) => {
+          {displayed.map((j) => {
             const linked = linkedModelsFor(j.id);
             return (
               <div
