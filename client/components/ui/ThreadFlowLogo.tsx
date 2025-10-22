@@ -10,26 +10,31 @@ export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: 
       role="img"
     >
       <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#667eea" />
+          <stop offset="100%" stopColor="#764ba2" />
+        </linearGradient>
+        
         <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="50%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#d946ef" />
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="50%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#8b5cf6" />
         </linearGradient>
         
         <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="50%" stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#6366f1" />
-        </linearGradient>
-        
-        <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#10b981" />
           <stop offset="50%" stopColor="#06b6d4" />
           <stop offset="100%" stopColor="#3b82f6" />
         </linearGradient>
+        
+        <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#f59e0b" />
+          <stop offset="50%" stopColor="#ef4444" />
+          <stop offset="100%" stopColor="#ec4899" />
+        </linearGradient>
 
         <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
           <feMerge>
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
@@ -37,32 +42,53 @@ export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: 
         </filter>
       </defs>
 
+      {/* Rounded square background */}
+      <rect 
+        x="20" 
+        y="20" 
+        width="160" 
+        height="160" 
+        rx="35" 
+        fill="url(#bgGrad)"
+        filter="url(#glow)"
+      />
+
+      {/* Inner rounded square for depth */}
+      <rect 
+        x="25" 
+        y="25" 
+        width="150" 
+        height="150" 
+        rx="32" 
+        fill="#ffffff"
+        opacity="0.08"
+      />
+
       {/* Dynamic flowing ribbon */}
       <path
-        d="M 40 100 Q 70 60, 100 80 T 160 100 Q 130 140, 100 120 T 40 100 Z"
+        d="M 55 100 Q 75 70, 100 85 T 145 100 Q 125 130, 100 115 T 55 100 Z"
         fill="url(#g1)"
-        opacity="0.85"
-        filter="url(#glow)"
+        opacity="0.9"
       />
 
       {/* Second layer - offset */}
       <path
-        d="M 50 90 Q 80 55, 110 75 T 165 95 Q 135 130, 110 115 T 50 90 Z"
+        d="M 60 95 Q 80 68, 105 82 T 145 97 Q 125 125, 105 112 T 60 95 Z"
         fill="url(#g2)"
-        opacity="0.7"
+        opacity="0.75"
       />
 
       {/* Third layer accent */}
       <path
-        d="M 45 110 Q 75 80, 100 95 T 155 115 Q 125 145, 100 130 T 45 110 Z"
+        d="M 58 105 Q 78 80, 100 92 T 142 108 Q 122 133, 100 120 T 58 105 Z"
         fill="url(#g3)"
-        opacity="0.6"
+        opacity="0.65"
       />
 
-      {/* Center orb */}
-      <circle cx="100" cy="100" r="22" fill="url(#g1)" opacity="0.9" filter="url(#glow)" />
-      <circle cx="100" cy="100" r="12" fill="#ffffff" opacity="0.9" />
-      <circle cx="100" cy="100" r="6" fill="url(#g2)" opacity="0.8" />
+      {/* Center orb - the focal point */}
+      <circle cx="100" cy="100" r="20" fill="#ffffff" opacity="0.95" filter="url(#glow)" />
+      <circle cx="100" cy="100" r="14" fill="url(#g1)" opacity="0.9" />
+      <circle cx="100" cy="100" r="7" fill="#ffffff" opacity="0.95" />
     </svg>
   );
 }
