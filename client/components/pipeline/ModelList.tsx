@@ -363,14 +363,14 @@ export default function ModelList(props: ModelListProps) {
                         <tr
                           data-order-id={o.id}
                           data-parent-id={o.parentId ?? ""}
-                          className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
+                          className={`${bg} border-t border-gray-200 dark:border-gray-800`}
                         >
                           {showDetails && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap w-20">
                               {formatDate(o.createdAt)}
                             </td>
                           )}
-                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
+                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100 flex-1 min-w-32">
                             <button
                               onClick={() => toggleExpanded(o.id)}
                               className="text-left w-full truncate"
@@ -383,13 +383,13 @@ export default function ModelList(props: ModelListProps) {
                               )}
                             </button>
                           </td>
-                          {showDetails && o.quantity > 0 && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300">
-                              {o.quantity}
+                          {showDetails && (
+                            <td className="p-3 text-gray-700 dark:text-gray-300 w-16">
+                              {o.quantity > 0 ? o.quantity : ""}
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3">
+                            <td className="p-3 w-40">
                               <div className="flex flex-wrap items-center gap-1">
                                 {getPathLetterPills(o, (orderId, stepIdx) => {
                                   const stepAtIdx = o.steps[stepIdx];
@@ -412,7 +412,7 @@ export default function ModelList(props: ModelListProps) {
                               </div>
                             </td>
                           )}
-                          <td className="p-3 text-gray-700 dark:text-gray-300">
+                          <td className="p-3 text-gray-700 dark:text-gray-300 w-40">
                             {i < 0
                               ? "Not started"
                               : i >= o.steps.length
@@ -447,7 +447,7 @@ export default function ModelList(props: ModelListProps) {
                                           (machine) => (
                                             <div
                                               key={machine}
-                                              className="font-medium text-gray-900 dark:text-gray-100"
+                                              className="text-sm font-medium text-gray-900 dark:text-gray-100"
                                             >
                                               {machine}
                                             </div>
