@@ -12,6 +12,32 @@ export interface NewPathStep {
   externalUnitName?: string;
 }
 
+function parseModelName(fullName: string) {
+  const regex = /^([^\(]+?)(?:\s*\(([^\)]+)\))?(?:\s*\(([^\)]+)\))?$/;
+  const match = fullName.trim().match(regex);
+
+  if (match) {
+    return {
+      part1: match[1].trim(),
+      part2: match[2] || "",
+      part3: match[3] || "",
+    };
+  }
+
+  return { part1: fullName, part2: "", part3: "" };
+}
+
+function combineModelName(part1: string, part2: string, part3: string): string {
+  let result = part1.trim();
+  if (part2.trim()) {
+    result += ` (${part2.trim()})`;
+  }
+  if (part3.trim()) {
+    result += ` (${part3.trim()})`;
+  }
+  return result;
+}
+
 export default function ModelForm(props: {
   onCreate: (data: {
     modelName: string;
@@ -30,8 +56,10 @@ export default function ModelForm(props: {
   onCancel?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [modelName, setModelName] = useState("");
-  const [quantity, setQuantity] = useState(100);
+  const [modelNamePart1, setModelNamePart1] = useState("");
+  const [modelNamePart2, setModelNamePart2] = useState("");
+  const [modelNamePart3, setModelNamePart3] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [dateStr, setDateStr] = useState(() =>
     new Date().toISOString().slice(0, 10),
   );
