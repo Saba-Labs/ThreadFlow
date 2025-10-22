@@ -71,7 +71,7 @@ export default function ModelList(props: ModelListProps) {
     at: number;
   } | null>(null);
 
-  const handleSplit = () => {
+  const handleSplit = async () => {
     if (!splitForId) return;
     const validQuantities = splitInputs
       .map((q) => Math.max(0, Math.floor(q)))
@@ -79,11 +79,21 @@ export default function ModelList(props: ModelListProps) {
     if (validQuantities.length === 0) return;
 
     const parentId = splitForId!;
-    const wasParentToggled = toggledIds.includes(parentId);
+    const originalToggled = toggledIds.includes(parentId);
+    let tempExpanded = false;
+    let addedChildIds: string[] = [];
 
     // close modal immediately
     setSplitForId(null);
     setSplitInputs([0]);
+
+    // If global details are hidden and the parent isn't toggled, temporarily expand it
+    if (!showDetails && !originalToggled) {
+      tempExpanded = true;
+      setToggledIds((prev) => [...new Set([...prev, parentId])]);
+      // wait for next paint so the DOM updates
+      await new Promise((res) => requestAnimationFrame(res));
+    }
 
     // FLIP with WAAPI: measure before (only visible elements)
     const allElsBefore = Array.from(
@@ -101,12 +111,14 @@ export default function ModelList(props: ModelListProps) {
     // perform split (synchronous state update)
     props.onSplit(parentId, validQuantities);
 
-    // If parent was expanded, we need to expand all new children BEFORE animation measurement
-    if (wasParentToggled) {
+    // next paint: detect new children, expand them (so they render for animation), then measure after and animate
+    requestAnimationFrame(() => {
       const allElsAfter = Array.from(
         document.querySelectorAll<HTMLElement>("[data-order-id]"),
       ) as HTMLElement[];
       const elsAfter = allElsAfter.filter((el) => el.offsetParent !== null);
+
+      // find new child IDs that weren't present before
       const newChildIds: string[] = [];
       elsAfter.forEach((el) => {
         const id = el.getAttribute("data-order-id");
@@ -115,17 +127,23 @@ export default function ModelList(props: ModelListProps) {
           newChildIds.push(id);
         }
       });
-      if (newChildIds.length > 0) {
-        setToggledIds((prev) => [...new Set([...prev, ...newChildIds])]);
-      }
-    }
 
-    // next paint: measure after and animate using WAAPI
-    requestAnimationFrame(() => {
+      if (newChildIds.length > 0) {
+        addedChildIds = newChildIds;
+        setToggledIds((prev) => [...new Set([...prev, ...newChildIds])]);
+        // wait another frame to ensure newly toggled children render
+        requestAnimationFrame(() => runAnimation(rectsBefore, parentId));
+      } else {
+        runAnimation(rectsBefore, parentId);
+      }
+    });
+
+    const runAnimation = (rectsBefore: Map<string, DOMRect>, parentId: string) => {
       const allElsAfter = Array.from(
         document.querySelectorAll<HTMLElement>("[data-order-id]"),
       ) as HTMLElement[];
       const elsAfter = allElsAfter.filter((el) => el.offsetParent !== null);
+
       // build a map of id -> all elements after
       const elsAfterById = new Map<string, HTMLElement[]>();
       elsAfter.forEach((el) => {
@@ -150,8 +168,7 @@ export default function ModelList(props: ModelListProps) {
 
       elsToAnimate.forEach((el) => {
         const id = el.getAttribute("data-order-id")!;
-        const beforeRect =
-          rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
+        const beforeRect = rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
         if (!beforeRect) return;
         const afterRect = el.getBoundingClientRect();
 
@@ -184,26 +201,26 @@ export default function ModelList(props: ModelListProps) {
         }
       });
 
-      // when all animations finish, ensure cleanup
-      if (animations.length > 0) {
-        Promise.all(animations.map((a) => a.finished)).then(() => {
-          elsToAnimate.forEach((el) => {
-            el.style.transition = "";
-            el.style.transform = "";
-            el.style.opacity = "";
-          });
+      // when all animations finish, ensure cleanup and revert any temporary toggles
+      const cleanup = () => {
+        elsToAnimate.forEach((el) => {
+          el.style.transition = "";
+          el.style.transform = "";
+          el.style.opacity = "";
         });
+
+        if (tempExpanded || addedChildIds.length > 0) {
+          setToggledIds((prev) => prev.filter((id) => id !== parentId && !addedChildIds.includes(id)));
+        }
+      };
+
+      if (animations.length > 0) {
+        Promise.all(animations.map((a) => a.finished)).then(cleanup).catch(cleanup);
       } else {
         // fallback cleanup after duration
-        setTimeout(() => {
-          elsToAnimate.forEach((el) => {
-            el.style.transition = "";
-            el.style.transform = "";
-            el.style.opacity = "";
-          });
-        }, DURATION + 100);
+        setTimeout(cleanup, DURATION + 100);
       }
-    });
+    };
   };
 
   const handleRemoveBatch = (index: number) => {
