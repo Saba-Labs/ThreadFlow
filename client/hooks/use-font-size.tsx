@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import * as React from "react";
 
 export type FontSizeOption = "small" | "medium" | "large" | "extra-large";
 
@@ -7,7 +7,7 @@ type Ctx = {
   setValue: (v: FontSizeOption) => void;
 };
 
-const FontSizeContext = createContext<Ctx | undefined>(undefined);
+const FontSizeContext = React.createContext<Ctx | undefined>(undefined);
 
 const STORAGE_KEY = "app:font-size";
 
@@ -19,22 +19,42 @@ const SCALE_MAP: Record<FontSizeOption, number> = {
 };
 
 function applyScale(option: FontSizeOption) {
+  if (typeof document === "undefined") return;
   const scale = SCALE_MAP[option] ?? 1;
   document.documentElement.style.setProperty("--app-font-scale", String(scale));
 }
 
-export function FontSizeProvider({ children }: { children: ReactNode }) {
-  const [value, setValue] = useState<FontSizeOption>(() => {
+const DEFAULT_VALUE: FontSizeOption = "large";
+
+// Guard to avoid calling React hooks in non-browser contexts or when React isn't initialized
+const canUseHooks = typeof window !== "undefined" && typeof React.useState === "function";
+
+export function FontSizeProvider({ children }: { children: React.ReactNode }) {
+  if (!canUseHooks) {
+    // Provide a noop implementation for SSR or environments where hooks aren't available
+    const noopCtx: Ctx = { value: DEFAULT_VALUE, setValue: () => {} };
+    // Apply default scale safely
     try {
-      const saved = (localStorage.getItem(STORAGE_KEY) as FontSizeOption | null) ?? "large";
+      applyScale(DEFAULT_VALUE);
+    } catch {
+      /* ignore */
+    }
+    return (
+      <FontSizeContext.Provider value={noopCtx}>{children}</FontSizeContext.Provider>
+    );
+  }
+
+  const [value, setValue] = React.useState<FontSizeOption>(() => {
+    try {
+      const saved = (localStorage.getItem(STORAGE_KEY) as FontSizeOption | null) ?? DEFAULT_VALUE;
       return saved;
     } catch {
-      return "large";
+      return DEFAULT_VALUE;
     }
   });
 
   // Apply on mount and whenever it changes
-  useEffect(() => {
+  React.useEffect(() => {
     applyScale(value);
     try {
       localStorage.setItem(STORAGE_KEY, value);
@@ -43,12 +63,12 @@ export function FontSizeProvider({ children }: { children: ReactNode }) {
     }
   }, [value]);
 
-  const ctx = useMemo<Ctx>(() => ({ value, setValue }), [value]);
+  const ctx = React.useMemo<Ctx>(() => ({ value, setValue }), [value]);
   return <FontSizeContext.Provider value={ctx}>{children}</FontSizeContext.Provider>;
 }
 
 export function useFontSize() {
-  const ctx = useContext(FontSizeContext);
+  const ctx = React.useContext(FontSizeContext);
   if (!ctx) throw new Error("useFontSize must be used within FontSizeProvider");
   return ctx;
 }
