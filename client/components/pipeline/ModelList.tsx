@@ -325,10 +325,16 @@ export default function ModelList(props: ModelListProps) {
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
 
-  // Clear toggled state when eye state changes
+  // When 'showDetails' toggles, control which rows are expanded.
+  // If details are shown we expand all rows by default, but still allow
+  // the user to toggle individual cards. If details are hidden we collapse all.
   useEffect(() => {
-    setToggledIds([]);
-  }, [showDetails]);
+    if (showDetails) {
+      setToggledIds(sorted.map((o) => o.id));
+    } else {
+      setToggledIds([]);
+    }
+  }, [showDetails, sorted]);
 
   const toggleExpanded = (id: string) => {
     setToggledIds((prev) =>
