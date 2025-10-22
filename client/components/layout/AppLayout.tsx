@@ -47,11 +47,7 @@ export default function AppLayout() {
               className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
               aria-hidden
             >
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F6a793d177a104251820f2fe2c04c7db9%2F309fda35c0a943e889e9f0b7cd322041?format=webp&width=800"
-                alt="ThreadFlow"
-                className="h-6 w-6"
-              />
+              <ThreadFlowLogo className="h-6 w-6" />
             </span>
             <span className="tracking-tight">ThreadFlow</span>
           </Link>
