@@ -344,32 +344,53 @@ export default function ModelList(props: ModelListProps) {
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '80px'}}>
+                      <th
+                        className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                        style={{ width: "80px" }}
+                      >
                         Date
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '120px'}}>
+                    <th
+                      className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                      style={{ width: "120px" }}
+                    >
                       Model
                     </th>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '60px'}}>
+                      <th
+                        className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                        style={{ width: "60px" }}
+                      >
                         Qty
                       </th>
                     )}
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '240px'}}>
+                      <th
+                        className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                        style={{ width: "240px" }}
+                      >
                         Path
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '120px'}}>
+                    <th
+                      className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                      style={{ width: "120px" }}
+                    >
                       Current
                     </th>
                     {showDetails && (
                       <>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '120px'}}>
+                        <th
+                          className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                          style={{ width: "120px" }}
+                        >
                           Status
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '140px'}}>
+                        <th
+                          className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                          style={{ width: "140px" }}
+                        >
                           Actions
                         </th>
                       </>
@@ -381,8 +402,7 @@ export default function ModelList(props: ModelListProps) {
                     const i = o.currentStepIndex;
                     const step = o.steps[i];
                     const bg = statusBgClass(o);
-                    const isExpanded =
-                      showDetails || toggledIds.includes(o.id);
+                    const isExpanded = showDetails || toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
                         <tr
@@ -391,11 +411,17 @@ export default function ModelList(props: ModelListProps) {
                           className={`${bg} border-t border-gray-200 dark:border-gray-800`}
                         >
                           {showDetails && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap" style={{width: '80px'}}>
+                            <td
+                              className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                              style={{ width: "80px" }}
+                            >
                               {formatDate(o.createdAt)}
                             </td>
                           )}
-                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100" style={{width: '120px'}}>
+                          <td
+                            className="p-3 font-medium text-gray-900 dark:text-gray-100"
+                            style={{ width: "120px" }}
+                          >
                             <div className="text-left break-words whitespace-normal">
                               {o.modelName}{" "}
                               {!showDetails && o.quantity > 0 && (
@@ -406,12 +432,15 @@ export default function ModelList(props: ModelListProps) {
                             </div>
                           </td>
                           {showDetails && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300" style={{width: '60px'}}>
+                            <td
+                              className="p-3 text-gray-700 dark:text-gray-300"
+                              style={{ width: "60px" }}
+                            >
                               {o.quantity > 0 ? o.quantity : ""}
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3" style={{width: '240px'}}>
+                            <td className="p-3" style={{ width: "240px" }}>
                               <div className="flex flex-wrap items-center gap-1">
                                 {getPathLetterPills(o, (orderId, stepIdx) => {
                                   const stepAtIdx = o.steps[stepIdx];
@@ -434,7 +463,10 @@ export default function ModelList(props: ModelListProps) {
                               </div>
                             </td>
                           )}
-                          <td className="p-3 text-gray-700 dark:text-gray-300" style={{width: '120px'}}>
+                          <td
+                            className="p-3 text-gray-700 dark:text-gray-300"
+                            style={{ width: "120px" }}
+                          >
                             {i < 0
                               ? "Not started"
                               : i >= o.steps.length
@@ -465,22 +497,20 @@ export default function ModelList(props: ModelListProps) {
                                         <div className="font-medium">
                                           {primaryMachine}
                                         </div>
-                                        {selectedMachines.map(
-                                          (machine) => (
-                                            <div
-                                              key={machine}
-                                              className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                            >
-                                              {machine}
-                                            </div>
-                                          ),
-                                        )}
+                                        {selectedMachines.map((machine) => (
+                                          <div
+                                            key={machine}
+                                            className="text-sm font-medium text-gray-900 dark:text-gray-100"
+                                          >
+                                            {machine}
+                                          </div>
+                                        ))}
                                       </div>
                                     );
                                   })()}
                           </td>
                           {showDetails && (
-                            <td className="p-3" style={{width: '120px'}}>
+                            <td className="p-3" style={{ width: "120px" }}>
                               {i < 0 || i >= o.steps.length ? (
                                 <Badge variant="secondary">—</Badge>
                               ) : (
@@ -535,7 +565,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3" style={{width: '140px'}}>
+                            <td className="p-3" style={{ width: "140px" }}>
                               <div className="flex items-center gap-1">
                                 <Button
                                   size="icon"
@@ -663,8 +693,7 @@ export default function ModelList(props: ModelListProps) {
               const i = o.currentStepIndex;
               const step = o.steps[i];
               const bg = statusBgClass(o);
-              const isExpandedMobile =
-                showDetails || toggledIds.includes(o.id);
+              const isExpandedMobile = showDetails || toggledIds.includes(o.id);
               return (
                 <div
                   key={o.id}
