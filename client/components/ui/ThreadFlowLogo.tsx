@@ -1,72 +1,79 @@
 import React from "react";
 
 export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: string }) {
+  // Base colors derived from the image:
+  // Deep Blue: #1976D2 (approx)
+  // Bright Blue/Cyan: #2196F3 (approx)
+  // Green/Lime: #8BC34A (approx)
+  // Center Overlap (Teal/Darker Cyan): #00BCD4 (approx)
+
+  // A viewBox of "0 0 250 200" provides good proportions for the 'M' shape.
   return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 280 200" 
-      className={className} 
-      aria-label="ThreadFlow logo" 
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 250 200"
+      className={className}
+      aria-label="ThreadFlow logo"
       role="img"
     >
       <defs>
-        {/* Left shape gradient - cyan to deep blue */}
-        <linearGradient id="leftGrad" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#22d3ee" />
-          <stop offset="50%" stopColor="#0ea5e9" />
-          <stop offset="100%" stopColor="#3b82f6" />
+        {/* Gradient for the Left Shape (Blue/Cyan Focus) */}
+        <linearGradient id="leftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#2196F3" /> {/* Light Blue */}
+          <stop offset="100%" stopColor="#1976D2" /> {/* Deep Blue */}
         </linearGradient>
-        
-        {/* Right shape gradient - lime green to cyan */}
-        <linearGradient id="rightGrad" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#a3e635" />
-          <stop offset="50%" stopColor="#22d3ee" />
-          <stop offset="100%" stopColor="#06b6d4" />
+
+        {/* Gradient for the Right Shape (Green/Cyan Focus) */}
+        <linearGradient id="rightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#8BC34A" /> {/* Lime Green */}
+          <stop offset="100%" stopColor="#2196F3" /> {/* Light Blue/Cyan */}
         </linearGradient>
-        
-        {/* Center overlap */}
-        <radialGradient id="centerGrad" cx="50%" cy="50%">
-          <stop offset="0%" stopColor="#14b8a6" />
-          <stop offset="100%" stopColor="#0891b2" />
-        </radialGradient>
       </defs>
 
-      {/* Left organic blob - more rounded */}
+      {/* The logo is essentially two 'D' or 'P' shapes reflected horizontally,
+        forming an overlap. We use a single path for each side.
+      */}
+
+      {/* Left Shape (Pill/D-shape) */}
       <path
-        d="M 60 100
-           Q 60 50, 95 40
-           Q 130 30, 145 65
-           Q 155 90, 145 115
-           Q 135 140, 110 150
-           Q 85 160, 70 135
-           Q 60 120, 60 100 Z"
+        // Start near the middle-left (50, 100)
+        // Draw a smooth curve up to the top-left (50, 20)
+        // Curve across the top to the center point (125, 100)
+        // Curve down across the bottom back to the start
+        d="M 125 100 
+           C 125 30, 80 20, 50 40 
+           L 50 160 
+           C 80 180, 125 170, 125 100 Z"
         fill="url(#leftGrad)"
-        opacity="0.92"
+        opacity="0.95"
       />
 
-      {/* Right organic blob - more rounded */}
+      {/* Right Shape (Reflected Pill/D-shape) */}
       <path
-        d="M 220 100
-           Q 220 50, 185 40
-           Q 150 30, 135 65
-           Q 125 90, 135 115
-           Q 145 140, 170 150
-           Q 195 160, 210 135
-           Q 220 120, 220 100 Z"
+        // Start near the middle-right (125, 100)
+        // Draw a smooth curve up to the top-right (200, 40)
+        // Curve across the top to the center point (125, 100)
+        // Curve down across the bottom back to the start
+        d="M 125 100 
+           C 125 30, 170 20, 200 40 
+           L 200 160 
+           C 170 180, 125 170, 125 100 Z"
         fill="url(#rightGrad)"
-        opacity="0.92"
+        opacity="0.95"
       />
 
-      {/* Center intersection shape - vertically oriented */}
-      <path
-        d="M 140 55
-           Q 155 65, 155 90
-           Q 155 115, 140 125
-           Q 125 115, 125 90
-           Q 125 65, 140 55 Z"
-        fill="url(#centerGrad)"
-        opacity="0.88"
+      {/* Optional: A third shape or circle could be added 
+        in the center to emphasize the blend/overlap area, 
+        giving it the darker, slightly translucent look. 
+      */}
+      <circle 
+        cx="125" 
+        cy="100" 
+        r="40" 
+        fill="#00BCD4" // Teal/Darker Cyan for the blend
+        opacity="0.25" // Adjust opacity to achieve the "transparency" look
       />
+
     </svg>
   );
 }
