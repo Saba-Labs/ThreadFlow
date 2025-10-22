@@ -73,8 +73,11 @@ export default function ModelForm(props: {
   // initialize from initialData, otherwise populate default path when modal opens or when rendered inline
   useEffect(() => {
     if (props.initialData) {
-      setModelName(props.initialData.modelName || "");
-      setQuantity(props.initialData.quantity ?? 100);
+      const parsed = parseModelName(props.initialData.modelName || "");
+      setModelNamePart1(parsed.part1);
+      setModelNamePart2(parsed.part2);
+      setModelNamePart3(parsed.part3);
+      setQuantity(props.initialData.quantity ? String(props.initialData.quantity) : "");
       setDateStr(
         new Date(props.initialData.createdAt).toISOString().slice(0, 10),
       );
