@@ -106,7 +106,9 @@ export default function JobWork() {
       if (linked.some((m) => m.toLowerCase().includes(q))) return true;
       // search model names in pipeline orders linked to this job work
       return pipeline.orders.some(
-        (o) => ((o.jobWorkIds || []).includes(j.id) && o.modelName.toLowerCase().includes(q)),
+        (o) =>
+          (o.jobWorkIds || []).includes(j.id) &&
+          o.modelName.toLowerCase().includes(q),
       );
     });
   })();

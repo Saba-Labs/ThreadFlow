@@ -138,7 +138,10 @@ export default function ModelList(props: ModelListProps) {
       }
     });
 
-    const runAnimation = (rectsBefore: Map<string, DOMRect>, parentId: string) => {
+    const runAnimation = (
+      rectsBefore: Map<string, DOMRect>,
+      parentId: string,
+    ) => {
       const allElsAfter = Array.from(
         document.querySelectorAll<HTMLElement>("[data-order-id]"),
       ) as HTMLElement[];
@@ -168,7 +171,8 @@ export default function ModelList(props: ModelListProps) {
 
       elsToAnimate.forEach((el) => {
         const id = el.getAttribute("data-order-id")!;
-        const beforeRect = rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
+        const beforeRect =
+          rectsBefore.get(id) || rectsBefore.get(parentId) || sourceRect;
         if (!beforeRect) return;
         const afterRect = el.getBoundingClientRect();
 
@@ -212,12 +216,16 @@ export default function ModelList(props: ModelListProps) {
         // Only revert toggles if we temporarily expanded the parent for animation.
         // If the parent was already toggled open by the user, keep parent and new children toggled.
         if (tempExpanded) {
-          setToggledIds((prev) => prev.filter((id) => id !== parentId && !addedChildIds.includes(id)));
+          setToggledIds((prev) =>
+            prev.filter((id) => id !== parentId && !addedChildIds.includes(id)),
+          );
         }
       };
 
       if (animations.length > 0) {
-        Promise.all(animations.map((a) => a.finished)).then(cleanup).catch(cleanup);
+        Promise.all(animations.map((a) => a.finished))
+          .then(cleanup)
+          .catch(cleanup);
       } else {
         // fallback cleanup after duration
         setTimeout(cleanup, DURATION + 100);

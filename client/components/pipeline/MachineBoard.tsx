@@ -19,8 +19,12 @@ export default function MachineBoard(props: {
   onNext: (o: WorkOrder) => void;
 }) {
   const machineTypes = useMachineTypes();
-  const [expandedBelow, setExpandedBelow] = useState<Record<string, boolean>>({});
-  const [expandedAbove, setExpandedAbove] = useState<Record<string, boolean>>({});
+  const [expandedBelow, setExpandedBelow] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [expandedAbove, setExpandedAbove] = useState<Record<string, boolean>>(
+    {},
+  );
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -45,18 +49,28 @@ export default function MachineBoard(props: {
         });
 
         return (
-          <section key={mtConfig.name} className="rounded-lg border bg-card/50 shadow-sm overflow-hidden">
+          <section
+            key={mtConfig.name}
+            className="rounded-lg border bg-card/50 shadow-sm overflow-hidden"
+          >
             {/* expanded above (incoming) */}
             {expandedAbove[mtConfig.name] && (
               <div className="p-3 border-b bg-red-50">
                 <div className="text-sm font-semibold mb-2">Incoming</div>
                 {incoming.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No incoming models</div>
+                  <div className="text-sm text-muted-foreground">
+                    No incoming models
+                  </div>
                 ) : (
                   incoming.map((o) => (
-                    <div key={o.id} className="flex items-center justify-between py-1">
+                    <div
+                      key={o.id}
+                      className="flex items-center justify-between py-1"
+                    >
                       <div className="truncate">{o.modelName}</div>
-                      <div className="text-xs text-muted-foreground">{o.quantity}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {o.quantity}
+                      </div>
                     </div>
                   ))
                 )}
@@ -69,32 +83,58 @@ export default function MachineBoard(props: {
                 tabIndex={0}
                 onClick={() => {
                   // toggle both incoming and running/hold when machine name is clicked
-                  setExpandedAbove((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
-                  setExpandedBelow((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
+                  setExpandedAbove((prev) => ({
+                    ...prev,
+                    [mtConfig.name]: !prev[mtConfig.name],
+                  }));
+                  setExpandedBelow((prev) => ({
+                    ...prev,
+                    [mtConfig.name]: !prev[mtConfig.name],
+                  }));
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    setExpandedAbove((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
-                    setExpandedBelow((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
+                    setExpandedAbove((prev) => ({
+                      ...prev,
+                      [mtConfig.name]: !prev[mtConfig.name],
+                    }));
+                    setExpandedBelow((prev) => ({
+                      ...prev,
+                      [mtConfig.name]: !prev[mtConfig.name],
+                    }));
                   }
                 }}
                 className="cursor-pointer"
               >
-                <h3 className="text-sm font-semibold text-gray-900">{mtConfig.name}</h3>
-                <div className="text-xs text-muted-foreground">{orders.length} queued</div>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  {mtConfig.name}
+                </h3>
+                <div className="text-xs text-muted-foreground">
+                  {orders.length} queued
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   aria-label="Show incoming"
-                  onClick={() => setExpandedAbove((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }))}
+                  onClick={() =>
+                    setExpandedAbove((prev) => ({
+                      ...prev,
+                      [mtConfig.name]: !prev[mtConfig.name],
+                    }))
+                  }
                   className="inline-flex items-center justify-center p-1 rounded-md border"
                 >
                   <ChevronUp className="h-4 w-4" />
                 </button>
                 <button
                   aria-label="Show running/hold"
-                  onClick={() => setExpandedBelow((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }))}
+                  onClick={() =>
+                    setExpandedBelow((prev) => ({
+                      ...prev,
+                      [mtConfig.name]: !prev[mtConfig.name],
+                    }))
+                  }
                   className="inline-flex items-center justify-center p-1 rounded-md border"
                 >
                   <ChevronDown className="h-4 w-4" />
@@ -103,18 +143,24 @@ export default function MachineBoard(props: {
               </div>
             </div>
 
-
             {/* expanded below (running and hold list) */}
             {expandedBelow[mtConfig.name] && (
               <div className="p-3 border-t bg-emerald-50">
                 <div className="text-sm font-semibold mb-2">Running / Hold</div>
                 {runningOrHold.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No active models</div>
+                  <div className="text-sm text-muted-foreground">
+                    No active models
+                  </div>
                 ) : (
                   runningOrHold.map((o) => (
-                    <div key={o.id} className="flex items-center justify-between py-1">
+                    <div
+                      key={o.id}
+                      className="flex items-center justify-between py-1"
+                    >
                       <div className="truncate">{o.modelName}</div>
-                      <div className="text-xs text-muted-foreground">{o.quantity}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {o.quantity}
+                      </div>
                     </div>
                   ))
                 )}

@@ -1,6 +1,10 @@
 import React from "react";
 
-export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: string }) {
+export default function ThreadFlowLogo({
+  className = "h-8 w-8",
+}: {
+  className?: string;
+}) {
   // Base colors derived from the image:
   // Deep Blue: #1976D2 (approx)
   // Bright Blue/Cyan: #2196F3 (approx)
@@ -66,14 +70,13 @@ export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: 
         in the center to emphasize the blend/overlap area, 
         giving it the darker, slightly translucent look. 
       */}
-      <circle 
-        cx="125" 
-        cy="100" 
-        r="40" 
+      <circle
+        cx="125"
+        cy="100"
+        r="40"
         fill="#00BCD4" // Teal/Darker Cyan for the blend
         opacity="0.25" // Adjust opacity to achieve the "transparency" look
       />
-
     </svg>
   );
 }

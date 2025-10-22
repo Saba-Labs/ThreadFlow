@@ -44,8 +44,9 @@ export default function ModelsAll() {
   const visible = useMemo(() => {
     const q = (query || "").trim().toLowerCase();
     if (!q) return filtered;
-    return filtered.filter((o) =>
-      o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
+    return filtered.filter(
+      (o) =>
+        o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
     );
   }, [filtered, query]);
 
