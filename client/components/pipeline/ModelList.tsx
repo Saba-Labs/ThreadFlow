@@ -370,10 +370,10 @@ export default function ModelList(props: ModelListProps) {
                               {formatDate(o.createdAt)}
                             </td>
                           )}
-                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
+                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100" style={{width: '120px'}}>
                             <button
                               onClick={() => toggleExpanded(o.id)}
-                              className="text-left w-full truncate"
+                              className="text-left w-full break-words whitespace-normal"
                             >
                               {o.modelName}{" "}
                               {!showDetails && o.quantity > 0 && (
