@@ -17,7 +17,6 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <FontSizeProvider>
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayout />}>
@@ -36,7 +35,6 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-    </FontSizeProvider>
   </QueryClientProvider>
 );
 
