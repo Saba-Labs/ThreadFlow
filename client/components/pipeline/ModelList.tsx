@@ -85,10 +85,11 @@ export default function ModelList(props: ModelListProps) {
     setSplitForId(null);
     setSplitInputs([0]);
 
-    // FLIP with WAAPI: measure before
-    const elsBefore = Array.from(
+    // FLIP with WAAPI: measure before (only visible elements)
+    const allElsBefore = Array.from(
       document.querySelectorAll<HTMLElement>("[data-order-id]"),
     ) as HTMLElement[];
+    const elsBefore = allElsBefore.filter((el) => el.offsetParent !== null);
     const rectsBefore = new Map<string, DOMRect>();
     elsBefore.forEach((el) => {
       const id = el.getAttribute("data-order-id");
@@ -102,9 +103,10 @@ export default function ModelList(props: ModelListProps) {
 
     // If parent was expanded, we need to expand all new children BEFORE animation measurement
     if (wasParentToggled) {
-      const elsAfter = Array.from(
+      const allElsAfter = Array.from(
         document.querySelectorAll<HTMLElement>("[data-order-id]"),
       ) as HTMLElement[];
+      const elsAfter = allElsAfter.filter((el) => el.offsetParent !== null);
       const newChildIds: string[] = [];
       elsAfter.forEach((el) => {
         const id = el.getAttribute("data-order-id");
@@ -120,9 +122,10 @@ export default function ModelList(props: ModelListProps) {
 
     // next paint: measure after and animate using WAAPI
     requestAnimationFrame(() => {
-      const elsAfter = Array.from(
+      const allElsAfter = Array.from(
         document.querySelectorAll<HTMLElement>("[data-order-id]"),
       ) as HTMLElement[];
+      const elsAfter = allElsAfter.filter((el) => el.offsetParent !== null);
       // build a map of id -> all elements after
       const elsAfterById = new Map<string, HTMLElement[]>();
       elsAfter.forEach((el) => {
