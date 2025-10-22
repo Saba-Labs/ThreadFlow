@@ -164,21 +164,34 @@ export default function ModelForm(props: {
         Define quantity, date, and select which production paths to include.
       </p>
       <div className="grid gap-4">
-        <div className="grid gap-2 sm:grid-cols-3">
-          <div>
-            <label className="text-sm font-medium">Model name</label>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Model name</label>
+          <div className="grid gap-2 grid-cols-3">
             <Input
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
-              placeholder="e.g., KIDS TEE M1"
+              value={modelNamePart1}
+              onChange={(e) => setModelNamePart1(e.target.value)}
+              placeholder="e.g., Knot"
+            />
+            <Input
+              value={modelNamePart2}
+              onChange={(e) => setModelNamePart2(e.target.value)}
+              placeholder="e.g., L (optional)"
+            />
+            <Input
+              value={modelNamePart3}
+              onChange={(e) => setModelNamePart3(e.target.value)}
+              placeholder="e.g., Spl (optional)"
             />
           </div>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
           <div>
             <label className="text-sm font-medium">Quantity</label>
             <Input
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
+              onChange={(e) => setQuantity(e.target.value)}
+              placeholder="Enter quantity"
             />
           </div>
           <div>
