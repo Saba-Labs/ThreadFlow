@@ -513,7 +513,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3 w-32">
+                            <td className="p-3" style={{width: '140px'}}>
                               <div className="flex items-center gap-1">
                                 <Button
                                   size="icon"
