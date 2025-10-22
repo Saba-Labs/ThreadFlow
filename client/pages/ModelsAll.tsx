@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff, Plus } from "lucide-react";
+import { useSearch } from "@/context/SearchContext";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
