@@ -301,6 +301,13 @@ export default function ModelList(props: ModelListProps) {
   const showDetails = props.showDetails ?? true;
   const emptyColSpan = showDetails ? 7 : 2;
 
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
   return (
     <div className="min-h-screen">
       <div className="px-0">
@@ -349,228 +356,267 @@ export default function ModelList(props: ModelListProps) {
                     const i = o.currentStepIndex;
                     const step = o.steps[i];
                     const bg = statusBgClass(o);
+                    const isExpanded =
+                      showDetails || expandedIds.includes(o.id);
                     return (
-                      <tr
-                        key={o.id}
-                        data-order-id={o.id}
-                        data-parent-id={o.parentId ?? ""}
-                        className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
-                      >
-                        {showDetails && (
-                          <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                            {formatDate(o.createdAt)}
+                      <>
+                        <tr
+                          key={o.id}
+                          data-order-id={o.id}
+                          data-parent-id={o.parentId ?? ""}
+                          className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
+                        >
+                          {showDetails && (
+                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                              {formatDate(o.createdAt)}
+                            </td>
+                          )}
+                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
+                            <button
+                              onClick={() => toggleExpanded(o.id)}
+                              className="text-left w-full truncate"
+                            >
+                              {o.modelName}{" "}
+                              {!showDetails && (
+                                <span className="text-muted-foreground">
+                                  ({o.quantity})
+                                </span>
+                              )}
+                            </button>
                           </td>
-                        )}
-                        <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
-                          <button
-                            onClick={() => navigate(`/models/${o.id}/edit`)}
-                            className="text-left w-full truncate"
-                          >
-                            {o.modelName}{" "}
-                            {!showDetails && (
-                              <span className="text-muted-foreground">
-                                ({o.quantity})
-                              </span>
-                            )}
-                          </button>
-                        </td>
-                        {showDetails && (
+                          {showDetails && (
+                            <td className="p-3 text-gray-700 dark:text-gray-300">
+                              {o.quantity}
+                            </td>
+                          )}
+                          {showDetails && (
+                            <td className="p-3">
+                              <div className="flex flex-wrap items-center gap-1">
+                                {getPathLetterPills(o, (orderId, stepIdx) => {
+                                  const stepAtIdx = o.steps[stepIdx];
+                                  if (
+                                    stepAtIdx.kind === "machine" &&
+                                    stepAtIdx.machineType
+                                  ) {
+                                    const machineIndex = machineTypes.findIndex(
+                                      (m) => m.name === stepAtIdx.machineType,
+                                    );
+                                    if (machineIndex >= 0) {
+                                      props.onToggleParallelMachine(
+                                        orderId,
+                                        o.currentStepIndex,
+                                        machineIndex,
+                                      );
+                                    }
+                                  }
+                                })}
+                              </div>
+                            </td>
+                          )}
                           <td className="p-3 text-gray-700 dark:text-gray-300">
-                            {o.quantity}
-                          </td>
-                        )}
-                        {showDetails && (
-                          <td className="p-3">
-                            <div className="flex flex-wrap items-center gap-1">
-                              {getPathLetterPills(o, (orderId, stepIdx) => {
-                                const stepAtIdx = o.steps[stepIdx];
-                                if (
-                                  stepAtIdx.kind === "machine" &&
-                                  stepAtIdx.machineType
-                                ) {
-                                  const machineIndex = machineTypes.findIndex(
-                                    (m) => m.name === stepAtIdx.machineType,
-                                  );
-                                  if (machineIndex >= 0) {
-                                    props.onToggleParallelMachine(
-                                      orderId,
-                                      o.currentStepIndex,
-                                      machineIndex,
-                                    );
-                                  }
-                                }
-                              })}
-                            </div>
-                          </td>
-                        )}
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {i < 0
-                            ? "Not started"
-                            : i >= o.steps.length
-                              ? "Completed"
-                              : (() => {
-                                  const primaryMachine =
-                                    step.kind === "machine"
-                                      ? step.machineType
-                                      : "Job Work";
-                                  const parallelGroup = (
-                                    o.parallelGroups || []
-                                  ).find((g) => g.stepIndex === i);
-                                  const selectedIndices =
-                                    parallelGroup?.machineIndices || [];
+                            {i < 0
+                              ? "Not started"
+                              : i >= o.steps.length
+                                ? "Completed"
+                                : (() => {
+                                    const primaryMachine =
+                                      step.kind === "machine"
+                                        ? step.machineType
+                                        : "Job Work";
+                                    const parallelGroup = (
+                                      o.parallelGroups || []
+                                    ).find((g) => g.stepIndex === i);
+                                    const selectedIndices =
+                                      parallelGroup?.machineIndices || [];
 
-                                  if (selectedIndices.length === 0) {
-                                    return primaryMachine;
-                                  }
+                                    if (selectedIndices.length === 0) {
+                                      return primaryMachine;
+                                    }
 
-                                  const selectedMachines = selectedIndices
-                                    .map((idx) => machineTypes[idx]?.name)
-                                    .filter(
-                                      (name) =>
-                                        !!name && name !== primaryMachine,
-                                    );
-                                  return (
-                                    <div className="flex flex-col gap-0.5">
-                                      <div className="font-medium">
-                                        {primaryMachine}
-                                      </div>
-                                      {selectedMachines.map((machine, idx) => (
-                                        <div
-                                          key={idx}
-                                          className="font-medium text-gray-900 dark:text-gray-100"
-                                        >
-                                          {machine}
+                                    const selectedMachines = selectedIndices
+                                      .map((idx) => machineTypes[idx]?.name)
+                                      .filter(
+                                        (name) =>
+                                          !!name && name !== primaryMachine,
+                                      );
+                                    return (
+                                      <div className="flex flex-col gap-0.5">
+                                        <div className="font-medium">
+                                          {primaryMachine}
                                         </div>
-                                      ))}
-                                    </div>
-                                  );
-                                })()}
-                        </td>
-                        {showDetails && (
-                          <td className="p-3">
-                            {i < 0 || i >= o.steps.length ? (
-                              <Badge variant="secondary">—</Badge>
-                            ) : (
-                              (() => {
-                                const displayStatus =
-                                  step.status === "pending"
-                                    ? "hold"
-                                    : step.status;
-                                return (
-                                  <>
-                                    <button onClick={() => toggleCardStatus(o)}>
-                                      <Badge
-                                        variant={
-                                          displayStatus === "running"
-                                            ? "success"
-                                            : displayStatus === "hold"
-                                              ? "destructive"
-                                              : "secondary"
-                                        }
-                                        className="cursor-pointer"
-                                        aria-label={`Set status for ${o.modelName}`}
-                                      >
-                                        {cap(displayStatus)}
-                                      </Badge>
-                                    </button>
-                                    {((o as any).jobWorkIds || []).length >
-                                      0 && (
-                                      <div className="mt-1">
-                                        {jobWorks
-                                          .filter((j) =>
-                                            (
-                                              ((o as any).jobWorkIds ||
-                                                []) as string[]
-                                            ).includes(j.id),
-                                          )
-                                          .map((j) => (
+                                        {selectedMachines.map(
+                                          (machine, idx) => (
                                             <div
-                                              key={j.id}
-                                              className="text-sm text-muted-foreground"
+                                              key={idx}
+                                              className="font-medium text-gray-900 dark:text-gray-100"
                                             >
-                                              {j.name}
+                                              {machine}
                                             </div>
-                                          ))}
+                                          ),
+                                        )}
                                       </div>
-                                    )}
-                                  </>
-                                );
-                              })()
-                            )}
+                                    );
+                                  })()}
                           </td>
-                        )}
-                        {showDetails && (
-                          <td className="p-3">
-                            <div className="flex items-center gap-1">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => navigate(`/models/${o.id}/edit`)}
-                                title="Details"
-                                aria-label="Details"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant={
-                                  ((o as any).jobWorkIds || []).length > 0
-                                    ? "default"
-                                    : "ghost"
-                                }
-                                onClick={() => {
-                                  setJwForId(o.id);
-                                  setJwSelected(
-                                    ((o as any).jobWorkIds || []) as string[],
+                          {showDetails && (
+                            <td className="p-3">
+                              {i < 0 || i >= o.steps.length ? (
+                                <Badge variant="secondary">—</Badge>
+                              ) : (
+                                (() => {
+                                  const displayStatus =
+                                    step.status === "pending"
+                                      ? "hold"
+                                      : step.status;
+                                  return (
+                                    <>
+                                      <button
+                                        onClick={() => toggleCardStatus(o)}
+                                      >
+                                        <Badge
+                                          variant={
+                                            displayStatus === "running"
+                                              ? "success"
+                                              : displayStatus === "hold"
+                                                ? "destructive"
+                                                : "secondary"
+                                          }
+                                          className="cursor-pointer"
+                                          aria-label={`Set status for ${o.modelName}`}
+                                        >
+                                          {cap(displayStatus)}
+                                        </Badge>
+                                      </button>
+                                      {((o as any).jobWorkIds || []).length >
+                                        0 && (
+                                        <div className="mt-1">
+                                          {jobWorks
+                                            .filter((j) =>
+                                              (
+                                                ((o as any).jobWorkIds ||
+                                                  []) as string[]
+                                              ).includes(j.id),
+                                            )
+                                            .map((j) => (
+                                              <div
+                                                key={j.id}
+                                                className="text-sm text-muted-foreground"
+                                              >
+                                                {j.name}
+                                              </div>
+                                            ))}
+                                        </div>
+                                      )}
+                                    </>
                                   );
-                                }}
-                                title="Job Work"
-                                aria-label="Job Work"
-                              >
-                                JW
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => props.onPrev(o.id)}
-                                title="Previous step"
-                                aria-label="Previous step"
-                              >
-                                <SkipBack className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                onClick={() => props.onNext(o.id)}
-                                title="Next step"
-                                aria-label="Next step"
-                              >
-                                <SkipForward className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => {
-                                  setSplitForId(o.id);
-                                  setSplitInputs([0]);
-                                }}
-                                title="Split into batches"
-                                aria-label="Split into batches"
-                              >
-                                <Scissors className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => setDeleteConfirmId(o.id)}
-                                title="Delete"
-                                aria-label="Delete"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </td>
+                                })()
+                              )}
+                            </td>
+                          )}
+                          {showDetails && (
+                            <td className="p-3">
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    navigate(`/models/${o.id}/edit`)
+                                  }
+                                  title="Details"
+                                  aria-label="Details"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant={
+                                    ((o as any).jobWorkIds || []).length > 0
+                                      ? "default"
+                                      : "ghost"
+                                  }
+                                  onClick={() => {
+                                    setJwForId(o.id);
+                                    setJwSelected(
+                                      ((o as any).jobWorkIds || []) as string[],
+                                    );
+                                  }}
+                                  title="Job Work"
+                                  aria-label="Job Work"
+                                >
+                                  JW
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => props.onPrev(o.id)}
+                                  title="Previous step"
+                                  aria-label="Previous step"
+                                >
+                                  <SkipBack className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  onClick={() => props.onNext(o.id)}
+                                  title="Next step"
+                                  aria-label="Next step"
+                                >
+                                  <SkipForward className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setSplitForId(o.id);
+                                    setSplitInputs([0]);
+                                  }}
+                                  title="Split into batches"
+                                  aria-label="Split into batches"
+                                >
+                                  <Scissors className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => setDeleteConfirmId(o.id)}
+                                  title="Delete"
+                                  aria-label="Delete"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                        {expandedIds.includes(o.id) && (
+                          <tr>
+                            <td colSpan={emptyColSpan} className="p-2">
+                              <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-3 rounded">
+                                <div className="flex flex-col gap-2">
+                                  <div className="text-sm text-muted-foreground">
+                                    Date: {formatDate(o.createdAt)}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    Qty: {o.quantity}
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-1">
+                                    {getPathLetterPills(o)}
+                                  </div>
+                                  <div className="mt-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() =>
+                                        navigate(`/models/${o.id}/edit`)
+                                      }
+                                    >
+                                      Open
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                      </tr>
+                      </>
                     );
                   })}
                   {sorted.length === 0 && (
@@ -594,6 +640,8 @@ export default function ModelList(props: ModelListProps) {
               const i = o.currentStepIndex;
               const step = o.steps[i];
               const bg = statusBgClass(o);
+              const isExpandedMobile =
+                showDetails || expandedIds.includes(o.id);
               return (
                 <div
                   key={o.id}
@@ -605,7 +653,7 @@ export default function ModelList(props: ModelListProps) {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
                         <button
-                          onClick={() => navigate(`/models/${o.id}/edit`)}
+                          onClick={() => toggleExpanded(o.id)}
                           className="text-left w-full truncate"
                         >
                           {o.modelName}{" "}
@@ -617,7 +665,7 @@ export default function ModelList(props: ModelListProps) {
                         </button>
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                        {showDetails && (
+                        {isExpandedMobile && (
                           <>
                             <span className="inline-flex items-center gap-1">
                               <CalendarDays className="h-3.5 w-3.5" />{" "}
@@ -627,7 +675,7 @@ export default function ModelList(props: ModelListProps) {
                           </>
                         )}
                       </div>
-                      {showDetails && (
+                      {isExpandedMobile && (
                         <div className="flex flex-wrap items-center gap-1 mt-2">
                           {getPathLetterPills(o, (orderId, stepIdx) => {
                             const stepAtIdx = o.steps[stepIdx];
@@ -701,7 +749,7 @@ export default function ModelList(props: ModelListProps) {
                                 );
                               })()}
 
-                              {showDetails && (
+                              {isExpandedMobile && (
                                 <>
                                   <button onClick={() => toggleCardStatus(o)}>
                                     <Badge
@@ -744,7 +792,7 @@ export default function ModelList(props: ModelListProps) {
                     </div>
                   </div>
 
-                  {showDetails && (
+                  {isExpandedMobile && (
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex gap-1">
                         <Button

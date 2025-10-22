@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 
 export default function Logo({ className }: { className?: string }) {
   // Monogram "TF" inspired by the reference: rounded strokes, geometric proportions
