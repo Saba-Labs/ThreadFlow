@@ -380,17 +380,14 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                           <td className="p-3 font-medium text-gray-900 dark:text-gray-100" style={{width: '120px'}}>
-                            <button
-                              onClick={() => toggleExpanded(o.id)}
-                              className="text-left w-full break-words whitespace-normal"
-                            >
+                            <div className="text-left break-words whitespace-normal">
                               {o.modelName}{" "}
                               {!showDetails && o.quantity > 0 && (
                                 <span className="text-muted-foreground">
                                   ({o.quantity})
                                 </span>
                               )}
-                            </button>
+                            </div>
                           </td>
                           {showDetails && (
                             <td className="p-3 text-gray-700 dark:text-gray-300" style={{width: '60px'}}>
