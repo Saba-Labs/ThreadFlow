@@ -661,7 +661,7 @@ export default function ModelList(props: ModelListProps) {
                           className="text-left w-full truncate"
                         >
                           {o.modelName}{" "}
-                          {!showDetails && o.quantity > 0 && (
+                          {o.quantity > 0 && (
                             <span className="text-muted-foreground">
                               ({o.quantity})
                             </span>
