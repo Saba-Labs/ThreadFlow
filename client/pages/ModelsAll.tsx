@@ -75,7 +75,7 @@ export default function ModelsAll() {
             variant="ghost"
             size="icon"
             aria-label={showDetails ? "Hide details" : "Show details"}
-            onClick={handleToggleDetails}
+            onClick={() => setShowDetails((s) => !s)}
             title={showDetails ? "Hide details" : "Show details"}
           >
             {showDetails ? (
