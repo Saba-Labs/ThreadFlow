@@ -303,6 +303,11 @@ export default function ModelList(props: ModelListProps) {
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
 
+  // Clear toggled state when eye state changes
+  useEffect(() => {
+    setToggledIds([]);
+  }, [showDetails]);
+
   const toggleExpanded = (id: string) => {
     setToggledIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
