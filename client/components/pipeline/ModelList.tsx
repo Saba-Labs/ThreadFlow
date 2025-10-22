@@ -584,7 +584,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                         </tr>
-                        {expandedIds.includes(o.id) && (
+                        {toggledIds.includes(o.id) && (
                           <tr>
                             <td colSpan={emptyColSpan} className="p-2">
                               <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-3 rounded">
