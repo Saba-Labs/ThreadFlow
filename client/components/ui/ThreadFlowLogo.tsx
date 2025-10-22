@@ -19,14 +19,23 @@ export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: 
       {/* Rounded square background */}
       <rect x="2" y="2" width="60" height="60" rx="10" fill="url(#tfG)" />
 
-      {/* Stylized thread mark: vertical stem + flowing curve */}
-      <g transform="translate(0,0)" fill="none" stroke="#0F172A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M32 14 L32 32" strokeOpacity="0.95" strokeWidth="4" />
-        <path d="M32 32 C 44 36, 46 48, 38 54 C 30 60, 18 58, 14 46" strokeOpacity="0.95" strokeWidth="4" />
+      {/* Monogram 'TF' — geometric, minimal, balanced */}
+      <g fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        {/* T: horizontal bar and short stem centered */}
+        <path d="M18 18 H46" strokeOpacity="0.95" />
+        <path d="M32 18 V34" strokeOpacity="0.95" />
+
+        {/* F: stem on right with two bars, forming a mirrored complement of T */}
+        <path d="M44 36 V50" strokeOpacity="0.95" />
+        <path d="M44 36 H36" strokeOpacity="0.95" />
+        <path d="M44 42 H36" strokeOpacity="0.95" />
       </g>
 
-      {/* Small dot to represent the thread head */}
-      <circle cx="32" cy="12" r="3" fill="#0F172A" />
+      {/* Accent dots to imply stitching */}
+      <g fill="#0F172A" opacity="0.9">
+        <circle cx="22" cy="46" r="2" />
+        <circle cx="28" cy="50" r="2" />
+      </g>
     </svg>
   );
 }
