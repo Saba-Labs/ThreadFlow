@@ -131,8 +131,10 @@ export default function ModelForm(props: {
   };
 
   const reset = () => {
-    setModelName("");
-    setQuantity(100);
+    setModelNamePart1("");
+    setModelNamePart2("");
+    setModelNamePart3("");
+    setQuantity("");
     setDateStr(new Date().toISOString().slice(0, 10));
     setSelectedMachines(new Set());
     setIncludeJobWork(false);
