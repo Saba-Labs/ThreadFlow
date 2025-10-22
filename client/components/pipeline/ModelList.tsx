@@ -79,6 +79,7 @@ export default function ModelList(props: ModelListProps) {
     if (validQuantities.length === 0) return;
 
     const parentId = splitForId!;
+    const wasParentToggled = toggledIds.includes(parentId);
 
     // close modal immediately
     setSplitForId(null);
@@ -98,6 +99,26 @@ export default function ModelList(props: ModelListProps) {
 
     // perform split (synchronous state update)
     props.onSplit(parentId, validQuantities);
+
+    // If parent was expanded, expand all new children created by the split
+    requestAnimationFrame(() => {
+      if (wasParentToggled) {
+        const elsAfter = Array.from(
+          document.querySelectorAll<HTMLElement>("[data-order-id]"),
+        ) as HTMLElement[];
+        const newChildIds: string[] = [];
+        elsAfter.forEach((el) => {
+          const id = el.getAttribute("data-order-id");
+          const p = el.getAttribute("data-parent-id");
+          if (id && p === parentId && !rectsBefore.has(id)) {
+            newChildIds.push(id);
+          }
+        });
+        if (newChildIds.length > 0) {
+          setToggledIds((prev) => [...new Set([...prev, ...newChildIds])]);
+        }
+      }
+    });
 
     // next paint: measure after and animate using WAAPI
     requestAnimationFrame(() => {
