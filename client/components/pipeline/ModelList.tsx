@@ -41,6 +41,7 @@ interface ModelListProps {
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
   showDetails?: boolean;
+  resetExpandedSignal?: boolean;
 }
 
 export default function ModelList(props: ModelListProps) {
