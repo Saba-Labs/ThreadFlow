@@ -315,7 +315,7 @@ export default function ModelList(props: ModelListProps) {
           {/* Desktop table */}
           <div className="hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+              <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
                     {showDetails && (
