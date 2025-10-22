@@ -642,7 +642,7 @@ export default function ModelList(props: ModelListProps) {
                         </button>
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-                        {showDetails && (
+                        {isExpandedMobile && (
                           <>
                             <span className="inline-flex items-center gap-1">
                               <CalendarDays className="h-3.5 w-3.5" />{" "}
@@ -652,7 +652,7 @@ export default function ModelList(props: ModelListProps) {
                           </>
                         )}
                       </div>
-                      {showDetails && (
+                      {isExpandedMobile && (
                         <div className="flex flex-wrap items-center gap-1 mt-2">
                           {getPathLetterPills(o, (orderId, stepIdx) => {
                             const stepAtIdx = o.steps[stepIdx];
@@ -726,7 +726,7 @@ export default function ModelList(props: ModelListProps) {
                                 );
                               })()}
 
-                              {showDetails && (
+                              {isExpandedMobile && (
                                 <>
                                   <button onClick={() => toggleCardStatus(o)}>
                                     <Badge
@@ -769,7 +769,7 @@ export default function ModelList(props: ModelListProps) {
                     </div>
                   </div>
 
-                  {showDetails && (
+                  {isExpandedMobile && (
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex gap-1">
                         <Button
