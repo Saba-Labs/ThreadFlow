@@ -40,6 +40,15 @@ export default function ModelsAll() {
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
 
+  const { query } = useSearch();
+  const visible = useMemo(() => {
+    const q = (query || "").trim().toLowerCase();
+    if (!q) return filtered;
+    return filtered.filter((o) =>
+      o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
+    );
+  }, [filtered, query]);
+
   const [showDetails, setShowDetails] = useState(false);
 
   // Persist showDetails across navigation using localStorage
