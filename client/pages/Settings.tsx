@@ -2,16 +2,37 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useFontSize } from "@/hooks/use-font-size";
+import { useEffect, useState } from "react";
+
+const STORAGE_KEY = "app:font-size";
+const SCALE_MAP: Record<string, number> = {
+  small: 0.875,
+  medium: 1.0,
+  large: 1.125,
+  "extra-large": 1.25,
+};
 
 export default function Settings() {
-  const { value, setValue } = useFontSize();
+  const [value, setValue] = useState<string>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY) || "large";
+    } catch {
+      return "large";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const scale = SCALE_MAP[value] ?? 1;
+      document.documentElement.style.setProperty("--app-font-scale", String(scale));
+      localStorage.setItem(STORAGE_KEY, value);
+    } catch {
+      // ignore
+    }
+  }, [value]);
 
   return (
     <div className="space-y-6">
-      <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 text-yellow-900">
-        Debug: font-size control injected for testing. If you don't see radio options below, the build might be stale. (Remove after verification)
-      </div>
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-muted-foreground max-w-prose">
@@ -28,7 +49,7 @@ export default function Settings() {
         </div>
         <RadioGroup
           value={value}
-          onValueChange={(v) => setValue(v as any)}
+          onValueChange={(v) => setValue(v as string)}
           className="grid gap-3 sm:grid-cols-2"
         >
           <div className="flex items-center space-x-2 rounded-md border p-3">
