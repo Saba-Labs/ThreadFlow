@@ -12,6 +12,7 @@ import {
 } from "@/lib/jobWorks";
 import { Trash2, Save, Plus, Pencil } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { useSearch } from "@/context/SearchContext";
 
 export default function JobWork() {
   const list = useJobWorks();
@@ -95,6 +96,23 @@ export default function JobWork() {
     return Array.from(set);
   };
 
+  const { query } = useSearch();
+  const displayed = ((): typeof local => {
+    const q = (query || "").trim().toLowerCase();
+    if (!q) return local;
+    return local.filter((j) => {
+      if (j.name.toLowerCase().includes(q)) return true;
+      const linked = linkedModelsFor(j.id);
+      if (linked.some((m) => m.toLowerCase().includes(q))) return true;
+      // search model names in pipeline orders linked to this job work
+      return pipeline.orders.some(
+        (o) =>
+          (o.jobWorkIds || []).includes(j.id) &&
+          o.modelName.toLowerCase().includes(q),
+      );
+    });
+  })();
+
   return (
     <div className="space-y-6">
       <div>
@@ -107,7 +125,7 @@ export default function JobWork() {
       {/* All Job Works list (card-style) */}
       <div className="">
         <div className="space-y-3">
-          {local.map((j) => {
+          {displayed.map((j) => {
             const linked = linkedModelsFor(j.id);
             return (
               <div

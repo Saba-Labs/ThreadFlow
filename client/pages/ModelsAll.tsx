@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff, Plus } from "lucide-react";
+import { useSearch } from "@/context/SearchContext";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
@@ -38,6 +39,16 @@ export default function ModelsAll() {
 
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
+
+  const { query } = useSearch();
+  const visible = useMemo(() => {
+    const q = (query || "").trim().toLowerCase();
+    if (!q) return filtered;
+    return filtered.filter(
+      (o) =>
+        o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
+    );
+  }, [filtered, query]);
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -102,7 +113,7 @@ export default function ModelsAll() {
 
       <div className="-mx-4 sm:-mx-6 px-0 sm:px-0">
         <ModelList
-          orders={filtered}
+          orders={visible}
           onDelete={pipeline.deleteOrder}
           onNext={(id) => pipeline.moveToNextStep(id)}
           onPrev={(id) => pipeline.moveToPrevStep(id)}

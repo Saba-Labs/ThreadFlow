@@ -2,7 +2,7 @@ import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Layers, Play, Pause, CheckCircle } from "lucide-react";
+import { Search, Layers, Play, Pause, Briefcase } from "lucide-react";
 import MachineBoard from "@/components/pipeline/MachineBoard";
 
 export default function Index() {
@@ -41,17 +41,8 @@ export default function Index() {
 
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="flex items-center w-full md:w-96 bg-surface rounded-md px-3 py-2 shadow-sm">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                className="ml-2 bg-transparent border-0 p-0 focus:ring-0"
-                placeholder="Search models, machines or orders..."
-                aria-label="Search models and machines"
-              />
+              <div className="text-sm text-muted-foreground">Overview</div>
             </div>
-
-            <Button asChild className="ml-2">
-              <a href="/models/new">New Model</a>
-            </Button>
 
             <Button variant="ghost" size="icon" className="ml-1">
               <Layers className="h-5 w-5" />
@@ -107,15 +98,18 @@ export default function Index() {
 
         <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-700">
-            <CheckCircle className="h-6 w-6" />
+            <Briefcase className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <div className="text-sm text-muted-foreground">Completed</div>
+            <div className="text-sm text-muted-foreground">Job Work</div>
             <div className="mt-1 flex items-baseline justify-between gap-4">
               <div className="text-2xl font-semibold text-green-700">
-                {completed}
+                {pipeline.orders.reduce(
+                  (sum, o) => sum + (o.jobWorkIds || []).length,
+                  0,
+                )}
               </div>
-              <div className="text-xs text-muted-foreground">Done</div>
+              <div className="text-xs text-muted-foreground">Assigned</div>
             </div>
           </div>
         </div>
