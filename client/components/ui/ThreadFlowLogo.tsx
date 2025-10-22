@@ -13,20 +13,30 @@ export default function ThreadFlowLogo({
       aria-label="ThreadFlow logo"
       role="img"
     >
-      {/* Left blue curved shape */}
-      <path
-        d="M 16 12 C 16 12 8 16 8 24 L 8 40 C 8 48 16 52 24 52 C 28 48 32 40 32 32 C 32 24 28 16 24 12 C 20 12 16 12 16 12 Z"
+      {/* Left blue square rotated */}
+      <rect
+        x="8"
+        y="16"
+        width="24"
+        height="24"
+        rx="4"
         fill="#0369a1"
+        transform="rotate(-15 20 28)"
       />
 
-      {/* Right green curved shape */}
-      <path
-        d="M 48 12 C 48 12 44 12 40 12 C 36 16 32 24 32 32 C 32 40 36 48 40 52 C 48 52 56 48 56 40 L 56 24 C 56 16 48 12 48 12 Z"
+      {/* Right green square rotated opposite direction */}
+      <rect
+        x="32"
+        y="16"
+        width="24"
+        height="24"
+        rx="4"
         fill="#22c55e"
+        transform="rotate(15 44 28)"
       />
 
-      {/* Center overlap circle for depth */}
-      <circle cx="32" cy="32" r="8" fill="#06b6d4" />
+      {/* Center diamond shape for overlap */}
+      <polygon points="32,16 40,32 32,48 24,32" fill="#06b6d4" />
     </svg>
   );
 }
