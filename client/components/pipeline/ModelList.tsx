@@ -594,9 +594,11 @@ export default function ModelList(props: ModelListProps) {
                                   <div className="text-sm text-muted-foreground">
                                     Date: {formatDate(o.createdAt)}
                                   </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Qty: {o.quantity}
-                                  </div>
+                                  {o.quantity > 0 && (
+                                    <div className="text-sm text-muted-foreground">
+                                      Qty: {o.quantity}
+                                    </div>
+                                  )}
                                   <div className="flex flex-wrap items-center gap-1">
                                     {getPathLetterPills(o)}
                                   </div>
@@ -656,7 +658,7 @@ export default function ModelList(props: ModelListProps) {
                           className="text-left w-full truncate"
                         >
                           {o.modelName}{" "}
-                          {!showDetails && (
+                          {!showDetails && o.quantity > 0 && (
                             <span className="text-muted-foreground">
                               ({o.quantity})
                             </span>
@@ -670,7 +672,7 @@ export default function ModelList(props: ModelListProps) {
                               <CalendarDays className="h-3.5 w-3.5" />{" "}
                               {formatDate(o.createdAt)}
                             </span>
-                            <span>Qty: {o.quantity}</span>
+                            {o.quantity > 0 && <span>Qty: {o.quantity}</span>}
                           </>
                         )}
                       </div>
