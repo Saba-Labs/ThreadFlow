@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
 import { Settings, Menu, X, Search as SearchIcon } from "lucide-react";
-import { useState } from "react";
 import { SearchProvider, useSearch } from "@/context/SearchContext";
 
 function HeaderSearch({ className }: { className?: string }) {
