@@ -100,7 +100,7 @@ export function useProductionPipeline() {
       const order: WorkOrder = {
         id: uid("order"),
         modelName: input.modelName.trim(),
-        quantity: Math.max(1, Math.floor(input.quantity)),
+        quantity: Math.max(0, Math.floor(input.quantity)),
         createdAt:
           typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
