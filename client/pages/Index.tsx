@@ -98,7 +98,7 @@ export default function Index() {
 
         <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-700">
-            <CheckCircle className="h-6 w-6" />
+            <Briefcase className="h-6 w-6" />
           </div>
           <div className="flex-1">
             <div className="text-sm text-muted-foreground">Job Work</div>
@@ -106,7 +106,7 @@ export default function Index() {
               <div className="text-2xl font-semibold text-green-700">
                 {pipeline.orders.reduce((sum, o) => sum + ((o.jobWorkIds || []).length), 0)}
               </div>
-              <div className="text-xs text-muted-foreground">Linked</div>
+              <div className="text-xs text-muted-foreground">Assigned</div>
             </div>
           </div>
         </div>
