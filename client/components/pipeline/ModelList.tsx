@@ -1139,7 +1139,7 @@ export default function ModelList(props: ModelListProps) {
                     {splitInputs.map(
                       (q, i) =>
                         q > 0 && (
-                          <div key={i}>
+                          <div key={`batch-summary-${i}`}>
                             Batch {i + 1}: {q} units
                           </div>
                         ),
