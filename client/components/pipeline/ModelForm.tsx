@@ -141,13 +141,16 @@ export default function ModelForm(props: {
   };
 
   const submit = () => {
-    if (!modelName.trim()) return;
+    if (!modelNamePart1.trim()) return;
     const path = buildPath();
     if (path.length === 0) return;
 
+    const fullModelName = combineModelName(modelNamePart1, modelNamePart2, modelNamePart3);
+    const quantityValue = quantity.trim() ? Math.max(1, Math.floor(Number(quantity))) : 0;
+
     props.onCreate({
-      modelName,
-      quantity: Math.max(1, Math.floor(quantity)),
+      modelName: fullModelName,
+      quantity: quantityValue,
       createdAt: new Date(dateStr).getTime(),
       path,
     });
