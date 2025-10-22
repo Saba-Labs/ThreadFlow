@@ -3,7 +3,53 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
-import { Settings, Menu, X } from "lucide-react";
+import { Settings, Menu, X, Search as SearchIcon } from "lucide-react";
+import { useState } from "react";
+import { SearchProvider, useSearch } from "@/context/SearchContext";
+
+function HeaderSearch({ className }: { className?: string }) {
+  const { query, setQuery } = useSearch();
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={className}>
+      {!open ? (
+        <button
+          aria-label="Open search"
+          onClick={() => setOpen(true)}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
+        >
+          <SearchIcon className="h-5 w-5" />
+        </button>
+      ) : (
+        <div className="flex items-center">
+          <input
+            aria-label="Header search"
+            placeholder="Search..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setQuery("");
+                setOpen(false);
+              }
+            }}
+            className="w-64 rounded-md border px-2 py-1"
+            autoFocus
+          />
+          <button
+            aria-label="Close search"
+            onClick={() => {
+              setOpen(false);
+            }}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1 ml-2"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AppLayout() {
   const location = useLocation();
