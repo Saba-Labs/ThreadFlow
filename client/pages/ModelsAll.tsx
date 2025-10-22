@@ -40,6 +40,7 @@ export default function ModelsAll() {
   }, [pipeline.orders, filter]);
 
   const [showDetails, setShowDetails] = useState(false);
+  const [resetExpandedIds, setResetExpandedIds] = useState(false);
 
   // Persist showDetails across navigation using localStorage
   useEffect(() => {
@@ -63,6 +64,15 @@ export default function ModelsAll() {
       // ignore
     }
   }, [showDetails]);
+
+  const handleToggleDetails = () => {
+    setShowDetails((prev) => !prev);
+    // When opening details (eye icon), reset expanded IDs so all cards show
+    // When closing details, keep expanded IDs so manually expanded cards stay visible
+    if (!showDetails) {
+      setResetExpandedIds((r) => !r);
+    }
+  };
 
   return (
     <div className="space-y-6">
