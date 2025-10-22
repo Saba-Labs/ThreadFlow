@@ -301,18 +301,10 @@ export default function ModelList(props: ModelListProps) {
   const showDetails = props.showDetails ?? true;
   const emptyColSpan = showDetails ? 7 : 2;
 
-  const [expandedIds, setExpandedIds] = useState<string[]>([]);
-
-  // When eye closes (showDetails becomes false), clear expanded cards
-  // When eye opens (showDetails becomes true), all cards show expanded automatically
-  useEffect(() => {
-    if (!showDetails) {
-      setExpandedIds([]);
-    }
-  }, [showDetails]);
+  const [toggledIds, setToggledIds] = useState<string[]>([]);
 
   const toggleExpanded = (id: string) => {
-    setExpandedIds((prev) =>
+    setToggledIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
