@@ -79,6 +79,7 @@ export default function ModelList(props: ModelListProps) {
     if (validQuantities.length === 0) return;
 
     const parentId = splitForId!;
+    const wasParentToggled = toggledIds.includes(parentId);
 
     // close modal immediately
     setSplitForId(null);
@@ -98,6 +99,24 @@ export default function ModelList(props: ModelListProps) {
 
     // perform split (synchronous state update)
     props.onSplit(parentId, validQuantities);
+
+    // If parent was expanded, we need to expand all new children BEFORE animation measurement
+    if (wasParentToggled) {
+      const elsAfter = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-order-id]"),
+      ) as HTMLElement[];
+      const newChildIds: string[] = [];
+      elsAfter.forEach((el) => {
+        const id = el.getAttribute("data-order-id");
+        const p = el.getAttribute("data-parent-id");
+        if (id && p === parentId && !rectsBefore.has(id)) {
+          newChildIds.push(id);
+        }
+      });
+      if (newChildIds.length > 0) {
+        setToggledIds((prev) => [...new Set([...prev, ...newChildIds])]);
+      }
+    }
 
     // next paint: measure after and animate using WAAPI
     requestAnimationFrame(() => {
@@ -301,9 +320,15 @@ export default function ModelList(props: ModelListProps) {
   const showDetails = props.showDetails ?? true;
   const emptyColSpan = showDetails ? 7 : 2;
 
-  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const [toggledIds, setToggledIds] = useState<string[]>([]);
+
+  // Clear toggled state when eye state changes
+  useEffect(() => {
+    setToggledIds([]);
+  }, [showDetails]);
+
   const toggleExpanded = (id: string) => {
-    setExpandedIds((prev) =>
+    setToggledIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
@@ -315,36 +340,57 @@ export default function ModelList(props: ModelListProps) {
           {/* Desktop table */}
           <div className="hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
+              <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      <th
+                        className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                        style={{ width: "80px" }}
+                      >
                         Date
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th
+                      className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                      style={{ width: "120px" }}
+                    >
                       Model
                     </th>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      <th
+                        className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                        style={{ width: "60px" }}
+                      >
                         Qty
                       </th>
                     )}
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                      <th
+                        className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                        style={{ width: "240px" }}
+                      >
                         Path
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th
+                      className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                      style={{ width: "120px" }}
+                    >
                       Current
                     </th>
                     {showDetails && (
                       <>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        <th
+                          className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                          style={{ width: "120px" }}
+                        >
                           Status
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                        <th
+                          className="p-3 text-left font-medium text-gray-900 dark:text-gray-100"
+                          style={{ width: "140px" }}
+                        >
                           Actions
                         </th>
                       </>
@@ -356,40 +402,45 @@ export default function ModelList(props: ModelListProps) {
                     const i = o.currentStepIndex;
                     const step = o.steps[i];
                     const bg = statusBgClass(o);
-                    const isExpanded =
-                      showDetails || expandedIds.includes(o.id);
+                    const isExpanded = showDetails || toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
                         <tr
                           data-order-id={o.id}
                           data-parent-id={o.parentId ?? ""}
-                          className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
+                          className={`${bg} border-t border-gray-200 dark:border-gray-800`}
                         >
                           {showDetails && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                            <td
+                              className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                              style={{ width: "80px" }}
+                            >
                               {formatDate(o.createdAt)}
                             </td>
                           )}
-                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
-                            <button
-                              onClick={() => toggleExpanded(o.id)}
-                              className="text-left w-full truncate"
-                            >
+                          <td
+                            className="p-3 font-medium text-gray-900 dark:text-gray-100"
+                            style={{ width: "120px" }}
+                          >
+                            <div className="text-left break-words whitespace-normal">
                               {o.modelName}{" "}
                               {!showDetails && o.quantity > 0 && (
                                 <span className="text-muted-foreground">
                                   ({o.quantity})
                                 </span>
                               )}
-                            </button>
+                            </div>
                           </td>
-                          {showDetails && o.quantity > 0 && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300">
-                              {o.quantity}
+                          {showDetails && (
+                            <td
+                              className="p-3 text-gray-700 dark:text-gray-300"
+                              style={{ width: "60px" }}
+                            >
+                              {o.quantity > 0 ? o.quantity : ""}
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3">
+                            <td className="p-3" style={{ width: "240px" }}>
                               <div className="flex flex-wrap items-center gap-1">
                                 {getPathLetterPills(o, (orderId, stepIdx) => {
                                   const stepAtIdx = o.steps[stepIdx];
@@ -412,7 +463,10 @@ export default function ModelList(props: ModelListProps) {
                               </div>
                             </td>
                           )}
-                          <td className="p-3 text-gray-700 dark:text-gray-300">
+                          <td
+                            className="p-3 text-gray-700 dark:text-gray-300"
+                            style={{ width: "120px" }}
+                          >
                             {i < 0
                               ? "Not started"
                               : i >= o.steps.length
@@ -443,22 +497,20 @@ export default function ModelList(props: ModelListProps) {
                                         <div className="font-medium">
                                           {primaryMachine}
                                         </div>
-                                        {selectedMachines.map(
-                                          (machine) => (
-                                            <div
-                                              key={machine}
-                                              className="font-medium text-gray-900 dark:text-gray-100"
-                                            >
-                                              {machine}
-                                            </div>
-                                          ),
-                                        )}
+                                        {selectedMachines.map((machine) => (
+                                          <div
+                                            key={machine}
+                                            className="text-sm font-medium text-gray-900 dark:text-gray-100"
+                                          >
+                                            {machine}
+                                          </div>
+                                        ))}
                                       </div>
                                     );
                                   })()}
                           </td>
                           {showDetails && (
-                            <td className="p-3">
+                            <td className="p-3" style={{ width: "120px" }}>
                               {i < 0 || i >= o.steps.length ? (
                                 <Badge variant="secondary">—</Badge>
                               ) : (
@@ -480,7 +532,7 @@ export default function ModelList(props: ModelListProps) {
                                                 ? "destructive"
                                                 : "secondary"
                                           }
-                                          className="cursor-pointer"
+                                          className="cursor-pointer whitespace-nowrap"
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
                                           {cap(displayStatus)}
@@ -499,7 +551,7 @@ export default function ModelList(props: ModelListProps) {
                                             .map((j) => (
                                               <div
                                                 key={j.id}
-                                                className="text-sm text-muted-foreground"
+                                                className="text-xs text-muted-foreground"
                                               >
                                                 {j.name}
                                               </div>
@@ -513,7 +565,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3">
+                            <td className="p-3" style={{ width: "140px" }}>
                               <div className="flex items-center gap-1">
                                 <Button
                                   size="icon"
@@ -586,7 +638,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                         </tr>
-                        {expandedIds.includes(o.id) && (
+                        {toggledIds.includes(o.id) && (
                           <tr>
                             <td colSpan={emptyColSpan} className="p-2">
                               <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-3 rounded">
@@ -641,8 +693,7 @@ export default function ModelList(props: ModelListProps) {
               const i = o.currentStepIndex;
               const step = o.steps[i];
               const bg = statusBgClass(o);
-              const isExpandedMobile =
-                showDetails || expandedIds.includes(o.id);
+              const isExpandedMobile = showDetails || toggledIds.includes(o.id);
               return (
                 <div
                   key={o.id}
@@ -658,7 +709,7 @@ export default function ModelList(props: ModelListProps) {
                           className="text-left w-full truncate"
                         >
                           {o.modelName}{" "}
-                          {!showDetails && o.quantity > 0 && (
+                          {o.quantity > 0 && (
                             <span className="text-muted-foreground">
                               ({o.quantity})
                             </span>
@@ -667,13 +718,10 @@ export default function ModelList(props: ModelListProps) {
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
                         {isExpandedMobile && (
-                          <>
-                            <span className="inline-flex items-center gap-1">
-                              <CalendarDays className="h-3.5 w-3.5" />{" "}
-                              {formatDate(o.createdAt)}
-                            </span>
-                            {o.quantity > 0 && <span>Qty: {o.quantity}</span>}
-                          </>
+                          <span className="inline-flex items-center gap-1">
+                            <CalendarDays className="h-3.5 w-3.5" />{" "}
+                            {formatDate(o.createdAt)}
+                          </span>
                         )}
                       </div>
                       {isExpandedMobile && (
