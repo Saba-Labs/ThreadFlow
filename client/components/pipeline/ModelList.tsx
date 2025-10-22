@@ -369,7 +369,7 @@ export default function ModelList(props: ModelListProps) {
                         )}
                         <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
                           <button
-                            onClick={() => navigate(`/models/${o.id}/edit`)}
+                            onClick={() => toggleExpanded(o.id)}
                             className="text-left w-full truncate"
                           >
                             {o.modelName}{" "}
@@ -611,9 +611,9 @@ export default function ModelList(props: ModelListProps) {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
                         <button
-                          onClick={() => navigate(`/models/${o.id}/edit`)}
-                          className="text-left w-full truncate"
-                        >
+                            onClick={() => toggleExpanded(o.id)}
+                            className="text-left w-full truncate"
+                          >
                           {o.modelName}{" "}
                           {!showDetails && (
                             <span className="text-muted-foreground">
