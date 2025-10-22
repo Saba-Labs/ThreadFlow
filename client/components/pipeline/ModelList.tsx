@@ -301,6 +301,11 @@ export default function ModelList(props: ModelListProps) {
   const showDetails = props.showDetails ?? true;
   const emptyColSpan = showDetails ? 7 : 2;
 
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
   return (
     <div className="min-h-screen">
       <div className="px-0">
