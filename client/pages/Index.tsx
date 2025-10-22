@@ -1,9 +1,10 @@
-import MachineBoard from "@/components/pipeline/MachineBoard";
+import React from "react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Search, Layers, Play, Pause, CheckCircle } from "lucide-react";
+import MachineBoard from "@/components/pipeline/MachineBoard";
 
 export default function Index() {
   const pipeline = useProductionPipeline();
@@ -24,84 +25,113 @@ export default function Index() {
   ).length;
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Garments Production</h1>
-          <p className="text-sm text-muted-foreground">
-            Overview of models, machines and live production status.
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* Hero */}
+      <div className="rounded-lg bg-gradient-to-r from-white/60 to-muted/40 p-6 shadow-sm border">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">Garments Production</h1>
+            <p className="mt-1 text-sm text-muted-foreground max-w-xl">
+              Live overview of models, machines and production flow. Use the search
+              and quick actions to manage the pipeline.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center gap-2 w-full md:w-80">
-            <Input placeholder="Search models or machines..." />
-            <Button variant="ghost" size="icon" aria-label="Search">
-              <Search className="h-4 w-4" />
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center w-full md:w-96 bg-surface rounded-md px-3 py-2 shadow-sm">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                className="ml-2 bg-transparent border-0 p-0 focus:ring-0"
+                placeholder="Search models, machines or orders..."
+                aria-label="Search models and machines"
+              />
+            </div>
+
+            <Button asChild className="ml-2">
+              <a href="/models/new">New Model</a>
+            </Button>
+
+            <Button variant="ghost" size="icon" className="ml-1">
+              <Layers className="h-5 w-5" />
             </Button>
           </div>
-
-          <Button asChild>
-            <a href="/models/new" className="ml-2">
-              New Model
-            </a>
-          </Button>
         </div>
-      </header>
+      </div>
 
-      {/* KPI cards */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-lg border bg-white p-4">
-          <div className="text-sm text-muted-foreground">Total Models</div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="text-2xl font-semibold">{total}</div>
-            <Badge variant="secondary">Live</Badge>
+      {/* KPI Cards */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+            <Layers className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm text-muted-foreground">Total Models</div>
+            <div className="mt-1 flex items-baseline justify-between gap-4">
+              <div className="text-2xl font-semibold">{total}</div>
+              <Badge variant="secondary">Live</Badge>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-lg border bg-white p-4">
-          <div className="text-sm text-muted-foreground">Running</div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="text-2xl font-semibold text-green-600">{running}</div>
-            <div className="text-xs text-muted-foreground">Active</div>
+        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-600">
+            <Play className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm text-muted-foreground">Running</div>
+            <div className="mt-1 flex items-baseline justify-between gap-4">
+              <div className="text-2xl font-semibold text-green-600">{running}</div>
+              <div className="text-xs text-muted-foreground">Active</div>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-lg border bg-white p-4">
-          <div className="text-sm text-muted-foreground">On Hold</div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="text-2xl font-semibold text-amber-600">{hold}</div>
-            <div className="text-xs text-muted-foreground">Blocked</div>
+        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-amber-50 text-amber-600">
+            <Pause className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm text-muted-foreground">On Hold</div>
+            <div className="mt-1 flex items-baseline justify-between gap-4">
+              <div className="text-2xl font-semibold text-amber-600">{hold}</div>
+              <div className="text-xs text-muted-foreground">Blocked</div>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-lg border bg-white p-4">
-          <div className="text-sm text-muted-foreground">Completed</div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="text-2xl font-semibold text-green-700">{completed}</div>
-            <div className="text-xs text-muted-foreground">Done</div>
+        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-700">
+            <CheckCircle className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm text-muted-foreground">Completed</div>
+            <div className="mt-1 flex items-baseline justify-between gap-4">
+              <div className="text-2xl font-semibold text-green-700">{completed}</div>
+              <div className="text-xs text-muted-foreground">Done</div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Machine board */}
       <section>
-        <h2 className="text-lg font-medium mb-3">Machines</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium">Machines</h2>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm">Refresh</Button>
+            <Button variant="ghost" size="sm">Filters</Button>
+          </div>
+        </div>
+
         <MachineBoard
           data={pipeline.board}
           onRun={(o) => {
-            if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
-              return;
-            pipeline.updateStepStatus(o.id, o.currentStepIndex, {
-              status: "running",
-            });
+            if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return;
+            pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "running" });
           }}
           onHold={(o) => {
-            if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
-              return;
-            pipeline.updateStepStatus(o.id, o.currentStepIndex, {
-              status: "hold",
-            });
+            if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return;
+            pipeline.updateStepStatus(o.id, o.currentStepIndex, { status: "hold" });
           }}
           onNext={(o) => pipeline.moveToNextStep(o.id)}
         />
