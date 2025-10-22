@@ -8,44 +8,25 @@ export default function ThreadFlowLogo({
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 200"
+      viewBox="0 0 64 64"
       className={className}
       aria-label="ThreadFlow logo"
       role="img"
-      preserveAspectRatio="xMidYMid meet"
     >
-      <defs>
-        <linearGradient id="leftGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#0369a1" />
-        </linearGradient>
-        <linearGradient id="rightGradient" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#84cc16" />
-          <stop offset="100%" stopColor="#06b6d4" />
-        </linearGradient>
-        <filter id="smoothFilter">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
-        </filter>
-      </defs>
-
-      {/* Left blue rounded shape */}
+      {/* Left blue curved shape */}
       <path
-        d="M 60 40 C 45 40 35 55 35 75 C 35 95 45 110 60 115 C 75 105 85 85 100 70 C 90 55 75 40 60 40 Z"
-        fill="url(#leftGradient)"
-        strokeLinejoin="round"
-        strokeLinecap="round"
+        d="M 16 12 C 16 12 8 16 8 24 L 8 40 C 8 48 16 52 24 52 C 28 48 32 40 32 32 C 32 24 28 16 24 12 C 20 12 16 12 16 12 Z"
+        fill="#0369a1"
       />
 
-      {/* Right green/cyan rounded shape */}
+      {/* Right green curved shape */}
       <path
-        d="M 140 40 C 155 40 165 55 165 75 C 165 95 155 110 140 115 C 125 105 115 85 100 70 C 110 55 125 40 140 40 Z"
-        fill="url(#rightGradient)"
-        strokeLinejoin="round"
-        strokeLinecap="round"
+        d="M 48 12 C 48 12 44 12 40 12 C 36 16 32 24 32 32 C 32 40 36 48 40 52 C 48 52 56 48 56 40 L 56 24 C 56 16 48 12 48 12 Z"
+        fill="#22c55e"
       />
 
-      {/* Center overlap ellipse for depth effect */}
-      <ellipse cx="100" cy="72" rx="18" ry="24" fill="#0d9488" opacity="0.7" />
+      {/* Center overlap circle for depth */}
+      <circle cx="32" cy="32" r="8" fill="#06b6d4" />
     </svg>
   );
 }
