@@ -664,7 +664,7 @@ export default function ModelList(props: ModelListProps) {
               const step = o.steps[i];
               const bg = statusBgClass(o);
               const isExpandedMobile =
-                showDetails ? !toggledIds.includes(o.id) : toggledIds.includes(o.id);
+                showDetails || toggledIds.includes(o.id);
               return (
                 <div
                   key={o.id}
