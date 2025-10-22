@@ -458,7 +458,7 @@ export default function ModelList(props: ModelListProps) {
                                   })()}
                           </td>
                           {showDetails && (
-                            <td className="p-3 w-24">
+                            <td className="p-3" style={{width: '100px'}}>
                               {i < 0 || i >= o.steps.length ? (
                                 <Badge variant="secondary">—</Badge>
                               ) : (
