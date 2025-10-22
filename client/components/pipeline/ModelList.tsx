@@ -444,9 +444,9 @@ export default function ModelList(props: ModelListProps) {
                                           {primaryMachine}
                                         </div>
                                         {selectedMachines.map(
-                                          (machine, idx) => (
+                                          (machine) => (
                                             <div
-                                              key={idx}
+                                              key={machine}
                                               className="font-medium text-gray-900 dark:text-gray-100"
                                             >
                                               {machine}
@@ -736,9 +736,9 @@ export default function ModelList(props: ModelListProps) {
                                 if (selectedMachines.length === 0) return null;
                                 return (
                                   <div className="text-sm text-right">
-                                    {selectedMachines.map((m, idx) => (
+                                    {selectedMachines.map((m) => (
                                       <div
-                                        key={idx}
+                                        key={m}
                                         className="font-medium text-gray-900 dark:text-gray-100"
                                       >
                                         {m}
@@ -1090,7 +1090,7 @@ export default function ModelList(props: ModelListProps) {
 
               <div className="space-y-2">
                 {splitInputs.map((q, i) => (
-                  <div key={i} className="flex gap-2">
+                  <div key={`split-${i}`} className="flex gap-2">
                     <div className="flex-1">
                       <Input
                         type="number"
