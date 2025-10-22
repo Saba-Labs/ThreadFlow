@@ -319,32 +319,32 @@ export default function ModelList(props: ModelListProps) {
                 <thead className="bg-gray-100 dark:bg-gray-800">
                   <tr>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-20">
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '80px'}}>
                         Date
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 flex-1 min-w-32">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
                       Model
                     </th>
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-16">
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '60px'}}>
                         Qty
                       </th>
                     )}
                     {showDetails && (
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-40">
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '160px'}}>
                         Path
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-40">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '160px'}}>
                       Current
                     </th>
                     {showDetails && (
                       <>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-24">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '100px'}}>
                           Status
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 w-32">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '140px'}}>
                           Actions
                         </th>
                       </>
