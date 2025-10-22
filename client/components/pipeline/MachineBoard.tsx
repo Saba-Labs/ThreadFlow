@@ -88,44 +88,6 @@ export default function MachineBoard(props: {
               </div>
             </div>
 
-            <div className="p-3 space-y-2">
-              {orders.length === 0 ? (
-                <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">No models on this machine</div>
-              ) : (
-                orders.map((o) => {
-                  const total = Math.max(1, o.steps.length);
-                  const idx = Math.max(0, Math.min(o.currentStepIndex, total - 1));
-                  const percent = Math.round(((idx + 1) / total) * 100);
-                  const status = o.steps[o.currentStepIndex]?.status || "—";
-                  return (
-                    <div key={o.id} className="flex items-center justify-between gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <div className="truncate font-medium text-sm text-gray-900">{o.modelName}</div>
-                          <Badge variant="outline">{o.quantity}</Badge>
-                        </div>
-                        <div className="mt-2 text-xs text-muted-foreground flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <div className="text-[10px] bg-muted rounded px-2 py-0.5">Step {o.currentStepIndex + 1}/{o.steps.length}</div>
-                            <div className="capitalize">{status}</div>
-                          </div>
-                          <div className="flex-1">
-                            <div className="h-2 bg-muted rounded overflow-hidden"><div className="h-2 bg-primary" style={{ width: `${percent}%` }} /></div>
-                          </div>
-                          <div className="text-xs text-muted-foreground">{percent}%</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => props.onRun(o)} title="Mark running"><PlayCircle className="h-5 w-5 text-green-600" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => props.onHold(o)} title="Put on hold"><PauseCircle className="h-5 w-5 text-amber-600" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => props.onNext(o)} title="Move to next step"><SkipForward className="h-5 w-5 text-primary" /></Button>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
 
             {/* expanded below (running and hold list) */}
             {expandedBelow[mtConfig.name] && (
