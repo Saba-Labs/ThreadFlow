@@ -359,9 +359,8 @@ export default function ModelList(props: ModelListProps) {
                     const isExpanded =
                       showDetails || expandedIds.includes(o.id);
                     return (
-                      <>
+                      <Fragment key={o.id}>
                         <tr
-                          key={o.id}
                           data-order-id={o.id}
                           data-parent-id={o.parentId ?? ""}
                           className={`${bg} border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors`}
@@ -616,7 +615,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     );
                   })}
                   {sorted.length === 0 && (
