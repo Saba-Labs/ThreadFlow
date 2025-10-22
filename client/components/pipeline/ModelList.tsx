@@ -480,7 +480,7 @@ export default function ModelList(props: ModelListProps) {
                                                 ? "destructive"
                                                 : "secondary"
                                           }
-                                          className="cursor-pointer"
+                                          className="cursor-pointer whitespace-nowrap"
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
                                           {cap(displayStatus)}
