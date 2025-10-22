@@ -10,18 +10,24 @@ export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: 
         </linearGradient>
       </defs>
 
-      {/* Outer ring */}
-      <circle cx="32" cy="26" r="18" fill="#ffffff" stroke="#d9d9d9" strokeWidth="1.2" />
+      {/* Connected workflow nodes */}
+      <circle cx="16" cy="32" r="6" fill="#e8f4f8" stroke="#18b7ff" strokeWidth="2" />
+      <circle cx="32" cy="20" r="6" fill="#e8f4f8" stroke="#16c7b8" strokeWidth="2" />
+      <circle cx="48" cy="32" r="6" fill="#e8f4f8" stroke="#33d6d0" strokeWidth="2" />
 
-      {/* Bars */}
-      <g transform="translate(14,10)">
-        <rect x="0" y="22" width="4.5" height="8" rx="1" fill="url(#gB)" />
-        <rect x="7" y="18" width="4.5" height="12" rx="1" fill="#18b7ff" />
-        <rect x="14" y="10" width="4.5" height="20" rx="1" fill="#16c7b8" />
-      </g>
+      {/* Connection lines */}
+      <line x1="21" y1="29" x2="27" y2="23" stroke="url(#gB)" strokeWidth="2" strokeLinecap="round" />
+      <line x1="37" y1="23" x2="43" y2="29" stroke="url(#gB)" strokeWidth="2" strokeLinecap="round" />
 
-      {/* Check */}
-      <path d="M22 28 L28 34 L40 18" fill="none" stroke="#0b4d85" strokeWidth="2.8" strokeLinecap="square" strokeLinejoin="miter" />
+      {/* Progress indicators (dots) */}
+      <circle cx="16" cy="32" r="2.5" fill="#18b7ff" />
+      <circle cx="32" cy="20" r="2.5" fill="#16c7b8" />
+
+      {/* Completion check */}
+      <path d="M44 31 L47 34 L52 28" fill="none" stroke="#0b4d85" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+
+      {/* Thread element - flowing line */}
+      <path d="M16 44 Q32 48 48 44" fill="none" stroke="url(#gB)" strokeWidth="1.5" strokeDasharray="2,3" opacity="0.6" />
     </svg>
   );
 }
