@@ -1,36 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
   <defs>
-    <linearGradient id="gLeft" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#1e3eff" />
-      <stop offset="1" stop-color="#14d8e2" />
+    <linearGradient id="barGrad" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#33d6d0" />
+      <stop offset="1" stop-color="#18b7ff" />
     </linearGradient>
-    <linearGradient id="gRight" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#9be72a" />
-      <stop offset="1" stop-color="#2ee8c8" />
+    <linearGradient id="textGrad" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#0b4d85" />
+      <stop offset="1" stop-color="#20c6b9" />
     </linearGradient>
-    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="0" dy="18" stdDeviation="30" flood-color="#000" flood-opacity="0.12" />
-    </filter>
   </defs>
 
-  <!-- White background -->
-  <rect width="1200" height="1200" fill="#fff" rx="0" />
+  <!-- Background white -->
+  <rect width="1200" height="1200" fill="#ffffff" />
 
-  <!-- Left rounded pill (rotated) -->
-  <g filter="url(#shadow)">
-    <path d="M300 200 C340 160, 460 140, 540 200 L740 500 C780 540, 780 610, 740 650 L540 950 C460 1010, 340 990, 300 950 L100 650 C60 610, 60 540, 100 500 Z"
-      fill="url(#gLeft)" transform="translate(0,0) rotate(-10 420 580)" />
+  <!-- Double ring -->
+  <g transform="translate(300,160)">
+    <circle cx="300" cy="300" r="220" fill="none" stroke="#d9d9d9" stroke-width="12" />
+    <circle cx="300" cy="300" r="260" fill="none" stroke="#efefef" stroke-width="6" />
 
-    <!-- Right rounded pill (rotated opposite) -->
-    <path d="M900 200 C860 160, 740 140, 660 200 L460 500 C420 540, 420 610, 460 650 L660 950 C740 1010, 860 990, 900 950 L1100 650 C1140 610, 1140 540, 1100 500 Z"
-      fill="url(#gRight)" transform="translate(0,0) rotate(10 760 580)" />
+    <!-- Bars (rising) centered inside circle -->
+    <g transform="translate(140,150)">
+      <rect x="0" y="160" width="80" height="140" rx="6" fill="url(#barGrad)" />
+      <rect x="110" y="120" width="80" height="180" rx="6" fill="#18b7ff" />
+      <rect x="220" y="60" width="80" height="240" rx="6" fill="#16c7b8" />
 
-    <!-- Central overlapping lens to match reference darker center -->
-    <ellipse cx="600" cy="600" rx="140" ry="180" fill="#064f45" opacity="0.22" />
+      <!-- Small white separators to mimic the reference crisp gaps -->
+      <rect x="0" y="160" width="80" height="10" fill="#ffffff" opacity="0.0" />
+    </g>
+
+    <!-- Check mark overlay -- bold, dark blue -->
+    <g transform="translate(220,180)">
+      <path d="M40 180 L120 260 L260 60" fill="none" stroke="#0b4d85" stroke-width="32" stroke-linecap="square" stroke-linejoin="miter" />
+    </g>
   </g>
 
-  <!-- Brand wordmark centered below (matches reference styling) -->
+  <!-- Wordmark under emblem -->
   <g>
-    <text x="50%" y="980" text-anchor="middle" font-family="Inter, Roboto, Helvetica, Arial, sans-serif" font-size="96" fill="#333" font-weight="600">ThreadFlow</text>
+    <text x="50%" y="1020" text-anchor="middle" font-family="Inter, Roboto, Helvetica, Arial, sans-serif" font-size="96" font-weight="700">
+      <tspan fill="#0b4d85">Thread</tspan>
+      <tspan fill="#20c6b9">Flow</tspan>
+    </text>
   </g>
 </svg>
