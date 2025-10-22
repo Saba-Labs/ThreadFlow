@@ -59,7 +59,7 @@ export default function ModelForm(props: {
   const [modelNamePart1, setModelNamePart1] = useState("");
   const [modelNamePart2, setModelNamePart2] = useState("");
   const [modelNamePart3, setModelNamePart3] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [quantity, setQuantity] = useState<number | null>(null);
   const [dateStr, setDateStr] = useState(() =>
     new Date().toISOString().slice(0, 10),
   );
@@ -77,7 +77,7 @@ export default function ModelForm(props: {
       setModelNamePart1(parsed.part1);
       setModelNamePart2(parsed.part2);
       setModelNamePart3(parsed.part3);
-      setQuantity(props.initialData.quantity ? String(props.initialData.quantity) : "");
+      setQuantity(props.initialData.quantity || null);
       setDateStr(
         new Date(props.initialData.createdAt).toISOString().slice(0, 10),
       );
@@ -134,7 +134,7 @@ export default function ModelForm(props: {
     setModelNamePart1("");
     setModelNamePart2("");
     setModelNamePart3("");
-    setQuantity("");
+    setQuantity(null);
     setDateStr(new Date().toISOString().slice(0, 10));
     setSelectedMachines(new Set());
     setIncludeJobWork(false);
@@ -146,7 +146,7 @@ export default function ModelForm(props: {
     if (path.length === 0) return;
 
     const fullModelName = combineModelName(modelNamePart1, modelNamePart2, modelNamePart3);
-    const quantityValue = quantity.trim() ? Math.max(1, Math.floor(Number(quantity))) : 0;
+    const quantityValue = quantity ? Math.max(0, Math.floor(quantity)) : 0;
 
     props.onCreate({
       modelName: fullModelName,
@@ -189,8 +189,8 @@ export default function ModelForm(props: {
             <label className="text-sm font-medium">Quantity</label>
             <Input
               type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              value={quantity ?? ""}
+              onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : null)}
               placeholder="Enter quantity"
             />
           </div>
