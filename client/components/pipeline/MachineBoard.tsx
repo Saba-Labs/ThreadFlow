@@ -91,7 +91,7 @@ export default function MachineBoard(props: {
 
             {/* expanded below (running and hold list) */}
             {expandedBelow[mtConfig.name] && (
-              <div className="p-3 border-t bg-muted/10">
+              <div className="p-3 border-t bg-emerald-50">
                 <div className="text-sm font-semibold mb-2">Running / Hold</div>
                 {runningOrHold.length === 0 ? (
                   <div className="text-sm text-muted-foreground">No active models</div>
