@@ -458,7 +458,7 @@ export default function ModelList(props: ModelListProps) {
                                   })()}
                           </td>
                           {showDetails && (
-                            <td className="p-3">
+                            <td className="p-3 w-24">
                               {i < 0 || i >= o.steps.length ? (
                                 <Badge variant="secondary">—</Badge>
                               ) : (
@@ -499,7 +499,7 @@ export default function ModelList(props: ModelListProps) {
                                             .map((j) => (
                                               <div
                                                 key={j.id}
-                                                className="text-sm text-muted-foreground"
+                                                className="text-xs text-muted-foreground"
                                               >
                                                 {j.name}
                                               </div>
@@ -513,7 +513,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3">
+                            <td className="p-3 w-32">
                               <div className="flex items-center gap-1">
                                 <Button
                                   size="icon"
