@@ -27,7 +27,7 @@ function applyScale(option: FontSizeOption) {
 const DEFAULT_VALUE: FontSizeOption = "large";
 
 // Guard to avoid calling React hooks in non-browser contexts or when React isn't initialized
-const canUseHooks = typeof window !== "undefined" && typeof React.useState === "function";
+const canUseHooks = typeof window !== "undefined" && React != null && typeof (React as any).useState === "function";
 
 export function FontSizeProvider({ children }: { children: React.ReactNode }) {
   if (!canUseHooks) {
