@@ -304,12 +304,13 @@ export default function ModelList(props: ModelListProps) {
 
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
-  // When resetExpandedSignal changes (eye icon toggled to open), clear expandedIds
+  // When eye closes (showDetails becomes false), clear expanded cards
+  // When eye opens (showDetails becomes true), all cards show expanded automatically
   useEffect(() => {
-    if (props.resetExpandedSignal && showDetails) {
+    if (!showDetails) {
       setExpandedIds([]);
     }
-  }, [props.resetExpandedSignal, showDetails]);
+  }, [showDetails]);
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) =>
