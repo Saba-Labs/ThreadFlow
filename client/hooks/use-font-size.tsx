@@ -27,7 +27,10 @@ function applyScale(option: FontSizeOption) {
 const DEFAULT_VALUE: FontSizeOption = "large";
 
 // Guard to avoid calling React hooks in non-browser contexts or when React isn't initialized
-const canUseHooks = typeof window !== "undefined" && React != null && typeof (React as any).useState === "function";
+const canUseHooks =
+  typeof window !== "undefined" &&
+  React != null &&
+  typeof (React as any).useState === "function";
 
 export function FontSizeProvider({ children }: { children: React.ReactNode }) {
   if (!canUseHooks) {
@@ -40,13 +43,17 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
       /* ignore */
     }
     return (
-      <FontSizeContext.Provider value={noopCtx}>{children}</FontSizeContext.Provider>
+      <FontSizeContext.Provider value={noopCtx}>
+        {children}
+      </FontSizeContext.Provider>
     );
   }
 
   const [value, setValue] = React.useState<FontSizeOption>(() => {
     try {
-      const saved = (localStorage.getItem(STORAGE_KEY) as FontSizeOption | null) ?? DEFAULT_VALUE;
+      const saved =
+        (localStorage.getItem(STORAGE_KEY) as FontSizeOption | null) ??
+        DEFAULT_VALUE;
       return saved;
     } catch {
       return DEFAULT_VALUE;
@@ -64,7 +71,9 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
   }, [value]);
 
   const ctx = React.useMemo<Ctx>(() => ({ value, setValue }), [value]);
-  return <FontSizeContext.Provider value={ctx}>{children}</FontSizeContext.Provider>;
+  return (
+    <FontSizeContext.Provider value={ctx}>{children}</FontSizeContext.Provider>
+  );
 }
 
 export function useFontSize() {

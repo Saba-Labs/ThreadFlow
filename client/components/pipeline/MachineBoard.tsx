@@ -29,8 +29,12 @@ export default function MachineBoard(props: {
           >
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-accent/3">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">{mtConfig.name}</h3>
-                <div className="text-xs text-muted-foreground">{orders.length} queued</div>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  {mtConfig.name}
+                </h3>
+                <div className="text-xs text-muted-foreground">
+                  {orders.length} queued
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">{orders.length}</Badge>
@@ -45,19 +49,29 @@ export default function MachineBoard(props: {
               ) : (
                 orders.map((o) => {
                   const total = Math.max(1, o.steps.length);
-                  const idx = Math.max(0, Math.min(o.currentStepIndex, total - 1));
+                  const idx = Math.max(
+                    0,
+                    Math.min(o.currentStepIndex, total - 1),
+                  );
                   const percent = Math.round(((idx + 1) / total) * 100);
                   const status = o.steps[o.currentStepIndex]?.status || "—";
                   return (
-                    <div key={o.id} className="flex items-center justify-between gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
+                    <div
+                      key={o.id}
+                      className="flex items-center justify-between gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors"
+                    >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <div className="truncate font-medium text-sm text-gray-900">{o.modelName}</div>
+                          <div className="truncate font-medium text-sm text-gray-900">
+                            {o.modelName}
+                          </div>
                           <Badge variant="outline">{o.quantity}</Badge>
                         </div>
                         <div className="mt-2 text-xs text-muted-foreground flex items-center gap-3">
                           <div className="flex items-center gap-2">
-                            <div className="text-[10px] bg-muted rounded px-2 py-0.5">Step {o.currentStepIndex + 1}/{o.steps.length}</div>
+                            <div className="text-[10px] bg-muted rounded px-2 py-0.5">
+                              Step {o.currentStepIndex + 1}/{o.steps.length}
+                            </div>
                             <div className="capitalize">{status}</div>
                           </div>
                           <div className="flex-1">
@@ -68,18 +82,35 @@ export default function MachineBoard(props: {
                               />
                             </div>
                           </div>
-                          <div className="text-xs text-muted-foreground">{percent}%</div>
+                          <div className="text-xs text-muted-foreground">
+                            {percent}%
+                          </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => props.onRun(o)} title="Mark running">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => props.onRun(o)}
+                          title="Mark running"
+                        >
                           <PlayCircle className="h-5 w-5 text-green-600" />
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => props.onHold(o)} title="Put on hold">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => props.onHold(o)}
+                          title="Put on hold"
+                        >
                           <PauseCircle className="h-5 w-5 text-amber-600" />
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => props.onNext(o)} title="Move to next step">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => props.onNext(o)}
+                          title="Move to next step"
+                        >
                           <SkipForward className="h-5 w-5 text-primary" />
                         </Button>
                       </div>

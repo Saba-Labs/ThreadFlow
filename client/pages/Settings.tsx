@@ -24,7 +24,10 @@ export default function Settings() {
   useEffect(() => {
     try {
       const scale = SCALE_MAP[value] ?? 1;
-      document.documentElement.style.setProperty("--app-font-scale", String(scale));
+      document.documentElement.style.setProperty(
+        "--app-font-scale",
+        String(scale),
+      );
       localStorage.setItem(STORAGE_KEY, value);
     } catch {
       // ignore

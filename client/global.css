@@ -101,7 +101,9 @@
     @apply bg-background text-foreground;
   }
 
-  html { font-size: calc(16px * var(--app-font-scale, 1)); }
+  html {
+    font-size: calc(16px * var(--app-font-scale, 1));
+  }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
     overflow-wrap: anywhere;
