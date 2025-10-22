@@ -48,7 +48,7 @@ export default function MachineBoard(props: {
           <section key={mtConfig.name} className="rounded-lg border bg-card/50 shadow-sm overflow-hidden">
             {/* expanded above (incoming) */}
             {expandedAbove[mtConfig.name] && (
-              <div className="p-3 border-b bg-sky-50">
+              <div className="p-3 border-b bg-red-50">
                 <div className="text-sm font-semibold mb-2">Incoming</div>
                 {incoming.length === 0 ? (
                   <div className="text-sm text-muted-foreground">No incoming models</div>
@@ -64,7 +64,22 @@ export default function MachineBoard(props: {
             )}
 
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-accent/3">
-              <div>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  // toggle both incoming and running/hold when machine name is clicked
+                  setExpandedAbove((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
+                  setExpandedBelow((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setExpandedAbove((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
+                    setExpandedBelow((prev) => ({ ...prev, [mtConfig.name]: !prev[mtConfig.name] }));
+                  }
+                }}
+                className="cursor-pointer"
+              >
                 <h3 className="text-sm font-semibold text-gray-900">{mtConfig.name}</h3>
                 <div className="text-xs text-muted-foreground">{orders.length} queued</div>
               </div>
