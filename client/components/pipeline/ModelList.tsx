@@ -323,7 +323,7 @@ export default function ModelList(props: ModelListProps) {
                         Date
                       </th>
                     )}
-                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100">
+                    <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100" style={{width: '120px'}}>
                       Model
                     </th>
                     {showDetails && (
