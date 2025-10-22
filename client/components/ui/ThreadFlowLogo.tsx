@@ -10,85 +10,52 @@ export default function ThreadFlowLogo({ className = "h-8 w-8" }: { className?: 
       role="img"
     >
       <defs>
-        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#667eea" />
-          <stop offset="100%" stopColor="#764ba2" />
+        <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0ea5e9" />
+          <stop offset="100%" stopColor="#06b6d4" />
         </linearGradient>
         
-        <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="50%" stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#8b5cf6" />
+        <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#6366f1" />
         </linearGradient>
-        
-        <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#10b981" />
-          <stop offset="50%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#3b82f6" />
-        </linearGradient>
-        
-        <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#f59e0b" />
-          <stop offset="50%" stopColor="#ef4444" />
-          <stop offset="100%" stopColor="#ec4899" />
-        </linearGradient>
-
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
       </defs>
 
-      {/* Rounded square background */}
+      {/* Rounded square container */}
       <rect 
-        x="20" 
-        y="20" 
-        width="160" 
-        height="160" 
-        rx="35" 
-        fill="url(#bgGrad)"
-        filter="url(#glow)"
+        x="15" 
+        y="15" 
+        width="170" 
+        height="170" 
+        rx="38" 
+        fill="url(#mainGrad)"
       />
 
-      {/* Inner rounded square for depth */}
-      <rect 
-        x="25" 
-        y="25" 
-        width="150" 
-        height="150" 
-        rx="32" 
+      {/* Bold letter T */}
+      <path
+        d="M 60 65 L 140 65 L 140 85 L 110 85 L 110 145 L 90 145 L 90 85 L 60 85 Z"
         fill="#ffffff"
-        opacity="0.08"
       />
 
-      {/* Dynamic flowing ribbon */}
+      {/* Flow arrow integrated into T */}
       <path
-        d="M 55 100 Q 75 70, 100 85 T 145 100 Q 125 130, 100 115 T 55 100 Z"
-        fill="url(#g1)"
-        opacity="0.9"
+        d="M 130 105 L 155 105 L 145 95 M 155 105 L 145 115"
+        stroke="#ffffff"
+        strokeWidth="8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
       />
 
-      {/* Second layer - offset */}
+      {/* Thread line accent */}
       <path
-        d="M 60 95 Q 80 68, 105 82 T 145 97 Q 125 125, 105 112 T 60 95 Z"
-        fill="url(#g2)"
-        opacity="0.75"
+        d="M 50 125 Q 100 115, 150 125"
+        stroke="url(#accentGrad)"
+        strokeWidth="4"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.8"
       />
-
-      {/* Third layer accent */}
-      <path
-        d="M 58 105 Q 78 80, 100 92 T 142 108 Q 122 133, 100 120 T 58 105 Z"
-        fill="url(#g3)"
-        opacity="0.65"
-      />
-
-      {/* Center orb - the focal point */}
-      <circle cx="100" cy="100" r="20" fill="#ffffff" opacity="0.95" filter="url(#glow)" />
-      <circle cx="100" cy="100" r="14" fill="url(#g1)" opacity="0.9" />
-      <circle cx="100" cy="100" r="7" fill="#ffffff" opacity="0.95" />
     </svg>
   );
 }
