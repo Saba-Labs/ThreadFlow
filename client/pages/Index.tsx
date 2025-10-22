@@ -41,17 +41,8 @@ export default function Index() {
 
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="flex items-center w-full md:w-96 bg-surface rounded-md px-3 py-2 shadow-sm">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                className="ml-2 bg-transparent border-0 p-0 focus:ring-0"
-                placeholder="Search models, machines or orders..."
-                aria-label="Search models and machines"
-              />
+              <div className="text-sm text-muted-foreground">Overview</div>
             </div>
-
-            <Button asChild className="ml-2">
-              <a href="/models/new">New Model</a>
-            </Button>
 
             <Button variant="ghost" size="icon" className="ml-1">
               <Layers className="h-5 w-5" />
