@@ -412,7 +412,7 @@ export default function ModelList(props: ModelListProps) {
                               </div>
                             </td>
                           )}
-                          <td className="p-3 text-gray-700 dark:text-gray-300" style={{width: '160px'}}>
+                          <td className="p-3 text-gray-700 dark:text-gray-300" style={{width: '120px'}}>
                             {i < 0
                               ? "Not started"
                               : i >= o.steps.length
