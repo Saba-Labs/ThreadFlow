@@ -209,7 +209,9 @@ export default function ModelList(props: ModelListProps) {
           el.style.opacity = "";
         });
 
-        if (tempExpanded || addedChildIds.length > 0) {
+        // Only revert toggles if we temporarily expanded the parent for animation.
+        // If the parent was already toggled open by the user, keep parent and new children toggled.
+        if (tempExpanded) {
           setToggledIds((prev) => prev.filter((id) => id !== parentId && !addedChildIds.includes(id)));
         }
       };
