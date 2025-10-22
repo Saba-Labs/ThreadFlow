@@ -101,12 +101,12 @@ export default function Index() {
             <CheckCircle className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <div className="text-sm text-muted-foreground">Completed</div>
+            <div className="text-sm text-muted-foreground">Job Work</div>
             <div className="mt-1 flex items-baseline justify-between gap-4">
               <div className="text-2xl font-semibold text-green-700">
-                {completed}
+                {pipeline.orders.reduce((sum, o) => sum + ((o.jobWorkIds || []).length), 0)}
               </div>
-              <div className="text-xs text-muted-foreground">Done</div>
+              <div className="text-xs text-muted-foreground">Linked</div>
             </div>
           </div>
         </div>
