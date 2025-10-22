@@ -303,6 +303,14 @@ export default function ModelList(props: ModelListProps) {
   const emptyColSpan = showDetails ? 7 : 2;
 
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
+
+  // When resetExpandedSignal changes (eye icon toggled to open), clear expandedIds
+  useEffect(() => {
+    if (props.resetExpandedSignal && showDetails) {
+      setExpandedIds([]);
+    }
+  }, [props.resetExpandedSignal, showDetails]);
+
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
