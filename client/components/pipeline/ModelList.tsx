@@ -670,13 +670,10 @@ export default function ModelList(props: ModelListProps) {
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
                         {isExpandedMobile && (
-                          <>
-                            <span className="inline-flex items-center gap-1">
-                              <CalendarDays className="h-3.5 w-3.5" />{" "}
-                              {formatDate(o.createdAt)}
-                            </span>
-                            {o.quantity > 0 && <span>Qty: {o.quantity}</span>}
-                          </>
+                          <span className="inline-flex items-center gap-1">
+                            <CalendarDays className="h-3.5 w-3.5" />{" "}
+                            {formatDate(o.createdAt)}
+                          </span>
                         )}
                       </div>
                       {isExpandedMobile && (
