@@ -366,11 +366,11 @@ export default function ModelList(props: ModelListProps) {
                           className={`${bg} border-t border-gray-200 dark:border-gray-800`}
                         >
                           {showDetails && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap w-20">
+                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap" style={{width: '80px'}}>
                               {formatDate(o.createdAt)}
                             </td>
                           )}
-                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100 flex-1 min-w-32">
+                          <td className="p-3 font-medium text-gray-900 dark:text-gray-100">
                             <button
                               onClick={() => toggleExpanded(o.id)}
                               className="text-left w-full truncate"
@@ -384,12 +384,12 @@ export default function ModelList(props: ModelListProps) {
                             </button>
                           </td>
                           {showDetails && (
-                            <td className="p-3 text-gray-700 dark:text-gray-300 w-16">
+                            <td className="p-3 text-gray-700 dark:text-gray-300" style={{width: '60px'}}>
                               {o.quantity > 0 ? o.quantity : ""}
                             </td>
                           )}
                           {showDetails && (
-                            <td className="p-3 w-40">
+                            <td className="p-3" style={{width: '160px'}}>
                               <div className="flex flex-wrap items-center gap-1">
                                 {getPathLetterPills(o, (orderId, stepIdx) => {
                                   const stepAtIdx = o.steps[stepIdx];
@@ -412,7 +412,7 @@ export default function ModelList(props: ModelListProps) {
                               </div>
                             </td>
                           )}
-                          <td className="p-3 text-gray-700 dark:text-gray-300 w-40">
+                          <td className="p-3 text-gray-700 dark:text-gray-300" style={{width: '160px'}}>
                             {i < 0
                               ? "Not started"
                               : i >= o.steps.length
