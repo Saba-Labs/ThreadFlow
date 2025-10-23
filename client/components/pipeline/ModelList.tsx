@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -41,11 +42,13 @@ interface ModelListProps {
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
   showDetails?: boolean;
+  viewMode?: "cards" | "list";
 }
 
 export default function ModelList(props: ModelListProps) {
   const machineTypes = useMachineTypes();
   const navigate = useNavigate();
+  const viewMode = props.viewMode ?? "cards";
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0]);
@@ -347,7 +350,8 @@ export default function ModelList(props: ModelListProps) {
     props.onSetStepStatus(o.id, i, newStatus);
   };
 
-  const showDetails = props.showDetails ?? true;
+  const isMobile = useIsMobile();
+  const showDetails = isMobile ? (props.showDetails ?? true) : true;
   const emptyColSpan = showDetails ? 7 : 2;
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
@@ -355,15 +359,35 @@ export default function ModelList(props: ModelListProps) {
   // When 'showDetails' toggles, control which rows are expanded.
   // If details are shown we expand all rows by default, but still allow
   // the user to toggle individual cards. If details are hidden we collapse all.
+  const prevShowRef = useRef<boolean | undefined>(undefined);
+
   useEffect(() => {
-    if (showDetails) {
-      setToggledIds(sorted.map((o) => o.id));
+    const prev = prevShowRef.current;
+    // First render or when showDetails toggles
+    if (prev === undefined || prev !== showDetails) {
+      if (showDetails) {
+        // Show details => expand all
+        setToggledIds(sorted.map((o) => o.id));
+      } else {
+        // Hide details => collapse all
+        setToggledIds([]);
+      }
     } else {
-      setToggledIds([]);
+      // showDetails unchanged; preserve user toggles across data updates
+      // but remove IDs that no longer exist
+      setToggledIds((prevIds) =>
+        prevIds.filter((id) => sorted.some((o) => o.id === id)),
+      );
     }
+
+    prevShowRef.current = showDetails;
   }, [showDetails, sorted]);
 
   const toggleExpanded = (id: string) => {
+    // Disable toggling only when desktop forces showDetails. On mobile
+    // allow toggling even when showDetails is true (eye open).
+    if (!isMobile && showDetails) return;
+
     setToggledIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
@@ -371,10 +395,17 @@ export default function ModelList(props: ModelListProps) {
 
   return (
     <div className="min-h-screen">
-      <div className="px-0">
+      <div className="px-0 max-w-full">
         <div className="space-y-3">
           {/* Desktop table */}
-          <div className="hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900">
+
+          <div
+            className={
+              viewMode === "list"
+                ? "hidden lg:block w-full"
+                : "hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"
+            }
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100 dark:bg-gray-800">
@@ -438,7 +469,7 @@ export default function ModelList(props: ModelListProps) {
                     const i = o.currentStepIndex;
                     const step = o.steps[i];
                     const bg = statusBgClass(o);
-                    const isExpanded = showDetails || toggledIds.includes(o.id);
+                    const isExpanded = toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
                         <tr
@@ -674,10 +705,10 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                         </tr>
-                        {toggledIds.includes(o.id) && (
+                        {isMobile && toggledIds.includes(o.id) && (
                           <tr>
                             <td colSpan={emptyColSpan} className="p-2">
-                              <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-3 rounded">
+                              <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-2 rounded-sm">
                                 <div className="flex flex-col gap-2">
                                   <div className="text-sm text-muted-foreground">
                                     Date: {formatDate(o.createdAt)}
@@ -724,25 +755,32 @@ export default function ModelList(props: ModelListProps) {
           </div>
 
           {/* Mobile cards */}
-          <div className="lg:hidden space-y-3">
+          <div
+            className={
+              viewMode === "cards"
+                ? "lg:hidden space-y-3"
+                : "lg:hidden divide-y divide-gray-200"
+            }
+          >
             {sorted.map((o) => {
               const i = o.currentStepIndex;
               const step = o.steps[i];
               const bg = statusBgClass(o);
-              const isExpandedMobile = showDetails || toggledIds.includes(o.id);
+              const isExpandedMobile = toggledIds.includes(o.id);
               return (
                 <div
                   key={o.id}
                   data-order-id={o.id}
                   data-parent-id={o.parentId ?? ""}
-                  className={`${bg} rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3 shadow-sm w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
+                  className={`${bg} ${viewMode === "cards" ? "rounded-lg p-4 space-y-3 shadow-sm border border-gray-200 dark:border-gray-800" : "py-2 -mx-4 px-4 space-y-1"} w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
+                      <h3 className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
                         <button
                           onClick={() => toggleExpanded(o.id)}
-                          className="text-left w-full truncate"
+                          disabled={!isMobile && showDetails}
+                          className={`text-left w-full truncate ${!isMobile && showDetails ? "opacity-60 cursor-default" : ""}`}
                         >
                           {o.modelName}{" "}
                           {o.quantity > 0 && (
@@ -752,7 +790,13 @@ export default function ModelList(props: ModelListProps) {
                           )}
                         </button>
                       </h3>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+                      <div
+                        className={
+                          viewMode === "cards"
+                            ? "flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400"
+                            : "flex flex-wrap items-center gap-x-2 gap-y-0 mt-0.5 text-xs text-gray-600 dark:text-gray-400"
+                        }
+                      >
                         {isExpandedMobile && (
                           <span className="inline-flex items-center gap-1">
                             <CalendarDays className="h-3.5 w-3.5" />{" "}
@@ -761,7 +805,13 @@ export default function ModelList(props: ModelListProps) {
                         )}
                       </div>
                       {isExpandedMobile && (
-                        <div className="flex flex-wrap items-center gap-1 mt-2">
+                        <div
+                          className={
+                            viewMode === "cards"
+                              ? "flex flex-wrap items-center gap-1 mt-2"
+                              : "flex flex-wrap items-center gap-1 mt-1"
+                          }
+                        >
                           {getPathLetterPills(o, (orderId, stepIdx) => {
                             const stepAtIdx = o.steps[stepIdx];
                             if (
@@ -784,12 +834,110 @@ export default function ModelList(props: ModelListProps) {
                       )}
                     </div>
 
-                    <div className="flex flex-col items-end gap-1">
+                    <div
+                      className={
+                        viewMode === "cards"
+                          ? "flex flex-col items-end gap-1"
+                          : "flex items-center gap-1"
+                      }
+                    >
                       {i >= 0 &&
                         i < o.steps.length &&
                         (() => {
                           const displayStatus =
                             step.status === "pending" ? "hold" : step.status;
+                          if (viewMode === "list") {
+                            // Stack current, status badge, and job work vertically like card view
+                            const parallelGroup = (o.parallelGroups || []).find(
+                              (g) => g.stepIndex === i,
+                            );
+                            const selectedIndices =
+                              parallelGroup?.machineIndices || [];
+                            const primaryMachine =
+                              step.kind === "machine"
+                                ? step.machineType
+                                : "Job Work";
+                            const selectedMachines = selectedIndices
+                              .map((idx) => machineTypes[idx]?.name)
+                              .filter(
+                                (name) => !!name && name !== primaryMachine,
+                              );
+
+                            return (
+                              <div className="flex flex-col items-end gap-1 text-right">
+                                <div className="text-sm">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    {i < 0
+                                      ? "Not started"
+                                      : i >= o.steps.length
+                                        ? "Completed"
+                                        : step.kind === "machine"
+                                          ? step.machineType
+                                          : "Job Work"}
+                                  </span>
+                                </div>
+
+                                {/* Only show selected machines, job works and status when the row is expanded */}
+                                {isExpandedMobile && (
+                                  <>
+                                    {selectedMachines.length > 0 && (
+                                      <div className="text-sm">
+                                        {selectedMachines.map((m) => (
+                                          <div
+                                            key={m}
+                                            className="font-medium text-gray-900 dark:text-gray-100"
+                                          >
+                                            {m}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    <div>
+                                      <button
+                                        onClick={() => toggleCardStatus(o)}
+                                      >
+                                        <Badge
+                                          variant={
+                                            displayStatus === "running"
+                                              ? "success"
+                                              : displayStatus === "hold"
+                                                ? "destructive"
+                                                : "secondary"
+                                          }
+                                          className="shrink-0 cursor-pointer"
+                                        >
+                                          {cap(displayStatus)}
+                                        </Badge>
+                                      </button>
+                                    </div>
+
+                                    {((o as any).jobWorkIds || []).length >
+                                      0 && (
+                                      <div className="mt-1 text-right">
+                                        {jobWorks
+                                          .filter((j) =>
+                                            (
+                                              (o as any).jobWorkIds || []
+                                            ).includes(j.id),
+                                          )
+                                          .map((j) => (
+                                            <div
+                                              key={j.id}
+                                              className="text-sm text-muted-foreground"
+                                            >
+                                              {j.name}
+                                            </div>
+                                          ))}
+                                      </div>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            );
+                          }
+
+                          // cards (compact) default behaviour
                           return (
                             <>
                               <div className="text-sm text-right">
@@ -878,7 +1026,7 @@ export default function ModelList(props: ModelListProps) {
                   </div>
 
                   {isExpandedMobile && (
-                    <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center justify-between pt-1">
                       <div className="flex gap-1">
                         <Button
                           size="icon"

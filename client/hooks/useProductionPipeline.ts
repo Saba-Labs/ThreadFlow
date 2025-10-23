@@ -298,7 +298,9 @@ export function useProductionPipeline() {
       if (sum <= 0) return s;
       if (src.quantity > 0 && sum >= src.quantity) return s;
       const remainder = src.quantity - sum;
-      const base = (q: number): WorkOrder => ({
+
+      // Helper to create a new child order with steps set to 'hold' (unless completed)
+      const createChild = (q: number): WorkOrder => ({
         id: uid("order"),
         modelName: src.modelName,
         quantity: q,
@@ -313,6 +315,7 @@ export function useProductionPipeline() {
           activeMachines: 0,
           quantityDone: 0,
         })),
+        // Keep the same logical position but these new orders are placed on hold
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
         parallelGroups: (src.parallelGroups || []).map((g) => ({
@@ -321,10 +324,25 @@ export function useProductionPipeline() {
           status: g.status as StepStatus,
         })),
       });
-      const children = valid.map((q) => base(q));
-      const remainderOrder = base(remainder);
-      const withoutSrc = s.orders.filter((o) => o.id !== src.id);
-      return { orders: [remainderOrder, ...children, ...withoutSrc] };
+
+      const children = valid.map((q) => createChild(q));
+
+      // Update the original source order to have the remainder quantity but keep its statuses unchanged
+      const updatedSrc: WorkOrder = { ...src, quantity: remainder };
+
+      // Rebuild orders: keep original order position but replace src with updatedSrc and append children after it
+      const newOrders: WorkOrder[] = [];
+      for (const o of s.orders) {
+        if (o.id === src.id) {
+          newOrders.push(updatedSrc);
+          // insert children right after the original
+          for (const c of children) newOrders.push(c);
+        } else {
+          newOrders.push(o);
+        }
+      }
+
+      return { orders: newOrders };
     });
   }, []);
 

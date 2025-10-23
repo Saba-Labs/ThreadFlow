@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import ModelList from "@/components/pipeline/ModelList";
 import ModelForm from "@/components/pipeline/ModelForm";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
@@ -11,7 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import React, { useEffect, useMemo, useState } from "react";
 import { Eye, EyeOff, Plus } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useSearch } from "@/context/SearchContext";
 
 export default function ModelsAll() {
@@ -51,6 +52,45 @@ export default function ModelsAll() {
   }, [filtered, query]);
 
   const [showDetails, setShowDetails] = useState(false);
+  const isMobile = useIsMobile();
+
+  // View mode for models list: 'cards' or 'list'. Default to 'cards' for new devices.
+  const [viewMode, setViewMode] = useState<"cards" | "list">(() => {
+    try {
+      return (
+        (localStorage.getItem("models.viewMode") as "cards" | "list") || "cards"
+      );
+    } catch {
+      return "cards";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("models.viewMode", viewMode);
+    } catch {}
+  }, [viewMode]);
+
+  useEffect(() => {
+    const onStorage = () => {
+      try {
+        const v =
+          (localStorage.getItem("models.viewMode") as "cards" | "list") ||
+          "cards";
+        setViewMode(v);
+      } catch {}
+    };
+    window.addEventListener("storage", onStorage);
+    // also listen to a custom event in case settings updates in same window
+    window.addEventListener("modelsViewChanged", onStorage as EventListener);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(
+        "modelsViewChanged",
+        onStorage as EventListener,
+      );
+    };
+  }, []);
 
   // Persist showDetails across navigation using localStorage
   useEffect(() => {
@@ -77,11 +117,14 @@ export default function ModelsAll() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div
+        className={`flex items-center justify-between ${viewMode === "list" ? "pb-3 border-b border-gray-200 mb-3" : ""}`}
+      >
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
             All Models
           </h1>
+          {/* Mobile-only toggle: keep for small screens */}
           <Button
             variant="ghost"
             size="icon"
@@ -111,7 +154,7 @@ export default function ModelsAll() {
         </div>
       </div>
 
-      <div className="-mx-4 sm:-mx-6 px-0 sm:px-0">
+      <div className="-mx-8 px-4">
         <ModelList
           orders={visible}
           onDelete={pipeline.deleteOrder}
@@ -124,7 +167,8 @@ export default function ModelsAll() {
           }
           onToggleParallelMachine={pipeline.toggleParallelMachine}
           setOrderJobWorks={pipeline.setOrderJobWorks}
-          showDetails={showDetails}
+          showDetails={isMobile ? showDetails : true}
+          viewMode={viewMode}
         />
         <Button
           asChild
