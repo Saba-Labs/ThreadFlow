@@ -185,7 +185,7 @@ export default function ModelList(props: ModelListProps) {
         const sy = beforeRect.height / afterRect.height;
 
         const from = {
-          transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+          transform: `translate(${dx}px, ${dy}px)`,
           opacity: 0.85,
         };
         const to = { transform: "none", opacity: 1 };
