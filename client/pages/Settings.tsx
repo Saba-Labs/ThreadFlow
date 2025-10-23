@@ -82,6 +82,38 @@ export default function Settings() {
         </RadioGroup>
       </section>
 
+      <section className="rounded-lg border bg-white p-4 space-y-4">
+        <div>
+          <div className="font-medium">Models view</div>
+          <div className="text-sm text-muted-foreground">
+            Choose how models are displayed on the All Models page. Default is Cards.
+          </div>
+        </div>
+        <RadioGroup
+          value={localStorage.getItem("models.viewMode") || "cards"}
+          onValueChange={(v) => {
+            try {
+              localStorage.setItem("models.viewMode", v as string);
+              window.dispatchEvent(new Event("storage"));
+            } catch {}
+          }}
+          className="grid gap-3 sm:grid-cols-2"
+        >
+          <div className="flex items-center space-x-2 rounded-md border p-3">
+            <RadioGroupItem value="cards" id="mv-cards" />
+            <Label htmlFor="mv-cards" className="cursor-pointer">
+              Cards view
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2 rounded-md border p-3">
+            <RadioGroupItem value="list" id="mv-list" />
+            <Label htmlFor="mv-list" className="cursor-pointer">
+              List view
+            </Label>
+          </div>
+        </RadioGroup>
+      </section>
+
       <section className="rounded-lg border bg-white divide-y">
         <Link
           to="/settings/production-path"
