@@ -782,7 +782,7 @@ export default function ModelList(props: ModelListProps) {
                         )}
                       </div>
                       {isExpandedMobile && (
-                        <div className="flex flex-wrap items-center gap-1 mt-2">
+                        <div className="flex flex-wrap items-center gap-1 mt-1">
                           {getPathLetterPills(o, (orderId, stepIdx) => {
                             const stepAtIdx = o.steps[stepIdx];
                             if (
