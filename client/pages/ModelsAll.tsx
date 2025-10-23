@@ -144,6 +144,7 @@ export default function ModelsAll() {
           onToggleParallelMachine={pipeline.toggleParallelMachine}
           setOrderJobWorks={pipeline.setOrderJobWorks}
           showDetails={isMobile ? showDetails : true}
+          viewMode={viewMode}
         />
         <Button
           asChild
