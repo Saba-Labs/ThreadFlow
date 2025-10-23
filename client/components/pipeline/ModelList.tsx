@@ -772,7 +772,7 @@ export default function ModelList(props: ModelListProps) {
                   key={o.id}
                   data-order-id={o.id}
                   data-parent-id={o.parentId ?? ""}
-                  className={`${bg} ${viewMode === "cards" ? "rounded-lg p-4 space-y-3 shadow-sm border border-gray-200 dark:border-gray-800" : "py-2 space-y-1 ml-0 mr-0 pl-4 -ml-4 -mr-4 -mr-[-16px]"} w-screen max-w-none ${bg ? "" : "bg-white dark:bg-gray-900"}`}
+                  className={`${bg} ${viewMode === "cards" ? "rounded-lg p-4 space-y-3 shadow-sm border border-gray-200 dark:border-gray-800" : "py-2 space-y-1 -mx-4 px-4"} w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
