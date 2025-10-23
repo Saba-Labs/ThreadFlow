@@ -757,7 +757,7 @@ export default function ModelList(props: ModelListProps) {
                   data-parent-id={o.parentId ?? ""}
                   className={`${bg} rounded-sm border border-gray-200 dark:border-gray-800 py-2 px-3 space-y-1 w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
                         <button
