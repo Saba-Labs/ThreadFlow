@@ -899,7 +899,7 @@ export default function ModelList(props: ModelListProps) {
                   </div>
 
                   {isExpandedMobile && (
-                    <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center justify-between pt-1">
                       <div className="flex gap-1">
                         <Button
                           size="icon"
