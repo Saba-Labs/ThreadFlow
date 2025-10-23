@@ -393,7 +393,7 @@ export default function ModelList(props: ModelListProps) {
 
   return (
     <div className="min-h-screen">
-      <div className="px-0">
+      <div className="px-0 max-w-full">
         <div className="space-y-3">
           {/* Desktop table */}
           <div className={viewMode === "list" ? "hidden lg:block w-full" : "hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"}>
