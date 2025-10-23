@@ -759,7 +759,7 @@ export default function ModelList(props: ModelListProps) {
             className={
               viewMode === "cards"
                 ? "lg:hidden space-y-3"
-                : "lg:hidden divide-y divide-gray-200"
+                : "lg:hidden divide-y divide-gray-200 -mx-3 sm:-mx-8 px-3 sm:px-8"
             }
           >
             {sorted.map((o) => {
