@@ -1,6 +1,7 @@
 import ModelList from "@/components/pipeline/ModelList";
 import ModelForm from "@/components/pipeline/ModelForm";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
