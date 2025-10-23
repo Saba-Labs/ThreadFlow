@@ -1,4 +1,10 @@
-import { ChevronRight, Type, LayoutGrid, Settings, Sparkles } from "lucide-react";
+import {
+  ChevronRight,
+  Type,
+  LayoutGrid,
+  Settings,
+  Sparkles,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -27,8 +33,14 @@ export default function SettingsPage() {
       {/* Animated background effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "2s" }}
+        ></div>
       </div>
 
       {/* Header Section */}
@@ -56,15 +68,16 @@ export default function SettingsPage() {
 
       {/* Content Section */}
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-        
         {/* Appearance Section */}
         <div className="space-y-5">
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Appearance</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+              Appearance
+            </h2>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
           </div>
-          
+
           {/* Font Size Setting */}
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -80,7 +93,9 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">Font Size</h3>
+                      <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                        Font Size
+                      </h3>
                       <p className="text-sm text-slate-600 leading-relaxed">
                         Scale text to your preferred reading size
                       </p>
@@ -123,7 +138,9 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">Models View</h3>
+                      <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                        Models View
+                      </h3>
                       <p className="text-sm text-slate-600 leading-relaxed">
                         Switch between card and list layouts
                       </p>
@@ -163,10 +180,12 @@ export default function SettingsPage() {
         <div className="space-y-5">
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Advanced</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+              Advanced
+            </h2>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
           </div>
-          
+
           <div className="group relative">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <section className="relative rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300">
@@ -179,13 +198,25 @@ export default function SettingsPage() {
                   <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 bg-emerald-500/20 rounded-2xl blur-lg"></div>
                     <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      <svg
+                        className="w-6 h-6 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
                       </svg>
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">Production Path</h3>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                      Production Path
+                    </h3>
                     <p className="text-sm text-slate-600 leading-relaxed">
                       Configure workflow steps and automation
                     </p>

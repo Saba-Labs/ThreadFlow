@@ -57,10 +57,7 @@ export default function ModelList(props: ModelListProps) {
   const [jwSelected, setJwSelected] = useState<string[]>([]);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const sorted = useMemo(
-    () => props.orders.slice(),
-    [props.orders],
-  );
+  const sorted = useMemo(() => props.orders.slice(), [props.orders]);
 
   const editing = editingId
     ? sorted.find((o) => o.id === editingId) || null
@@ -657,7 +654,13 @@ export default function ModelList(props: ModelListProps) {
                                   title="Job Work"
                                   aria-label="Job Work"
                                 >
-                                  <span className={((o as any).jobWorkIds || []).length > 0 ? "text-blue-600 dark:text-blue-400" : ""}>
+                                  <span
+                                    className={
+                                      ((o as any).jobWorkIds || []).length > 0
+                                        ? "text-blue-600 dark:text-blue-400"
+                                        : ""
+                                    }
+                                  >
                                     JW
                                   </span>
                                 </Button>
@@ -1048,7 +1051,13 @@ export default function ModelList(props: ModelListProps) {
                           title="Job Work"
                           aria-label="Job Work"
                         >
-                          <span className={((o as any).jobWorkIds || []).length > 0 ? "text-blue-600 dark:text-blue-400" : ""}>
+                          <span
+                            className={
+                              ((o as any).jobWorkIds || []).length > 0
+                                ? "text-blue-600 dark:text-blue-400"
+                                : ""
+                            }
+                          >
                             JW
                           </span>
                         </Button>
