@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -347,7 +348,8 @@ export default function ModelList(props: ModelListProps) {
     props.onSetStepStatus(o.id, i, newStatus);
   };
 
-  const showDetails = props.showDetails ?? true;
+  const isMobile = useIsMobile();
+  const showDetails = (isMobile ? (props.showDetails ?? true) : true);
   const emptyColSpan = showDetails ? 7 : 2;
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
@@ -674,7 +676,7 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                         </tr>
-                        {toggledIds.includes(o.id) && (
+                        {isMobile && toggledIds.includes(o.id) && (
                           <tr>
                             <td colSpan={emptyColSpan} className="p-2">
                               <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-3 rounded">
