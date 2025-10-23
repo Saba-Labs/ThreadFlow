@@ -657,7 +657,9 @@ export default function ModelList(props: ModelListProps) {
                                   title="Job Work"
                                   aria-label="Job Work"
                                 >
-                                  JW
+                                  <span className={((o as any).jobWorkIds || []).length > 0 ? "text-blue-600 dark:text-blue-400" : ""}>
+                                    JW
+                                  </span>
                                 </Button>
                                 <Button
                                   size="icon"
@@ -1046,7 +1048,9 @@ export default function ModelList(props: ModelListProps) {
                           title="Job Work"
                           aria-label="Job Work"
                         >
-                          JW
+                          <span className={((o as any).jobWorkIds || []).length > 0 ? "text-blue-600 dark:text-blue-400" : ""}>
+                            JW
+                          </span>
                         </Button>
                         <Button
                           size="icon"
