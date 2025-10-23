@@ -110,7 +110,7 @@ export default function ModelsAll() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className={`flex items-center justify-between ${viewMode === "list" ? "pb-3 border-b border-gray-200 mb-3" : ""}`}>
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
             All Models
