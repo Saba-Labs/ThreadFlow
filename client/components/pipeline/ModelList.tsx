@@ -806,7 +806,7 @@ export default function ModelList(props: ModelListProps) {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className={viewMode === "cards" ? "flex flex-col items-end gap-1" : "flex items-center gap-1"}>
                       {i >= 0 &&
                         i < o.steps.length &&
                         (() => {
