@@ -647,11 +647,7 @@ export default function ModelList(props: ModelListProps) {
                                 </Button>
                                 <Button
                                   size="icon"
-                                  variant={
-                                    ((o as any).jobWorkIds || []).length > 0
-                                      ? "default"
-                                      : "ghost"
-                                  }
+                                  variant="ghost"
                                   onClick={() => {
                                     setJwForId(o.id);
                                     setJwSelected(
@@ -674,6 +670,7 @@ export default function ModelList(props: ModelListProps) {
                                 </Button>
                                 <Button
                                   size="icon"
+                                  variant="ghost"
                                   onClick={() => props.onNext(o.id)}
                                   title="Next step"
                                   aria-label="Next step"
@@ -1039,11 +1036,7 @@ export default function ModelList(props: ModelListProps) {
                         </Button>
                         <Button
                           size="icon"
-                          variant={
-                            ((o as any).jobWorkIds || []).length > 0
-                              ? "default"
-                              : "ghost"
-                          }
+                          variant="ghost"
                           onClick={() => {
                             setJwForId(o.id);
                             setJwSelected(
@@ -1066,6 +1059,7 @@ export default function ModelList(props: ModelListProps) {
                         </Button>
                         <Button
                           size="icon"
+                          variant="ghost"
                           onClick={() => props.onNext(o.id)}
                           title="Next step"
                           aria-label="Next step"
