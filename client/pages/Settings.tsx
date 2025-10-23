@@ -95,6 +95,7 @@ export default function Settings() {
             try {
               localStorage.setItem("models.viewMode", v as string);
               window.dispatchEvent(new Event("storage"));
+              window.dispatchEvent(new Event("modelsViewChanged"));
             } catch {}
           }}
           className="grid gap-3 sm:grid-cols-2"
