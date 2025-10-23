@@ -838,46 +838,51 @@ export default function ModelList(props: ModelListProps) {
                                   </span>
                                 </div>
 
-                                <div>
-                                  <button onClick={() => toggleCardStatus(o)}>
-                                    <Badge
-                                      variant={
-                                        displayStatus === "running"
-                                          ? "success"
-                                          : displayStatus === "hold"
-                                            ? "destructive"
-                                            : "secondary"
-                                      }
-                                      className="shrink-0 cursor-pointer"
-                                    >
-                                      {cap(displayStatus)}
-                                    </Badge>
-                                  </button>
-                                </div>
-
-                                {selectedMachines.length > 0 && (
-                                  <div className="text-sm">
-                                    {selectedMachines.map((m) => (
-                                      <div
-                                        key={m}
-                                        className="font-medium text-gray-900 dark:text-gray-100"
-                                      >
-                                        {m}
+                                {/* Only show selected machines, job works and status when the row is expanded */}
+                                {isExpandedMobile && (
+                                  <>
+                                    {selectedMachines.length > 0 && (
+                                      <div className="text-sm">
+                                        {selectedMachines.map((m) => (
+                                          <div
+                                            key={m}
+                                            className="font-medium text-gray-900 dark:text-gray-100"
+                                          >
+                                            {m}
+                                          </div>
+                                        ))}
                                       </div>
-                                    ))}
-                                  </div>
-                                )}
+                                    )}
 
-                                {isExpandedMobile && ((o as any).jobWorkIds || []).length > 0 && (
-                                  <div className="mt-1 text-right">
-                                    {jobWorks
-                                      .filter((j) => ((o as any).jobWorkIds || []).includes(j.id))
-                                      .map((j) => (
-                                        <div key={j.id} className="text-sm text-muted-foreground">
-                                          {j.name}
-                                        </div>
-                                      ))}
-                                  </div>
+                                    {((o as any).jobWorkIds || []).length > 0 && (
+                                      <div className="mt-1 text-right">
+                                        {jobWorks
+                                          .filter((j) => ((o as any).jobWorkIds || []).includes(j.id))
+                                          .map((j) => (
+                                            <div key={j.id} className="text-sm text-muted-foreground">
+                                              {j.name}
+                                            </div>
+                                          ))}
+                                      </div>
+                                    )}
+
+                                    <div>
+                                      <button onClick={() => toggleCardStatus(o)}>
+                                        <Badge
+                                          variant={
+                                            displayStatus === "running"
+                                              ? "success"
+                                              : displayStatus === "hold"
+                                                ? "destructive"
+                                                : "secondary"
+                                          }
+                                          className="shrink-0 cursor-pointer"
+                                        >
+                                          {cap(displayStatus)}
+                                        </Badge>
+                                      </button>
+                                    </div>
+                                  </>
                                 )}
                               </div>
                             );
