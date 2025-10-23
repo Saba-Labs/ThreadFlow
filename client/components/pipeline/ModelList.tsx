@@ -380,9 +380,9 @@ export default function ModelList(props: ModelListProps) {
   }, [showDetails, sorted]);
 
   const toggleExpanded = (id: string) => {
-    // When global details are enabled (eye open) we show all cards and
-    // prevent users from toggling individual cards to close them.
-    if (showDetails) return;
+    // Disable toggling only when desktop forces showDetails. On mobile
+    // allow toggling even when showDetails is true (eye open).
+    if (!isMobile && showDetails) return;
 
     setToggledIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
