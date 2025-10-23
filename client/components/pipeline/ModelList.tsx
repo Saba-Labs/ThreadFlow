@@ -697,7 +697,7 @@ export default function ModelList(props: ModelListProps) {
                         {isMobile && toggledIds.includes(o.id) && (
                           <tr>
                             <td colSpan={emptyColSpan} className="p-2">
-                              <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-3 rounded">
+                              <div className="overflow-hidden transition-all duration-200 bg-muted/20 p-2 rounded-sm">
                                 <div className="flex flex-col gap-2">
                                   <div className="text-sm text-muted-foreground">
                                     Date: {formatDate(o.createdAt)}
@@ -1149,7 +1149,7 @@ export default function ModelList(props: ModelListProps) {
           <SimpleModal
             open={!!splitFor}
             onOpenChange={(v) => !v && setSplitForId(null)}
-            title={`Split into Batches — ${splitFor?.modelName}`}
+            title={`Split into Batches ��� ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setSplitForId(null)}>
