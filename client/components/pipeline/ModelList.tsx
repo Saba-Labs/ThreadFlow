@@ -812,6 +812,77 @@ export default function ModelList(props: ModelListProps) {
                         (() => {
                           const displayStatus =
                             step.status === "pending" ? "hold" : step.status;
+                          if (viewMode === "list") {
+                            // Stack current, status badge, and job work vertically like card view
+                            const parallelGroup = (o.parallelGroups || []).find(
+                              (g) => g.stepIndex === i,
+                            );
+                            const selectedIndices = parallelGroup?.machineIndices || [];
+                            const primaryMachine = step.kind === "machine" ? step.machineType : "Job Work";
+                            const selectedMachines = selectedIndices
+                              .map((idx) => machineTypes[idx]?.name)
+                              .filter((name) => !!name && name !== primaryMachine);
+
+                            return (
+                              <div className="flex flex-col items-end gap-1 text-right">
+                                <div className="text-sm">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    {i < 0
+                                      ? "Not started"
+                                      : i >= o.steps.length
+                                        ? "Completed"
+                                        : step.kind === "machine"
+                                          ? step.machineType
+                                          : "Job Work"}
+                                  </span>
+                                </div>
+
+                                <div>
+                                  <button onClick={() => toggleCardStatus(o)}>
+                                    <Badge
+                                      variant={
+                                        displayStatus === "running"
+                                          ? "success"
+                                          : displayStatus === "hold"
+                                            ? "destructive"
+                                            : "secondary"
+                                      }
+                                      className="shrink-0 cursor-pointer"
+                                    >
+                                      {cap(displayStatus)}
+                                    </Badge>
+                                  </button>
+                                </div>
+
+                                {selectedMachines.length > 0 && (
+                                  <div className="text-sm">
+                                    {selectedMachines.map((m) => (
+                                      <div
+                                        key={m}
+                                        className="font-medium text-gray-900 dark:text-gray-100"
+                                      >
+                                        {m}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {isExpandedMobile && ((o as any).jobWorkIds || []).length > 0 && (
+                                  <div className="mt-1 text-right">
+                                    {jobWorks
+                                      .filter((j) => ((o as any).jobWorkIds || []).includes(j.id))
+                                      .map((j) => (
+                                        <div key={j.id} className="text-sm text-muted-foreground">
+                                          {j.name}
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+
+                          // cards (compact) default behaviour
                           return (
                             <>
                               <div className="text-sm text-right">
