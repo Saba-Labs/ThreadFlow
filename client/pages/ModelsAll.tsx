@@ -84,6 +84,7 @@ export default function ModelsAll() {
           <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
             All Models
           </h1>
+          {/* Mobile-only toggle: keep for small screens */}
           <Button
             variant="ghost"
             size="icon"
