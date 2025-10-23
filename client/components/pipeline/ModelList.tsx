@@ -359,9 +359,14 @@ export default function ModelList(props: ModelListProps) {
   // the user to toggle individual cards. If details are hidden we collapse all.
   useEffect(() => {
     if (showDetails) {
+      // When global details are shown, expand all rows
       setToggledIds(sorted.map((o) => o.id));
     } else {
-      setToggledIds([]);
+      // When global details are hidden, preserve user toggles across
+      // data updates so interactions (like changing status) don't
+      // unexpectedly close opened cards. Remove any ids that no
+      // longer exist in the updated list.
+      setToggledIds((prev) => prev.filter((id) => sorted.some((o) => o.id === id)));
     }
   }, [showDetails, sorted]);
 
