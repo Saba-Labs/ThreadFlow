@@ -1,5 +1,6 @@
 import { ChevronRight, Type, LayoutGrid, Settings, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const STORAGE_KEY = "app:font-size";
 const SCALE_MAP: Record<string, number> = {
