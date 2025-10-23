@@ -118,7 +118,9 @@ export default function ModelsAll() {
   return (
     <div className="space-y-6">
       <div
-        className={`flex items-center justify-between ${viewMode === "list" ? "pb-3 border-b border-gray-200 mb-3" : ""}`}
+        className={`flex items-center justify-between ${
+          viewMode === "list" ? "pb-3 border-b border-gray-200" : ""
+        }`}
       >
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
@@ -154,7 +156,7 @@ export default function ModelsAll() {
         </div>
       </div>
 
-      <div className={viewMode === "list" ? "-mx-4 px-4 -mr-10" : "-mx-80 px-4"}>
+      <div className="w-full">
         <ModelList
           orders={visible}
           onDelete={pipeline.deleteOrder}
