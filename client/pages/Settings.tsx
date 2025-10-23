@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const STORAGE_KEY = "app:font-size";
 const SCALE_MAP: Record<string, number> = {
@@ -18,6 +24,14 @@ export default function Settings() {
       return localStorage.getItem(STORAGE_KEY) || "large";
     } catch {
       return "large";
+    }
+  });
+
+  const [modelsView, setModelsView] = useState<string>(() => {
+    try {
+      return localStorage.getItem("models.viewMode") || "cards";
+    } catch {
+      return "cards";
     }
   });
 
@@ -50,39 +64,23 @@ export default function Settings() {
             Choose how large text appears across the app.
           </div>
         </div>
-        <RadioGroup
-          value={value}
-          onValueChange={(v) => setValue(v as string)}
-          className="grid gap-3 sm:grid-cols-2"
-        >
-          <div className="flex items-center space-x-2 rounded-md border p-3">
-            <RadioGroupItem value="small" id="fs-small" />
-            <Label htmlFor="fs-small" className="cursor-pointer">
-              Small
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2 rounded-md border p-3">
-            <RadioGroupItem value="medium" id="fs-medium" />
-            <Label htmlFor="fs-medium" className="cursor-pointer">
-              Medium
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2 rounded-md border p-3">
-            <RadioGroupItem value="large" id="fs-large" />
-            <Label htmlFor="fs-large" className="cursor-pointer">
-              Large (current)
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2 rounded-md border p-3">
-            <RadioGroupItem value="extra-large" id="fs-xl" />
-            <Label htmlFor="fs-xl" className="cursor-pointer">
-              Extra large
-            </Label>
-          </div>
-        </RadioGroup>
+        <div className="max-w-xs">
+          <Select value={value} onValueChange={(v) => setValue(v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select size" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="small">Small</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="large">Large</SelectItem>
+              <SelectItem value="extra-large">Extra large</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </section>
 
-      <section className="rounded-lg border bg-white p-4 space-y-4">
+      {/* Mobile-only Models view toggle */}
+      <section className="rounded-lg border bg-white p-4 space-y-4 sm:hidden">
         <div>
           <div className="font-medium">Models view</div>
           <div className="text-sm text-muted-foreground">
@@ -90,30 +88,28 @@ export default function Settings() {
             Cards.
           </div>
         </div>
-        <RadioGroup
-          value={localStorage.getItem("models.viewMode") || "cards"}
+        <ToggleGroup
+          type="single"
+          value={modelsView}
           onValueChange={(v) => {
+            if (!v) return;
+            setModelsView(v);
             try {
-              localStorage.setItem("models.viewMode", v as string);
+              localStorage.setItem("models.viewMode", v);
               window.dispatchEvent(new Event("storage"));
               window.dispatchEvent(new Event("modelsViewChanged"));
             } catch {}
           }}
-          className="grid gap-3 sm:grid-cols-2"
+          className="w-full"
+          variant="outline"
         >
-          <div className="flex items-center space-x-2 rounded-md border p-3">
-            <RadioGroupItem value="cards" id="mv-cards" />
-            <Label htmlFor="mv-cards" className="cursor-pointer">
-              Cards view
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2 rounded-md border p-3">
-            <RadioGroupItem value="list" id="mv-list" />
-            <Label htmlFor="mv-list" className="cursor-pointer">
-              List view
-            </Label>
-          </div>
-        </RadioGroup>
+          <ToggleGroupItem value="cards" className="flex-1" aria-label="Cards view">
+            Cards
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" className="flex-1" aria-label="List view">
+            List
+          </ToggleGroupItem>
+        </ToggleGroup>
       </section>
 
       <section className="rounded-lg border bg-white divide-y">
