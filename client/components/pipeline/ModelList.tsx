@@ -855,18 +855,6 @@ export default function ModelList(props: ModelListProps) {
                                       </div>
                                     )}
 
-                                    {((o as any).jobWorkIds || []).length > 0 && (
-                                      <div className="mt-1 text-right">
-                                        {jobWorks
-                                          .filter((j) => ((o as any).jobWorkIds || []).includes(j.id))
-                                          .map((j) => (
-                                            <div key={j.id} className="text-sm text-muted-foreground">
-                                              {j.name}
-                                            </div>
-                                          ))}
-                                      </div>
-                                    )}
-
                                     <div>
                                       <button onClick={() => toggleCardStatus(o)}>
                                         <Badge
@@ -883,6 +871,18 @@ export default function ModelList(props: ModelListProps) {
                                         </Badge>
                                       </button>
                                     </div>
+
+                                    {((o as any).jobWorkIds || []).length > 0 && (
+                                      <div className="mt-1 text-right">
+                                        {jobWorks
+                                          .filter((j) => ((o as any).jobWorkIds || []).includes(j.id))
+                                          .map((j) => (
+                                            <div key={j.id} className="text-sm text-muted-foreground">
+                                              {j.name}
+                                            </div>
+                                          ))}
+                                      </div>
+                                    )}
                                   </>
                                 )}
                               </div>
