@@ -55,6 +55,21 @@ export default function ModelsAll() {
   const [showDetails, setShowDetails] = useState(false);
   const isMobile = useIsMobile();
 
+  // View mode for models list: 'cards' or 'list'. Default to 'cards' for new devices.
+  const [viewMode, setViewMode] = useState<"cards" | "list">(() => {
+    try {
+      return (localStorage.getItem("models.viewMode") as "cards" | "list") || "cards";
+    } catch {
+      return "cards";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("models.viewMode", viewMode);
+    } catch {}
+  }, [viewMode]);
+
   // Persist showDetails across navigation using localStorage
   useEffect(() => {
     try {
