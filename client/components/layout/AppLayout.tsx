@@ -272,7 +272,7 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main className="py-6 px-4 sm:container">
+        <main className="container py-6">
           <SearchProvider>
             <Outlet />
           </SearchProvider>
