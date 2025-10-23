@@ -70,6 +70,22 @@ export default function ModelsAll() {
     } catch {}
   }, [viewMode]);
 
+  useEffect(() => {
+    const onStorage = () => {
+      try {
+        const v = (localStorage.getItem("models.viewMode") as "cards" | "list") || "cards";
+        setViewMode(v);
+      } catch {}
+    };
+    window.addEventListener("storage", onStorage);
+    // also listen to a custom event in case settings updates in same window
+    window.addEventListener("modelsViewChanged", onStorage as EventListener);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("modelsViewChanged", onStorage as EventListener);
+    };
+  }, []);
+
   // Persist showDetails across navigation using localStorage
   useEffect(() => {
     try {
