@@ -116,43 +116,45 @@ export default function ModelsAll() {
   }, [showDetails]);
 
   return (
-    <div className="space-y-6">
-      <div
-        className={`flex items-center justify-between ${
-          viewMode === "list" ? "pb-3 border-b border-gray-200" : ""
-        }`}
-      >
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
-            All Models
-          </h1>
-          {/* Mobile-only toggle: keep for small screens */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={showDetails ? "Hide details" : "Show details"}
-            onClick={() => setShowDetails((s) => !s)}
-            title={showDetails ? "Hide details" : "Show details"}
-            className="lg:hidden"
-          >
-            {showDetails ? (
-              <Eye className="h-4 w-4" />
-            ) : (
-              <EyeOff className="h-4 w-4" />
-            )}
-          </Button>
-          <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="hold">Hold</SelectItem>
-              <SelectItem value="running">Running</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="job">Job Work</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="w-full">
+      <div className="px-4 md:px-6 lg:px-8">
+        <div
+          className={`flex items-center justify-between py-6 ${
+            viewMode === "list" ? "pb-3 border-b border-gray-200" : ""
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
+              All Models
+            </h1>
+            {/* Mobile-only toggle: keep for small screens */}
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={showDetails ? "Hide details" : "Show details"}
+              onClick={() => setShowDetails((s) => !s)}
+              title={showDetails ? "Hide details" : "Show details"}
+              className="lg:hidden"
+            >
+              {showDetails ? (
+                <Eye className="h-4 w-4" />
+              ) : (
+                <EyeOff className="h-4 w-4" />
+              )}
+            </Button>
+            <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="hold">Hold</SelectItem>
+                <SelectItem value="running">Running</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="job">Job Work</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
