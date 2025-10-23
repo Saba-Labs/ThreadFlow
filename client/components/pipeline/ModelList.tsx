@@ -42,6 +42,7 @@ interface ModelListProps {
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
   showDetails?: boolean;
+  viewMode?: "cards" | "list";
 }
 
 export default function ModelList(props: ModelListProps) {
@@ -1149,7 +1150,7 @@ export default function ModelList(props: ModelListProps) {
           <SimpleModal
             open={!!splitFor}
             onOpenChange={(v) => !v && setSplitForId(null)}
-            title={`Split into Batches ��� ${splitFor?.modelName}`}
+            title={`Split into Batches — ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setSplitForId(null)}>
