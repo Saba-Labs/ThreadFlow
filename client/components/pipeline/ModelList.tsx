@@ -458,7 +458,7 @@ export default function ModelList(props: ModelListProps) {
                     const i = o.currentStepIndex;
                     const step = o.steps[i];
                     const bg = statusBgClass(o);
-                    const isExpanded = showDetails || toggledIds.includes(o.id);
+                    const isExpanded = toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
                         <tr
