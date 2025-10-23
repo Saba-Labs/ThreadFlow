@@ -759,7 +759,7 @@ export default function ModelList(props: ModelListProps) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
+                      <h3 className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
                         <button
                           onClick={() => toggleExpanded(o.id)}
                           disabled={!isMobile && showDetails}
