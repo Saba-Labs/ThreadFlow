@@ -171,8 +171,8 @@ export default function SettingsPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <section className="relative rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-teal-50/30 pointer-events-none"></div>
-              <a
-                href="/settings/production-path"
+              <Link
+                to="/settings/production-path"
                 className="relative w-full flex items-center justify-between p-6 sm:p-8 hover:bg-slate-50/50 active:bg-slate-100/50 transition-all duration-300 group/button text-left"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -192,7 +192,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <ChevronRight className="h-6 w-6 text-slate-400 group-hover/button:text-slate-600 group-hover/button:translate-x-1 transition-all duration-300 flex-shrink-0 ml-4" />
-              </a>
+              </Link>
             </section>
           </div>
         </div>
