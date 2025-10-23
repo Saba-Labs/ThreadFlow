@@ -58,7 +58,7 @@ export default function ModelList(props: ModelListProps) {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const sorted = useMemo(
-    () => props.orders.slice().sort((a, b) => b.createdAt - a.createdAt),
+    () => props.orders.slice(),
     [props.orders],
   );
 
