@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff, Plus } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useSearch } from "@/context/SearchContext";
 
 export default function ModelsAll() {
@@ -51,6 +52,7 @@ export default function ModelsAll() {
   }, [filtered, query]);
 
   const [showDetails, setShowDetails] = useState(false);
+  const isMobile = useIsMobile();
 
   // Persist showDetails across navigation using localStorage
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function ModelsAll() {
           }
           onToggleParallelMachine={pipeline.toggleParallelMachine}
           setOrderJobWorks={pipeline.setOrderJobWorks}
-          showDetails={showDetails}
+          showDetails={isMobile ? showDetails : true}
         />
         <Button
           asChild
