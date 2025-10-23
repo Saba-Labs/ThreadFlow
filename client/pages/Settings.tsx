@@ -103,10 +103,18 @@ export default function Settings() {
           className="w-full"
           variant="outline"
         >
-          <ToggleGroupItem value="cards" className="flex-1" aria-label="Cards view">
+          <ToggleGroupItem
+            value="cards"
+            className="flex-1"
+            aria-label="Cards view"
+          >
             Cards
           </ToggleGroupItem>
-          <ToggleGroupItem value="list" className="flex-1" aria-label="List view">
+          <ToggleGroupItem
+            value="list"
+            className="flex-1"
+            aria-label="List view"
+          >
             List
           </ToggleGroupItem>
         </ToggleGroup>
