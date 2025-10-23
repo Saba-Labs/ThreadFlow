@@ -357,17 +357,26 @@ export default function ModelList(props: ModelListProps) {
   // When 'showDetails' toggles, control which rows are expanded.
   // If details are shown we expand all rows by default, but still allow
   // the user to toggle individual cards. If details are hidden we collapse all.
+  const prevShowRef = useRef<boolean | undefined>(undefined);
+
   useEffect(() => {
-    if (showDetails) {
-      // When global details are shown, expand all rows
-      setToggledIds(sorted.map((o) => o.id));
+    const prev = prevShowRef.current;
+    // First render or when showDetails toggles
+    if (prev === undefined || prev !== showDetails) {
+      if (showDetails) {
+        // Show details => expand all
+        setToggledIds(sorted.map((o) => o.id));
+      } else {
+        // Hide details => collapse all
+        setToggledIds([]);
+      }
     } else {
-      // When global details are hidden, preserve user toggles across
-      // data updates so interactions (like changing status) don't
-      // unexpectedly close opened cards. Remove any ids that no
-      // longer exist in the updated list.
-      setToggledIds((prev) => prev.filter((id) => sorted.some((o) => o.id === id)));
+      // showDetails unchanged; preserve user toggles across data updates
+      // but remove IDs that no longer exist
+      setToggledIds((prevIds) => prevIds.filter((id) => sorted.some((o) => o.id === id)));
     }
+
+    prevShowRef.current = showDetails;
   }, [showDetails, sorted]);
 
   const toggleExpanded = (id: string) => {
