@@ -805,7 +805,7 @@ export default function ModelList(props: ModelListProps) {
                       )}
                     </div>
 
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1">
                       {i >= 0 &&
                         i < o.steps.length &&
                         (() => {
