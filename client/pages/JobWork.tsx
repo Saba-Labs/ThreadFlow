@@ -18,6 +18,10 @@ import { useSearch } from "@/context/SearchContext";
 export default function JobWork() {
   const list = useJobWorks();
   const pipeline = useProductionPipeline();
+  useSwipeNavigation({
+    leftPage: "/models/all",
+    rightPage: "/models/all",
+  });
 
   const [local, setLocal] = useState<JobWork[]>(() => getJobWorks());
 
