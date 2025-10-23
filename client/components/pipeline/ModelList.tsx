@@ -48,6 +48,7 @@ interface ModelListProps {
 export default function ModelList(props: ModelListProps) {
   const machineTypes = useMachineTypes();
   const navigate = useNavigate();
+  const viewMode = props.viewMode ?? "cards";
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0]);
