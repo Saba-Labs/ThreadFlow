@@ -1,6 +1,7 @@
 import ModelList from "@/components/pipeline/ModelList";
 import ModelForm from "@/components/pipeline/ModelForm";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
@@ -17,6 +18,10 @@ import { useSearch } from "@/context/SearchContext";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
+  useSwipeNavigation({
+    leftPage: "/job-work",
+    rightPage: "/job-work",
+  });
   const [filter, setFilter] = useState<
     "all" | "hold" | "running" | "completed" | "job"
   >("all");
@@ -154,7 +159,11 @@ export default function ModelsAll() {
         </div>
       </div>
 
-      <div className="-mx-8 px-4">
+      <div
+        className={
+          viewMode === "list" ? "-mx-4 px-4 -ml-8 -mr-16" : "-mx-8 px-4"
+        }
+      >
         <ModelList
           orders={visible}
           onDelete={pipeline.deleteOrder}

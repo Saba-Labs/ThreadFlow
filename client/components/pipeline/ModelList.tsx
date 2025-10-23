@@ -57,10 +57,7 @@ export default function ModelList(props: ModelListProps) {
   const [jwSelected, setJwSelected] = useState<string[]>([]);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const sorted = useMemo(
-    () => props.orders.slice().sort((a, b) => b.createdAt - a.createdAt),
-    [props.orders],
-  );
+  const sorted = useMemo(() => props.orders.slice(), [props.orders]);
 
   const editing = editingId
     ? sorted.find((o) => o.id === editingId) || null
@@ -185,7 +182,7 @@ export default function ModelList(props: ModelListProps) {
         const sy = beforeRect.height / afterRect.height;
 
         const from = {
-          transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+          transform: `translate(${dx}px, ${dy}px)`,
           opacity: 0.85,
         };
         const to = { transform: "none", opacity: 1 };
@@ -647,11 +644,7 @@ export default function ModelList(props: ModelListProps) {
                                 </Button>
                                 <Button
                                   size="icon"
-                                  variant={
-                                    ((o as any).jobWorkIds || []).length > 0
-                                      ? "default"
-                                      : "ghost"
-                                  }
+                                  variant="ghost"
                                   onClick={() => {
                                     setJwForId(o.id);
                                     setJwSelected(
@@ -661,7 +654,15 @@ export default function ModelList(props: ModelListProps) {
                                   title="Job Work"
                                   aria-label="Job Work"
                                 >
-                                  JW
+                                  <span
+                                    className={
+                                      ((o as any).jobWorkIds || []).length > 0
+                                        ? "text-blue-600 dark:text-blue-400"
+                                        : ""
+                                    }
+                                  >
+                                    JW
+                                  </span>
                                 </Button>
                                 <Button
                                   size="icon"
@@ -674,6 +675,7 @@ export default function ModelList(props: ModelListProps) {
                                 </Button>
                                 <Button
                                   size="icon"
+                                  variant="ghost"
                                   onClick={() => props.onNext(o.id)}
                                   title="Next step"
                                   aria-label="Next step"
@@ -772,7 +774,7 @@ export default function ModelList(props: ModelListProps) {
                   key={o.id}
                   data-order-id={o.id}
                   data-parent-id={o.parentId ?? ""}
-                  className={`${bg} ${viewMode === "cards" ? "rounded-lg p-4 space-y-3 shadow-sm border border-gray-200 dark:border-gray-800" : "py-2 -mx-4 px-4 space-y-1"} w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
+                  className={`${bg} ${viewMode === "cards" ? "rounded-lg p-4 space-y-3 shadow-sm border border-gray-200 dark:border-gray-800" : "py-2 space-y-1 -mx-4 px-4"} w-full ${bg ? "" : "bg-white dark:bg-gray-900"}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -1039,11 +1041,7 @@ export default function ModelList(props: ModelListProps) {
                         </Button>
                         <Button
                           size="icon"
-                          variant={
-                            ((o as any).jobWorkIds || []).length > 0
-                              ? "default"
-                              : "ghost"
-                          }
+                          variant="ghost"
                           onClick={() => {
                             setJwForId(o.id);
                             setJwSelected(
@@ -1053,7 +1051,15 @@ export default function ModelList(props: ModelListProps) {
                           title="Job Work"
                           aria-label="Job Work"
                         >
-                          JW
+                          <span
+                            className={
+                              ((o as any).jobWorkIds || []).length > 0
+                                ? "text-blue-600 dark:text-blue-400"
+                                : ""
+                            }
+                          >
+                            JW
+                          </span>
                         </Button>
                         <Button
                           size="icon"
@@ -1066,6 +1072,7 @@ export default function ModelList(props: ModelListProps) {
                         </Button>
                         <Button
                           size="icon"
+                          variant="ghost"
                           onClick={() => props.onNext(o.id)}
                           title="Next step"
                           aria-label="Next step"

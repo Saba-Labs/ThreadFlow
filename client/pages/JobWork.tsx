@@ -12,11 +12,16 @@ import {
 } from "@/lib/jobWorks";
 import { Trash2, Save, Plus, Pencil } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useSearch } from "@/context/SearchContext";
 
 export default function JobWork() {
   const list = useJobWorks();
   const pipeline = useProductionPipeline();
+  useSwipeNavigation({
+    leftPage: "/models/all",
+    rightPage: "/models/all",
+  });
 
   const [local, setLocal] = useState<JobWork[]>(() => getJobWorks());
 
