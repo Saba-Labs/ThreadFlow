@@ -745,7 +745,7 @@ export default function ModelList(props: ModelListProps) {
           </div>
 
           {/* Mobile cards */}
-          <div className="lg:hidden divide-y divide-gray-200">
+          <div className={viewMode === "cards" ? "lg:hidden space-y-3" : "lg:hidden divide-y divide-gray-200"}>
             {sorted.map((o) => {
               const i = o.currentStepIndex;
               const step = o.steps[i];
