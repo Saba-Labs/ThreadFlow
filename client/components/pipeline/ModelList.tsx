@@ -396,7 +396,7 @@ export default function ModelList(props: ModelListProps) {
       <div className="px-0">
         <div className="space-y-3">
           {/* Desktop table */}
-          <div className={viewMode === "list" ? "hidden lg:block" : "hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"}>
+          <div className={viewMode === "list" ? "hidden lg:block w-full" : "hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"}>
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100 dark:bg-gray-800">
