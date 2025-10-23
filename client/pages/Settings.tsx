@@ -86,7 +86,8 @@ export default function Settings() {
         <div>
           <div className="font-medium">Models view</div>
           <div className="text-sm text-muted-foreground">
-            Choose how models are displayed on the All Models page. Default is Cards.
+            Choose how models are displayed on the All Models page. Default is
+            Cards.
           </div>
         </div>
         <RadioGroup

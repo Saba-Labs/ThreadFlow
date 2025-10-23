@@ -308,7 +308,10 @@ export function useProductionPipeline() {
         steps: src.steps.map((st) => ({
           ...st,
           id: uid("step"),
-          status: st.status === "completed" ? ("completed" as StepStatus) : ("hold" as StepStatus),
+          status:
+            st.status === "completed"
+              ? ("completed" as StepStatus)
+              : ("hold" as StepStatus),
           activeMachines: 0,
           quantityDone: 0,
         })),

@@ -57,7 +57,9 @@ export default function ModelsAll() {
   // View mode for models list: 'cards' or 'list'. Default to 'cards' for new devices.
   const [viewMode, setViewMode] = useState<"cards" | "list">(() => {
     try {
-      return (localStorage.getItem("models.viewMode") as "cards" | "list") || "cards";
+      return (
+        (localStorage.getItem("models.viewMode") as "cards" | "list") || "cards"
+      );
     } catch {
       return "cards";
     }
@@ -72,7 +74,9 @@ export default function ModelsAll() {
   useEffect(() => {
     const onStorage = () => {
       try {
-        const v = (localStorage.getItem("models.viewMode") as "cards" | "list") || "cards";
+        const v =
+          (localStorage.getItem("models.viewMode") as "cards" | "list") ||
+          "cards";
         setViewMode(v);
       } catch {}
     };
@@ -81,7 +85,10 @@ export default function ModelsAll() {
     window.addEventListener("modelsViewChanged", onStorage as EventListener);
     return () => {
       window.removeEventListener("storage", onStorage);
-      window.removeEventListener("modelsViewChanged", onStorage as EventListener);
+      window.removeEventListener(
+        "modelsViewChanged",
+        onStorage as EventListener,
+      );
     };
   }, []);
 
@@ -110,7 +117,9 @@ export default function ModelsAll() {
 
   return (
     <div className="space-y-6">
-      <div className={`flex items-center justify-between ${viewMode === "list" ? "pb-3 border-b border-gray-200 mb-3" : ""}`}>
+      <div
+        className={`flex items-center justify-between ${viewMode === "list" ? "pb-3 border-b border-gray-200 mb-3" : ""}`}
+      >
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight whitespace-nowrap flex-shrink-0">
             All Models

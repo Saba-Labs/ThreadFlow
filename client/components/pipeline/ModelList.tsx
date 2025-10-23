@@ -351,7 +351,7 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const isMobile = useIsMobile();
-  const showDetails = (isMobile ? (props.showDetails ?? true) : true);
+  const showDetails = isMobile ? (props.showDetails ?? true) : true;
   const emptyColSpan = showDetails ? 7 : 2;
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
@@ -375,7 +375,9 @@ export default function ModelList(props: ModelListProps) {
     } else {
       // showDetails unchanged; preserve user toggles across data updates
       // but remove IDs that no longer exist
-      setToggledIds((prevIds) => prevIds.filter((id) => sorted.some((o) => o.id === id)));
+      setToggledIds((prevIds) =>
+        prevIds.filter((id) => sorted.some((o) => o.id === id)),
+      );
     }
 
     prevShowRef.current = showDetails;
@@ -397,7 +399,13 @@ export default function ModelList(props: ModelListProps) {
         <div className="space-y-3">
           {/* Desktop table */}
 
-          <div className={viewMode === "list" ? "hidden lg:block w-full" : "hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"}>
+          <div
+            className={
+              viewMode === "list"
+                ? "hidden lg:block w-full"
+                : "hidden lg:block rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"
+            }
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100 dark:bg-gray-800">
@@ -747,7 +755,13 @@ export default function ModelList(props: ModelListProps) {
           </div>
 
           {/* Mobile cards */}
-          <div className={viewMode === "cards" ? "lg:hidden space-y-3" : "lg:hidden divide-y divide-gray-200"}>
+          <div
+            className={
+              viewMode === "cards"
+                ? "lg:hidden space-y-3"
+                : "lg:hidden divide-y divide-gray-200"
+            }
+          >
             {sorted.map((o) => {
               const i = o.currentStepIndex;
               const step = o.steps[i];
@@ -766,7 +780,7 @@ export default function ModelList(props: ModelListProps) {
                         <button
                           onClick={() => toggleExpanded(o.id)}
                           disabled={!isMobile && showDetails}
-                          className={`text-left w-full truncate ${!isMobile && showDetails ? 'opacity-60 cursor-default' : ''}`}
+                          className={`text-left w-full truncate ${!isMobile && showDetails ? "opacity-60 cursor-default" : ""}`}
                         >
                           {o.modelName}{" "}
                           {o.quantity > 0 && (
@@ -776,7 +790,13 @@ export default function ModelList(props: ModelListProps) {
                           )}
                         </button>
                       </h3>
-                      <div className={viewMode === "cards" ? "flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400" : "flex flex-wrap items-center gap-x-2 gap-y-0 mt-0.5 text-xs text-gray-600 dark:text-gray-400"}>
+                      <div
+                        className={
+                          viewMode === "cards"
+                            ? "flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 text-xs text-gray-600 dark:text-gray-400"
+                            : "flex flex-wrap items-center gap-x-2 gap-y-0 mt-0.5 text-xs text-gray-600 dark:text-gray-400"
+                        }
+                      >
                         {isExpandedMobile && (
                           <span className="inline-flex items-center gap-1">
                             <CalendarDays className="h-3.5 w-3.5" />{" "}
@@ -785,7 +805,13 @@ export default function ModelList(props: ModelListProps) {
                         )}
                       </div>
                       {isExpandedMobile && (
-                        <div className={viewMode === "cards" ? "flex flex-wrap items-center gap-1 mt-2" : "flex flex-wrap items-center gap-1 mt-1"}>
+                        <div
+                          className={
+                            viewMode === "cards"
+                              ? "flex flex-wrap items-center gap-1 mt-2"
+                              : "flex flex-wrap items-center gap-1 mt-1"
+                          }
+                        >
                           {getPathLetterPills(o, (orderId, stepIdx) => {
                             const stepAtIdx = o.steps[stepIdx];
                             if (
@@ -808,7 +834,13 @@ export default function ModelList(props: ModelListProps) {
                       )}
                     </div>
 
-                    <div className={viewMode === "cards" ? "flex flex-col items-end gap-1" : "flex items-center gap-1"}>
+                    <div
+                      className={
+                        viewMode === "cards"
+                          ? "flex flex-col items-end gap-1"
+                          : "flex items-center gap-1"
+                      }
+                    >
                       {i >= 0 &&
                         i < o.steps.length &&
                         (() => {
@@ -819,11 +851,17 @@ export default function ModelList(props: ModelListProps) {
                             const parallelGroup = (o.parallelGroups || []).find(
                               (g) => g.stepIndex === i,
                             );
-                            const selectedIndices = parallelGroup?.machineIndices || [];
-                            const primaryMachine = step.kind === "machine" ? step.machineType : "Job Work";
+                            const selectedIndices =
+                              parallelGroup?.machineIndices || [];
+                            const primaryMachine =
+                              step.kind === "machine"
+                                ? step.machineType
+                                : "Job Work";
                             const selectedMachines = selectedIndices
                               .map((idx) => machineTypes[idx]?.name)
-                              .filter((name) => !!name && name !== primaryMachine);
+                              .filter(
+                                (name) => !!name && name !== primaryMachine,
+                              );
 
                             return (
                               <div className="flex flex-col items-end gap-1 text-right">
@@ -856,7 +894,9 @@ export default function ModelList(props: ModelListProps) {
                                     )}
 
                                     <div>
-                                      <button onClick={() => toggleCardStatus(o)}>
+                                      <button
+                                        onClick={() => toggleCardStatus(o)}
+                                      >
                                         <Badge
                                           variant={
                                             displayStatus === "running"
@@ -872,12 +912,20 @@ export default function ModelList(props: ModelListProps) {
                                       </button>
                                     </div>
 
-                                    {((o as any).jobWorkIds || []).length > 0 && (
+                                    {((o as any).jobWorkIds || []).length >
+                                      0 && (
                                       <div className="mt-1 text-right">
                                         {jobWorks
-                                          .filter((j) => ((o as any).jobWorkIds || []).includes(j.id))
+                                          .filter((j) =>
+                                            (
+                                              (o as any).jobWorkIds || []
+                                            ).includes(j.id),
+                                          )
                                           .map((j) => (
-                                            <div key={j.id} className="text-sm text-muted-foreground">
+                                            <div
+                                              key={j.id}
+                                              className="text-sm text-muted-foreground"
+                                            >
                                               {j.name}
                                             </div>
                                           ))}
