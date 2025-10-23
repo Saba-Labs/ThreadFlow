@@ -145,7 +145,7 @@ export default function ModelsAll() {
         </div>
       </div>
 
-      <div className="-mx-4 sm:-mx-6 px-0 sm:px-0">
+      <div className="-mx-6 px-0">
         <ModelList
           orders={visible}
           onDelete={pipeline.deleteOrder}
