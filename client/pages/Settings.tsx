@@ -71,7 +71,7 @@ export default function SettingsPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/30 pointer-events-none"></div>
               <div className="relative p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                  <div className="flex items-start gap-4 sm:flex-[2]">
+                  <div className="flex items-start gap-4 sm:w-[70%]">
                     <div className="relative flex-shrink-0">
                       <div className="absolute inset-0 bg-purple-500/20 rounded-2xl blur-lg"></div>
                       <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
@@ -85,7 +85,7 @@ export default function SettingsPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="w-full sm:w-auto sm:flex-1">
+                  <div className="w-full sm:w-[29%]">
                     <div className="relative">
                       <select
                         value={fontSize}
@@ -114,21 +114,21 @@ export default function SettingsPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/30 pointer-events-none"></div>
               <div className="relative p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                  <div className="flex items-start gap-4 flex-1">
+                  <div className="flex items-start gap-4 sm:w-[70%]">
                     <div className="relative flex-shrink-0">
                       <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-lg"></div>
                       <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
                         <LayoutGrid className="w-6 h-6 text-white" />
                       </div>
                     </div>
-                    <div className="flex-1">
+                    <div>
                       <h3 className="text-xl font-semibold text-slate-900 mb-2">Models View</h3>
                       <p className="text-sm text-slate-600 leading-relaxed">
                         Switch between card and list layouts
                       </p>
                     </div>
                   </div>
-                  <div className="w-full sm:w-52 flex-shrink-0">
+                  <div className="w-full sm:w-[29%]">
                     <div className="flex gap-2 p-1.5 rounded-xl bg-slate-100/80 border border-slate-200/60 shadow-inner">
                       <button
                         onClick={() => setModelsView("cards")}
@@ -170,8 +170,8 @@ export default function SettingsPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <section className="relative rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-teal-50/30 pointer-events-none"></div>
-              <button
-                onClick={() => alert("Navigate to Production Path settings")}
+              <a
+                href="/settings/production-path"
                 className="relative w-full flex items-center justify-between p-6 sm:p-8 hover:bg-slate-50/50 active:bg-slate-100/50 transition-all duration-300 group/button text-left"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -191,7 +191,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <ChevronRight className="h-6 w-6 text-slate-400 group-hover/button:text-slate-600 group-hover/button:translate-x-1 transition-all duration-300 flex-shrink-0 ml-4" />
-              </button>
+              </a>
             </section>
           </div>
         </div>
