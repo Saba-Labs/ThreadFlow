@@ -18,6 +18,10 @@ import { useSearch } from "@/context/SearchContext";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
+  useSwipeNavigation({
+    leftPage: "/job-work",
+    rightPage: "/job-work",
+  });
   const [filter, setFilter] = useState<
     "all" | "hold" | "running" | "completed" | "job"
   >("all");
