@@ -761,8 +761,9 @@ export default function ModelList(props: ModelListProps) {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-base truncate text-gray-900 dark:text-gray-100">
                         <button
-                          onClick={() => toggleExpanded(o.id)}
-                          className="text-left w-full truncate"
+                          onClick={() => !showDetails && toggleExpanded(o.id)}
+                          disabled={showDetails}
+                          className={`text-left w-full truncate ${showDetails ? 'opacity-60 cursor-default' : ''}`}
                         >
                           {o.modelName}{" "}
                           {o.quantity > 0 && (
