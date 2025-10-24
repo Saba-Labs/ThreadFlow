@@ -487,6 +487,11 @@ export default function ModelList(props: ModelListProps) {
                             style={{ width: "120px" }}
                           >
                             <div className="text-left break-words whitespace-normal">
+                              {!showDetails && (
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                  {formatDate(o.createdAt)}
+                                </div>
+                              )}
                               {o.modelName}{" "}
                               {!showDetails && o.quantity > 0 && (
                                 <span className="text-muted-foreground">
@@ -778,6 +783,12 @@ export default function ModelList(props: ModelListProps) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
+                      {!isExpandedMobile && (
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-1 flex items-center gap-1">
+                          <CalendarDays className="h-3.5 w-3.5" />
+                          {formatDate(o.createdAt)}
+                        </div>
+                      )}
                       <h3 className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
                         <button
                           onClick={() => toggleExpanded(o.id)}
