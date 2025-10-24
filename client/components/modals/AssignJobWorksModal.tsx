@@ -129,45 +129,42 @@ export default function AssignJobWorksModal({
               jobWorks.map((jw) => (
                 <div
                   key={jw.id}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-muted/30 transition"
+                  className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-muted/30 transition space-y-2"
                 >
-                  <Checkbox
-                    id={`assign-jw-${jw.id}`}
-                    checked={selectedIds.includes(jw.id)}
-                    onCheckedChange={(checked) =>
-                      handleSelectJobWork(jw.id, checked as boolean)
-                    }
-                    className="mt-1"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <label
-                      htmlFor={`assign-jw-${jw.id}`}
-                      className="font-medium cursor-pointer"
-                    >
-                      {jw.name}
-                    </label>
-                    {jw.description && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {jw.description}
-                      </p>
-                    )}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <Checkbox
+                        id={`assign-jw-${jw.id}`}
+                        checked={selectedIds.includes(jw.id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectJobWork(jw.id, checked as boolean)
+                        }
+                      />
+                      <label
+                        htmlFor={`assign-jw-${jw.id}`}
+                        className="font-medium cursor-pointer flex-1 min-w-0"
+                      >
+                        {jw.name}
+                      </label>
+                    </div>
                     {selectedIds.includes(jw.id) && (
-                      <div className="mt-2">
-                        <label className="text-xs text-muted-foreground">
-                          Quantity for this job work
-                        </label>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={quantitiesAfterSplit[jw.id] || 0}
-                          onChange={(e) =>
-                            handleQuantityChange(jw.id, Number(e.target.value))
-                          }
-                          className="h-8 mt-1"
-                        />
-                      </div>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={quantitiesAfterSplit[jw.id] || 0}
+                        onChange={(e) =>
+                          handleQuantityChange(jw.id, Number(e.target.value))
+                        }
+                        className="h-8 w-20 flex-shrink-0"
+                        placeholder="Qty"
+                      />
                     )}
                   </div>
+                  {jw.description && (
+                    <p className="text-xs text-muted-foreground ml-6">
+                      {jw.description}
+                    </p>
+                  )}
                 </div>
               ))
             )}
