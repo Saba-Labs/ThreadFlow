@@ -45,8 +45,8 @@ export default function SettingsPage() {
 
       {/* Header Section */}
       <div className="relative border-b border-slate-200/60 backdrop-blur-xl bg-white/80">
-        <div className="max-w-full sm:max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12">
-          <div className="flex items-center gap-4 mb-3">
+        <div className="max-w-full sm:max-w-6xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-6">
+          <div className="flex items-center gap-4 mb-1">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-30"></div>
               <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-blue-500/20">
@@ -67,9 +67,9 @@ export default function SettingsPage() {
       </div>
 
       {/* Content Section */}
-      <div className="relative max-w-full sm:max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12 space-y-8">
+      <div className="relative max-w-full sm:max-w-6xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-4 space-y-4">
         {/* Appearance Section */}
-        <div className="space-y-5">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
@@ -83,9 +83,9 @@ export default function SettingsPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <section className="relative rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/30 pointer-events-none"></div>
-              <div className="relative p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                  <div className="flex items-start gap-4 sm:w-[70%]">
+              <div className="relative p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-start gap-3 sm:w-[70%]">
                     <div className="relative flex-shrink-0">
                       <div className="absolute inset-0 bg-purple-500/20 rounded-2xl blur-lg"></div>
                       <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
@@ -93,10 +93,10 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1">
                         Font Size
                       </h3>
-                      <p className="text-sm text-slate-600 leading-relaxed">
+                      <p className="text-xs text-slate-600 leading-relaxed">
                         Scale text to your preferred reading size
                       </p>
                     </div>
@@ -128,9 +128,9 @@ export default function SettingsPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <section className="relative rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/30 pointer-events-none"></div>
-              <div className="relative p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                  <div className="flex items-start gap-4 sm:w-[70%]">
+              <div className="relative p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-start gap-3 sm:w-[70%]">
                     <div className="relative flex-shrink-0">
                       <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-lg"></div>
                       <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
@@ -138,10 +138,10 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1">
                         Models View
                       </h3>
-                      <p className="text-sm text-slate-600 leading-relaxed">
+                      <p className="text-xs text-slate-600 leading-relaxed">
                         Switch between card and list layouts
                       </p>
                     </div>
@@ -177,7 +177,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Advanced Section */}
-        <div className="space-y-5">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
@@ -192,7 +192,7 @@ export default function SettingsPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-teal-50/30 pointer-events-none"></div>
               <Link
                 to="/settings/production-path"
-                className="relative w-full flex items-center justify-between p-6 sm:p-8 hover:bg-slate-50/50 active:bg-slate-100/50 transition-all duration-300 group/button text-left"
+                className="relative w-full flex items-center justify-between p-4 sm:p-6 hover:bg-slate-50/50 active:bg-slate-100/50 transition-all duration-300 group/button text-left"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="relative flex-shrink-0">
@@ -214,10 +214,10 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1">
                       Production Path
                     </h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       Configure workflow steps and automation
                     </p>
                   </div>
@@ -229,7 +229,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Footer spacing */}
-        <div className="h-12" />
+        <div className="h-4" />
       </div>
     </div>
   );

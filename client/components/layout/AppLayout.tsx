@@ -86,6 +86,118 @@ export default function AppLayout() {
   return (
     <SearchProvider>
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 overflow-x-hidden">
+        {/* Mobile sidebar backdrop */}
+        {menuOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/50 sm:hidden"
+            onClick={() => setMenuOpen(false)}
+          />
+        )}
+
+        {/* Mobile sidebar */}
+        <div
+          className={cn(
+            "fixed left-0 top-0 h-screen w-64 z-40 bg-background border-r transform transition-transform duration-200 ease-in-out sm:hidden",
+            menuOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+        >
+          <div className="flex flex-col h-full">
+            {/* Sidebar header */}
+            <div className="flex items-center justify-between h-14 border-b px-4">
+              <div className="flex items-center gap-2 font-semibold">
+                <span
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
+                  aria-hidden
+                >
+                  <ThreadFlowLogo className="h-6 w-6" />
+                </span>
+                <span className="tracking-tight">ThreadFlow</span>
+              </div>
+              <button
+                aria-label="Close menu"
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Sidebar navigation */}
+            <nav className="flex-1 overflow-y-auto px-2 py-4">
+              <div className="flex flex-col gap-2">
+                <NavLink
+                  to="/"
+                  end
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  Dashboard
+                </NavLink>
+                <NavLink
+                  to="/models/all"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  All Models
+                </NavLink>
+                <NavLink
+                  to="/job-work"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  Job Work
+                </NavLink>
+                <NavLink
+                  to="/settings"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Settings className="h-4 w-4" /> Settings
+                  </span>
+                </NavLink>
+              </div>
+            </nav>
+
+            {/* Sidebar footer */}
+            <div className="border-t p-4">
+              <Button asChild size="sm" className="w-full">
+                <Link to="/models/new" onClick={() => setMenuOpen(false)}>
+                  New Model
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur overflow-x-hidden">
           <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
             <Link to="/" className="flex items-center gap-2 font-semibold">
@@ -167,7 +279,7 @@ export default function AppLayout() {
 
               {/* Install button (shows when PWA install available) */}
               {canInstall && (
-                <div className="hidden sm:block mr-2">
+                <div className="mr-2">
                   <Button onClick={handleInstallClick} size="sm">
                     Install
                   </Button>
@@ -194,85 +306,10 @@ export default function AppLayout() {
                 </button>
               </div>
             </nav>
-
-            {/* Mobile dropdown */}
-            <div
-              className={cn(
-                "absolute left-0 right-0 top-14 z-50 sm:hidden",
-                menuOpen ? "block" : "hidden",
-              )}
-            >
-              <div className="mx-3 rounded-md border bg-popover p-3 shadow-sm">
-                <nav className="flex flex-col gap-2">
-                  <NavLink
-                    to="/"
-                    end
-                    onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
-                        isActive
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )
-                    }
-                  >
-                    Dashboard
-                  </NavLink>
-                  <NavLink
-                    to="/models/all"
-                    onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
-                        isActive
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )
-                    }
-                  >
-                    All Models
-                  </NavLink>
-                  <NavLink
-                    to="/job-work"
-                    onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
-                        isActive
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )
-                    }
-                  >
-                    Job Work
-                  </NavLink>
-                  <NavLink
-                    to="/settings"
-                    onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
-                        isActive
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )
-                    }
-                  >
-                    Settings
-                  </NavLink>
-                  <Button asChild size="sm" className="mt-2">
-                    <Link to="/models/new" onClick={() => setMenuOpen(false)}>
-                      New Model
-                    </Link>
-                  </Button>
-                </nav>
-              </div>
-            </div>
           </div>
         </header>
 
-        <main className="container py-6 overflow-x-hidden">
+        <main className="container py-3 sm:py-6 overflow-x-hidden">
           <SearchProvider>
             <Outlet />
           </SearchProvider>
