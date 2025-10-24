@@ -64,6 +64,8 @@ export default function AssignJobWorksModal({
   );
 
   const handleAssign = () => {
+    if (selectedIds.length === 0) return;
+
     const assignments: JobWorkAssignment[] = selectedIds.map((jwId) => ({
       jobWorkId: jwId,
       quantity: quantitiesAfterSplit[jwId] || 0,
