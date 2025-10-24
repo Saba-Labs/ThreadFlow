@@ -67,7 +67,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Content Section */}
-      <div className="relative max-w-full sm:max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12 space-y-8">
+      <div className="relative max-w-full sm:max-w-6xl mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-8 space-y-8">
         {/* Appearance Section */}
         <div className="space-y-5">
           <div className="flex items-center gap-3">
