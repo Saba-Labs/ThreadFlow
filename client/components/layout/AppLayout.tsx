@@ -186,11 +186,13 @@ export default function AppLayout() {
                 </NavLink>
 
                 <div className="pt-4 mt-5 border-t text-center text-xs text-gray-400">
-                  Created by <span className="font-semibold text-gray-600">Sabarish Arjunan</span>
+                  Created by{" "}
+                  <span className="font-semibold text-gray-600">
+                    Sabarish Arjunan
+                  </span>
                 </div>
               </div>
             </nav>
-            
 
             {/* Sidebar footer */}
             <div className="border-t p-4 flex flex-col gap-4">
@@ -199,7 +201,6 @@ export default function AppLayout() {
                   New Model
                 </Link>
               </Button>
-              
             </div>
           </div>
         </div>

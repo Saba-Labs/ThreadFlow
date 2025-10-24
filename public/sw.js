@@ -29,23 +29,25 @@ self.addEventListener("fetch", (event) => {
       if (response) {
         return response;
       }
-      return fetch(event.request).then((fetchResponse) => {
-        if (!fetchResponse || fetchResponse.status !== 200) {
-          return fetchResponse;
-        }
-        const clonedResponse = fetchResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          try {
-            cache.put(event.request, clonedResponse);
-          } catch (e) {
-            // Ignore cache.put failures for cross-origin or other restricted requests
+      return fetch(event.request)
+        .then((fetchResponse) => {
+          if (!fetchResponse || fetchResponse.status !== 200) {
+            return fetchResponse;
           }
+          const clonedResponse = fetchResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            try {
+              cache.put(event.request, clonedResponse);
+            } catch (e) {
+              // Ignore cache.put failures for cross-origin or other restricted requests
+            }
+          });
+          return fetchResponse;
+        })
+        .catch(() => {
+          // Network request failed, return cached version if available
+          return caches.match(event.request);
         });
-        return fetchResponse;
-      }).catch(() => {
-        // Network request failed, return cached version if available
-        return caches.match(event.request);
-      });
     }),
   );
 });

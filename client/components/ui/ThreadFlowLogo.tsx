@@ -14,7 +14,13 @@ export default function ThreadFlowLogo({
       role="img"
     >
       <defs>
-        <linearGradient id="threadFlowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient
+          id="threadFlowGradient"
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="100%"
+        >
           <stop offset="0%" stopColor="#10B981" />
           <stop offset="100%" stopColor="#059669" />
         </linearGradient>
@@ -28,10 +34,24 @@ export default function ThreadFlowLogo({
       </defs>
 
       {/* Background circle (subtle) */}
-      <circle cx="100" cy="100" r="95" fill="none" stroke="#10B981" strokeWidth="0.5" opacity="0.1" />
+      <circle
+        cx="100"
+        cy="100"
+        r="95"
+        fill="none"
+        stroke="#10B981"
+        strokeWidth="0.5"
+        opacity="0.1"
+      />
 
       {/* Central node - represents data/model hub */}
-      <circle cx="100" cy="100" r="18" fill="url(#threadFlowGradient)" filter="url(#glow)" />
+      <circle
+        cx="100"
+        cy="100"
+        r="18"
+        fill="url(#threadFlowGradient)"
+        filter="url(#glow)"
+      />
 
       {/* Top-left node */}
       <circle cx="50" cy="50" r="12" fill="#10B981" opacity="0.8" />
@@ -46,14 +66,64 @@ export default function ThreadFlowLogo({
       <circle cx="150" cy="150" r="12" fill="#10B981" opacity="0.8" />
 
       {/* Connection lines - representing data flow/pipeline */}
-      <line x1="100" y1="100" x2="50" y2="50" stroke="#10B981" strokeWidth="2" opacity="0.6" />
-      <line x1="100" y1="100" x2="150" y2="50" stroke="#10B981" strokeWidth="2" opacity="0.6" />
-      <line x1="100" y1="100" x2="50" y2="150" stroke="#10B981" strokeWidth="2" opacity="0.6" />
-      <line x1="100" y1="100" x2="150" y2="150" stroke="#10B981" strokeWidth="2" opacity="0.6" />
+      <line
+        x1="100"
+        y1="100"
+        x2="50"
+        y2="50"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
+      <line
+        x1="100"
+        y1="100"
+        x2="150"
+        y2="50"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
+      <line
+        x1="100"
+        y1="100"
+        x2="50"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
+      <line
+        x1="100"
+        y1="100"
+        x2="150"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
 
       {/* Diagonal connections - representing interconnected ML models */}
-      <line x1="50" y1="50" x2="150" y2="150" stroke="#10B981" strokeWidth="1.5" opacity="0.3" strokeDasharray="3,2" />
-      <line x1="150" y1="50" x2="50" y2="150" stroke="#10B981" strokeWidth="1.5" opacity="0.3" strokeDasharray="3,2" />
+      <line
+        x1="50"
+        y1="50"
+        x2="150"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="1.5"
+        opacity="0.3"
+        strokeDasharray="3,2"
+      />
+      <line
+        x1="150"
+        y1="50"
+        x2="50"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="1.5"
+        opacity="0.3"
+        strokeDasharray="3,2"
+      />
 
       {/* Inner geometric pattern - data layer representation */}
       <g opacity="0.5">
@@ -66,7 +136,15 @@ export default function ThreadFlowLogo({
       </g>
 
       {/* Top accent bar - representing thread/flow direction */}
-      <rect x="85" y="25" width="30" height="4" rx="2" fill="url(#threadFlowGradient)" opacity="0.8" />
+      <rect
+        x="85"
+        y="25"
+        width="30"
+        height="4"
+        rx="2"
+        fill="url(#threadFlowGradient)"
+        opacity="0.8"
+      />
     </svg>
   );
 }

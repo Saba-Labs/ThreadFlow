@@ -145,7 +145,11 @@ export default function ModelForm(props: {
     const path = buildPath();
     if (path.length === 0) return;
 
-    const fullModelName = combineModelName(modelNamePart1, modelNamePart2, modelNamePart3);
+    const fullModelName = combineModelName(
+      modelNamePart1,
+      modelNamePart2,
+      modelNamePart3,
+    );
     const quantityValue = quantity ? Math.max(0, Math.floor(quantity)) : 0;
 
     props.onCreate({
@@ -197,7 +201,9 @@ export default function ModelForm(props: {
           <Input
             type="number"
             value={quantity ?? ""}
-            onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : null)}
+            onChange={(e) =>
+              setQuantity(e.target.value ? Number(e.target.value) : null)
+            }
             placeholder="Enter quantity"
           />
         </div>
