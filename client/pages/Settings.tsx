@@ -5,13 +5,28 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useFontSize } from "@/hooks/use-font-size";
 
 export default function SettingsPage() {
   const { value: fontSize, setValue: setFontSize } = useFontSize();
-  const [modelsView, setModelsView] = useState<string>("cards");
+  const [modelsView, setModelsViewState] = useState<string>("cards");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("models.viewMode") || "cards";
+      setModelsViewState(saved);
+    } catch {}
+  }, []);
+
+  const setModelsView = (value: string) => {
+    setModelsViewState(value);
+    try {
+      localStorage.setItem("models.viewMode", value);
+      window.dispatchEvent(new Event("modelsViewChanged"));
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
