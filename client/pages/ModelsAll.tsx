@@ -161,7 +161,7 @@ export default function ModelsAll() {
 
       <div
         className={
-          viewMode === "list" ? "-mx-4 px-4 -ml-8 -mr-16" : "-mx-8 px-4"
+          viewMode === "list" ? "px-0" : "-mx-8 px-4"
         }
       >
         <ModelList
