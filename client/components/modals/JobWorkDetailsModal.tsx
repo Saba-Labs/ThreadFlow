@@ -53,24 +53,51 @@ export default function JobWorkDetailsModal({
     });
   };
 
-  const handleEditPickupDate = (assignment: JobWorkAssignment) => {
-    setEditingId(assignment.jobWorkId);
-    setEditDate(new Date(assignment.pickupDate).toISOString().split("T")[0]);
+  const handleEditField = (
+    assignment: JobWorkAssignment,
+    field: "pickup" | "delivery" | "quantity"
+  ) => {
+    setEditingField({ jobWorkId: assignment.jobWorkId, field });
+    if (field === "pickup") {
+      setEditValue(new Date(assignment.pickupDate).toISOString().split("T")[0]);
+    } else if (field === "delivery") {
+      setEditValue(
+        assignment.completionDate
+          ? new Date(assignment.completionDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0]
+      );
+    } else {
+      setEditValue(String(assignment.quantity));
+    }
   };
 
-  const handleSaveEditDate = () => {
-    if (!editingId) return;
+  const handleSaveEditField = () => {
+    if (!editingField) return;
 
-    const updated = assignments.map((a) =>
-      a.jobWorkId === editingId
-        ? {
-            ...a,
-            pickupDate: new Date(editDate).getTime(),
-          }
-        : a
-    );
+    const updated = assignments.map((a) => {
+      if (a.jobWorkId !== editingField.jobWorkId) return a;
+
+      if (editingField.field === "pickup") {
+        return {
+          ...a,
+          pickupDate: new Date(editValue).getTime(),
+        };
+      } else if (editingField.field === "delivery") {
+        return {
+          ...a,
+          completionDate: new Date(editValue).getTime(),
+          status: a.status === "pending" ? "completed" : a.status,
+        };
+      } else {
+        return {
+          ...a,
+          quantity: Math.max(0, Math.floor(Number(editValue) || 0)),
+        };
+      }
+    });
+
     onUpdateAssignments(updated);
-    setEditingId(null);
+    setEditingField(null);
   };
 
   const handleOpenCompleteDialog = (jwId: string, pickupDate: number) => {
