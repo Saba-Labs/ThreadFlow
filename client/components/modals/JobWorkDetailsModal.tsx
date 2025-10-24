@@ -297,7 +297,9 @@ export default function JobWorkDetailsModal({
           <div className="flex justify-end gap-2">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleCompleteAssignment}>
-              Complete
+              {assignments.find((a) => a.jobWorkId === completingId)?.status === "completed"
+                ? "Update"
+                : "Complete"}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
