@@ -159,11 +159,7 @@ export default function ModelsAll() {
         </div>
       </div>
 
-      <div
-        className={
-          viewMode === "list" ? "-mx-4 px-0" : "-mx-8 px-4"
-        }
-      >
+      <div className={viewMode === "list" ? "-mx-4 px-0" : "-mx-8 px-4"}>
         <ModelList
           orders={visible}
           onDelete={pipeline.deleteOrder}
