@@ -298,6 +298,108 @@ export default function JobWork() {
           />
         </div>
       </SimpleModal>
+
+      {/* History Modal */}
+      <SimpleModal
+        open={historyOpen && selectedJobWorkId !== null}
+        onOpenChange={(v) => setHistoryOpen(v)}
+        title={`Assignment History — ${list.find((j) => j.id === selectedJobWorkId)?.name || ""}`}
+        footer={
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setHistoryOpen(false)}>
+              Close
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {selectedJobWorkId && (() => {
+            const assignments = getAssignmentsForJobWork(selectedJobWorkId);
+            const pendingAssignments = assignments.filter((a) => a.status === "pending");
+            const completedAssignments = assignments.filter((a) => a.status === "completed");
+
+            const formatDate = (timestamp: number) => {
+              return new Date(timestamp).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              });
+            };
+
+            return (
+              <>
+                {/* Pending */}
+                {pendingAssignments.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      Current Models
+                    </div>
+                    <div className="space-y-2">
+                      {pendingAssignments.map((a) => (
+                        <div
+                          key={`${a.orderId}-pending`}
+                          className="rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-3"
+                        >
+                          <div className="font-medium text-gray-900 dark:text-gray-100">
+                            {a.modelName}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Quantity: {a.quantity}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
+                            <Calendar className="h-4 w-4" />
+                            Pickup: {formatDate(a.pickupDate)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Completed */}
+                {completedAssignments.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      Completed Records
+                    </div>
+                    <div className="space-y-2">
+                      {completedAssignments.map((a) => (
+                        <div
+                          key={`${a.orderId}-completed`}
+                          className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-3"
+                        >
+                          <div className="font-medium text-gray-900 dark:text-gray-100">
+                            {a.modelName}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Quantity: {a.quantity}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
+                            <Calendar className="h-4 w-4" />
+                            Pickup: {formatDate(a.pickupDate)}
+                          </div>
+                          {a.completionDate && (
+                            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
+                              <Calendar className="h-4 w-4" />
+                              Delivered: {formatDate(a.completionDate)}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {assignments.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No assignment history.
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      </SimpleModal>
     </div>
   );
 }
