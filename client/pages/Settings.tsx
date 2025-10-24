@@ -69,7 +69,7 @@ export default function SettingsPage() {
       {/* Content Section */}
       <div className="relative max-w-full sm:max-w-6xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-4 space-y-4">
         {/* Appearance Section */}
-        <div className="space-y-5">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
