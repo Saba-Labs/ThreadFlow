@@ -96,7 +96,7 @@ export default function AssignJobWorksModal({
           </Button>
           <Button
             onClick={handleAssign}
-            disabled={selectedIds.length === 0 || totalAssignedQty === 0}
+            disabled={selectedIds.length === 0}
           >
             Assign
           </Button>
