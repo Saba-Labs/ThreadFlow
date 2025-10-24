@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useJobWorks } from "@/lib/jobWorks";
+import AssignJobWorksModal from "@/components/modals/AssignJobWorksModal";
+import JobWorkDetailsModal from "@/components/modals/JobWorkDetailsModal";
 import {
   Scissors,
   SkipForward,
@@ -17,7 +19,7 @@ import {
   CalendarDays,
   Plus,
 } from "lucide-react";
-import type { PathStep, WorkOrder } from "@/hooks/useProductionPipeline";
+import type { PathStep, WorkOrder, JobWorkAssignment } from "@/hooks/useProductionPipeline";
 import { useMachineTypes, getMachineTypeConfig } from "@/lib/machineTypes";
 
 interface ModelListProps {
