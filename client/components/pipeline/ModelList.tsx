@@ -1075,18 +1075,20 @@ export default function ModelList(props: ModelListProps) {
                           size="icon"
                           variant="ghost"
                           onClick={() => {
-                            setJwForId(o.id);
-                            setJwSelected(
-                              ((o as any).jobWorkIds || []) as string[],
-                            );
+                            const hasAssignments = (o.jobWorkAssignments || []).length > 0;
+                            if (hasAssignments) {
+                              setJobWorkDetailsModalId(o.id);
+                            } else {
+                              setAssignJobWorksModalId(o.id);
+                            }
                           }}
                           title="Job Work"
                           aria-label="Job Work"
                         >
                           <span
                             className={
-                              ((o as any).jobWorkIds || []).length > 0
-                                ? "text-blue-600 dark:text-blue-400"
+                              (o.jobWorkAssignments || []).length > 0
+                                ? "text-blue-600 dark:text-blue-400 font-bold"
                                 : ""
                             }
                           >
