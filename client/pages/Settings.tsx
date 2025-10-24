@@ -5,28 +5,28 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-const STORAGE_KEY = "app:font-size";
-const SCALE_MAP: Record<string, number> = {
-  small: 0.875,
-  medium: 1.0,
-  large: 1.125,
-  "extra-large": 1.25,
-};
+import { useFontSize } from "@/hooks/use-font-size";
 
 export default function SettingsPage() {
-  const [fontSize, setFontSize] = useState<string>("large");
-  const [modelsView, setModelsView] = useState<string>("cards");
+  const { value: fontSize, setValue: setFontSize } = useFontSize();
+  const [modelsView, setModelsViewState] = useState<string>("cards");
 
   useEffect(() => {
-    const scale = SCALE_MAP[fontSize] ?? 1;
-    document.documentElement.style.setProperty(
-      "--app-font-scale",
-      String(scale),
-    );
-  }, [fontSize]);
+    try {
+      const saved = localStorage.getItem("models.viewMode") || "cards";
+      setModelsViewState(saved);
+    } catch {}
+  }, []);
+
+  const setModelsView = (value: string) => {
+    setModelsViewState(value);
+    try {
+      localStorage.setItem("models.viewMode", value);
+      window.dispatchEvent(new Event("modelsViewChanged"));
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
@@ -45,7 +45,7 @@ export default function SettingsPage() {
 
       {/* Header Section */}
       <div className="relative border-b border-slate-200/60 backdrop-blur-xl bg-white/80">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="max-w-full sm:max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12">
           <div className="flex items-center gap-4 mb-3">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-30"></div>
@@ -67,7 +67,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Content Section */}
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+      <div className="relative max-w-full sm:max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12 space-y-8">
         {/* Appearance Section */}
         <div className="space-y-5">
           <div className="flex items-center gap-3">
@@ -123,8 +123,8 @@ export default function SettingsPage() {
             </section>
           </div>
 
-          {/* Models View Toggle */}
-          <div className="group relative">
+          {/* Models View Toggle - Mobile Only */}
+          <div className="group relative md:hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <section className="relative rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/30 pointer-events-none"></div>

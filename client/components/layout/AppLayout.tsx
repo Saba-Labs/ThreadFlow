@@ -32,7 +32,7 @@ function HeaderSearch({ className }: { className?: string }) {
                 setOpen(false);
               }
             }}
-            className="w-64 rounded-md border px-2 py-1"
+            className="w-64 sm:w-64 rounded-md border px-2 py-1 max-w-80"
             autoFocus
           />
           <button
@@ -85,8 +85,8 @@ export default function AppLayout() {
 
   return (
     <SearchProvider>
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 overflow-x-hidden">
+        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur overflow-x-hidden">
           <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
             <Link to="/" className="flex items-center gap-2 font-semibold">
               <span
@@ -272,7 +272,7 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main className="container py-6">
+        <main className="container py-6 overflow-x-hidden">
           <SearchProvider>
             <Outlet />
           </SearchProvider>

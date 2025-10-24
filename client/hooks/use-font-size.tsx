@@ -24,7 +24,7 @@ function applyScale(option: FontSizeOption) {
   document.documentElement.style.setProperty("--app-font-scale", String(scale));
 }
 
-const DEFAULT_VALUE: FontSizeOption = "large";
+const DEFAULT_VALUE: FontSizeOption = "medium";
 
 // Guard to avoid calling React hooks in non-browser contexts or when React isn't initialized
 const canUseHooks =
