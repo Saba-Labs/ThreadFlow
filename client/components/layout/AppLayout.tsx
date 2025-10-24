@@ -184,11 +184,18 @@ export default function AppLayout() {
                     <Settings className="h-4 w-4" /> Settings
                   </span>
                 </NavLink>
+
+                <div className="pt-4 mt-5 border-t text-center text-xs text-gray-400">
+                  Created by{" "}
+                  <span className="font-semibold text-gray-600">
+                    Sabarish Arjunan
+                  </span>
+                </div>
               </div>
             </nav>
 
             {/* Sidebar footer */}
-            <div className="border-t p-4">
+            <div className="border-t p-4 flex flex-col gap-4">
               <Button asChild size="sm" className="w-full">
                 <Link to="/models/new" onClick={() => setMenuOpen(false)}>
                   New Model

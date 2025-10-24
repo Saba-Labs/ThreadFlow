@@ -5,77 +5,145 @@ export default function ThreadFlowLogo({
 }: {
   className?: string;
 }) {
-  // Base colors derived from the image:
-  // Deep Blue: #1976D2 (approx)
-  // Bright Blue/Cyan: #2196F3 (approx)
-  // Green/Lime: #8BC34A (approx)
-  // Center Overlap (Teal/Darker Cyan): #00BCD4 (approx)
-
-  // A viewBox of "0 0 250 200" provides good proportions for the 'M' shape.
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 250 200"
+      viewBox="0 0 200 200"
       className={className}
       aria-label="ThreadFlow logo"
       role="img"
     >
       <defs>
-        {/* Gradient for the Left Shape (Blue/Cyan Focus) */}
-        <linearGradient id="leftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#2196F3" /> {/* Light Blue */}
-          <stop offset="100%" stopColor="#1976D2" /> {/* Deep Blue */}
+        <linearGradient
+          id="threadFlowGradient"
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="100%"
+        >
+          <stop offset="0%" stopColor="#10B981" />
+          <stop offset="100%" stopColor="#059669" />
         </linearGradient>
-
-        {/* Gradient for the Right Shape (Green/Cyan Focus) */}
-        <linearGradient id="rightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#8BC34A" /> {/* Lime Green */}
-          <stop offset="100%" stopColor="#2196F3" /> {/* Light Blue/Cyan */}
-        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="1" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
-      {/* The logo is essentially two 'D' or 'P' shapes reflected horizontally,
-        forming an overlap. We use a single path for each side.
-      */}
-
-      {/* Left Shape (Pill/D-shape) */}
-      <path
-        // Start near the middle-left (50, 100)
-        // Draw a smooth curve up to the top-left (50, 20)
-        // Curve across the top to the center point (125, 100)
-        // Curve down across the bottom back to the start
-        d="M 125 100 
-           C 125 30, 80 20, 50 40 
-           L 50 160 
-           C 80 180, 125 170, 125 100 Z"
-        fill="url(#leftGrad)"
-        opacity="0.95"
-      />
-
-      {/* Right Shape (Reflected Pill/D-shape) */}
-      <path
-        // Start near the middle-right (125, 100)
-        // Draw a smooth curve up to the top-right (200, 40)
-        // Curve across the top to the center point (125, 100)
-        // Curve down across the bottom back to the start
-        d="M 125 100 
-           C 125 30, 170 20, 200 40 
-           L 200 160 
-           C 170 180, 125 170, 125 100 Z"
-        fill="url(#rightGrad)"
-        opacity="0.95"
-      />
-
-      {/* Optional: A third shape or circle could be added 
-        in the center to emphasize the blend/overlap area, 
-        giving it the darker, slightly translucent look. 
-      */}
+      {/* Background circle (subtle) */}
       <circle
-        cx="125"
+        cx="100"
         cy="100"
-        r="40"
-        fill="#00BCD4" // Teal/Darker Cyan for the blend
-        opacity="0.25" // Adjust opacity to achieve the "transparency" look
+        r="95"
+        fill="none"
+        stroke="#10B981"
+        strokeWidth="0.5"
+        opacity="0.1"
+      />
+
+      {/* Central node - represents data/model hub */}
+      <circle
+        cx="100"
+        cy="100"
+        r="18"
+        fill="url(#threadFlowGradient)"
+        filter="url(#glow)"
+      />
+
+      {/* Top-left node */}
+      <circle cx="50" cy="50" r="12" fill="#10B981" opacity="0.8" />
+
+      {/* Top-right node */}
+      <circle cx="150" cy="50" r="12" fill="#10B981" opacity="0.8" />
+
+      {/* Bottom-left node */}
+      <circle cx="50" cy="150" r="12" fill="#10B981" opacity="0.8" />
+
+      {/* Bottom-right node */}
+      <circle cx="150" cy="150" r="12" fill="#10B981" opacity="0.8" />
+
+      {/* Connection lines - representing data flow/pipeline */}
+      <line
+        x1="100"
+        y1="100"
+        x2="50"
+        y2="50"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
+      <line
+        x1="100"
+        y1="100"
+        x2="150"
+        y2="50"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
+      <line
+        x1="100"
+        y1="100"
+        x2="50"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
+      <line
+        x1="100"
+        y1="100"
+        x2="150"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="2"
+        opacity="0.6"
+      />
+
+      {/* Diagonal connections - representing interconnected ML models */}
+      <line
+        x1="50"
+        y1="50"
+        x2="150"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="1.5"
+        opacity="0.3"
+        strokeDasharray="3,2"
+      />
+      <line
+        x1="150"
+        y1="50"
+        x2="50"
+        y2="150"
+        stroke="#10B981"
+        strokeWidth="1.5"
+        opacity="0.3"
+        strokeDasharray="3,2"
+      />
+
+      {/* Inner geometric pattern - data layer representation */}
+      <g opacity="0.5">
+        <polygon
+          points="100,100 115,90 120,105 105,115"
+          fill="none"
+          stroke="#10B981"
+          strokeWidth="1"
+        />
+      </g>
+
+      {/* Top accent bar - representing thread/flow direction */}
+      <rect
+        x="85"
+        y="25"
+        width="30"
+        height="4"
+        rx="2"
+        fill="url(#threadFlowGradient)"
+        opacity="0.8"
       />
     </svg>
   );

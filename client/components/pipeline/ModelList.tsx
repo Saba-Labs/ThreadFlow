@@ -244,6 +244,13 @@ export default function ModelList(props: ModelListProps) {
     const yyyy = String(d.getFullYear());
     return `${dd}/${mm}/${yyyy}`;
   };
+
+  const formatDateShort = (ts: number) => {
+    const d = new Date(ts);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    return `${dd}/${mm}`;
+  };
   const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
   const getPathLetterPills = (
@@ -486,13 +493,20 @@ export default function ModelList(props: ModelListProps) {
                             className="p-3 font-medium text-gray-900 dark:text-gray-100"
                             style={{ width: "120px" }}
                           >
-                            <div className="text-left break-words whitespace-normal">
-                              {o.modelName}{" "}
-                              {!showDetails && o.quantity > 0 && (
-                                <span className="text-muted-foreground">
-                                  ({o.quantity})
+                            <div className="text-left break-words whitespace-normal flex items-start gap-2">
+                              {!showDetails && (
+                                <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
+                                  {formatDateShort(o.createdAt)}
                                 </span>
                               )}
+                              <span>
+                                {o.modelName}{" "}
+                                {!showDetails && o.quantity > 0 && (
+                                  <span className="text-muted-foreground">
+                                    ({o.quantity})
+                                  </span>
+                                )}
+                              </span>
                             </div>
                           </td>
                           {showDetails && (
@@ -778,11 +792,16 @@ export default function ModelList(props: ModelListProps) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
+                      <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 flex items-center gap-2 min-w-0">
+                        {!isExpandedMobile && (
+                          <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
+                            {formatDateShort(o.createdAt)}
+                          </span>
+                        )}
                         <button
                           onClick={() => toggleExpanded(o.id)}
                           disabled={!isMobile && showDetails}
-                          className={`text-left w-full truncate ${!isMobile && showDetails ? "opacity-60 cursor-default" : ""}`}
+                          className={`text-left truncate ${!isMobile && showDetails ? "opacity-60 cursor-default" : ""}`}
                         >
                           {o.modelName}{" "}
                           {o.quantity > 0 && (

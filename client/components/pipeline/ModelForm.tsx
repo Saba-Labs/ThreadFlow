@@ -145,7 +145,11 @@ export default function ModelForm(props: {
     const path = buildPath();
     if (path.length === 0) return;
 
-    const fullModelName = combineModelName(modelNamePart1, modelNamePart2, modelNamePart3);
+    const fullModelName = combineModelName(
+      modelNamePart1,
+      modelNamePart2,
+      modelNamePart3,
+    );
     const quantityValue = quantity ? Math.max(0, Math.floor(quantity)) : 0;
 
     props.onCreate({
@@ -164,6 +168,14 @@ export default function ModelForm(props: {
         Define quantity, date, and select which production paths to include.
       </p>
       <div className="grid gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Date</label>
+          <Input
+            type="date"
+            value={dateStr}
+            onChange={(e) => setDateStr(e.target.value)}
+          />
+        </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Model name</label>
           <div className="grid gap-2 grid-cols-3">
@@ -184,24 +196,16 @@ export default function ModelForm(props: {
             />
           </div>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div>
-            <label className="text-sm font-medium">Quantity</label>
-            <Input
-              type="number"
-              value={quantity ?? ""}
-              onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : null)}
-              placeholder="Enter quantity"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Date</label>
-            <Input
-              type="date"
-              value={dateStr}
-              onChange={(e) => setDateStr(e.target.value)}
-            />
-          </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Quantity</label>
+          <Input
+            type="number"
+            value={quantity ?? ""}
+            onChange={(e) =>
+              setQuantity(e.target.value ? Number(e.target.value) : null)
+            }
+            placeholder="Enter quantity"
+          />
         </div>
         <div className="space-y-3">
           <label className="text-sm font-medium">Production Path</label>
