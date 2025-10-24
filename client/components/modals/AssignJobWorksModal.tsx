@@ -178,13 +178,9 @@ export default function AssignJobWorksModal({
             <div className="text-sm text-gray-600 dark:text-gray-300">
               Selected: {selectedIds.length} job work(s)
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">
-              Total quantity: {totalAssignedQty} / {totalQuantity}
-            </div>
-            {totalAssignedQty !== totalQuantity && (
-              <div className="text-xs text-amber-600 dark:text-amber-400">
-                ⚠️ Total assigned ({totalAssignedQty}) doesn't match available
-                quantity ({totalQuantity})
+            {totalQuantity > 0 && (
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Total quantity: {totalAssignedQty} / {totalQuantity}
               </div>
             )}
           </div>
