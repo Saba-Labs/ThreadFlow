@@ -43,6 +43,13 @@ interface ModelListProps {
     machineIndex: number,
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
+  setJobWorkAssignments?: (orderId: string, assignments: JobWorkAssignment[]) => void;
+  updateJobWorkAssignmentStatus?: (
+    orderId: string,
+    jobWorkId: string,
+    status: "pending" | "completed",
+    completionDate?: number,
+  ) => void;
   showDetails?: boolean;
   viewMode?: "cards" | "list";
 }
