@@ -35,6 +35,10 @@ export default function JobWork() {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
 
+  // Modal state for viewing history
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedJobWorkId, setSelectedJobWorkId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!modalOpen) {
       setEditing(null);
