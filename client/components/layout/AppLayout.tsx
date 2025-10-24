@@ -85,7 +85,7 @@ export default function AppLayout() {
 
   return (
     <SearchProvider>
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 overflow-x-hidden">
         <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
           <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
             <Link to="/" className="flex items-center gap-2 font-semibold">
