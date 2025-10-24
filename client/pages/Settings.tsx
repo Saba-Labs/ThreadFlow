@@ -123,8 +123,8 @@ export default function SettingsPage() {
             </section>
           </div>
 
-          {/* Models View Toggle */}
-          <div className="group relative">
+          {/* Models View Toggle - Mobile Only */}
+          <div className="group relative md:hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <section className="relative rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/30 pointer-events-none"></div>
