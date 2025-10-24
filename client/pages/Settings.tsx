@@ -5,28 +5,13 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-
-const STORAGE_KEY = "app:font-size";
-const SCALE_MAP: Record<string, number> = {
-  small: 0.875,
-  medium: 1.0,
-  large: 1.125,
-  "extra-large": 1.25,
-};
+import { useFontSize } from "@/hooks/use-font-size";
 
 export default function SettingsPage() {
-  const [fontSize, setFontSize] = useState<string>("large");
+  const { value: fontSize, setValue: setFontSize } = useFontSize();
   const [modelsView, setModelsView] = useState<string>("cards");
-
-  useEffect(() => {
-    const scale = SCALE_MAP[fontSize] ?? 1;
-    document.documentElement.style.setProperty(
-      "--app-font-scale",
-      String(scale),
-    );
-  }, [fontSize]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
