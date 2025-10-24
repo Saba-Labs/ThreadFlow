@@ -22,6 +22,14 @@ export interface ParallelMachineGroup {
   status: StepStatus;
 }
 
+export interface JobWorkAssignment {
+  jobWorkId: string;
+  quantity: number;
+  pickupDate: number; // timestamp
+  completionDate?: number; // timestamp, only set when completed
+  status: "pending" | "completed"; // pending = assigned, completed = done
+}
+
 export interface WorkOrder {
   id: string;
   modelName: string;
@@ -32,6 +40,7 @@ export interface WorkOrder {
   parentId?: string; // if split from another
   parallelGroups: ParallelMachineGroup[]; // groups of machines running in parallel
   jobWorkIds?: string[];
+  jobWorkAssignments?: JobWorkAssignment[]; // new: detailed assignments with quantities and dates
 }
 
 function uid(prefix = "id") {
