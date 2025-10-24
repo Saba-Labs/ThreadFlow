@@ -198,7 +198,7 @@ export default function AppLayout() {
             {/* Mobile dropdown */}
             <div
               className={cn(
-                "absolute left-0 right-0 top-14 z-50 sm:hidden",
+                "fixed left-0 right-0 top-14 z-50 sm:hidden max-h-[calc(100vh-3.5rem)] overflow-y-auto",
                 menuOpen ? "block" : "hidden",
               )}
             >
