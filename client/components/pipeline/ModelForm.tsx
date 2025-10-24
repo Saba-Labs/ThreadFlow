@@ -165,6 +165,14 @@ export default function ModelForm(props: {
       </p>
       <div className="grid gap-4">
         <div className="space-y-2">
+          <label className="text-sm font-medium">Date</label>
+          <Input
+            type="date"
+            value={dateStr}
+            onChange={(e) => setDateStr(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
           <label className="text-sm font-medium">Model name</label>
           <div className="grid gap-2 grid-cols-3">
             <Input
@@ -184,24 +192,14 @@ export default function ModelForm(props: {
             />
           </div>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div>
-            <label className="text-sm font-medium">Quantity</label>
-            <Input
-              type="number"
-              value={quantity ?? ""}
-              onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : null)}
-              placeholder="Enter quantity"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Date</label>
-            <Input
-              type="date"
-              value={dateStr}
-              onChange={(e) => setDateStr(e.target.value)}
-            />
-          </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Quantity</label>
+          <Input
+            type="number"
+            value={quantity ?? ""}
+            onChange={(e) => setQuantity(e.target.value ? Number(e.target.value) : null)}
+            placeholder="Enter quantity"
+          />
         </div>
         <div className="space-y-3">
           <label className="text-sm font-medium">Production Path</label>
