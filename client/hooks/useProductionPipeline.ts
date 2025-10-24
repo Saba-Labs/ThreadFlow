@@ -404,6 +404,40 @@ export function useProductionPipeline() {
         ),
       }));
     },
+    setJobWorkAssignments: (orderId: string, assignments: JobWorkAssignment[]) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) =>
+          o.id === orderId
+            ? { ...o, jobWorkAssignments: assignments.slice() }
+            : o,
+        ),
+      }));
+    },
+    updateJobWorkAssignmentStatus: (
+      orderId: string,
+      jobWorkId: string,
+      status: "pending" | "completed",
+      completionDate?: number,
+    ) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const assignments = (o.jobWorkAssignments || []).map((a) =>
+            a.jobWorkId === jobWorkId
+              ? {
+                  ...a,
+                  status,
+                  completionDate:
+                    status === "completed"
+                      ? completionDate ?? Date.now()
+                      : undefined,
+                }
+              : a,
+          );
+          return { ...o, jobWorkAssignments: assignments };
+        }),
+      }));
+    },
     // update an existing order's basic properties (modelName, quantity, createdAt, path)
     updateOrder: (
       orderId: string,
