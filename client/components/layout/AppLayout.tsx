@@ -194,9 +194,9 @@ export default function AppLayout() {
                   New Model
                 </Link>
               </Button>
-              <div className="text-xs text-muted-foreground text-center">
-                Created by Sabarish Arjunan
-              </div>
+              <div className="pt-4 mt-5 border-t text-center text-xs text-gray-400">
+    Created by <span className="font-semibold text-gray-600">Sabarish Arjunan</span>
+  </div>
             </div>
           </div>
         </div>
