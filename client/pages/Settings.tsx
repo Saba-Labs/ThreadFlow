@@ -229,7 +229,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Footer spacing */}
-        <div className="h-12" />
+        <div className="h-4" />
       </div>
     </div>
   );
