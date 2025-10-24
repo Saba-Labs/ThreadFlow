@@ -405,7 +405,10 @@ export function useProductionPipeline() {
         ),
       }));
     },
-    setJobWorkAssignments: (orderId: string, assignments: JobWorkAssignment[]) => {
+    setJobWorkAssignments: (
+      orderId: string,
+      assignments: JobWorkAssignment[],
+    ) => {
       setStore((s) => ({
         orders: s.orders.map((o) =>
           o.id === orderId
@@ -430,7 +433,7 @@ export function useProductionPipeline() {
                   status,
                   completionDate:
                     status === "completed"
-                      ? completionDate ?? Date.now()
+                      ? (completionDate ?? Date.now())
                       : undefined,
                 }
               : a,

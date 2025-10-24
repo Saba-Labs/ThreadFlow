@@ -42,7 +42,7 @@ export default function JobWorkDetailsModal({
   const [editValue, setEditValue] = useState<string>("");
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [completeDate, setCompleteDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
 
   const formatDate = (timestamp: number) => {
@@ -55,7 +55,7 @@ export default function JobWorkDetailsModal({
 
   const handleEditField = (
     assignment: JobWorkAssignment,
-    field: "pickup" | "delivery" | "quantity"
+    field: "pickup" | "delivery" | "quantity",
   ) => {
     setEditingField({ jobWorkId: assignment.jobWorkId, field });
     if (field === "pickup") {
@@ -64,7 +64,7 @@ export default function JobWorkDetailsModal({
       setEditValue(
         assignment.completionDate
           ? new Date(assignment.completionDate).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
       );
     } else {
       setEditValue(String(assignment.quantity));
@@ -121,7 +121,9 @@ export default function JobWorkDetailsModal({
   };
 
   const pendingAssignments = assignments.filter((a) => a.status === "pending");
-  const completedAssignments = assignments.filter((a) => a.status === "completed");
+  const completedAssignments = assignments.filter(
+    (a) => a.status === "completed",
+  );
 
   return (
     <>
@@ -159,7 +161,10 @@ export default function JobWorkDetailsModal({
               <tbody>
                 {assignments.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                    <td
+                      colSpan={4}
+                      className="p-4 text-center text-muted-foreground"
+                    >
                       No job work assignments yet.
                     </td>
                   </tr>
@@ -202,7 +207,8 @@ export default function JobWorkDetailsModal({
                       <td className="p-3 text-gray-900 dark:text-gray-100 font-medium">
                         <span>{modelName}</span>
                         <span className="text-gray-600 dark:text-gray-400">
-                          {" "}({assignment.quantity})
+                          {" "}
+                          ({assignment.quantity})
                         </span>
                       </td>
                       <td className="p-3 text-gray-700 dark:text-gray-300">
@@ -253,8 +259,6 @@ export default function JobWorkDetailsModal({
           </div>
         </div>
       </SimpleModal>
-
-
     </>
   );
 }

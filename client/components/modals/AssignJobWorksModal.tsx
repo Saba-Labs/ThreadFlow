@@ -27,7 +27,7 @@ export default function AssignJobWorksModal({
   const jobWorks = useJobWorks();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [pickupDate, setPickupDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
@@ -47,7 +47,7 @@ export default function AssignJobWorksModal({
 
   const handleSelectJobWork = (id: string, checked: boolean) => {
     setSelectedIds((prev) =>
-      checked ? [...prev, id] : prev.filter((x) => x !== id)
+      checked ? [...prev, id] : prev.filter((x) => x !== id),
     );
   };
 
@@ -60,7 +60,7 @@ export default function AssignJobWorksModal({
 
   const totalAssignedQty = Object.values(quantitiesAfterSplit).reduce(
     (a, b) => a + b,
-    0
+    0,
   );
 
   const handleAssign = () => {
@@ -94,10 +94,7 @@ export default function AssignJobWorksModal({
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button
-            onClick={handleAssign}
-            disabled={selectedIds.length === 0}
-          >
+          <Button onClick={handleAssign} disabled={selectedIds.length === 0}>
             Assign
           </Button>
         </div>
@@ -167,7 +164,10 @@ export default function AssignJobWorksModal({
                             min={0}
                             value={quantitiesAfterSplit[jw.id] || 0}
                             onChange={(e) =>
-                              handleQuantityChange(jw.id, Number(e.target.value))
+                              handleQuantityChange(
+                                jw.id,
+                                Number(e.target.value),
+                              )
                             }
                             onClick={(e) => e.stopPropagation()}
                             className="h-8 text-sm"

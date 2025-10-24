@@ -19,7 +19,11 @@ import {
   CalendarDays,
   Plus,
 } from "lucide-react";
-import type { PathStep, WorkOrder, JobWorkAssignment } from "@/hooks/useProductionPipeline";
+import type {
+  PathStep,
+  WorkOrder,
+  JobWorkAssignment,
+} from "@/hooks/useProductionPipeline";
 import { useMachineTypes, getMachineTypeConfig } from "@/lib/machineTypes";
 
 interface ModelListProps {
@@ -43,7 +47,10 @@ interface ModelListProps {
     machineIndex: number,
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
-  setJobWorkAssignments?: (orderId: string, assignments: JobWorkAssignment[]) => void;
+  setJobWorkAssignments?: (
+    orderId: string,
+    assignments: JobWorkAssignment[],
+  ) => void;
   updateJobWorkAssignmentStatus?: (
     orderId: string,
     jobWorkId: string,
@@ -65,8 +72,12 @@ export default function ModelList(props: ModelListProps) {
   const [jwForId, setJwForId] = useState<string | null>(null);
   const [jwSelected, setJwSelected] = useState<string[]>([]);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [assignJobWorksModalId, setAssignJobWorksModalId] = useState<string | null>(null);
-  const [jobWorkDetailsModalId, setJobWorkDetailsModalId] = useState<string | null>(null);
+  const [assignJobWorksModalId, setAssignJobWorksModalId] = useState<
+    string | null
+  >(null);
+  const [jobWorkDetailsModalId, setJobWorkDetailsModalId] = useState<
+    string | null
+  >(null);
 
   const sorted = useMemo(() => props.orders.slice(), [props.orders]);
 
@@ -671,7 +682,8 @@ export default function ModelList(props: ModelListProps) {
                                   size="icon"
                                   variant="ghost"
                                   onClick={() => {
-                                    const hasAssignments = (o.jobWorkAssignments || []).length > 0;
+                                    const hasAssignments =
+                                      (o.jobWorkAssignments || []).length > 0;
                                     if (hasAssignments) {
                                       setJobWorkDetailsModalId(o.id);
                                     } else {
@@ -1075,7 +1087,8 @@ export default function ModelList(props: ModelListProps) {
                           size="icon"
                           variant="ghost"
                           onClick={() => {
-                            const hasAssignments = (o.jobWorkAssignments || []).length > 0;
+                            const hasAssignments =
+                              (o.jobWorkAssignments || []).length > 0;
                             if (hasAssignments) {
                               setJobWorkDetailsModalId(o.id);
                             } else {
@@ -1158,8 +1171,14 @@ export default function ModelList(props: ModelListProps) {
               open={assignJobWorksModalId !== null}
               onOpenChange={(v) => !v && setAssignJobWorksModalId(null)}
               orderId={assignJobWorksModalId}
-              modelName={sorted.find((o) => o.id === assignJobWorksModalId)?.modelName || ""}
-              totalQuantity={sorted.find((o) => o.id === assignJobWorksModalId)?.quantity || 0}
+              modelName={
+                sorted.find((o) => o.id === assignJobWorksModalId)?.modelName ||
+                ""
+              }
+              totalQuantity={
+                sorted.find((o) => o.id === assignJobWorksModalId)?.quantity ||
+                0
+              }
               onAssign={(assignments) => {
                 const o = sorted.find((x) => x.id === assignJobWorksModalId);
                 if (o) {
@@ -1179,9 +1198,18 @@ export default function ModelList(props: ModelListProps) {
             <JobWorkDetailsModal
               open={jobWorkDetailsModalId !== null}
               onOpenChange={(v) => !v && setJobWorkDetailsModalId(null)}
-              modelName={sorted.find((o) => o.id === jobWorkDetailsModalId)?.modelName || ""}
-              modelQuantity={sorted.find((o) => o.id === jobWorkDetailsModalId)?.quantity || 0}
-              assignments={sorted.find((o) => o.id === jobWorkDetailsModalId)?.jobWorkAssignments || []}
+              modelName={
+                sorted.find((o) => o.id === jobWorkDetailsModalId)?.modelName ||
+                ""
+              }
+              modelQuantity={
+                sorted.find((o) => o.id === jobWorkDetailsModalId)?.quantity ||
+                0
+              }
+              assignments={
+                sorted.find((o) => o.id === jobWorkDetailsModalId)
+                  ?.jobWorkAssignments || []
+              }
               onUpdateAssignments={(assignments) => {
                 const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
                 if (o) {
@@ -1195,7 +1223,7 @@ export default function ModelList(props: ModelListProps) {
                     o.id,
                     jobWorkId,
                     "completed",
-                    completionDate
+                    completionDate,
                   );
                 }
               }}
