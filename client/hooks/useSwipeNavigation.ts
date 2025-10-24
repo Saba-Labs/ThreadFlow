@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "./use-mobile";
 
-const MIN_SWIPE_DISTANCE = 50;
+const MIN_SWIPE_DISTANCE = 100;
 
 interface SwipeNavigationConfig {
   leftPage: string;
