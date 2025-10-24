@@ -192,27 +192,19 @@ export default function JobWork() {
                     {/* Current Running Models */}
                     {pendingAssignments.length > 0 && (
                       <div className="space-y-1">
-                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                          Current Models:
-                        </div>
                         {pendingAssignments.map((a) => (
                           <div
                             key={`${a.orderId}-pending`}
-                            className="text-sm text-gray-700 dark:text-gray-300 flex items-center justify-between"
+                            className="text-sm flex items-center justify-between"
                           >
-                            <span>{a.modelName}</span>
+                            <span className="text-red-600 dark:text-red-400 font-medium">
+                              {a.modelName}
+                            </span>
                             <span className="text-xs text-muted-foreground ml-2">
                               ({a.quantity})
                             </span>
                           </div>
                         ))}
-                      </div>
-                    )}
-
-                    {/* Completed Count */}
-                    {completedAssignments.length > 0 && (
-                      <div className="text-xs text-green-600 dark:text-green-400 mt-2">
-                        ✓ {completedAssignments.length} completed
                       </div>
                     )}
 
