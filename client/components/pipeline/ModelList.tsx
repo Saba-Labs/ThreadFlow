@@ -393,7 +393,7 @@ export default function ModelList(props: ModelListProps) {
   return (
     <div className="min-h-screen">
       <div className="px-0 max-w-full">
-        <div className="space-y-3">
+        <div className="space-y-2">
           {/* Desktop table */}
 
           <div
