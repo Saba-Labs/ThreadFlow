@@ -272,9 +272,15 @@ export default function JobWorkDetailsModal({
       }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Mark as Completed</AlertDialogTitle>
+            <AlertDialogTitle>
+              {assignments.find((a) => a.jobWorkId === completingId)?.status === "completed"
+                ? "Edit Delivery Date"
+                : "Mark as Completed"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Confirm the completion date for this job work assignment.
+              {assignments.find((a) => a.jobWorkId === completingId)?.status === "completed"
+                ? "Update the delivery date for this completed assignment."
+                : "Confirm the delivery date for this job work assignment."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-3">
