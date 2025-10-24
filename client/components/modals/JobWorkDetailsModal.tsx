@@ -143,19 +143,13 @@ export default function JobWorkDetailsModal({
               <thead className="bg-gray-100 dark:bg-gray-800">
                 <tr>
                   <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Model Name
-                  </th>
-                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Qty
-                  </th>
-                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
                     Pickup Date
                   </th>
                   <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Delivery Date
+                    Model Name
                   </th>
                   <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Status
+                    Delivery Date
                   </th>
                   <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
                     Actions
@@ -165,7 +159,7 @@ export default function JobWorkDetailsModal({
               <tbody>
                 {assignments.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-4 text-center text-muted-foreground">
+                    <td colSpan={4} className="p-4 text-center text-muted-foreground">
                       No job work assignments yet.
                     </td>
                   </tr>
@@ -179,86 +173,77 @@ export default function JobWorkDetailsModal({
                           : "bg-yellow-50 dark:bg-yellow-900/10"
                       }`}
                     >
+                      <td className="p-3 text-gray-700 dark:text-gray-300">
+                        {editingField?.jobWorkId === assignment.jobWorkId &&
+                        editingField.field === "pickup" ? (
+                          <Input
+                            type="date"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onBlur={handleSaveEditField}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSaveEditField();
+                              if (e.key === "Escape") setEditingField(null);
+                            }}
+                            autoFocus
+                            className="h-7 text-xs"
+                          />
+                        ) : (
+                          <button
+                            onClick={() =>
+                              handleEditField(assignment, "pickup")
+                            }
+                            className="hover:underline text-left"
+                          >
+                            {formatDate(assignment.pickupDate)}
+                          </button>
+                        )}
+                      </td>
                       <td className="p-3 text-gray-900 dark:text-gray-100 font-medium">
-                        {modelName}
-                      </td>
-                      <td className="p-3 text-gray-700 dark:text-gray-300">
-                        {assignment.quantity}
-                      </td>
-                      <td className="p-3 text-gray-700 dark:text-gray-300">
-                        {formatDate(assignment.pickupDate)}
-                      </td>
-                      <td className="p-3 text-gray-700 dark:text-gray-300">
-                        {assignment.completionDate
-                          ? formatDate(assignment.completionDate)
-                          : "—"}
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${
-                            assignment.status === "completed"
-                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                              : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
-                          }`}
-                        >
-                          {assignment.status === "completed"
-                            ? "✓ Completed"
-                            : "Pending"}
+                        <span>{modelName}</span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          {" "}({assignment.quantity})
                         </span>
                       </td>
-                      <td className="p-3">
-                        <div className="flex gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => handleEditPickupDate(assignment)}
-                            title="Edit pickup date"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          {assignment.status === "pending" && (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() =>
-                                handleOpenCompleteDialog(
-                                  assignment.jobWorkId,
-                                  assignment.pickupDate
-                                )
-                              }
-                              title="Mark complete"
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <span className="text-sm font-medium">✓</span>
-                            </Button>
-                          )}
-                          {assignment.status === "completed" && (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() =>
-                                handleOpenCompleteDialog(
-                                  assignment.jobWorkId,
-                                  assignment.pickupDate
-                                )
-                              }
-                              title="Edit delivery date"
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button
-                            size="icon"
-                            variant="ghost"
+                      <td className="p-3 text-gray-700 dark:text-gray-300">
+                        {editingField?.jobWorkId === assignment.jobWorkId &&
+                        editingField.field === "delivery" ? (
+                          <Input
+                            type="date"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onBlur={handleSaveEditField}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSaveEditField();
+                              if (e.key === "Escape") setEditingField(null);
+                            }}
+                            autoFocus
+                            className="h-7 text-xs"
+                          />
+                        ) : (
+                          <button
                             onClick={() =>
-                              handleRemoveAssignment(assignment.jobWorkId)
+                              handleEditField(assignment, "delivery")
                             }
-                            title="Remove"
+                            className="hover:underline text-left"
                           >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
+                            {assignment.completionDate
+                              ? formatDate(assignment.completionDate)
+                              : "—"}
+                          </button>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() =>
+                            handleRemoveAssignment(assignment.jobWorkId)
+                          }
+                          title="Remove"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
                       </td>
                     </tr>
                   ))
@@ -269,71 +254,7 @@ export default function JobWorkDetailsModal({
         </div>
       </SimpleModal>
 
-      {/* Edit Pickup Date Modal */}
-      <SimpleModal
-        open={editingId !== null}
-        onOpenChange={(v) => !v && setEditingId(null)}
-        title="Edit Pickup Date"
-        footer={
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setEditingId(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEditDate}>Save</Button>
-          </div>
-        }
-      >
-        <div className="space-y-3">
-          <label className="text-sm font-medium flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Pickup Date
-          </label>
-          <Input
-            type="date"
-            value={editDate}
-            onChange={(e) => setEditDate(e.target.value)}
-          />
-        </div>
-      </SimpleModal>
 
-      {/* Complete Assignment Dialog */}
-      <AlertDialog open={completingId !== null} onOpenChange={(v) => {
-        if (!v) setCompletingId(null);
-      }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {assignments.find((a) => a.jobWorkId === completingId)?.status === "completed"
-                ? "Edit Delivery Date"
-                : "Mark as Completed"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {assignments.find((a) => a.jobWorkId === completingId)?.status === "completed"
-                ? "Update the delivery date for this completed assignment."
-                : "Confirm the delivery date for this job work assignment."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-3">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Delivery Date
-            </label>
-            <Input
-              type="date"
-              value={completeDate}
-              onChange={(e) => setCompleteDate(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCompleteAssignment}>
-              {assignments.find((a) => a.jobWorkId === completingId)?.status === "completed"
-                ? "Update"
-                : "Complete"}
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
