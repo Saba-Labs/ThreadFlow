@@ -279,7 +279,7 @@ export default function AppLayout() {
 
               {/* Install button (shows when PWA install available) */}
               {canInstall && (
-                <div className="hidden sm:block mr-2">
+                <div className="mr-2">
                   <Button onClick={handleInstallClick} size="sm">
                     Install
                   </Button>
