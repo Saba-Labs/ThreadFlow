@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useJobWorks } from "@/lib/jobWorks";
+import AssignJobWorksModal from "@/components/modals/AssignJobWorksModal";
+import JobWorkDetailsModal from "@/components/modals/JobWorkDetailsModal";
 import {
   Scissors,
   SkipForward,
@@ -17,7 +19,11 @@ import {
   CalendarDays,
   Plus,
 } from "lucide-react";
-import type { PathStep, WorkOrder } from "@/hooks/useProductionPipeline";
+import type {
+  PathStep,
+  WorkOrder,
+  JobWorkAssignment,
+} from "@/hooks/useProductionPipeline";
 import { useMachineTypes, getMachineTypeConfig } from "@/lib/machineTypes";
 
 interface ModelListProps {
@@ -41,6 +47,16 @@ interface ModelListProps {
     machineIndex: number,
   ) => void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void;
+  setJobWorkAssignments?: (
+    orderId: string,
+    assignments: JobWorkAssignment[],
+  ) => void;
+  updateJobWorkAssignmentStatus?: (
+    orderId: string,
+    jobWorkId: string,
+    status: "pending" | "completed",
+    completionDate?: number,
+  ) => void;
   showDetails?: boolean;
   viewMode?: "cards" | "list";
 }
@@ -56,6 +72,12 @@ export default function ModelList(props: ModelListProps) {
   const [jwForId, setJwForId] = useState<string | null>(null);
   const [jwSelected, setJwSelected] = useState<string[]>([]);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [assignJobWorksModalId, setAssignJobWorksModalId] = useState<
+    string | null
+  >(null);
+  const [jobWorkDetailsModalId, setJobWorkDetailsModalId] = useState<
+    string | null
+  >(null);
 
   const sorted = useMemo(() => props.orders.slice(), [props.orders]);
 
@@ -660,18 +682,21 @@ export default function ModelList(props: ModelListProps) {
                                   size="icon"
                                   variant="ghost"
                                   onClick={() => {
-                                    setJwForId(o.id);
-                                    setJwSelected(
-                                      ((o as any).jobWorkIds || []) as string[],
-                                    );
+                                    const hasAssignments =
+                                      (o.jobWorkAssignments || []).length > 0;
+                                    if (hasAssignments) {
+                                      setJobWorkDetailsModalId(o.id);
+                                    } else {
+                                      setAssignJobWorksModalId(o.id);
+                                    }
                                   }}
                                   title="Job Work"
                                   aria-label="Job Work"
                                 >
                                   <span
                                     className={
-                                      ((o as any).jobWorkIds || []).length > 0
-                                        ? "text-blue-600 dark:text-blue-400"
+                                      (o.jobWorkAssignments || []).length > 0
+                                        ? "text-blue-600 dark:text-blue-400 font-bold"
                                         : ""
                                     }
                                   >
@@ -1062,18 +1087,21 @@ export default function ModelList(props: ModelListProps) {
                           size="icon"
                           variant="ghost"
                           onClick={() => {
-                            setJwForId(o.id);
-                            setJwSelected(
-                              ((o as any).jobWorkIds || []) as string[],
-                            );
+                            const hasAssignments =
+                              (o.jobWorkAssignments || []).length > 0;
+                            if (hasAssignments) {
+                              setJobWorkDetailsModalId(o.id);
+                            } else {
+                              setAssignJobWorksModalId(o.id);
+                            }
                           }}
                           title="Job Work"
                           aria-label="Job Work"
                         >
                           <span
                             className={
-                              ((o as any).jobWorkIds || []).length > 0
-                                ? "text-blue-600 dark:text-blue-400"
+                              (o.jobWorkAssignments || []).length > 0
+                                ? "text-blue-600 dark:text-blue-400 font-bold"
                                 : ""
                             }
                           >
@@ -1137,7 +1165,72 @@ export default function ModelList(props: ModelListProps) {
             )}
           </div>
 
-          {/* JW modal */}
+          {/* Assign Job Works Modal */}
+          {assignJobWorksModalId && (
+            <AssignJobWorksModal
+              open={assignJobWorksModalId !== null}
+              onOpenChange={(v) => !v && setAssignJobWorksModalId(null)}
+              orderId={assignJobWorksModalId}
+              modelName={
+                sorted.find((o) => o.id === assignJobWorksModalId)?.modelName ||
+                ""
+              }
+              totalQuantity={
+                sorted.find((o) => o.id === assignJobWorksModalId)?.quantity ||
+                0
+              }
+              onAssign={(assignments) => {
+                const o = sorted.find((x) => x.id === assignJobWorksModalId);
+                if (o) {
+                  const idx = o.currentStepIndex;
+                  if (idx >= 0 && idx < o.steps.length) {
+                    props.onSetStepStatus(o.id, idx, "running");
+                  }
+                  props.setJobWorkAssignments?.(o.id, assignments);
+                }
+                setAssignJobWorksModalId(null);
+              }}
+            />
+          )}
+
+          {/* Job Work Details Modal */}
+          {jobWorkDetailsModalId && (
+            <JobWorkDetailsModal
+              open={jobWorkDetailsModalId !== null}
+              onOpenChange={(v) => !v && setJobWorkDetailsModalId(null)}
+              modelName={
+                sorted.find((o) => o.id === jobWorkDetailsModalId)?.modelName ||
+                ""
+              }
+              modelQuantity={
+                sorted.find((o) => o.id === jobWorkDetailsModalId)?.quantity ||
+                0
+              }
+              assignments={
+                sorted.find((o) => o.id === jobWorkDetailsModalId)
+                  ?.jobWorkAssignments || []
+              }
+              onUpdateAssignments={(assignments) => {
+                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
+                if (o) {
+                  props.setJobWorkAssignments?.(o.id, assignments);
+                }
+              }}
+              onComplete={(jobWorkId, completionDate) => {
+                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
+                if (o) {
+                  props.updateJobWorkAssignmentStatus?.(
+                    o.id,
+                    jobWorkId,
+                    "completed",
+                    completionDate,
+                  );
+                }
+              }}
+            />
+          )}
+
+          {/* JW modal (deprecated - kept for backward compatibility) */}
           <SimpleModal
             open={!!jwForId}
             onOpenChange={(v) => !v && setJwForId(null)}

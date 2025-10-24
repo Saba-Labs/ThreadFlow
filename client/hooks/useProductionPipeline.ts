@@ -22,6 +22,14 @@ export interface ParallelMachineGroup {
   status: StepStatus;
 }
 
+export interface JobWorkAssignment {
+  jobWorkId: string;
+  quantity: number;
+  pickupDate: number; // timestamp
+  completionDate?: number; // timestamp, only set when completed
+  status: "pending" | "completed"; // pending = assigned, completed = done
+}
+
 export interface WorkOrder {
   id: string;
   modelName: string;
@@ -32,6 +40,7 @@ export interface WorkOrder {
   parentId?: string; // if split from another
   parallelGroups: ParallelMachineGroup[]; // groups of machines running in parallel
   jobWorkIds?: string[];
+  jobWorkAssignments?: JobWorkAssignment[]; // new: detailed assignments with quantities and dates
 }
 
 function uid(prefix = "id") {
@@ -107,6 +116,7 @@ export function useProductionPipeline() {
         currentStepIndex: steps.length > 0 ? 0 : -1,
         parallelGroups: [],
         jobWorkIds: [],
+        jobWorkAssignments: [],
       };
       setStore((s) => ({ orders: [order, ...s.orders] }));
       return order.id;
@@ -323,6 +333,7 @@ export function useProductionPipeline() {
           machineIndices: g.machineIndices.slice(),
           status: g.status as StepStatus,
         })),
+        jobWorkAssignments: [],
       });
 
       const children = valid.map((q) => createChild(q));
@@ -392,6 +403,43 @@ export function useProductionPipeline() {
         orders: s.orders.map((o) =>
           o.id === orderId ? { ...o, jobWorkIds: ids.slice() } : o,
         ),
+      }));
+    },
+    setJobWorkAssignments: (
+      orderId: string,
+      assignments: JobWorkAssignment[],
+    ) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) =>
+          o.id === orderId
+            ? { ...o, jobWorkAssignments: assignments.slice() }
+            : o,
+        ),
+      }));
+    },
+    updateJobWorkAssignmentStatus: (
+      orderId: string,
+      jobWorkId: string,
+      status: "pending" | "completed",
+      completionDate?: number,
+    ) => {
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const assignments = (o.jobWorkAssignments || []).map((a) =>
+            a.jobWorkId === jobWorkId
+              ? {
+                  ...a,
+                  status,
+                  completionDate:
+                    status === "completed"
+                      ? (completionDate ?? Date.now())
+                      : undefined,
+                }
+              : a,
+          );
+          return { ...o, jobWorkAssignments: assignments };
+        }),
       }));
     },
     // update an existing order's basic properties (modelName, quantity, createdAt, path)

@@ -10,7 +10,7 @@ import {
   deleteJobWork,
   type JobWork,
 } from "@/lib/jobWorks";
-import { Trash2, Save, Plus, Pencil } from "lucide-react";
+import { Trash2, Save, Plus, Pencil, Calendar } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useSearch } from "@/context/SearchContext";
@@ -34,6 +34,12 @@ export default function JobWork() {
   const [editing, setEditing] = useState<JobWork | null>(null);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
+
+  // Modal state for viewing history
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedJobWorkId, setSelectedJobWorkId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!modalOpen) {
@@ -86,7 +92,37 @@ export default function JobWork() {
     );
   };
 
-  // helper: return unique model names that reference this job work id
+  // helper: return assignments for this job work
+  const getAssignmentsForJobWork = (jwId: string) => {
+    const orders = pipeline.orders || [];
+    const assignments: Array<{
+      orderId: string;
+      modelName: string;
+      quantity: number;
+      pickupDate: number;
+      completionDate?: number;
+      status: "pending" | "completed";
+    }> = [];
+
+    for (const o of orders) {
+      const jwAssignments = o.jobWorkAssignments || [];
+      for (const assignment of jwAssignments) {
+        if (assignment.jobWorkId === jwId) {
+          assignments.push({
+            orderId: o.id,
+            modelName: o.modelName,
+            quantity: assignment.quantity,
+            pickupDate: assignment.pickupDate,
+            completionDate: assignment.completionDate,
+            status: assignment.status,
+          });
+        }
+      }
+    }
+    return assignments;
+  };
+
+  // helper: return unique model names that reference this job work id (backward compat)
   const linkedModelsFor = (jwId: string) => {
     const orders = pipeline.orders || [];
     const set = new Set<string>();
@@ -131,92 +167,85 @@ export default function JobWork() {
       <div className="">
         <div className="space-y-3">
           {displayed.map((j) => {
-            const linked = linkedModelsFor(j.id);
+            const assignments = getAssignmentsForJobWork(j.id);
+            const pendingAssignments = assignments.filter(
+              (a) => a.status === "pending",
+            );
+            const completedAssignments = assignments.filter(
+              (a) => a.status === "completed",
+            );
+
             return (
               <div
                 key={j.id}
-                className="p-4 rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800 flex items-center justify-between"
+                className="p-4 rounded-lg border bg-white dark:bg-gray-900 dark:border-gray-800 hover:shadow-md transition cursor-pointer"
+                onClick={() => {
+                  setSelectedJobWorkId(j.id);
+                  setHistoryOpen(true);
+                }}
               >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                    {j.name}
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {linked.length > 0 ? (
-                      // Show detailed linked orders with status and actions
-                      pipeline.orders
-                        .filter((o) => (o.jobWorkIds || []).includes(j.id))
-                        .map((o) => {
-                          const jobStepIndex = o.steps.findIndex(
-                            (st) => st.kind === "job",
-                          );
-                          const jobStep =
-                            jobStepIndex >= 0 ? o.steps[jobStepIndex] : null;
-                          const completed = jobStep?.status === "completed";
-                          return (
-                            <div
-                              key={o.id}
-                              className="flex items-center justify-between gap-2"
-                            >
-                              <div
-                                className={`font-medium ${completed ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
-                              >
-                                {o.modelName}{" "}
-                                <span className="text-muted-foreground">
-                                  ({o.quantity})
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {!completed && jobStepIndex >= 0 && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      pipeline.updateStepStatus(
-                                        o.id,
-                                        jobStepIndex,
-                                        { status: "completed" },
-                                      );
-                                      pipeline.moveToNextStep(o.id);
-                                    }}
-                                  >
-                                    Mark complete
-                                  </Button>
-                                )}
-                                {completed && (
-                                  <div className="text-sm text-muted-foreground">
-                                    Completed
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })
-                    ) : (
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      {j.name}
+                    </div>
+                    {j.description && (
+                      <p className="text-xs text-muted-foreground mb-3">
+                        {j.description}
+                      </p>
+                    )}
+
+                    {/* Current Running Models */}
+                    {pendingAssignments.length > 0 && (
+                      <div className="space-y-1">
+                        {pendingAssignments.map((a) => (
+                          <div
+                            key={`${a.orderId}-pending`}
+                            className="text-sm flex items-center justify-between"
+                          >
+                            <span className="text-red-600 dark:text-red-400 font-medium">
+                              {a.modelName}
+                            </span>
+                            <span className="text-xs text-muted-foreground ml-2">
+                              ({a.quantity})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {assignments.length === 0 && (
                       <div className="italic text-xs text-gray-400">
-                        No models linked
+                        No models assigned
                       </div>
                     )}
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2 ml-4">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    title="Edit"
-                    aria-label="Edit"
-                    onClick={() => openEdit(j)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handleDelete(j.id)}
-                    title="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Edit"
+                      aria-label="Edit"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEdit(j);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(j.id);
+                      }}
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
@@ -265,6 +294,113 @@ export default function JobWork() {
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
           />
+        </div>
+      </SimpleModal>
+
+      {/* History Modal */}
+      <SimpleModal
+        open={historyOpen && selectedJobWorkId !== null}
+        onOpenChange={(v) => setHistoryOpen(v)}
+        title={`Assignment History — ${list.find((j) => j.id === selectedJobWorkId)?.name || ""}`}
+        footer={
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setHistoryOpen(false)}>
+              Close
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {selectedJobWorkId &&
+            (() => {
+              const assignments = getAssignmentsForJobWork(selectedJobWorkId);
+              const pendingAssignments = assignments.filter(
+                (a) => a.status === "pending",
+              );
+              const completedAssignments = assignments.filter(
+                (a) => a.status === "completed",
+              );
+
+              const formatDate = (timestamp: number) => {
+                return new Date(timestamp).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                });
+              };
+
+              return (
+                <>
+                  {/* Pending */}
+                  {pendingAssignments.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        Current Models
+                      </div>
+                      <div className="space-y-2">
+                        {pendingAssignments.map((a) => (
+                          <div
+                            key={`${a.orderId}-pending`}
+                            className="rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-3"
+                          >
+                            <div className="font-medium text-gray-900 dark:text-gray-100">
+                              {a.modelName}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Quantity: {a.quantity}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
+                              <Calendar className="h-4 w-4" />
+                              Pickup: {formatDate(a.pickupDate)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Completed */}
+                  {completedAssignments.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        Completed Records
+                      </div>
+                      <div className="space-y-2">
+                        {completedAssignments.map((a) => (
+                          <div
+                            key={`${a.orderId}-completed`}
+                            className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-3"
+                          >
+                            <div className="font-medium text-gray-900 dark:text-gray-100">
+                              {a.modelName}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Quantity: {a.quantity}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
+                              <Calendar className="h-4 w-4" />
+                              Pickup: {formatDate(a.pickupDate)}
+                            </div>
+                            {a.completionDate && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
+                                <Calendar className="h-4 w-4" />
+                                Delivered: {formatDate(a.completionDate)}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {assignments.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No assignment history.
+                    </div>
+                  )}
+                </>
+              );
+            })()}
         </div>
       </SimpleModal>
     </div>

@@ -172,6 +172,8 @@ export default function ModelsAll() {
           }
           onToggleParallelMachine={pipeline.toggleParallelMachine}
           setOrderJobWorks={pipeline.setOrderJobWorks}
+          setJobWorkAssignments={pipeline.setJobWorkAssignments}
+          updateJobWorkAssignmentStatus={pipeline.updateJobWorkAssignmentStatus}
           showDetails={isMobile ? showDetails : true}
           viewMode={viewMode}
         />
