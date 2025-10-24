@@ -116,6 +116,7 @@ export function useProductionPipeline() {
         currentStepIndex: steps.length > 0 ? 0 : -1,
         parallelGroups: [],
         jobWorkIds: [],
+        jobWorkAssignments: [],
       };
       setStore((s) => ({ orders: [order, ...s.orders] }));
       return order.id;
