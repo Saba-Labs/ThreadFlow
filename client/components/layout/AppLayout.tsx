@@ -32,7 +32,7 @@ function HeaderSearch({ className }: { className?: string }) {
                 setOpen(false);
               }
             }}
-            className="w-64 rounded-md border px-2 py-1"
+            className="w-64 sm:w-64 rounded-md border px-2 py-1 max-w-80"
             autoFocus
           />
           <button
