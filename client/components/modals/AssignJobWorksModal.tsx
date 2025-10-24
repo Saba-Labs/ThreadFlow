@@ -117,7 +117,7 @@ export default function AssignJobWorksModal({
           />
         </div>
 
-        {/* Job Works Selection */}
+        {/* Job Works Selection - Card View */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Assign to Job Works</label>
           <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -129,42 +129,54 @@ export default function AssignJobWorksModal({
               jobWorks.map((jw) => (
                 <div
                   key={jw.id}
-                  className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-muted/30 transition space-y-2"
+                  className={`p-4 rounded-lg border-2 transition cursor-pointer ${
+                    selectedIds.includes(jw.id)
+                      ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-900"
+                  }`}
+                  onClick={() =>
+                    handleSelectJobWork(jw.id, !selectedIds.includes(jw.id))
+                  }
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <Checkbox
-                        id={`assign-jw-${jw.id}`}
-                        checked={selectedIds.includes(jw.id)}
-                        onCheckedChange={(checked) =>
-                          handleSelectJobWork(jw.id, checked as boolean)
-                        }
-                      />
-                      <label
-                        htmlFor={`assign-jw-${jw.id}`}
-                        className="font-medium cursor-pointer flex-1 min-w-0"
-                      >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id={`assign-jw-${jw.id}`}
+                      checked={selectedIds.includes(jw.id)}
+                      onCheckedChange={(checked) =>
+                        handleSelectJobWork(jw.id, checked as boolean)
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-900 dark:text-gray-100">
                         {jw.name}
-                      </label>
+                      </div>
+                      {jw.description && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {jw.description}
+                        </p>
+                      )}
+                      {selectedIds.includes(jw.id) && (
+                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                          <label className="text-xs text-muted-foreground block mb-1">
+                            Quantity for this job work
+                          </label>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={quantitiesAfterSplit[jw.id] || 0}
+                            onChange={(e) =>
+                              handleQuantityChange(jw.id, Number(e.target.value))
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-8 text-sm"
+                            placeholder="0"
+                          />
+                        </div>
+                      )}
                     </div>
-                    {selectedIds.includes(jw.id) && (
-                      <Input
-                        type="number"
-                        min={0}
-                        value={quantitiesAfterSplit[jw.id] || 0}
-                        onChange={(e) =>
-                          handleQuantityChange(jw.id, Number(e.target.value))
-                        }
-                        className="h-8 w-20 flex-shrink-0"
-                        placeholder="Qty"
-                      />
-                    )}
                   </div>
-                  {jw.description && (
-                    <p className="text-xs text-muted-foreground ml-6">
-                      {jw.description}
-                    </p>
-                  )}
                 </div>
               ))
             )}
