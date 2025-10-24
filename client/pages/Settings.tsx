@@ -45,7 +45,7 @@ export default function SettingsPage() {
 
       {/* Header Section */}
       <div className="relative border-b border-slate-200/60 backdrop-blur-xl bg-white/80">
-        <div className="max-w-full sm:max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12">
+        <div className="max-w-full sm:max-w-6xl mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-8">
           <div className="flex items-center gap-4 mb-3">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-30"></div>
