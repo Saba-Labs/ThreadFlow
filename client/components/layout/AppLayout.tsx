@@ -188,12 +188,15 @@ export default function AppLayout() {
             </nav>
 
             {/* Sidebar footer */}
-            <div className="border-t p-4">
+            <div className="border-t p-4 flex flex-col gap-4">
               <Button asChild size="sm" className="w-full">
                 <Link to="/models/new" onClick={() => setMenuOpen(false)}>
                   New Model
                 </Link>
               </Button>
+              <div className="text-xs text-muted-foreground text-center">
+                Created by Sabarish Arjunan
+              </div>
             </div>
           </div>
         </div>
