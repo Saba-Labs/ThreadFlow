@@ -1152,7 +1152,57 @@ export default function ModelList(props: ModelListProps) {
             )}
           </div>
 
-          {/* JW modal */}
+          {/* Assign Job Works Modal */}
+          {assignJobWorksModalId && (
+            <AssignJobWorksModal
+              open={assignJobWorksModalId !== null}
+              onOpenChange={(v) => !v && setAssignJobWorksModalId(null)}
+              orderId={assignJobWorksModalId}
+              modelName={sorted.find((o) => o.id === assignJobWorksModalId)?.modelName || ""}
+              totalQuantity={sorted.find((o) => o.id === assignJobWorksModalId)?.quantity || 0}
+              onAssign={(assignments) => {
+                const o = sorted.find((x) => x.id === assignJobWorksModalId);
+                if (o) {
+                  const idx = o.currentStepIndex;
+                  if (idx >= 0 && idx < o.steps.length) {
+                    props.onSetStepStatus(o.id, idx, "running");
+                  }
+                  props.setJobWorkAssignments?.(o.id, assignments);
+                }
+                setAssignJobWorksModalId(null);
+              }}
+            />
+          )}
+
+          {/* Job Work Details Modal */}
+          {jobWorkDetailsModalId && (
+            <JobWorkDetailsModal
+              open={jobWorkDetailsModalId !== null}
+              onOpenChange={(v) => !v && setJobWorkDetailsModalId(null)}
+              modelName={sorted.find((o) => o.id === jobWorkDetailsModalId)?.modelName || ""}
+              modelQuantity={sorted.find((o) => o.id === jobWorkDetailsModalId)?.quantity || 0}
+              assignments={sorted.find((o) => o.id === jobWorkDetailsModalId)?.jobWorkAssignments || []}
+              onUpdateAssignments={(assignments) => {
+                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
+                if (o) {
+                  props.setJobWorkAssignments?.(o.id, assignments);
+                }
+              }}
+              onComplete={(jobWorkId, completionDate) => {
+                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
+                if (o) {
+                  props.updateJobWorkAssignmentStatus?.(
+                    o.id,
+                    jobWorkId,
+                    "completed",
+                    completionDate
+                  );
+                }
+              }}
+            />
+          )}
+
+          {/* JW modal (deprecated - kept for backward compatibility) */}
           <SimpleModal
             open={!!jwForId}
             onOpenChange={(v) => !v && setJwForId(null)}
