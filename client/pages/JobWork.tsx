@@ -90,7 +90,37 @@ export default function JobWork() {
     );
   };
 
-  // helper: return unique model names that reference this job work id
+  // helper: return assignments for this job work
+  const getAssignmentsForJobWork = (jwId: string) => {
+    const orders = pipeline.orders || [];
+    const assignments: Array<{
+      orderId: string;
+      modelName: string;
+      quantity: number;
+      pickupDate: number;
+      completionDate?: number;
+      status: "pending" | "completed";
+    }> = [];
+
+    for (const o of orders) {
+      const jwAssignments = o.jobWorkAssignments || [];
+      for (const assignment of jwAssignments) {
+        if (assignment.jobWorkId === jwId) {
+          assignments.push({
+            orderId: o.id,
+            modelName: o.modelName,
+            quantity: assignment.quantity,
+            pickupDate: assignment.pickupDate,
+            completionDate: assignment.completionDate,
+            status: assignment.status,
+          });
+        }
+      }
+    }
+    return assignments;
+  };
+
+  // helper: return unique model names that reference this job work id (backward compat)
   const linkedModelsFor = (jwId: string) => {
     const orders = pipeline.orders || [];
     const set = new Set<string>();
