@@ -177,7 +177,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Advanced Section */}
-        <div className="space-y-5">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
