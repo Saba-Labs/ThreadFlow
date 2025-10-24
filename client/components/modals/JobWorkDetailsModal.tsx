@@ -35,8 +35,11 @@ export default function JobWorkDetailsModal({
   onComplete,
 }: JobWorkDetailsModalProps) {
   const jobWorks = useJobWorks();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDate, setEditDate] = useState<string>("");
+  const [editingField, setEditingField] = useState<{
+    jobWorkId: string;
+    field: "pickup" | "delivery" | "quantity";
+  } | null>(null);
+  const [editValue, setEditValue] = useState<string>("");
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [completeDate, setCompleteDate] = useState<string>(
     new Date().toISOString().split("T")[0]
