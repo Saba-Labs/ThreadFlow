@@ -309,7 +309,7 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <main className="container py-6 overflow-x-hidden">
+        <main className="container py-3 sm:py-6 overflow-x-hidden">
           <SearchProvider>
             <Outlet />
           </SearchProvider>
