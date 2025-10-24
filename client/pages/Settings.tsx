@@ -214,10 +214,10 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1">
                       Production Path
                     </h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       Configure workflow steps and automation
                     </p>
                   </div>
