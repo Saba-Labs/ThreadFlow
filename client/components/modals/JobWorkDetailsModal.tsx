@@ -107,121 +107,135 @@ export default function JobWorkDetailsModal({
           </div>
         }
       >
-        <div className="space-y-6">
-          {/* Pending Assignments */}
-          {pendingAssignments.length > 0 && (
-            <div className="space-y-3">
-              <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                Pending Assignments
-              </div>
-              <div className="space-y-2">
-                {pendingAssignments.map((assignment) => (
-                  <div
-                    key={assignment.jobWorkId}
-                    className="rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-4 space-y-3"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900 dark:text-gray-100">
-                          {getJobWorkName(assignment.jobWorkId)}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          Quantity: {assignment.quantity}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
-                          <Calendar className="h-4 w-4" />
-                          Pickup: {formatDate(assignment.pickupDate)}
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleEditPickupDate(assignment)}
-                          title="Edit date"
+        <div className="space-y-3">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead className="bg-gray-100 dark:bg-gray-800">
+                <tr>
+                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                    Model Name
+                  </th>
+                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                    Qty
+                  </th>
+                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                    Pickup Date
+                  </th>
+                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                    Delivery Date
+                  </th>
+                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                    Status
+                  </th>
+                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignments.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-4 text-center text-muted-foreground">
+                      No job work assignments yet.
+                    </td>
+                  </tr>
+                ) : (
+                  assignments.map((assignment) => (
+                    <tr
+                      key={assignment.jobWorkId}
+                      className={`border-t border-gray-200 dark:border-gray-700 ${
+                        assignment.status === "completed"
+                          ? "bg-green-50 dark:bg-green-900/10"
+                          : "bg-yellow-50 dark:bg-yellow-900/10"
+                      }`}
+                    >
+                      <td className="p-3 text-gray-900 dark:text-gray-100 font-medium">
+                        {modelName}
+                      </td>
+                      <td className="p-3 text-gray-700 dark:text-gray-300">
+                        {assignment.quantity}
+                      </td>
+                      <td className="p-3 text-gray-700 dark:text-gray-300">
+                        {formatDate(assignment.pickupDate)}
+                      </td>
+                      <td className="p-3 text-gray-700 dark:text-gray-300">
+                        {assignment.completionDate
+                          ? formatDate(assignment.completionDate)
+                          : "—"}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`text-xs font-medium px-2 py-1 rounded-full ${
+                            assignment.status === "completed"
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                              : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+                          }`}
                         >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 pt-2 border-t border-yellow-200 dark:border-yellow-800">
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          handleOpenCompleteDialog(
-                            assignment.jobWorkId,
-                            assignment.pickupDate
-                          )
-                        }
-                        className="flex-1"
-                      >
-                        Complete
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() =>
-                          handleRemoveAssignment(assignment.jobWorkId)
-                        }
-                        title="Remove"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Completed Assignments */}
-          {completedAssignments.length > 0 && (
-            <div className="space-y-3">
-              <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                Completed
-              </div>
-              <div className="space-y-2">
-                {completedAssignments.map((assignment) => (
-                  <div
-                    key={assignment.jobWorkId}
-                    className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-gray-100">
-                          {getJobWorkName(assignment.jobWorkId)}
+                          {assignment.status === "completed"
+                            ? "✓ Completed"
+                            : "Pending"}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleEditPickupDate(assignment)}
+                            title="Edit pickup date"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          {assignment.status === "pending" && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                handleOpenCompleteDialog(
+                                  assignment.jobWorkId,
+                                  assignment.pickupDate
+                                )
+                              }
+                              title="Mark complete"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <span className="text-sm font-medium">✓</span>
+                            </Button>
+                          )}
+                          {assignment.status === "completed" && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                handleOpenCompleteDialog(
+                                  assignment.jobWorkId,
+                                  assignment.pickupDate
+                                )
+                              }
+                              title="Edit delivery date"
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() =>
+                              handleRemoveAssignment(assignment.jobWorkId)
+                            }
+                            title="Remove"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
                         </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          Quantity: {assignment.quantity}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
-                          <Calendar className="h-4 w-4" />
-                          Pickup: {formatDate(assignment.pickupDate)}
-                        </div>
-                        {assignment.completionDate && (
-                          <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
-                            <Calendar className="h-4 w-4" />
-                            Completed:{" "}
-                            {formatDate(assignment.completionDate)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-xs font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
-                        ✓ Done
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {assignments.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No job work assignments yet.
-            </div>
-          )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </SimpleModal>
 
