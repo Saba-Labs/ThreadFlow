@@ -333,6 +333,7 @@ export function useProductionPipeline() {
           machineIndices: g.machineIndices.slice(),
           status: g.status as StepStatus,
         })),
+        jobWorkAssignments: [],
       });
 
       const children = valid.map((q) => createChild(q));
