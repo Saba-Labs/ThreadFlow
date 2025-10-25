@@ -38,6 +38,7 @@ export default function JobWorkDetailsModal({
   const [newPickupDate, setNewPickupDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString("en-US", {
