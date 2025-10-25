@@ -234,7 +234,9 @@ export default function JobWorkDetailsModal({
                           setEditingCardId(assignment.jobWorkId);
                         }
                       }}
-                      title={editingCardId === assignment.jobWorkId ? "Save" : "Edit"}
+                      title={
+                        editingCardId === assignment.jobWorkId ? "Save" : "Edit"
+                      }
                     >
                       {editingCardId === assignment.jobWorkId ? (
                         <Check className="h-4 w-4" />
@@ -266,9 +268,7 @@ export default function JobWorkDetailsModal({
                         />
                       ) : editingCardId === assignment.jobWorkId ? (
                         <button
-                          onClick={() =>
-                            handleEditField(assignment, "pickup")
-                          }
+                          onClick={() => handleEditField(assignment, "pickup")}
                           className="w-full text-left px-2 py-1 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded border border-gray-300 dark:border-gray-600"
                         >
                           {formatDate(assignment.pickupDate)}
