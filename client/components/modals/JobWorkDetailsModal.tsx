@@ -71,10 +71,18 @@ export default function JobWorkDetailsModal({
           pickupDate: new Date(editValue).getTime(),
         };
       } else if (editingField.field === "delivery") {
+        // If delivery date is empty, revert to pending status
+        if (!editValue) {
+          return {
+            ...a,
+            completionDate: undefined,
+            status: "pending",
+          };
+        }
         return {
           ...a,
           completionDate: new Date(editValue).getTime(),
-          status: a.status === "pending" ? "completed" : a.status,
+          status: "completed",
         };
       } else {
         return {
