@@ -13,6 +13,7 @@ import ModelsAll from "./pages/ModelsAll";
 import JobWork from "./pages/JobWork";
 import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
+import Roadmap from "./pages/Roadmap";
 
 const queryClient = new QueryClient();
 
