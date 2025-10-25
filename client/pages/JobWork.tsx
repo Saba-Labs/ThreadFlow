@@ -368,15 +368,16 @@ export default function JobWork() {
                                 : "bg-yellow-50 dark:bg-yellow-900/10"
                             }`}
                           >
+                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                              {formatDate(a.pickupDate)}
+                            </td>
                             <td className="p-3 text-gray-900 dark:text-gray-100 font-medium whitespace-nowrap">
                               {a.modelName}
                             </td>
                             <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                               {a.quantity}
                             </td>
-                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                              {formatDate(a.pickupDate)}
-                            </td>
+                            
                             <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                               {a.completionDate
                                 ? formatDate(a.completionDate)
