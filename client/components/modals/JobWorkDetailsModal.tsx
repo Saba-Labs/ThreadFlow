@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import { useJobWorks } from "@/lib/jobWorks";
 import type { JobWorkAssignment } from "@/hooks/useProductionPipeline";
-import { Trash2, Edit2, Check } from "lucide-react";
+import { Trash2, Edit2, Check, Plus } from "lucide-react";
 
 interface JobWorkDetailsModalProps {
   open: boolean;
