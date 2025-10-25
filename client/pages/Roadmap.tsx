@@ -15,6 +15,7 @@ export default function RoadmapPage() {
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [moveItem, setMoveItem] = useState<{ fromRoadmapId: string; modelId: string } | null>(null);
 
   const ordersById = useMemo(() => {
     const map: Record<string, (typeof pipeline.orders)[number]> = {};
