@@ -679,7 +679,7 @@ export default function ModelList(props: ModelListProps) {
                                           variant={"default"}
                                           className={`cursor-pointer whitespace-nowrap ${
                                             hasPendingJW
-                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
                                               : displayStatus === "running"
                                                 ? "bg-green-600 text-white"
                                                 : displayStatus === "hold"
@@ -1044,21 +1044,21 @@ export default function ModelList(props: ModelListProps) {
                                         onClick={() => toggleCardStatus(o)}
                                       >
                                         <Badge
-                                          variant={"default"}
-                                          className={`shrink-0 cursor-pointer ${
-                                            hasPendingJW
-                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
-                                              : displayStatus === "running"
-                                                ? "bg-green-600 text-white"
-                                                : displayStatus === "hold"
-                                                  ? "bg-red-600 text-white"
-                                                  : "bg-gray-500 text-white"
-                                          }`}
-                                        >
-                                          {hasPendingJW
-                                            ? "Job Work"
-                                            : cap(displayStatus)}
-                                        </Badge>
+                                        variant={"default"}
+                                        className={`shrink-0 cursor-pointer ${
+                                          hasPendingJW
+                                            ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                            : displayStatus === "running"
+                                              ? "bg-green-600 text-white"
+                                              : displayStatus === "hold"
+                                                ? "bg-red-600 text-white"
+                                                : "bg-gray-500 text-white"
+                                        }`}
+                                      >
+                                        {hasPendingJW
+                                          ? "Job Work"
+                                          : cap(displayStatus)}
+                                      </Badge>
                                       </button>
                                     </div>
 
@@ -1171,7 +1171,7 @@ export default function ModelList(props: ModelListProps) {
                                       variant={"default"}
                                       className={`shrink-0 cursor-pointer ${
                                         hasPendingJW
-                                          ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                          ? "bg-purple-700 dark:bg-purple-600 text-white"
                                           : displayStatus === "running"
                                             ? "bg-green-600 text-white"
                                             : displayStatus === "hold"
