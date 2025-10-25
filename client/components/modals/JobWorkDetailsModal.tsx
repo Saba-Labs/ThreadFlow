@@ -372,6 +372,88 @@ export default function JobWorkDetailsModal({
               </div>
             ))
           )}
+
+          {!showAddForm && availableJobWorks.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowAddForm(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Job Work
+            </Button>
+          )}
+
+          {showAddForm && (
+            <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4 space-y-3">
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                Add New Job Work
+              </h4>
+
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                  Job Work
+                </label>
+                <select
+                  value={newJobWorkId}
+                  onChange={(e) => setNewJobWorkId(e.target.value)}
+                  className="w-full px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm"
+                >
+                  <option value="">Select a job work...</option>
+                  {availableJobWorks.map((jw) => (
+                    <option key={jw.id} value={jw.id}>
+                      {jw.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                  Quantity
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={newQuantity}
+                  onChange={(e) => setNewQuantity(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                  Pickup Date
+                </label>
+                <Input
+                  type="date"
+                  value={newPickupDate}
+                  onChange={(e) => setNewPickupDate(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleAddJobWork}
+                  disabled={!newJobWorkId}
+                >
+                  Add
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowAddForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </SimpleModal>
     </>
