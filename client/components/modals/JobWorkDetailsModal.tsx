@@ -32,6 +32,12 @@ export default function JobWorkDetailsModal({
   } | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newJobWorkId, setNewJobWorkId] = useState<string>("");
+  const [newQuantity, setNewQuantity] = useState<string>("1");
+  const [newPickupDate, setNewPickupDate] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  );
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString("en-US", {
