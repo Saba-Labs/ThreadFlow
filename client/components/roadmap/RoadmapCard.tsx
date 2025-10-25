@@ -25,6 +25,7 @@ export default function RoadmapCard({
   onUpdateTitle,
   onAddModels,
   onRemoveModel,
+  onMoveModel,
   onDeleteCard,
 }: RoadmapCardProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
