@@ -677,7 +677,7 @@ export default function ModelList(props: ModelListProps) {
                                       >
                                         <Badge
                                           variant={"default"}
-                                          className={`cursor-pointer whitespace-nowrap ${
+                                          className={`cursor-pointer whitespace-nowrap !hover:bg-inherit ${
                                             hasPendingJW
                                               ? "bg-purple-700 dark:bg-purple-600 text-white"
                                               : displayStatus === "running"
@@ -1045,7 +1045,7 @@ export default function ModelList(props: ModelListProps) {
                                       >
                                         <Badge
                                         variant={"default"}
-                                        className={`shrink-0 cursor-pointer ${
+                                        className={`shrink-0 cursor-pointer !hover:bg-inherit ${
                                           hasPendingJW
                                             ? "bg-purple-700 dark:bg-purple-600 text-white"
                                             : displayStatus === "running"
@@ -1169,7 +1169,7 @@ export default function ModelList(props: ModelListProps) {
                                   <button onClick={() => toggleCardStatus(o)}>
                                     <Badge
                                       variant={"default"}
-                                      className={`shrink-0 cursor-pointer ${
+                                      className={`shrink-0 cursor-pointer !hover:bg-inherit ${
                                         hasPendingJW
                                           ? "bg-purple-700 dark:bg-purple-600 text-white"
                                           : displayStatus === "running"
