@@ -113,7 +113,7 @@ export function useProductionPipeline() {
         createdAt:
           typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
-        currentStepIndex: steps.length > 0 ? 0 : -1,
+        currentStepIndex: -1,
         parallelGroups: [],
         jobWorkIds: [],
         jobWorkAssignments: [],
