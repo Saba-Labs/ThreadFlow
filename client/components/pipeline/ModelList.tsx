@@ -619,6 +619,9 @@ export default function ModelList(props: ModelListProps) {
                                 <Badge variant="secondary">—</Badge>
                               ) : (
                                 (() => {
+                                  const hasJW =
+                                    ((o as any).jobWorkIds || []).length > 0 ||
+                                    (o.jobWorkAssignments || []).length > 0;
                                   const displayStatus =
                                     step.status === "pending"
                                       ? "hold"
@@ -630,16 +633,22 @@ export default function ModelList(props: ModelListProps) {
                                       >
                                         <Badge
                                           variant={
-                                            displayStatus === "running"
-                                              ? "success"
-                                              : displayStatus === "hold"
-                                                ? "destructive"
-                                                : "secondary"
+                                            hasJW
+                                              ? "outline"
+                                              : displayStatus === "running"
+                                                ? "success"
+                                                : displayStatus === "hold"
+                                                  ? "destructive"
+                                                  : "secondary"
                                           }
-                                          className="cursor-pointer whitespace-nowrap"
+                                          className={`cursor-pointer whitespace-nowrap ${
+                                            hasJW
+                                              ? "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border-purple-300 dark:border-purple-600"
+                                              : ""
+                                          }`}
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
-                                          {cap(displayStatus)}
+                                          {hasJW ? "Job Work" : cap(displayStatus)}
                                         </Badge>
                                       </button>
                                       {(((o as any).jobWorkIds || []).length >
