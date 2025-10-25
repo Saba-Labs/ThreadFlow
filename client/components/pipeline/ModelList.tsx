@@ -1019,7 +1019,7 @@ export default function ModelList(props: ModelListProps) {
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   {i < 0
-                                    ? "Not started"
+                                    ? "Out of Path"
                                     : i >= o.steps.length
                                       ? "Completed"
                                       : step.kind === "machine"
