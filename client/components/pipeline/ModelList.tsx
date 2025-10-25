@@ -2,7 +2,6 @@ import React, { Fragment, useEffect, useMemo, useState, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useRoadmaps } from "@/context/RoadmapContext";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
@@ -19,7 +18,6 @@ import {
   Pencil,
   CalendarDays,
   Plus,
-  Map,
 } from "lucide-react";
 import type {
   PathStep,
@@ -80,9 +78,6 @@ export default function ModelList(props: ModelListProps) {
   const [jobWorkDetailsModalId, setJobWorkDetailsModalId] = useState<
     string | null
   >(null);
-  const { roadmaps, addModelToRoadmap, createRoadmap } = useRoadmaps();
-  const [roadmapModalForId, setRoadmapModalForId] = useState<string | null>(null);
-  const [selectedRoadmapId, setSelectedRoadmapId] = useState<string>("");
 
   const sorted = useMemo(() => props.orders.slice(), [props.orders]);
 
@@ -746,25 +741,6 @@ export default function ModelList(props: ModelListProps) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => {
-                                    if (roadmaps.length === 0) {
-                                      const id = createRoadmap();
-                                      addModelToRoadmap(id, o.id);
-                                    } else if (roadmaps.length === 1) {
-                                      addModelToRoadmap(roadmaps[0].id, o.id);
-                                    } else {
-                                      setSelectedRoadmapId(roadmaps[0].id);
-                                      setRoadmapModalForId(o.id);
-                                    }
-                                  }}
-                                  title="Add to Roadmap"
-                                  aria-label="Add to Roadmap"
-                                >
-                                  <Map className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
                                   onClick={() => props.onPrev(o.id)}
                                   title="Previous step"
                                   aria-label="Previous step"
@@ -1204,25 +1180,6 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => {
-                            if (roadmaps.length === 0) {
-                              const id = createRoadmap();
-                              addModelToRoadmap(id, o.id);
-                            } else if (roadmaps.length === 1) {
-                              addModelToRoadmap(roadmaps[0].id, o.id);
-                            } else {
-                              setSelectedRoadmapId(roadmaps[0].id);
-                              setRoadmapModalForId(o.id);
-                            }
-                          }}
-                          title="Add to Roadmap"
-                          aria-label="Add to Roadmap"
-                        >
-                          <Map className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
                           onClick={() => props.onPrev(o.id)}
                           title="Previous step"
                           aria-label="Previous step"
@@ -1657,47 +1614,6 @@ export default function ModelList(props: ModelListProps) {
             </div>
           </SimpleModal>
 
-          {roadmapModalForId && roadmaps.length > 1 && (
-            <SimpleModal
-              open={roadmapModalForId !== null}
-              onOpenChange={(v) => !v && setRoadmapModalForId(null)}
-              title="Add to Roadmap"
-              footer={
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setRoadmapModalForId(null)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      if (roadmapModalForId && selectedRoadmapId) {
-                        addModelToRoadmap(selectedRoadmapId, roadmapModalForId);
-                      }
-                      setRoadmapModalForId(null);
-                    }}
-                  >
-                    Add
-                  </Button>
-                </div>
-              }
-            >
-              <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Choose a roadmap</div>
-                <div>
-                  <select
-                    className="w-full border rounded-md p-2"
-                    value={selectedRoadmapId}
-                    onChange={(e) => setSelectedRoadmapId(e.target.value)}
-                  >
-                    {roadmaps.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </SimpleModal>
-          )}
         </div>
       </div>
     </div>
