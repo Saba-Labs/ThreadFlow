@@ -1,4 +1,3 @@
-import { useRoadmaps } from "@/context/RoadmapContext";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,9 +30,7 @@ export default function RoadmapPage() {
     });
   }, [pipeline.orders]);
 
-  const handleAddRoadmap = () => {
-    createRoadmap();
-  };
+  const handleAddRoadmap = () => createRoadmap();
 
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
@@ -77,12 +74,7 @@ export default function RoadmapPage() {
                       setEditingTitleId(null);
                     }}
                   >
-                    <Input
-                      value={titleDraft}
-                      onChange={(e) => setTitleDraft(e.target.value)}
-                      className="bg-white text-black h-8"
-                      autoFocus
-                    />
+                    <Input value={titleDraft} onChange={(e) => setTitleDraft(e.target.value)} className="bg-white text-black h-8" autoFocus />
                     <Button size="sm" type="submit" variant="secondary">
                       Save
                     </Button>
@@ -103,13 +95,7 @@ export default function RoadmapPage() {
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => deleteRoadmap(r.id)}
-                        aria-label="Delete roadmap"
-                        title="Delete roadmap"
-                      >
+                      <Button size="icon" variant="destructive" onClick={() => deleteRoadmap(r.id)} aria-label="Delete roadmap" title="Delete roadmap">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -117,9 +103,17 @@ export default function RoadmapPage() {
                 )}
               </div>
             </CardHeader>
+
             <CardContent>
+              <div className="mb-3 flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">Models (only Running or Hold)</div>
+                <Button size="sm" onClick={() => openAddModels(r.id)}>
+                  Add models
+                </Button>
+              </div>
+
               {r.items.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No models added yet. Go to All Models and add to this roadmap.</div>
+                <div className="text-sm text-muted-foreground">No models added yet. Use "Add models" to pick from All Models (running or hold).</div>
               ) : (
                 <div className="divide-y">
                   {r.items.map((it) => {
@@ -130,14 +124,7 @@ export default function RoadmapPage() {
                           <div className="font-medium">{o ? o.modelName : "Model removed"}</div>
                           <div className="text-xs text-muted-foreground">{o ? `Qty: ${o.quantity}` : it.modelId}</div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => removeModelFromRoadmap(r.id, it.modelId)}
-                          aria-label="Remove"
-                          title="Remove"
-                          className="text-red-600 hover:text-red-700"
-                        >
+                        <Button size="sm" variant="ghost" onClick={() => removeModelFromRoadmap(r.id, it.modelId)} aria-label="Remove" title="Remove" className="text-red-600 hover:text-red-700">
                           Remove
                         </Button>
                       </div>
@@ -149,6 +136,38 @@ export default function RoadmapPage() {
           </Card>
         ))}
       </div>
+
+      <SimpleModal
+        open={openFor !== null}
+        onOpenChange={(v) => !v && setOpenFor(null)}
+        title="Add models from All Models"
+        footer={
+          <div className="flex items-center gap-2 justify-end">
+            <Button variant="outline" onClick={() => setOpenFor(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddSelectedToRoadmap}>Add selected</Button>
+          </div>
+        }
+      >
+        <div className="space-y-2 max-h-80 overflow-auto">
+          {eligibleOrders.length === 0 ? (
+            <div className="text-sm text-muted-foreground">No running or hold models available.</div>
+          ) : (
+            eligibleOrders.map((o) => (
+              <label key={o.id} className="flex items-center justify-between p-2 border-b">
+                <div>
+                  <div className="font-medium">{o.modelName}</div>
+                  <div className="text-xs text-muted-foreground">Qty: {o.quantity}</div>
+                </div>
+                <div>
+                  <Checkbox checked={selectedModels.includes(o.id)} onCheckedChange={() => toggleModelSelection(o.id)} />
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+      </SimpleModal>
     </div>
   );
 }
