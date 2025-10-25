@@ -5,6 +5,15 @@ import SimpleModal from "@/components/ui/SimpleModal";
 import { useJobWorks } from "@/lib/jobWorks";
 import type { JobWorkAssignment } from "@/hooks/useProductionPipeline";
 import { Trash2, Edit2, Check, Plus } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface JobWorkDetailsModalProps {
   open: boolean;
