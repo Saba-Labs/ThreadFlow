@@ -198,6 +198,48 @@ export default function RoadmapPage() {
           )}
         </div>
       </SimpleModal>
+
+      <SimpleModal
+        open={moveItem !== null}
+        onOpenChange={(v) => !v && setMoveItem(null)}
+        title="Move model to another roadmap"
+        footer={
+          <div className="flex items-center gap-2 justify-end">
+            <Button variant="outline" onClick={() => setMoveItem(null)}>Cancel</Button>
+            <Button onClick={() => setMoveItem(null)}>Close</Button>
+          </div>
+        }
+      >
+        <div className="space-y-2">
+          {moveItem ? (
+            <div>
+              <div className="text-sm text-muted-foreground mb-2">Choose destination roadmap</div>
+              <div className="space-y-2">
+                {roadmaps.filter((rr) => rr.id !== moveItem.fromRoadmapId).length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No other roadmaps available.</div>
+                ) : (
+                  roadmaps
+                    .filter((rr) => rr.id !== moveItem.fromRoadmapId)
+                    .map((rr) => (
+                      <div key={rr.id} className="flex items-center justify-between p-2 border rounded">
+                        <div className="font-medium">{rr.title}</div>
+                        <div>
+                          <Button
+                            onClick={() => {
+                              if (!moveItem) return;
+                              moveModelToRoadmap(moveItem.fromRoadmapId, rr.id, moveItem.modelId);
+                              setMoveItem(null);
+                            }}
+                          >Move here</Button>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </SimpleModal>
     </div>
   );
 }
