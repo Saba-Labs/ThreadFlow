@@ -153,16 +153,25 @@ export default function JobWorkDetailsModal({
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={() =>
-                        setEditingCardId(
-                          editingCardId === assignment.jobWorkId
-                            ? null
-                            : assignment.jobWorkId,
-                        )
-                      }
-                      title={editingCardId === assignment.jobWorkId ? "Done" : "Edit"}
+                      onClick={() => {
+                        if (editingCardId === assignment.jobWorkId) {
+                          // Save and exit edit mode
+                          if (editingField) {
+                            handleSaveEditField();
+                          }
+                          setEditingCardId(null);
+                        } else {
+                          // Enter edit mode
+                          setEditingCardId(assignment.jobWorkId);
+                        }
+                      }}
+                      title={editingCardId === assignment.jobWorkId ? "Save" : "Edit"}
                     >
-                      <Edit2 className="h-4 w-4" />
+                      {editingCardId === assignment.jobWorkId ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Edit2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
 
