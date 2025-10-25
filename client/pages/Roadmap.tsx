@@ -9,13 +9,25 @@ import SimpleModal from "@/components/ui/SimpleModal";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function RoadmapPage() {
-  const { roadmaps, createRoadmap, deleteRoadmap, renameRoadmap, removeModelFromRoadmap, addModelToRoadmap, moveModelWithinRoadmap, moveModelToRoadmap } = useRoadmaps();
+  const {
+    roadmaps,
+    createRoadmap,
+    deleteRoadmap,
+    renameRoadmap,
+    removeModelFromRoadmap,
+    addModelToRoadmap,
+    moveModelWithinRoadmap,
+    moveModelToRoadmap,
+  } = useRoadmaps();
   const pipeline = useProductionPipeline();
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
-  const [moveItem, setMoveItem] = useState<{ fromRoadmapId: string; modelId: string } | null>(null);
+  const [moveItem, setMoveItem] = useState<{
+    fromRoadmapId: string;
+    modelId: string;
+  } | null>(null);
 
   const ordersById = useMemo(() => {
     const map: Record<string, (typeof pipeline.orders)[number]> = {};
@@ -25,7 +37,8 @@ export default function RoadmapPage() {
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
-      if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return false;
+      if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
+        return false;
       const s = o.steps[o.currentStepIndex]?.status || "hold";
       return s === "hold" || s === "running";
     });
@@ -39,7 +52,9 @@ export default function RoadmapPage() {
   };
 
   const toggleModelSelection = (id: string) => {
-    setSelectedModels((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+    setSelectedModels((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
+    );
   };
 
   const handleAddSelectedToRoadmap = () => {
@@ -58,7 +73,9 @@ export default function RoadmapPage() {
       </div>
 
       {roadmaps.length === 0 && (
-        <div className="text-sm text-muted-foreground">No roadmaps yet. Click "Add Roadmap" to create one.</div>
+        <div className="text-sm text-muted-foreground">
+          No roadmaps yet. Click "Add Roadmap" to create one.
+        </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -75,14 +92,21 @@ export default function RoadmapPage() {
                       setEditingTitleId(null);
                     }}
                   >
-                    <Input value={titleDraft} onChange={(e) => setTitleDraft(e.target.value)} className="bg-white text-black h-8" autoFocus />
+                    <Input
+                      value={titleDraft}
+                      onChange={(e) => setTitleDraft(e.target.value)}
+                      className="bg-white text-black h-8"
+                      autoFocus
+                    />
                     <Button size="sm" type="submit" variant="secondary">
                       Save
                     </Button>
                   </form>
                 ) : (
                   <>
-                    <CardTitle className="text-white text-lg">{r.title}</CardTitle>
+                    <CardTitle className="text-white text-lg">
+                      {r.title}
+                    </CardTitle>
                     <div className="flex items-center gap-2">
                       <Button
                         size="icon"
@@ -96,7 +120,13 @@ export default function RoadmapPage() {
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="destructive" onClick={() => deleteRoadmap(r.id)} aria-label="Delete roadmap" title="Delete roadmap">
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={() => deleteRoadmap(r.id)}
+                        aria-label="Delete roadmap"
+                        title="Delete roadmap"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -107,31 +137,50 @@ export default function RoadmapPage() {
 
             <CardContent>
               <div className="mb-3 flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">Models (only Running or Hold)</div>
+                <div className="text-sm text-muted-foreground">
+                  Models (only Running or Hold)
+                </div>
                 <Button size="sm" onClick={() => openAddModels(r.id)}>
                   Add models
                 </Button>
               </div>
 
               {r.items.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No models added yet. Use "Add models" to pick from All Models (running or hold).</div>
+                <div className="text-sm text-muted-foreground">
+                  No models added yet. Use "Add models" to pick from All Models
+                  (running or hold).
+                </div>
               ) : (
                 <div className="divide-y">
                   {r.items.map((it) => {
                     const o = ordersById[it.modelId];
                     return (
-                      <div key={it.modelId} className="flex items-center justify-between py-3">
+                      <div
+                        key={it.modelId}
+                        className="flex items-center justify-between py-3"
+                      >
                         <div>
-                          <div className="font-medium">{o ? o.modelName : "Model removed"}</div>
-                          <div className="text-xs text-muted-foreground">{o ? `Qty: ${o.quantity}` : it.modelId}</div>
+                          <div className="font-medium">
+                            {o ? o.modelName : "Model removed"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {o ? `Qty: ${o.quantity}` : it.modelId}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => {
-                              const idx = r.items.findIndex((x) => x.modelId === it.modelId);
-                              if (idx > 0) moveModelWithinRoadmap(r.id, it.modelId, idx - 1);
+                              const idx = r.items.findIndex(
+                                (x) => x.modelId === it.modelId,
+                              );
+                              if (idx > 0)
+                                moveModelWithinRoadmap(
+                                  r.id,
+                                  it.modelId,
+                                  idx - 1,
+                                );
                             }}
                             title="Move up"
                             aria-label="Move up"
@@ -142,18 +191,45 @@ export default function RoadmapPage() {
                             size="icon"
                             variant="ghost"
                             onClick={() => {
-                              const idx = r.items.findIndex((x) => x.modelId === it.modelId);
-                              if (idx >= 0 && idx < r.items.length - 1) moveModelWithinRoadmap(r.id, it.modelId, idx + 1);
+                              const idx = r.items.findIndex(
+                                (x) => x.modelId === it.modelId,
+                              );
+                              if (idx >= 0 && idx < r.items.length - 1)
+                                moveModelWithinRoadmap(
+                                  r.id,
+                                  it.modelId,
+                                  idx + 1,
+                                );
                             }}
                             title="Move down"
                             aria-label="Move down"
                           >
                             ▼
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => setMoveItem({ fromRoadmapId: r.id, modelId: it.modelId })} title="Move to another roadmap" aria-label="Move to another roadmap">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() =>
+                              setMoveItem({
+                                fromRoadmapId: r.id,
+                                modelId: it.modelId,
+                              })
+                            }
+                            title="Move to another roadmap"
+                            aria-label="Move to another roadmap"
+                          >
                             Move
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => removeModelFromRoadmap(r.id, it.modelId)} aria-label="Remove" title="Remove" className="text-red-600 hover:text-red-700">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              removeModelFromRoadmap(r.id, it.modelId)
+                            }
+                            aria-label="Remove"
+                            title="Remove"
+                            className="text-red-600 hover:text-red-700"
+                          >
                             Remove
                           </Button>
                         </div>
@@ -182,16 +258,26 @@ export default function RoadmapPage() {
       >
         <div className="space-y-2 max-h-80 overflow-auto">
           {eligibleOrders.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No running or hold models available.</div>
+            <div className="text-sm text-muted-foreground">
+              No running or hold models available.
+            </div>
           ) : (
             eligibleOrders.map((o) => (
-              <label key={o.id} className="flex items-center justify-between p-2 border-b">
+              <label
+                key={o.id}
+                className="flex items-center justify-between p-2 border-b"
+              >
                 <div>
                   <div className="font-medium">{o.modelName}</div>
-                  <div className="text-xs text-muted-foreground">Qty: {o.quantity}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Qty: {o.quantity}
+                  </div>
                 </div>
                 <div>
-                  <Checkbox checked={selectedModels.includes(o.id)} onCheckedChange={() => toggleModelSelection(o.id)} />
+                  <Checkbox
+                    checked={selectedModels.includes(o.id)}
+                    onCheckedChange={() => toggleModelSelection(o.id)}
+                  />
                 </div>
               </label>
             ))
@@ -205,7 +291,9 @@ export default function RoadmapPage() {
         title="Move model to another roadmap"
         footer={
           <div className="flex items-center gap-2 justify-end">
-            <Button variant="outline" onClick={() => setMoveItem(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setMoveItem(null)}>
+              Cancel
+            </Button>
             <Button onClick={() => setMoveItem(null)}>Close</Button>
           </div>
         }
@@ -213,24 +301,38 @@ export default function RoadmapPage() {
         <div className="space-y-2">
           {moveItem ? (
             <div>
-              <div className="text-sm text-muted-foreground mb-2">Choose destination roadmap</div>
+              <div className="text-sm text-muted-foreground mb-2">
+                Choose destination roadmap
+              </div>
               <div className="space-y-2">
-                {roadmaps.filter((rr) => rr.id !== moveItem.fromRoadmapId).length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No other roadmaps available.</div>
+                {roadmaps.filter((rr) => rr.id !== moveItem.fromRoadmapId)
+                  .length === 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    No other roadmaps available.
+                  </div>
                 ) : (
                   roadmaps
                     .filter((rr) => rr.id !== moveItem.fromRoadmapId)
                     .map((rr) => (
-                      <div key={rr.id} className="flex items-center justify-between p-2 border rounded">
+                      <div
+                        key={rr.id}
+                        className="flex items-center justify-between p-2 border rounded"
+                      >
                         <div className="font-medium">{rr.title}</div>
                         <div>
                           <Button
                             onClick={() => {
                               if (!moveItem) return;
-                              moveModelToRoadmap(moveItem.fromRoadmapId, rr.id, moveItem.modelId);
+                              moveModelToRoadmap(
+                                moveItem.fromRoadmapId,
+                                rr.id,
+                                moveItem.modelId,
+                              );
                               setMoveItem(null);
                             }}
-                          >Move here</Button>
+                          >
+                            Move here
+                          </Button>
                         </div>
                       </div>
                     ))

@@ -1613,7 +1613,6 @@ export default function ModelList(props: ModelListProps) {
               </p>
             </div>
           </SimpleModal>
-
         </div>
       </div>
     </div>
