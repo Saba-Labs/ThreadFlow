@@ -226,31 +226,18 @@ export default function JobWorkDetailsModal({
                       {editingCardId === assignment.jobWorkId &&
                       editingField?.jobWorkId === assignment.jobWorkId &&
                       editingField.field === "delivery" ? (
-                        <div className="flex gap-1">
-                          <Input
-                            type="date"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={handleSaveEditField}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleSaveEditField();
-                              if (e.key === "Escape") setEditingField(null);
-                            }}
-                            autoFocus
-                            className="h-8 text-sm flex-1"
-                          />
-                          {editValue && (
-                            <button
-                              onClick={() => {
-                                setEditValue("");
-                                setTimeout(handleSaveEditField, 0);
-                              }}
-                              className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded border border-red-200 dark:border-red-800"
-                            >
-                              Clear
-                            </button>
-                          )}
-                        </div>
+                        <Input
+                          type="date"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleSaveEditField}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveEditField();
+                            if (e.key === "Escape") setEditingField(null);
+                          }}
+                          autoFocus
+                          className="h-8 text-sm"
+                        />
                       ) : editingCardId === assignment.jobWorkId ? (
                         <button
                           onClick={() =>
