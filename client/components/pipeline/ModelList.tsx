@@ -659,9 +659,11 @@ export default function ModelList(props: ModelListProps) {
                                 <Badge variant="secondary">—</Badge>
                               ) : (
                                 (() => {
-                                  const hasJW =
+                                  const hasPendingJW =
                                     ((o as any).jobWorkIds || []).length > 0 ||
-                                    (o.jobWorkAssignments || []).length > 0;
+                                    (o.jobWorkAssignments || []).some(
+                                      (a) => a.status === "pending",
+                                    );
                                   const displayStatus =
                                     step.status === "pending"
                                       ? "hold"
@@ -674,7 +676,7 @@ export default function ModelList(props: ModelListProps) {
                                         <Badge
                                           variant={"default"}
                                           className={`cursor-pointer whitespace-nowrap ${
-                                            hasJW
+                                            hasPendingJW
                                               ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
                                               : displayStatus === "running"
                                                 ? "bg-green-600 text-white"
@@ -684,15 +686,12 @@ export default function ModelList(props: ModelListProps) {
                                           }`}
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
-                                          {hasJW
+                                          {hasPendingJW
                                             ? "Job Work"
                                             : cap(displayStatus)}
                                         </Badge>
                                       </button>
-                                      {(((o as any).jobWorkIds || []).length >
-                                        0 ||
-                                        (o.jobWorkAssignments || []).length >
-                                          0) && (
+                                      {hasPendingJW && (
                                         <div className="mt-1">
                                           {(() => {
                                             const linkedJwIds = new Set<string>(
@@ -701,7 +700,11 @@ export default function ModelList(props: ModelListProps) {
                                                   []) as string[]),
                                                 ...(
                                                   o.jobWorkAssignments || []
-                                                ).map((a) => a.jobWorkId),
+                                                )
+                                                  .filter(
+                                                    (a) => a.status === "pending",
+                                                  )
+                                                  .map((a) => a.jobWorkId),
                                               ],
                                             );
                                             return Array.from(linkedJwIds)
@@ -1534,7 +1537,7 @@ export default function ModelList(props: ModelListProps) {
           <SimpleModal
             open={!!splitFor}
             onOpenChange={(v) => !v && setSplitForId(null)}
-            title={`Split into Batches — ${splitFor?.modelName}`}
+            title={`Split into Batches �� ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setSplitForId(null)}>
