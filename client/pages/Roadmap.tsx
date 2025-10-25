@@ -5,12 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Trash2, Plus, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useRoadmaps } from "@/context/RoadmapContext";
+import SimpleModal from "@/components/ui/SimpleModal";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function RoadmapPage() {
-  const { roadmaps, createRoadmap, deleteRoadmap, renameRoadmap, removeModelFromRoadmap } = useRoadmaps();
+  const { roadmaps, createRoadmap, deleteRoadmap, renameRoadmap, removeModelFromRoadmap, addModelToRoadmap } = useRoadmaps();
   const pipeline = useProductionPipeline();
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
+  const [openFor, setOpenFor] = useState<string | null>(null);
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
 
   const ordersById = useMemo(() => {
     const map: Record<string, (typeof pipeline.orders)[number]> = {};
@@ -18,8 +23,31 @@ export default function RoadmapPage() {
     return map;
   }, [pipeline.orders]);
 
+  const eligibleOrders = useMemo(() => {
+    return pipeline.orders.filter((o) => {
+      if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) return false;
+      const s = o.steps[o.currentStepIndex]?.status || "hold";
+      return s === "hold" || s === "running";
+    });
+  }, [pipeline.orders]);
+
   const handleAddRoadmap = () => {
     createRoadmap();
+  };
+
+  const openAddModels = (roadmapId: string) => {
+    setSelectedModels([]);
+    setOpenFor(roadmapId);
+  };
+
+  const toggleModelSelection = (id: string) => {
+    setSelectedModels((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  };
+
+  const handleAddSelectedToRoadmap = () => {
+    if (!openFor) return;
+    for (const id of selectedModels) addModelToRoadmap(openFor, id);
+    setOpenFor(null);
   };
 
   return (
