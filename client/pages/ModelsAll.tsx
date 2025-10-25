@@ -23,7 +23,7 @@ export default function ModelsAll() {
     rightPage: "/job-work",
   });
   const [filter, setFilter] = useState<
-    "all" | "hold" | "running" | "completed" | "job"
+    "all" | "hold" | "running" | "completed" | "job" | "onboard"
   >("all");
 
   const filtered = useMemo(() => {
