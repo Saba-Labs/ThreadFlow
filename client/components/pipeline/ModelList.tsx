@@ -1204,6 +1204,25 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
+                          onClick={() => {
+                            if (roadmaps.length === 0) {
+                              const id = createRoadmap();
+                              addModelToRoadmap(id, o.id);
+                            } else if (roadmaps.length === 1) {
+                              addModelToRoadmap(roadmaps[0].id, o.id);
+                            } else {
+                              setSelectedRoadmapId(roadmaps[0].id);
+                              setRoadmapModalForId(o.id);
+                            }
+                          }}
+                          title="Add to Roadmap"
+                          aria-label="Add to Roadmap"
+                        >
+                          <Map className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           onClick={() => props.onPrev(o.id)}
                           title="Previous step"
                           aria-label="Previous step"
