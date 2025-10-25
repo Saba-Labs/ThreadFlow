@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Calendar, Trash2, Edit2 } from "lucide-react";
+import { Trash2, Edit2 } from "lucide-react";
 
 interface JobWorkDetailsModalProps {
   open: boolean;
