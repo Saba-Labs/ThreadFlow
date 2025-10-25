@@ -304,7 +304,7 @@ export default function JobWorkDetailsModal({
                   )}
 
                   <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                    {assignment.status === "pending" && (
+                    {assignment.status === "pending" && !editingCardId && (
                       <Button
                         size="sm"
                         className="flex-1"
@@ -315,6 +315,19 @@ export default function JobWorkDetailsModal({
                         Complete
                       </Button>
                     )}
+                    {editingCardId === assignment.jobWorkId &&
+                      assignment.status === "completed" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() =>
+                            handleNotComplete(assignment.jobWorkId)
+                          }
+                        >
+                          Not Complete
+                        </Button>
+                      )}
                     <Button
                       size="icon"
                       variant="ghost"
