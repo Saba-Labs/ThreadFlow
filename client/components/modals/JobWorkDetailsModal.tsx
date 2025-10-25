@@ -110,8 +110,18 @@ export default function JobWorkDetailsModal({
   };
 
   const handleRemoveAssignment = (jwId: string) => {
-    const filtered = assignments.filter((a) => a.jobWorkId !== jwId);
+    setDeletingId(jwId);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deletingId) return;
+    const filtered = assignments.filter((a) => a.jobWorkId !== deletingId);
     onUpdateAssignments(filtered);
+    setDeletingId(null);
+  };
+
+  const handleCancelDelete = () => {
+    setDeletingId(null);
   };
 
   const handleNotComplete = (jwId: string) => {
