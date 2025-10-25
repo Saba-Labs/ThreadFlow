@@ -956,6 +956,10 @@ export default function ModelList(props: ModelListProps) {
                         (() => {
                           const displayStatus =
                             step.status === "pending" ? "hold" : step.status;
+                          const hasJW =
+                            ((o as any).jobWorkIds || []).length > 0 ||
+                            (o.jobWorkAssignments || []).length > 0;
+
                           if (viewMode === "list") {
                             // Stack current, status badge, and job work vertically like card view
                             const parallelGroup = (o.parallelGroups || []).find(
@@ -981,9 +985,32 @@ export default function ModelList(props: ModelListProps) {
                                       ? "Out of Path"
                                       : i >= o.steps.length
                                         ? "Completed"
-                                        : step.kind === "machine"
-                                          ? step.machineType
-                                          : "Job Work"}
+                                        : hasJW
+                                          ? (() => {
+                                              const linkedJwIds = new Set<string>(
+                                                [
+                                                  ...(((o as any).jobWorkIds ||
+                                                    []) as string[]),
+                                                  ...(o.jobWorkAssignments || []).map(
+                                                    (a) => a.jobWorkId,
+                                                  ),
+                                                ],
+                                              );
+                                              const jwNames = Array.from(
+                                                linkedJwIds,
+                                              )
+                                                .map((id) =>
+                                                  jobWorks.find((j) => j.id === id),
+                                                )
+                                                .filter((j) => j !== undefined)
+                                                .map((j) => j!.name);
+                                              return jwNames.length > 0
+                                                ? jwNames[0]
+                                                : primaryMachine;
+                                            })()
+                                          : step.kind === "machine"
+                                            ? step.machineType
+                                            : "Job Work"}
                                   </span>
                                 </div>
 
@@ -1007,38 +1034,26 @@ export default function ModelList(props: ModelListProps) {
                                       <button
                                         onClick={() => toggleCardStatus(o)}
                                       >
-                                        {(() => {
-                                          const hasJW =
-                                            ((o as any).jobWorkIds || [])
-                                              .length > 0 ||
-                                            (o.jobWorkAssignments || [])
-                                              .length > 0;
-                                          return (
-                                            <Badge
-                                              variant={"default"}
-                                              className={`shrink-0 cursor-pointer ${
-                                                hasJW
-                                                  ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
-                                                  : displayStatus === "running"
-                                                    ? "bg-green-600 text-white"
-                                                    : displayStatus === "hold"
-                                                      ? "bg-red-600 text-white"
-                                                      : "bg-gray-500 text-white"
-                                              }`}
-                                            >
-                                              {hasJW
-                                                ? "Job Work"
-                                                : cap(displayStatus)}
-                                            </Badge>
-                                          );
-                                        })()}
+                                        <Badge
+                                          variant={"default"}
+                                          className={`shrink-0 cursor-pointer ${
+                                            hasJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
+                                        >
+                                          {hasJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
+                                        </Badge>
                                       </button>
                                     </div>
 
-                                    {(((o as any).jobWorkIds || []).length >
-                                      0 ||
-                                      (o.jobWorkAssignments || []).length >
-                                        0) && (
+                                    {hasJW && (
                                       <div className="mt-1 text-right">
                                         {(() => {
                                           const linkedJwIds = new Set<string>([
@@ -1056,7 +1071,7 @@ export default function ModelList(props: ModelListProps) {
                                             .map((j) => (
                                               <div
                                                 key={j!.id}
-                                                className="text-sm text-muted-foreground"
+                                                className="text-xs text-muted-foreground"
                                               >
                                                 {j!.name}
                                               </div>
@@ -1079,9 +1094,32 @@ export default function ModelList(props: ModelListProps) {
                                     ? "Out of Path"
                                     : i >= o.steps.length
                                       ? "Completed"
-                                      : step.kind === "machine"
-                                        ? step.machineType
-                                        : "Job Work"}
+                                      : hasJW
+                                        ? (() => {
+                                            const linkedJwIds = new Set<string>(
+                                              [
+                                                ...(((o as any).jobWorkIds ||
+                                                  []) as string[]),
+                                                ...(o.jobWorkAssignments || []).map(
+                                                  (a) => a.jobWorkId,
+                                                ),
+                                              ],
+                                            );
+                                            const jwNames = Array.from(linkedJwIds)
+                                              .map((id) =>
+                                                jobWorks.find((j) => j.id === id),
+                                              )
+                                              .filter((j) => j !== undefined)
+                                              .map((j) => j!.name);
+                                            return jwNames.length > 0
+                                              ? jwNames[0]
+                                              : step.kind === "machine"
+                                                ? step.machineType
+                                                : "Job Work";
+                                          })()
+                                        : step.kind === "machine"
+                                          ? step.machineType
+                                          : "Job Work"}
                                 </span>
                               </div>
 
@@ -1118,34 +1156,24 @@ export default function ModelList(props: ModelListProps) {
                               {isExpandedMobile && (
                                 <>
                                   <button onClick={() => toggleCardStatus(o)}>
-                                    {(() => {
-                                      const hasJW =
-                                        ((o as any).jobWorkIds || []).length >
-                                          0 ||
-                                        (o.jobWorkAssignments || []).length > 0;
-                                      return (
-                                        <Badge
-                                          variant={"default"}
-                                          className={`shrink-0 cursor-pointer ${
-                                            hasJW
-                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
-                                              : displayStatus === "running"
-                                                ? "bg-green-600 text-white"
-                                                : displayStatus === "hold"
-                                                  ? "bg-red-600 text-white"
-                                                  : "bg-gray-500 text-white"
-                                          }`}
-                                        >
-                                          {hasJW
-                                            ? "Job Work"
-                                            : cap(displayStatus)}
-                                        </Badge>
-                                      );
-                                    })()}
+                                    <Badge
+                                      variant={"default"}
+                                      className={`shrink-0 cursor-pointer ${
+                                        hasJW
+                                          ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                          : displayStatus === "running"
+                                            ? "bg-green-600 text-white"
+                                            : displayStatus === "hold"
+                                              ? "bg-red-600 text-white"
+                                              : "bg-gray-500 text-white"
+                                      }`}
+                                    >
+                                      {hasJW
+                                        ? "Job Work"
+                                        : cap(displayStatus)}
+                                    </Badge>
                                   </button>
-                                  {(((o as any).jobWorkIds || []).length > 0 ||
-                                    (o.jobWorkAssignments || []).length >
-                                      0) && (
+                                  {hasJW && (
                                     <div className="mt-1 text-right">
                                       {(() => {
                                         const linkedJwIds = new Set<string>([
@@ -1163,7 +1191,7 @@ export default function ModelList(props: ModelListProps) {
                                           .map((j) => (
                                             <div
                                               key={j!.id}
-                                              className="text-sm text-muted-foreground"
+                                              className="text-xs text-muted-foreground"
                                             >
                                               {j!.name}
                                             </div>
