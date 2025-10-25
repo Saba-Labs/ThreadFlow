@@ -1,0 +1,126 @@
+import { useRoadmaps } from "@/context/RoadmapContext";
+import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Trash2, Plus, Pencil } from "lucide-react";
+import { useMemo, useState } from "react";
+
+export default function RoadmapPage() {
+  const { roadmaps, createRoadmap, deleteRoadmap, renameRoadmap, removeModelFromRoadmap } = useRoadmaps();
+  const pipeline = useProductionPipeline();
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
+  const [titleDraft, setTitleDraft] = useState<string>("");
+
+  const ordersById = useMemo(() => {
+    const map: Record<string, (typeof pipeline.orders)[number]> = {};
+    for (const o of pipeline.orders) map[o.id] = o;
+    return map;
+  }, [pipeline.orders]);
+
+  const handleAddRoadmap = () => {
+    createRoadmap();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">Roadmap</h1>
+        <Button onClick={handleAddRoadmap}>
+          <Plus className="h-4 w-4 mr-2" /> Add Roadmap
+        </Button>
+      </div>
+
+      {roadmaps.length === 0 && (
+        <div className="text-sm text-muted-foreground">No roadmaps yet. Click "Add Roadmap" to create one.</div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {roadmaps.map((r) => (
+          <Card key={r.id} className="overflow-hidden">
+            <CardHeader className="bg-blue-600 text-white">
+              <div className="flex items-center justify-between">
+                {editingTitleId === r.id ? (
+                  <form
+                    className="flex items-center gap-2 w-full"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      renameRoadmap(r.id, titleDraft || r.title);
+                      setEditingTitleId(null);
+                    }}
+                  >
+                    <Input
+                      value={titleDraft}
+                      onChange={(e) => setTitleDraft(e.target.value)}
+                      className="bg-white text-black h-8"
+                      autoFocus
+                    />
+                    <Button size="sm" type="submit" variant="secondary">
+                      Save
+                    </Button>
+                  </form>
+                ) : (
+                  <>
+                    <CardTitle className="text-white text-lg">{r.title}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        onClick={() => {
+                          setEditingTitleId(r.id);
+                          setTitleDraft(r.title);
+                        }}
+                        aria-label="Rename"
+                        title="Rename"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={() => deleteRoadmap(r.id)}
+                        aria-label="Delete roadmap"
+                        title="Delete roadmap"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {r.items.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No models added yet. Go to All Models and add to this roadmap.</div>
+              ) : (
+                <div className="divide-y">
+                  {r.items.map((it) => {
+                    const o = ordersById[it.modelId];
+                    return (
+                      <div key={it.modelId} className="flex items-center justify-between py-3">
+                        <div>
+                          <div className="font-medium">{o ? o.modelName : "Model removed"}</div>
+                          <div className="text-xs text-muted-foreground">{o ? `Qty: ${o.quantity}` : it.modelId}</div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeModelFromRoadmap(r.id, it.modelId)}
+                          aria-label="Remove"
+                          title="Remove"
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
