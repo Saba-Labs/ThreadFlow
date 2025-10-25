@@ -135,29 +135,26 @@ export default function AssignJobWorksModal({
                     handleSelectJobWork(jw.id, !selectedIds.includes(jw.id))
                   }
                 >
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      id={`assign-jw-${jw.id}`}
-                      checked={selectedIds.includes(jw.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectJobWork(jw.id, checked as boolean)
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                      className="mt-1"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 dark:text-gray-100">
-                        {jw.name}
+                  <div className="flex items-start gap-3 flex-col">
+                    <div className="flex items-start gap-3 w-full">
+                      <Checkbox
+                        id={`assign-jw-${jw.id}`}
+                        checked={selectedIds.includes(jw.id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectJobWork(jw.id, checked as boolean)
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-1"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900 dark:text-gray-100">
+                          {jw.name}
+                        </div>
                       </div>
-                      {jw.description && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {jw.description}
-                        </p>
-                      )}
                       {selectedIds.includes(jw.id) && (
-                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex-shrink-0 w-24">
                           <label className="text-xs text-muted-foreground block mb-1">
-                            Quantity for this job work
+                            Quantity
                           </label>
                           <Input
                             type="number"
@@ -176,6 +173,11 @@ export default function AssignJobWorksModal({
                         </div>
                       )}
                     </div>
+                    {jw.description && (
+                      <p className="text-xs text-muted-foreground pl-6">
+                        {jw.description}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))
