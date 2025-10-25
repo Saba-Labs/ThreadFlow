@@ -129,10 +129,33 @@ export default function JobWorkDetailsModal({
     return jobWorks.find((j) => j.id === jwId)?.name || "Unknown";
   };
 
+  const getAvailableJobWorks = () => {
+    const assignedIds = new Set(assignments.map((a) => a.jobWorkId));
+    return jobWorks.filter((j) => !assignedIds.has(j.id));
+  };
+
+  const handleAddJobWork = () => {
+    if (!newJobWorkId) return;
+
+    const newAssignment: JobWorkAssignment = {
+      jobWorkId: newJobWorkId,
+      quantity: Math.max(1, Math.floor(Number(newQuantity) || 1)),
+      pickupDate: new Date(newPickupDate).getTime(),
+      status: "pending",
+    };
+
+    onUpdateAssignments([...assignments, newAssignment]);
+    setShowAddForm(false);
+    setNewJobWorkId("");
+    setNewQuantity("1");
+    setNewPickupDate(new Date().toISOString().split("T")[0]);
+  };
+
   const pendingAssignments = assignments.filter((a) => a.status === "pending");
   const completedAssignments = assignments.filter(
     (a) => a.status === "completed",
   );
+  const availableJobWorks = getAvailableJobWorks();
 
   return (
     <>
