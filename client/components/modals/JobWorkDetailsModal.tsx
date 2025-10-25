@@ -107,6 +107,18 @@ export default function JobWorkDetailsModal({
     onUpdateAssignments(filtered);
   };
 
+  const handleNotComplete = (jwId: string) => {
+    const updated = assignments.map((a) => {
+      if (a.jobWorkId !== jwId) return a;
+      return {
+        ...a,
+        completionDate: undefined,
+        status: "pending" as const,
+      };
+    });
+    onUpdateAssignments(updated);
+  };
+
   const getJobWorkName = (jwId: string) => {
     return jobWorks.find((j) => j.id === jwId)?.name || "Unknown";
   };
