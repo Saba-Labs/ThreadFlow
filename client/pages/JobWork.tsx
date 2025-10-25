@@ -314,6 +314,9 @@ export default function JobWork() {
           {selectedJobWorkId &&
             (() => {
               const assignments = getAssignmentsForJobWork(selectedJobWorkId);
+              const sortedAssignments = [...assignments].sort(
+                (a, b) => b.pickupDate - a.pickupDate,
+              );
 
               const formatDate = (timestamp: number) => {
                 return new Date(timestamp).toLocaleDateString("en-US", {
@@ -328,25 +331,25 @@ export default function JobWork() {
                   <table className="w-full text-sm border-collapse">
                     <thead className="bg-gray-100 dark:bg-gray-800">
                       <tr>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Model Name
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Quantity
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Pickup Date
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Delivery Date
                         </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Status
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {assignments.length === 0 ? (
+                      {sortedAssignments.length === 0 ? (
                         <tr>
                           <td
                             colSpan={5}
@@ -356,7 +359,7 @@ export default function JobWork() {
                           </td>
                         </tr>
                       ) : (
-                        assignments.map((a) => (
+                        sortedAssignments.map((a) => (
                           <tr
                             key={`${a.orderId}-${a.status}`}
                             className={`border-t border-gray-200 dark:border-gray-700 ${
@@ -365,21 +368,21 @@ export default function JobWork() {
                                 : "bg-yellow-50 dark:bg-yellow-900/10"
                             }`}
                           >
-                            <td className="p-3 text-gray-900 dark:text-gray-100 font-medium">
+                            <td className="p-3 text-gray-900 dark:text-gray-100 font-medium whitespace-nowrap">
                               {a.modelName}
                             </td>
-                            <td className="p-3 text-gray-700 dark:text-gray-300">
+                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                               {a.quantity}
                             </td>
-                            <td className="p-3 text-gray-700 dark:text-gray-300">
+                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                               {formatDate(a.pickupDate)}
                             </td>
-                            <td className="p-3 text-gray-700 dark:text-gray-300">
+                            <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                               {a.completionDate
                                 ? formatDate(a.completionDate)
                                 : "—"}
                             </td>
-                            <td className="p-3">
+                            <td className="p-3 whitespace-nowrap">
                               <span
                                 className={`text-xs font-semibold px-2 py-1 rounded ${
                                   a.status === "completed"
