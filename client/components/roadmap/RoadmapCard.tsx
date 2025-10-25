@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Plus, X, Trash2 } from "lucide-react";
+import { Plus, X, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { WorkOrder } from "@/hooks/useProductionPipeline";
 
 interface RoadmapCardProps {
@@ -16,6 +15,7 @@ interface RoadmapCardProps {
   onUpdateTitle: (cardId: string, newTitle: string) => void;
   onAddModels: (cardId: string) => void;
   onRemoveModel: (cardId: string, modelId: string) => void;
+  onMoveModel: (cardId: string, modelIndex: number, direction: "up" | "down") => void;
   onDeleteCard: (cardId: string) => void;
 }
 
