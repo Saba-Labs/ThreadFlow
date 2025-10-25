@@ -15,7 +15,11 @@ interface RoadmapCardProps {
   onUpdateTitle: (cardId: string, newTitle: string) => void;
   onAddModels: (cardId: string) => void;
   onRemoveModel: (cardId: string, modelId: string) => void;
-  onMoveModel: (cardId: string, modelIndex: number, direction: "up" | "down") => void;
+  onMoveModel: (
+    cardId: string,
+    modelIndex: number,
+    direction: "up" | "down",
+  ) => void;
   onDeleteCard: (cardId: string) => void;
 }
 
