@@ -85,7 +85,7 @@ export default function RoadmapCard({
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col gap-4">
-        <div>
+        <div className="flex-1">
           <h3 className="text-sm font-medium mb-2">Models in this phase</h3>
           <div className="space-y-2">
             {validModels.length === 0 ? (
@@ -93,21 +93,47 @@ export default function RoadmapCard({
                 No models added yet
               </p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {validModels.map((model) => (
-                  <Badge
+              <div className="space-y-1">
+                {validModels.map((model, index) => (
+                  <div
                     key={model.id}
-                    variant="secondary"
-                    className="flex items-center gap-1 pr-1"
+                    className="flex items-center gap-2 p-2 bg-muted/50 rounded border border-muted text-sm"
                   >
-                    <span>{model.modelName}</span>
-                    <button
-                      onClick={() => onRemoveModel(card.id, model.id)}
-                      className="ml-1 hover:text-red-500 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
+                    <span className="flex-1 font-medium truncate">
+                      {model.modelName}
+                    </span>
+                    <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => onMoveModel(card.id, index, "up")}
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <ArrowUp className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => onMoveModel(card.id, index, "down")}
+                        disabled={index === validModels.length - 1}
+                        title="Move down"
+                      >
+                        <ArrowDown className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => onRemoveModel(card.id, model.id)}
+                        title="Remove"
+                      >
+                        <X className="h-3 w-3 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
