@@ -140,19 +140,18 @@ export default function Roadmap() {
         </div>
       )}
 
-      {showModelModal && selectedCardId && (
-        <ModelSelectionModal
-          onSelect={handleSelectModels}
-          onClose={() => {
-            setShowModelModal(false);
-            setSelectedCardId(null);
-          }}
-          allModels={pipeline.orders}
-          excludeModelIds={
-            cards.find((c) => c.id === selectedCardId)?.modelIds || []
-          }
-        />
-      )}
+      <ModelSelectionModal
+        open={showModelModal && selectedCardId !== null}
+        onSelect={handleSelectModels}
+        onClose={() => {
+          setShowModelModal(false);
+          setSelectedCardId(null);
+        }}
+        allModels={pipeline.orders}
+        excludeModelIds={
+          cards.find((c) => c.id === selectedCardId)?.modelIds || []
+        }
+      />
     </div>
   );
 }
