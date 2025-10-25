@@ -1095,18 +1095,33 @@ export default function ModelList(props: ModelListProps) {
                               {isExpandedMobile && (
                                 <>
                                   <button onClick={() => toggleCardStatus(o)}>
-                                    <Badge
-                                      variant={
-                                        displayStatus === "running"
-                                          ? "success"
-                                          : displayStatus === "hold"
-                                            ? "destructive"
-                                            : "secondary"
-                                      }
-                                      className="shrink-0 cursor-pointer"
-                                    >
-                                      {cap(displayStatus)}
-                                    </Badge>
+                                    {(() => {
+                                      const hasJW =
+                                        ((o as any).jobWorkIds || []).length >
+                                          0 ||
+                                        (o.jobWorkAssignments || []).length >
+                                          0;
+                                      return (
+                                        <Badge
+                                          variant={
+                                            hasJW
+                                              ? "outline"
+                                              : displayStatus === "running"
+                                                ? "success"
+                                                : displayStatus === "hold"
+                                                  ? "destructive"
+                                                  : "secondary"
+                                          }
+                                          className={`shrink-0 cursor-pointer ${
+                                            hasJW
+                                              ? "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border-purple-300 dark:border-purple-600"
+                                              : ""
+                                          }`}
+                                        >
+                                          {hasJW ? "Job Work" : cap(displayStatus)}
+                                        </Badge>
+                                      );
+                                    })()}
                                   </button>
                                   {(((o as any).jobWorkIds || []).length >
                                     0 ||
