@@ -33,6 +33,7 @@ const App = () => (
             <Route path="/job-work" element={<JobWork />} />
             <Route path="/models/new" element={<NewModel />} />
             <Route path="/models/:id/edit" element={<EditModel />} />
+            <Route path="/roadmap" element={<Roadmap />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
