@@ -1361,6 +1361,9 @@ export default function ModelList(props: ModelListProps) {
                     "completed",
                     completionDate,
                   );
+                  if (o.currentStepIndex >= 0 && o.currentStepIndex < o.steps.length) {
+                    props.onSetStepStatus(o.id, o.currentStepIndex, "hold");
+                  }
                 }
               }}
             />
