@@ -353,17 +353,27 @@ export default function ModelList(props: ModelListProps) {
 
   const statusBgClass = (o: WorkOrder) => {
     const i = o.currentStepIndex;
-    if (i < 0 || i >= o.steps.length) {
+    const hasJW =
+      ((o as any).jobWorkIds || []).length > 0 ||
+      (o.jobWorkAssignments || []).length > 0;
+
+    if (i < 0) {
+      // out of path, treat like hold
+      return hasJW
+        ? "bg-purple-50 dark:bg-purple-900/20"
+        : "bg-red-50 dark:bg-red-900/20";
+    }
+    if (i >= o.steps.length) {
       // completed
       return "bg-green-50 dark:bg-green-900/20";
     }
     const st = o.steps[i];
+    if (hasJW) {
+      return "bg-purple-50 dark:bg-purple-900/20";
+    }
     if (st.status === "hold") return "bg-red-50 dark:bg-red-900/20";
     if (st.status === "running") {
-      const hasJW = ((o as any).jobWorkIds || []).length > 0;
-      return hasJW
-        ? "bg-purple-50 dark:bg-purple-900/20"
-        : "bg-green-50 dark:bg-green-900/20";
+      return "bg-green-50 dark:bg-green-900/20";
     }
     return "";
   };
@@ -568,10 +578,44 @@ export default function ModelList(props: ModelListProps) {
                             style={{ width: "120px" }}
                           >
                             {i < 0
-                              ? "Not started"
+                              ? "Out of Path"
                               : i >= o.steps.length
                                 ? "Completed"
                                 : (() => {
+                                    const hasJW =
+                                      ((o as any).jobWorkIds || []).length >
+                                        0 ||
+                                      (o.jobWorkAssignments || []).length > 0;
+
+                                    if (hasJW) {
+                                      const linkedJwIds = new Set<string>([
+                                        ...(((o as any).jobWorkIds ||
+                                          []) as string[]),
+                                        ...(o.jobWorkAssignments || []).map(
+                                          (a) => a.jobWorkId,
+                                        ),
+                                      ]);
+                                      const jwNames = Array.from(linkedJwIds)
+                                        .map((id) =>
+                                          jobWorks.find((j) => j.id === id),
+                                        )
+                                        .filter((j) => j !== undefined)
+                                        .map((j) => j!.name);
+
+                                      return (
+                                        <div className="flex flex-col gap-0.5">
+                                          {jwNames.map((name) => (
+                                            <div
+                                              key={name}
+                                              className="font-medium text-purple-700 dark:text-purple-300"
+                                            >
+                                              {name}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      );
+                                    }
+
                                     const primaryMachine =
                                       step.kind === "machine"
                                         ? step.machineType
@@ -615,6 +659,9 @@ export default function ModelList(props: ModelListProps) {
                                 <Badge variant="secondary">—</Badge>
                               ) : (
                                 (() => {
+                                  const hasJW =
+                                    ((o as any).jobWorkIds || []).length > 0 ||
+                                    (o.jobWorkAssignments || []).length > 0;
                                   const displayStatus =
                                     step.status === "pending"
                                       ? "hold"
@@ -625,37 +672,54 @@ export default function ModelList(props: ModelListProps) {
                                         onClick={() => toggleCardStatus(o)}
                                       >
                                         <Badge
-                                          variant={
-                                            displayStatus === "running"
-                                              ? "success"
-                                              : displayStatus === "hold"
-                                                ? "destructive"
-                                                : "secondary"
-                                          }
-                                          className="cursor-pointer whitespace-nowrap"
+                                          variant={"default"}
+                                          className={`cursor-pointer whitespace-nowrap ${
+                                            hasJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
-                                          {cap(displayStatus)}
+                                          {hasJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
                                         </Badge>
                                       </button>
-                                      {((o as any).jobWorkIds || []).length >
-                                        0 && (
+                                      {(((o as any).jobWorkIds || []).length >
+                                        0 ||
+                                        (o.jobWorkAssignments || []).length >
+                                          0) && (
                                         <div className="mt-1">
-                                          {jobWorks
-                                            .filter((j) =>
-                                              (
-                                                ((o as any).jobWorkIds ||
-                                                  []) as string[]
-                                              ).includes(j.id),
-                                            )
-                                            .map((j) => (
-                                              <div
-                                                key={j.id}
-                                                className="text-xs text-muted-foreground"
-                                              >
-                                                {j.name}
-                                              </div>
-                                            ))}
+                                          {(() => {
+                                            const linkedJwIds = new Set<string>(
+                                              [
+                                                ...(((o as any).jobWorkIds ||
+                                                  []) as string[]),
+                                                ...(
+                                                  o.jobWorkAssignments || []
+                                                ).map((a) => a.jobWorkId),
+                                              ],
+                                            );
+                                            return Array.from(linkedJwIds)
+                                              .map((id) =>
+                                                jobWorks.find(
+                                                  (j) => j.id === id,
+                                                ),
+                                              )
+                                              .filter((j) => j !== undefined)
+                                              .map((j) => (
+                                                <div
+                                                  key={j!.id}
+                                                  className="text-xs text-muted-foreground"
+                                                >
+                                                  {j!.name}
+                                                </div>
+                                              ));
+                                          })()}
                                         </div>
                                       )}
                                     </>
@@ -914,7 +978,7 @@ export default function ModelList(props: ModelListProps) {
                                 <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
                                     {i < 0
-                                      ? "Not started"
+                                      ? "Out of Path"
                                       : i >= o.steps.length
                                         ? "Completed"
                                         : step.kind === "machine"
@@ -943,38 +1007,61 @@ export default function ModelList(props: ModelListProps) {
                                       <button
                                         onClick={() => toggleCardStatus(o)}
                                       >
-                                        <Badge
-                                          variant={
-                                            displayStatus === "running"
-                                              ? "success"
-                                              : displayStatus === "hold"
-                                                ? "destructive"
-                                                : "secondary"
-                                          }
-                                          className="shrink-0 cursor-pointer"
-                                        >
-                                          {cap(displayStatus)}
-                                        </Badge>
+                                        {(() => {
+                                          const hasJW =
+                                            ((o as any).jobWorkIds || [])
+                                              .length > 0 ||
+                                            (o.jobWorkAssignments || [])
+                                              .length > 0;
+                                          return (
+                                            <Badge
+                                              variant={"default"}
+                                              className={`shrink-0 cursor-pointer ${
+                                                hasJW
+                                                  ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                                  : displayStatus === "running"
+                                                    ? "bg-green-600 text-white"
+                                                    : displayStatus === "hold"
+                                                      ? "bg-red-600 text-white"
+                                                      : "bg-gray-500 text-white"
+                                              }`}
+                                            >
+                                              {hasJW
+                                                ? "Job Work"
+                                                : cap(displayStatus)}
+                                            </Badge>
+                                          );
+                                        })()}
                                       </button>
                                     </div>
 
-                                    {((o as any).jobWorkIds || []).length >
-                                      0 && (
+                                    {(((o as any).jobWorkIds || []).length >
+                                      0 ||
+                                      (o.jobWorkAssignments || []).length >
+                                        0) && (
                                       <div className="mt-1 text-right">
-                                        {jobWorks
-                                          .filter((j) =>
-                                            (
-                                              (o as any).jobWorkIds || []
-                                            ).includes(j.id),
-                                          )
-                                          .map((j) => (
-                                            <div
-                                              key={j.id}
-                                              className="text-sm text-muted-foreground"
-                                            >
-                                              {j.name}
-                                            </div>
-                                          ))}
+                                        {(() => {
+                                          const linkedJwIds = new Set<string>([
+                                            ...(((o as any).jobWorkIds ||
+                                              []) as string[]),
+                                            ...(o.jobWorkAssignments || []).map(
+                                              (a) => a.jobWorkId,
+                                            ),
+                                          ]);
+                                          return Array.from(linkedJwIds)
+                                            .map((id) =>
+                                              jobWorks.find((j) => j.id === id),
+                                            )
+                                            .filter((j) => j !== undefined)
+                                            .map((j) => (
+                                              <div
+                                                key={j!.id}
+                                                className="text-sm text-muted-foreground"
+                                              >
+                                                {j!.name}
+                                              </div>
+                                            ));
+                                        })()}
                                       </div>
                                     )}
                                   </>
@@ -989,7 +1076,7 @@ export default function ModelList(props: ModelListProps) {
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   {i < 0
-                                    ? "Not started"
+                                    ? "Out of Path"
                                     : i >= o.steps.length
                                       ? "Completed"
                                       : step.kind === "machine"
@@ -1031,36 +1118,57 @@ export default function ModelList(props: ModelListProps) {
                               {isExpandedMobile && (
                                 <>
                                   <button onClick={() => toggleCardStatus(o)}>
-                                    <Badge
-                                      variant={
-                                        displayStatus === "running"
-                                          ? "success"
-                                          : displayStatus === "hold"
-                                            ? "destructive"
-                                            : "secondary"
-                                      }
-                                      className="shrink-0 cursor-pointer"
-                                    >
-                                      {cap(displayStatus)}
-                                    </Badge>
+                                    {(() => {
+                                      const hasJW =
+                                        ((o as any).jobWorkIds || []).length >
+                                          0 ||
+                                        (o.jobWorkAssignments || []).length > 0;
+                                      return (
+                                        <Badge
+                                          variant={"default"}
+                                          className={`shrink-0 cursor-pointer ${
+                                            hasJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
+                                        >
+                                          {hasJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
+                                        </Badge>
+                                      );
+                                    })()}
                                   </button>
-                                  {((o as any).jobWorkIds || []).length > 0 && (
+                                  {(((o as any).jobWorkIds || []).length > 0 ||
+                                    (o.jobWorkAssignments || []).length >
+                                      0) && (
                                     <div className="mt-1 text-right">
-                                      {jobWorks
-                                        .filter((j) =>
-                                          (
-                                            ((o as any).jobWorkIds ||
-                                              []) as string[]
-                                          ).includes(j.id),
-                                        )
-                                        .map((j) => (
-                                          <div
-                                            key={j.id}
-                                            className="text-sm text-muted-foreground"
-                                          >
-                                            {j.name}
-                                          </div>
-                                        ))}
+                                      {(() => {
+                                        const linkedJwIds = new Set<string>([
+                                          ...(((o as any).jobWorkIds ||
+                                            []) as string[]),
+                                          ...(o.jobWorkAssignments || []).map(
+                                            (a) => a.jobWorkId,
+                                          ),
+                                        ]);
+                                        return Array.from(linkedJwIds)
+                                          .map((id) =>
+                                            jobWorks.find((j) => j.id === id),
+                                          )
+                                          .filter((j) => j !== undefined)
+                                          .map((j) => (
+                                            <div
+                                              key={j!.id}
+                                              className="text-sm text-muted-foreground"
+                                            >
+                                              {j!.name}
+                                            </div>
+                                          ));
+                                      })()}
                                     </div>
                                   )}
                                 </>

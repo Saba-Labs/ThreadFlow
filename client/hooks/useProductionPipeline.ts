@@ -113,7 +113,7 @@ export function useProductionPipeline() {
         createdAt:
           typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
-        currentStepIndex: steps.length > 0 ? 0 : -1,
+        currentStepIndex: -1,
         parallelGroups: [],
         jobWorkIds: [],
         jobWorkAssignments: [],
@@ -172,9 +172,16 @@ export function useProductionPipeline() {
     setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
-        if (o.currentStepIndex < 0) return o;
         const idx = o.currentStepIndex;
         const steps = o.steps.slice();
+
+        // If out of path (-1), enter the first path
+        if (idx < 0) {
+          if (steps.length > 0 && steps[0]) {
+            steps[0] = { ...steps[0], status: "hold", activeMachines: 0 };
+          }
+          return { ...o, steps, currentStepIndex: 0, parallelGroups: [] };
+        }
 
         // Do NOT mark previous step as completed; keep it as hold
         if (steps[idx]) {
@@ -202,13 +209,20 @@ export function useProductionPipeline() {
     setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
-        if (o.currentStepIndex <= 0 && o.steps.length > 0) {
-          // already at first or not started
-          return { ...o, currentStepIndex: 0 };
-        }
-        const steps = o.steps.slice();
         const idx = o.currentStepIndex;
-        const target = idx >= steps.length ? steps.length - 1 : idx - 1;
+
+        // If at first step (0), go back out of path (-1)
+        if (idx === 0) {
+          return { ...o, currentStepIndex: -1, parallelGroups: [] };
+        }
+
+        // If already out of path, stay out of path
+        if (idx < 0) {
+          return o;
+        }
+
+        const steps = o.steps.slice();
+        const target = idx - 1;
 
         // Ensure current step remains/sets to hold
         if (idx >= 0 && steps[idx]) {
@@ -228,7 +242,7 @@ export function useProductionPipeline() {
         return {
           ...o,
           steps,
-          currentStepIndex: Math.max(0, target),
+          currentStepIndex: target,
           parallelGroups: [],
         };
       }),

@@ -23,7 +23,7 @@ export default function ModelsAll() {
     rightPage: "/job-work",
   });
   const [filter, setFilter] = useState<
-    "all" | "hold" | "running" | "completed" | "job"
+    "all" | "hold" | "running" | "completed" | "job" | "onboard"
   >("all");
 
   const filtered = useMemo(() => {
@@ -41,6 +41,9 @@ export default function ModelsAll() {
       return pipeline.orders.filter(
         (o) => ((o as any).jobWorkIds || []).length > 0,
       );
+    }
+    if (filter === "onboard") {
+      return pipeline.orders.filter((o) => o.currentStepIndex === -1);
     }
 
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
@@ -150,6 +153,7 @@ export default function ModelsAll() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
+              <SelectItem value="onboard">On Board</SelectItem>
               <SelectItem value="hold">Hold</SelectItem>
               <SelectItem value="running">Running</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
