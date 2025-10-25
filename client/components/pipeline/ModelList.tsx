@@ -353,7 +353,11 @@ export default function ModelList(props: ModelListProps) {
 
   const statusBgClass = (o: WorkOrder) => {
     const i = o.currentStepIndex;
-    if (i < 0 || i >= o.steps.length) {
+    if (i < 0) {
+      // out of path, treat like hold
+      return "bg-red-50 dark:bg-red-900/20";
+    }
+    if (i >= o.steps.length) {
       // completed
       return "bg-green-50 dark:bg-green-900/20";
     }
