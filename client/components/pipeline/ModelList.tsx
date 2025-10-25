@@ -568,7 +568,7 @@ export default function ModelList(props: ModelListProps) {
                             style={{ width: "120px" }}
                           >
                             {i < 0
-                              ? "Not started"
+                              ? "Out of Path"
                               : i >= o.steps.length
                                 ? "Completed"
                                 : (() => {
