@@ -19,6 +19,7 @@ import {
   Pencil,
   CalendarDays,
   Plus,
+  Map,
 } from "lucide-react";
 import type {
   PathStep,
