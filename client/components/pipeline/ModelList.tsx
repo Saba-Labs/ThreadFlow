@@ -693,40 +693,6 @@ export default function ModelList(props: ModelListProps) {
                                             : cap(displayStatus)}
                                         </Badge>
                                       </button>
-                                      {hasPendingJW && (
-                                        <div className="mt-1">
-                                          {(() => {
-                                            const linkedJwIds = new Set<string>(
-                                              [
-                                                ...(((o as any).jobWorkIds ||
-                                                  []) as string[]),
-                                                ...(
-                                                  o.jobWorkAssignments || []
-                                                )
-                                                  .filter(
-                                                    (a) => a.status === "pending",
-                                                  )
-                                                  .map((a) => a.jobWorkId),
-                                              ],
-                                            );
-                                            return Array.from(linkedJwIds)
-                                              .map((id) =>
-                                                jobWorks.find(
-                                                  (j) => j.id === id,
-                                                ),
-                                              )
-                                              .filter((j) => j !== undefined)
-                                              .map((j) => (
-                                                <div
-                                                  key={j!.id}
-                                                  className="text-xs text-muted-foreground"
-                                                >
-                                                  {j!.name}
-                                                </div>
-                                              ));
-                                          })()}
-                                        </div>
-                                      )}
                                     </>
                                   );
                                 })()
@@ -1062,32 +1028,6 @@ export default function ModelList(props: ModelListProps) {
                                       </button>
                                     </div>
 
-                                    {hasPendingJW && (
-                                      <div className="mt-1 text-right">
-                                        {(() => {
-                                          const linkedJwIds = new Set<string>([
-                                            ...(((o as any).jobWorkIds ||
-                                              []) as string[]),
-                                            ...(o.jobWorkAssignments || [])
-                                              .filter((a) => a.status === "pending")
-                                              .map((a) => a.jobWorkId),
-                                          ]);
-                                          return Array.from(linkedJwIds)
-                                            .map((id) =>
-                                              jobWorks.find((j) => j.id === id),
-                                            )
-                                            .filter((j) => j !== undefined)
-                                            .map((j) => (
-                                              <div
-                                                key={j!.id}
-                                                className="text-xs text-muted-foreground"
-                                              >
-                                                {j!.name}
-                                              </div>
-                                            ));
-                                        })()}
-                                      </div>
-                                    )}
                                   </>
                                 )}
                               </div>
@@ -1184,32 +1124,6 @@ export default function ModelList(props: ModelListProps) {
                                         : cap(displayStatus)}
                                     </Badge>
                                   </button>
-                                  {hasPendingJW && (
-                                    <div className="mt-1 text-right">
-                                      {(() => {
-                                        const linkedJwIds = new Set<string>([
-                                          ...(((o as any).jobWorkIds ||
-                                            []) as string[]),
-                                          ...(o.jobWorkAssignments || [])
-                                            .filter((a) => a.status === "pending")
-                                            .map((a) => a.jobWorkId),
-                                        ]);
-                                        return Array.from(linkedJwIds)
-                                          .map((id) =>
-                                            jobWorks.find((j) => j.id === id),
-                                          )
-                                          .filter((j) => j !== undefined)
-                                          .map((j) => (
-                                            <div
-                                              key={j!.id}
-                                              className="text-xs text-muted-foreground"
-                                            >
-                                              {j!.name}
-                                            </div>
-                                          ));
-                                      })()}
-                                    </div>
-                                  )}
                                 </>
                               )}
                             </>
