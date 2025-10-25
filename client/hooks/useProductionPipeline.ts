@@ -2,6 +2,8 @@ import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
+import { useCallback, useMemo, useSyncExternalStore } from "react";
+
 import { useMachineTypes } from "@/lib/machineTypes";
 
 export type MachineType = string;
