@@ -353,13 +353,13 @@ export default function ModelList(props: ModelListProps) {
 
   const statusBgClass = (o: WorkOrder) => {
     const i = o.currentStepIndex;
-    const hasJW =
+    const hasPendingJW =
       ((o as any).jobWorkIds || []).length > 0 ||
-      (o.jobWorkAssignments || []).length > 0;
+      (o.jobWorkAssignments || []).some((a) => a.status === "pending");
 
     if (i < 0) {
       // out of path, treat like hold
-      return hasJW
+      return hasPendingJW
         ? "bg-purple-50 dark:bg-purple-900/20"
         : "bg-red-50 dark:bg-red-900/20";
     }
@@ -368,7 +368,7 @@ export default function ModelList(props: ModelListProps) {
       return "bg-green-50 dark:bg-green-900/20";
     }
     const st = o.steps[i];
-    if (hasJW) {
+    if (hasPendingJW) {
       return "bg-purple-50 dark:bg-purple-900/20";
     }
     if (st.status === "hold") return "bg-red-50 dark:bg-red-900/20";
