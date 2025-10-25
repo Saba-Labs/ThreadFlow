@@ -164,6 +164,7 @@ export default function Roadmap() {
               onUpdateTitle={handleUpdateCardTitle}
               onAddModels={handleAddModels}
               onRemoveModel={handleRemoveModel}
+              onMoveModel={handleMoveModel}
               onDeleteCard={handleDeleteCard}
             />
           ))}
