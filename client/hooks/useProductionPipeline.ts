@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useMachineTypes } from "@/lib/machineTypes";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
-
-import { useMachineTypes } from "@/lib/machineTypes";
 
 export type MachineType = string;
 
