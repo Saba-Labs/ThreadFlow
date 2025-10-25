@@ -40,10 +40,7 @@ export default function JobWorkDetailsModal({
     field: "pickup" | "delivery" | "quantity";
   } | null>(null);
   const [editValue, setEditValue] = useState<string>("");
-  const [completingId, setCompletingId] = useState<string | null>(null);
-  const [completeDate, setCompleteDate] = useState<string>(
-    new Date().toISOString().split("T")[0],
-  );
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString("en-US", {
