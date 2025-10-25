@@ -42,6 +42,9 @@ export default function ModelsAll() {
         (o) => ((o as any).jobWorkIds || []).length > 0,
       );
     }
+    if (filter === "onboard") {
+      return pipeline.orders.filter((o) => o.currentStepIndex === -1);
+    }
 
     return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
   }, [pipeline.orders, filter]);
