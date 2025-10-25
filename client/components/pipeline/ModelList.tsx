@@ -677,7 +677,7 @@ export default function ModelList(props: ModelListProps) {
                                       >
                                         <Badge
                                           variant={"default"}
-                                          className={`cursor-pointer whitespace-nowrap !hover:bg-inherit ${
+                                          className={`cursor-pointer whitespace-nowrap ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                             hasPendingJW
                                               ? "bg-purple-700 dark:bg-purple-600 text-white"
                                               : displayStatus === "running"
@@ -1045,7 +1045,7 @@ export default function ModelList(props: ModelListProps) {
                                       >
                                         <Badge
                                         variant={"default"}
-                                        className={`shrink-0 cursor-pointer !hover:bg-inherit ${
+                                        className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                           hasPendingJW
                                             ? "bg-purple-700 dark:bg-purple-600 text-white"
                                             : displayStatus === "running"
@@ -1169,7 +1169,7 @@ export default function ModelList(props: ModelListProps) {
                                   <button onClick={() => toggleCardStatus(o)}>
                                     <Badge
                                       variant={"default"}
-                                      className={`shrink-0 cursor-pointer !hover:bg-inherit ${
+                                      className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                         hasPendingJW
                                           ? "bg-purple-700 dark:bg-purple-600 text-white"
                                           : displayStatus === "running"
@@ -1545,7 +1545,7 @@ export default function ModelList(props: ModelListProps) {
           <SimpleModal
             open={!!splitFor}
             onOpenChange={(v) => !v && setSplitForId(null)}
-            title={`Split into Batches �� ${splitFor?.modelName}`}
+            title={`Split into Batches ���� ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setSplitForId(null)}>
