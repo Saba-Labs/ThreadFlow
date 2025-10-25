@@ -97,15 +97,10 @@ export default function JobWorkDetailsModal({
     setEditingField(null);
   };
 
-  const handleOpenCompleteDialog = (jwId: string, pickupDate: number) => {
-    setCompletingId(jwId);
-    setCompleteDate(new Date().toISOString().split("T")[0]);
-  };
-
-  const handleCompleteAssignment = () => {
-    if (!completingId) return;
-    onComplete(completingId, new Date(completeDate).getTime());
-    setCompletingId(null);
+  const handleCompleteAssignment = (jwId: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    onComplete(jwId, today.getTime());
   };
 
   const handleRemoveAssignment = (jwId: string) => {
