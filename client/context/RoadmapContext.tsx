@@ -91,6 +91,42 @@ export function useRoadmaps() {
     }));
   }, []);
 
+  const moveModelWithinRoadmap = useCallback((roadmapId: string, modelId: string, toIndex: number) => {
+    setStore((s) => ({
+      roadmaps: s.roadmaps.map((r) => {
+        if (r.id !== roadmapId) return r;
+        const idx = r.items.findIndex((it) => it.modelId === modelId);
+        if (idx === -1) return r;
+        const items = r.items.slice();
+        const [item] = items.splice(idx, 1);
+        const dest = Math.max(0, Math.min(toIndex, items.length));
+        items.splice(dest, 0, item);
+        return { ...r, items };
+      }),
+    }));
+  }, []);
+
+  const moveModelToRoadmap = useCallback((fromRoadmapId: string, toRoadmapId: string, modelId: string, toIndex?: number) => {
+    setStore((s) => {
+      const from = s.roadmaps.find((r) => r.id === fromRoadmapId);
+      const to = s.roadmaps.find((r) => r.id === toRoadmapId);
+      if (!from || !to) return s;
+      const exists = to.items.some((it) => it.modelId === modelId);
+      // remove from source
+      const newRoadmaps = s.roadmaps.map((r) =>
+        r.id === fromRoadmapId ? { ...r, items: r.items.filter((it) => it.modelId !== modelId) } : r,
+      );
+      if (exists) return { roadmaps: newRoadmaps };
+      // insert into dest
+      const destIndex = typeof toIndex === "number" ? Math.max(0, Math.min(toIndex, to.items.length)) : to.items.length;
+      return {
+        roadmaps: newRoadmaps.map((r) =>
+          r.id === toRoadmapId ? { ...r, items: [...r.items.slice(0, destIndex), { modelId, addedAt: Date.now() }, ...r.items.slice(destIndex)] } : r,
+        ),
+      };
+    });
+  }, []);
+
   return {
     roadmaps: state.roadmaps,
     createRoadmap,
@@ -98,5 +134,7 @@ export function useRoadmaps() {
     renameRoadmap,
     addModelToRoadmap,
     removeModelFromRoadmap,
+    moveModelWithinRoadmap,
+    moveModelToRoadmap,
   };
 }
