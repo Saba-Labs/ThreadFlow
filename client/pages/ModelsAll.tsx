@@ -153,6 +153,7 @@ export default function ModelsAll() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
+              <SelectItem value="onboard">On Board</SelectItem>
               <SelectItem value="hold">Hold</SelectItem>
               <SelectItem value="running">Running</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
