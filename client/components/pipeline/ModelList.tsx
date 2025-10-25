@@ -353,13 +353,13 @@ export default function ModelList(props: ModelListProps) {
 
   const statusBgClass = (o: WorkOrder) => {
     const i = o.currentStepIndex;
-    const hasJW =
+    const hasPendingJW =
       ((o as any).jobWorkIds || []).length > 0 ||
-      (o.jobWorkAssignments || []).length > 0;
+      (o.jobWorkAssignments || []).some((a) => a.status === "pending");
 
     if (i < 0) {
       // out of path, treat like hold
-      return hasJW
+      return hasPendingJW
         ? "bg-purple-50 dark:bg-purple-900/20"
         : "bg-red-50 dark:bg-red-900/20";
     }
@@ -368,7 +368,7 @@ export default function ModelList(props: ModelListProps) {
       return "bg-green-50 dark:bg-green-900/20";
     }
     const st = o.steps[i];
-    if (hasJW) {
+    if (hasPendingJW) {
       return "bg-purple-50 dark:bg-purple-900/20";
     }
     if (st.status === "hold") return "bg-red-50 dark:bg-red-900/20";
@@ -582,18 +582,20 @@ export default function ModelList(props: ModelListProps) {
                               : i >= o.steps.length
                                 ? "Completed"
                                 : (() => {
-                                    const hasJW =
+                                    const hasPendingJW =
                                       ((o as any).jobWorkIds || []).length >
                                         0 ||
-                                      (o.jobWorkAssignments || []).length > 0;
+                                      (o.jobWorkAssignments || []).some(
+                                        (a) => a.status === "pending",
+                                      );
 
-                                    if (hasJW) {
+                                    if (hasPendingJW) {
                                       const linkedJwIds = new Set<string>([
                                         ...(((o as any).jobWorkIds ||
                                           []) as string[]),
-                                        ...(o.jobWorkAssignments || []).map(
-                                          (a) => a.jobWorkId,
-                                        ),
+                                        ...(o.jobWorkAssignments || [])
+                                          .filter((a) => a.status === "pending")
+                                          .map((a) => a.jobWorkId),
                                       ]);
                                       const jwNames = Array.from(linkedJwIds)
                                         .map((id) =>
@@ -659,9 +661,11 @@ export default function ModelList(props: ModelListProps) {
                                 <Badge variant="secondary">—</Badge>
                               ) : (
                                 (() => {
-                                  const hasJW =
+                                  const hasPendingJW =
                                     ((o as any).jobWorkIds || []).length > 0 ||
-                                    (o.jobWorkAssignments || []).length > 0;
+                                    (o.jobWorkAssignments || []).some(
+                                      (a) => a.status === "pending",
+                                    );
                                   const displayStatus =
                                     step.status === "pending"
                                       ? "hold"
@@ -673,9 +677,9 @@ export default function ModelList(props: ModelListProps) {
                                       >
                                         <Badge
                                           variant={"default"}
-                                          className={`cursor-pointer whitespace-nowrap ${
-                                            hasJW
-                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                          className={`cursor-pointer whitespace-nowrap ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                            hasPendingJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
                                               : displayStatus === "running"
                                                 ? "bg-green-600 text-white"
                                                 : displayStatus === "hold"
@@ -684,44 +688,11 @@ export default function ModelList(props: ModelListProps) {
                                           }`}
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
-                                          {hasJW
+                                          {hasPendingJW
                                             ? "Job Work"
                                             : cap(displayStatus)}
                                         </Badge>
                                       </button>
-                                      {(((o as any).jobWorkIds || []).length >
-                                        0 ||
-                                        (o.jobWorkAssignments || []).length >
-                                          0) && (
-                                        <div className="mt-1">
-                                          {(() => {
-                                            const linkedJwIds = new Set<string>(
-                                              [
-                                                ...(((o as any).jobWorkIds ||
-                                                  []) as string[]),
-                                                ...(
-                                                  o.jobWorkAssignments || []
-                                                ).map((a) => a.jobWorkId),
-                                              ],
-                                            );
-                                            return Array.from(linkedJwIds)
-                                              .map((id) =>
-                                                jobWorks.find(
-                                                  (j) => j.id === id,
-                                                ),
-                                              )
-                                              .filter((j) => j !== undefined)
-                                              .map((j) => (
-                                                <div
-                                                  key={j!.id}
-                                                  className="text-xs text-muted-foreground"
-                                                >
-                                                  {j!.name}
-                                                </div>
-                                              ));
-                                          })()}
-                                        </div>
-                                      )}
                                     </>
                                   );
                                 })()
@@ -956,6 +927,12 @@ export default function ModelList(props: ModelListProps) {
                         (() => {
                           const displayStatus =
                             step.status === "pending" ? "hold" : step.status;
+                          const hasPendingJW =
+                            ((o as any).jobWorkIds || []).length > 0 ||
+                            (o.jobWorkAssignments || []).some(
+                              (a) => a.status === "pending",
+                            );
+
                           if (viewMode === "list") {
                             // Stack current, status badge, and job work vertically like card view
                             const parallelGroup = (o.parallelGroups || []).find(
@@ -981,9 +958,38 @@ export default function ModelList(props: ModelListProps) {
                                       ? "Out of Path"
                                       : i >= o.steps.length
                                         ? "Completed"
-                                        : step.kind === "machine"
-                                          ? step.machineType
-                                          : "Job Work"}
+                                        : hasPendingJW
+                                          ? (() => {
+                                              const linkedJwIds =
+                                                new Set<string>([
+                                                  ...(((o as any).jobWorkIds ||
+                                                    []) as string[]),
+                                                  ...(
+                                                    o.jobWorkAssignments || []
+                                                  )
+                                                    .filter(
+                                                      (a) =>
+                                                        a.status === "pending",
+                                                    )
+                                                    .map((a) => a.jobWorkId),
+                                                ]);
+                                              const jwNames = Array.from(
+                                                linkedJwIds,
+                                              )
+                                                .map((id) =>
+                                                  jobWorks.find(
+                                                    (j) => j.id === id,
+                                                  ),
+                                                )
+                                                .filter((j) => j !== undefined)
+                                                .map((j) => j!.name);
+                                              return jwNames.length > 0
+                                                ? jwNames[0]
+                                                : primaryMachine;
+                                            })()
+                                          : step.kind === "machine"
+                                            ? step.machineType
+                                            : "Job Work"}
                                   </span>
                                 </div>
 
@@ -1007,63 +1013,24 @@ export default function ModelList(props: ModelListProps) {
                                       <button
                                         onClick={() => toggleCardStatus(o)}
                                       >
-                                        {(() => {
-                                          const hasJW =
-                                            ((o as any).jobWorkIds || [])
-                                              .length > 0 ||
-                                            (o.jobWorkAssignments || [])
-                                              .length > 0;
-                                          return (
-                                            <Badge
-                                              variant={"default"}
-                                              className={`shrink-0 cursor-pointer ${
-                                                hasJW
-                                                  ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
-                                                  : displayStatus === "running"
-                                                    ? "bg-green-600 text-white"
-                                                    : displayStatus === "hold"
-                                                      ? "bg-red-600 text-white"
-                                                      : "bg-gray-500 text-white"
-                                              }`}
-                                            >
-                                              {hasJW
-                                                ? "Job Work"
-                                                : cap(displayStatus)}
-                                            </Badge>
-                                          );
-                                        })()}
+                                        <Badge
+                                          variant={"default"}
+                                          className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                            hasPendingJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
+                                        >
+                                          {hasPendingJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
+                                        </Badge>
                                       </button>
                                     </div>
-
-                                    {(((o as any).jobWorkIds || []).length >
-                                      0 ||
-                                      (o.jobWorkAssignments || []).length >
-                                        0) && (
-                                      <div className="mt-1 text-right">
-                                        {(() => {
-                                          const linkedJwIds = new Set<string>([
-                                            ...(((o as any).jobWorkIds ||
-                                              []) as string[]),
-                                            ...(o.jobWorkAssignments || []).map(
-                                              (a) => a.jobWorkId,
-                                            ),
-                                          ]);
-                                          return Array.from(linkedJwIds)
-                                            .map((id) =>
-                                              jobWorks.find((j) => j.id === id),
-                                            )
-                                            .filter((j) => j !== undefined)
-                                            .map((j) => (
-                                              <div
-                                                key={j!.id}
-                                                className="text-sm text-muted-foreground"
-                                              >
-                                                {j!.name}
-                                              </div>
-                                            ));
-                                        })()}
-                                      </div>
-                                    )}
                                   </>
                                 )}
                               </div>
@@ -1079,9 +1046,39 @@ export default function ModelList(props: ModelListProps) {
                                     ? "Out of Path"
                                     : i >= o.steps.length
                                       ? "Completed"
-                                      : step.kind === "machine"
-                                        ? step.machineType
-                                        : "Job Work"}
+                                      : hasPendingJW
+                                        ? (() => {
+                                            const linkedJwIds = new Set<string>(
+                                              [
+                                                ...(((o as any).jobWorkIds ||
+                                                  []) as string[]),
+                                                ...(o.jobWorkAssignments || [])
+                                                  .filter(
+                                                    (a) =>
+                                                      a.status === "pending",
+                                                  )
+                                                  .map((a) => a.jobWorkId),
+                                              ],
+                                            );
+                                            const jwNames = Array.from(
+                                              linkedJwIds,
+                                            )
+                                              .map((id) =>
+                                                jobWorks.find(
+                                                  (j) => j.id === id,
+                                                ),
+                                              )
+                                              .filter((j) => j !== undefined)
+                                              .map((j) => j!.name);
+                                            return jwNames.length > 0
+                                              ? jwNames[0]
+                                              : step.kind === "machine"
+                                                ? step.machineType
+                                                : "Job Work";
+                                          })()
+                                        : step.kind === "machine"
+                                          ? step.machineType
+                                          : "Job Work"}
                                 </span>
                               </div>
 
@@ -1118,59 +1115,23 @@ export default function ModelList(props: ModelListProps) {
                               {isExpandedMobile && (
                                 <>
                                   <button onClick={() => toggleCardStatus(o)}>
-                                    {(() => {
-                                      const hasJW =
-                                        ((o as any).jobWorkIds || []).length >
-                                          0 ||
-                                        (o.jobWorkAssignments || []).length > 0;
-                                      return (
-                                        <Badge
-                                          variant={"default"}
-                                          className={`shrink-0 cursor-pointer ${
-                                            hasJW
-                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
-                                              : displayStatus === "running"
-                                                ? "bg-green-600 text-white"
-                                                : displayStatus === "hold"
-                                                  ? "bg-red-600 text-white"
-                                                  : "bg-gray-500 text-white"
-                                          }`}
-                                        >
-                                          {hasJW
-                                            ? "Job Work"
-                                            : cap(displayStatus)}
-                                        </Badge>
-                                      );
-                                    })()}
+                                    <Badge
+                                      variant={"default"}
+                                      className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                        hasPendingJW
+                                          ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                          : displayStatus === "running"
+                                            ? "bg-green-600 text-white"
+                                            : displayStatus === "hold"
+                                              ? "bg-red-600 text-white"
+                                              : "bg-gray-500 text-white"
+                                      }`}
+                                    >
+                                      {hasPendingJW
+                                        ? "Job Work"
+                                        : cap(displayStatus)}
+                                    </Badge>
                                   </button>
-                                  {(((o as any).jobWorkIds || []).length > 0 ||
-                                    (o.jobWorkAssignments || []).length >
-                                      0) && (
-                                    <div className="mt-1 text-right">
-                                      {(() => {
-                                        const linkedJwIds = new Set<string>([
-                                          ...(((o as any).jobWorkIds ||
-                                            []) as string[]),
-                                          ...(o.jobWorkAssignments || []).map(
-                                            (a) => a.jobWorkId,
-                                          ),
-                                        ]);
-                                        return Array.from(linkedJwIds)
-                                          .map((id) =>
-                                            jobWorks.find((j) => j.id === id),
-                                          )
-                                          .filter((j) => j !== undefined)
-                                          .map((j) => (
-                                            <div
-                                              key={j!.id}
-                                              className="text-sm text-muted-foreground"
-                                            >
-                                              {j!.name}
-                                            </div>
-                                          ));
-                                      })()}
-                                    </div>
-                                  )}
                                 </>
                               )}
                             </>
@@ -1333,6 +1294,12 @@ export default function ModelList(props: ModelListProps) {
                     "completed",
                     completionDate,
                   );
+                  if (
+                    o.currentStepIndex >= 0 &&
+                    o.currentStepIndex < o.steps.length
+                  ) {
+                    props.onSetStepStatus(o.id, o.currentStepIndex, "hold");
+                  }
                 }
               }}
             />
@@ -1503,7 +1470,7 @@ export default function ModelList(props: ModelListProps) {
           <SimpleModal
             open={!!splitFor}
             onOpenChange={(v) => !v && setSplitForId(null)}
-            title={`Split into Batches — ${splitFor?.modelName}`}
+            title={`Split into Batches ���� ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setSplitForId(null)}>
