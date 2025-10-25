@@ -172,9 +172,16 @@ export function useProductionPipeline() {
     setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
-        if (o.currentStepIndex < 0) return o;
         const idx = o.currentStepIndex;
         const steps = o.steps.slice();
+
+        // If out of path (-1), enter the first path
+        if (idx < 0) {
+          if (steps.length > 0 && steps[0]) {
+            steps[0] = { ...steps[0], status: "hold", activeMachines: 0 };
+          }
+          return { ...o, steps, currentStepIndex: 0, parallelGroups: [] };
+        }
 
         // Do NOT mark previous step as completed; keep it as hold
         if (steps[idx]) {
