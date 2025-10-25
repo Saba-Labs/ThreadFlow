@@ -476,6 +476,27 @@ export default function JobWorkDetailsModal({
           )}
         </div>
       </SimpleModal>
+
+      <AlertDialog open={deletingId !== null} onOpenChange={handleCancelDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Job Work Assignment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this job work assignment? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
