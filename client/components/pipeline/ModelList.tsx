@@ -636,19 +636,15 @@ export default function ModelList(props: ModelListProps) {
                                         onClick={() => toggleCardStatus(o)}
                                       >
                                         <Badge
-                                          variant={
-                                            hasJW
-                                              ? "outline"
-                                              : displayStatus === "running"
-                                                ? "success"
-                                                : displayStatus === "hold"
-                                                  ? "destructive"
-                                                  : "secondary"
-                                          }
+                                          variant={"default"}
                                           className={`cursor-pointer whitespace-nowrap ${
                                             hasJW
-                                              ? "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border-purple-300 dark:border-purple-600"
-                                              : ""
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
                                           }`}
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
@@ -983,19 +979,15 @@ export default function ModelList(props: ModelListProps) {
                                               .length > 0;
                                           return (
                                             <Badge
-                                              variant={
-                                                hasJW
-                                                  ? "outline"
-                                                  : displayStatus === "running"
-                                                    ? "success"
-                                                    : displayStatus === "hold"
-                                                      ? "destructive"
-                                                      : "secondary"
-                                              }
+                                              variant={"default"}
                                               className={`shrink-0 cursor-pointer ${
                                                 hasJW
-                                                  ? "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border-purple-300 dark:border-purple-600"
-                                                  : ""
+                                                  ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                                  : displayStatus === "running"
+                                                    ? "bg-green-600 text-white"
+                                                    : displayStatus === "hold"
+                                                      ? "bg-red-600 text-white"
+                                                      : "bg-gray-500 text-white"
                                               }`}
                                             >
                                               {hasJW
@@ -1103,19 +1095,15 @@ export default function ModelList(props: ModelListProps) {
                                           0;
                                       return (
                                         <Badge
-                                          variant={
-                                            hasJW
-                                              ? "outline"
-                                              : displayStatus === "running"
-                                                ? "success"
-                                                : displayStatus === "hold"
-                                                  ? "destructive"
-                                                  : "secondary"
-                                          }
+                                          variant={"default"}
                                           className={`shrink-0 cursor-pointer ${
                                             hasJW
-                                              ? "bg-purple-100 dark:bg-purple-900/40 text-purple-900 dark:text-purple-100 border-purple-300 dark:border-purple-600"
-                                              : ""
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white hover:bg-purple-800 dark:hover:bg-purple-700"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
                                           }`}
                                         >
                                           {hasJW ? "Job Work" : cap(displayStatus)}
