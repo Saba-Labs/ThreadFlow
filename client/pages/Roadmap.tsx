@@ -9,7 +9,7 @@ import SimpleModal from "@/components/ui/SimpleModal";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function RoadmapPage() {
-  const { roadmaps, createRoadmap, deleteRoadmap, renameRoadmap, removeModelFromRoadmap, addModelToRoadmap } = useRoadmaps();
+  const { roadmaps, createRoadmap, deleteRoadmap, renameRoadmap, removeModelFromRoadmap, addModelToRoadmap, moveModelWithinRoadmap, moveModelToRoadmap } = useRoadmaps();
   const pipeline = useProductionPipeline();
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
