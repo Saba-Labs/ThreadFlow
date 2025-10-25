@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import { useJobWorks } from "@/lib/jobWorks";
 import type { JobWorkAssignment } from "@/hooks/useProductionPipeline";
+import { Trash2, Edit2, Check, Plus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +14,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Calendar, Trash2, Edit2 } from "lucide-react";
 
 interface JobWorkDetailsModalProps {
   open: boolean;
@@ -40,10 +40,14 @@ export default function JobWorkDetailsModal({
     field: "pickup" | "delivery" | "quantity";
   } | null>(null);
   const [editValue, setEditValue] = useState<string>("");
-  const [completingId, setCompletingId] = useState<string | null>(null);
-  const [completeDate, setCompleteDate] = useState<string>(
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newJobWorkId, setNewJobWorkId] = useState<string>("");
+  const [newQuantity, setNewQuantity] = useState<string>("1");
+  const [newPickupDate, setNewPickupDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString("en-US", {
@@ -83,10 +87,18 @@ export default function JobWorkDetailsModal({
           pickupDate: new Date(editValue).getTime(),
         };
       } else if (editingField.field === "delivery") {
+        // If delivery date is empty, revert to pending status
+        if (!editValue) {
+          return {
+            ...a,
+            completionDate: undefined,
+            status: "pending",
+          };
+        }
         return {
           ...a,
           completionDate: new Date(editValue).getTime(),
-          status: a.status === "pending" ? "completed" : a.status,
+          status: "completed",
         };
       } else {
         return {
@@ -100,30 +112,70 @@ export default function JobWorkDetailsModal({
     setEditingField(null);
   };
 
-  const handleOpenCompleteDialog = (jwId: string, pickupDate: number) => {
-    setCompletingId(jwId);
-    setCompleteDate(new Date().toISOString().split("T")[0]);
-  };
-
-  const handleCompleteAssignment = () => {
-    if (!completingId) return;
-    onComplete(completingId, new Date(completeDate).getTime());
-    setCompletingId(null);
+  const handleCompleteAssignment = (jwId: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    onComplete(jwId, today.getTime());
   };
 
   const handleRemoveAssignment = (jwId: string) => {
-    const filtered = assignments.filter((a) => a.jobWorkId !== jwId);
+    setDeletingId(jwId);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deletingId) return;
+    const filtered = assignments.filter((a) => a.jobWorkId !== deletingId);
     onUpdateAssignments(filtered);
+    setDeletingId(null);
+  };
+
+  const handleCancelDelete = () => {
+    setDeletingId(null);
+  };
+
+  const handleNotComplete = (jwId: string) => {
+    const updated = assignments.map((a) => {
+      if (a.jobWorkId !== jwId) return a;
+      return {
+        ...a,
+        completionDate: undefined,
+        status: "pending" as const,
+      };
+    });
+    onUpdateAssignments(updated);
   };
 
   const getJobWorkName = (jwId: string) => {
     return jobWorks.find((j) => j.id === jwId)?.name || "Unknown";
   };
 
+  const getAvailableJobWorks = () => {
+    const assignedIds = new Set(assignments.map((a) => a.jobWorkId));
+    return jobWorks.filter((j) => !assignedIds.has(j.id));
+  };
+
+  const handleAddJobWork = () => {
+    if (!newJobWorkId) return;
+
+    const newAssignment: JobWorkAssignment = {
+      jobWorkId: newJobWorkId,
+      quantity: Math.max(1, Math.floor(Number(newQuantity) || 1)),
+      pickupDate: new Date(newPickupDate).getTime(),
+      status: "pending",
+    };
+
+    onUpdateAssignments([...assignments, newAssignment]);
+    setShowAddForm(false);
+    setNewJobWorkId("");
+    setNewQuantity("1");
+    setNewPickupDate(new Date().toISOString().split("T")[0]);
+  };
+
   const pendingAssignments = assignments.filter((a) => a.status === "pending");
   const completedAssignments = assignments.filter(
     (a) => a.status === "completed",
   );
+  const availableJobWorks = getAvailableJobWorks();
 
   return (
     <>
@@ -140,125 +192,311 @@ export default function JobWorkDetailsModal({
         }
       >
         <div className="space-y-3">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead className="bg-gray-100 dark:bg-gray-800">
-                <tr>
-                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Pickup Date
-                  </th>
-                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Model Name
-                  </th>
-                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Delivery Date
-                  </th>
-                  <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {assignments.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="p-4 text-center text-muted-foreground"
-                    >
-                      No job work assignments yet.
-                    </td>
-                  </tr>
-                ) : (
-                  assignments.map((assignment) => (
-                    <tr
-                      key={assignment.jobWorkId}
-                      className={`border-t border-gray-200 dark:border-gray-700 ${
-                        assignment.status === "completed"
-                          ? "bg-green-50 dark:bg-green-900/10"
-                          : "bg-yellow-50 dark:bg-yellow-900/10"
-                      }`}
-                    >
-                      <td className="p-3 text-gray-700 dark:text-gray-300">
-                        {editingField?.jobWorkId === assignment.jobWorkId &&
-                        editingField.field === "pickup" ? (
-                          <Input
-                            type="date"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={handleSaveEditField}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleSaveEditField();
-                              if (e.key === "Escape") setEditingField(null);
-                            }}
-                            autoFocus
-                            className="h-7 text-xs"
-                          />
-                        ) : (
-                          <button
-                            onClick={() =>
-                              handleEditField(assignment, "pickup")
-                            }
-                            className="hover:underline text-left"
-                          >
-                            {formatDate(assignment.pickupDate)}
-                          </button>
-                        )}
-                      </td>
-                      <td className="p-3 text-gray-900 dark:text-gray-100 font-medium">
-                        <span>{modelName}</span>
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {" "}
+          {assignments.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground">
+              No job work assignments yet.
+            </div>
+          ) : (
+            assignments.map((assignment) => (
+              <div
+                key={assignment.jobWorkId}
+                className={`rounded-lg border p-4 ${
+                  assignment.status === "completed"
+                    ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
+                    : "border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20"
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Job Work
+                      </div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                        {getJobWorkName(assignment.jobWorkId)}
+                        <span className="text-gray-600 dark:text-gray-400 ml-2">
                           ({assignment.quantity})
                         </span>
-                      </td>
-                      <td className="p-3 text-gray-700 dark:text-gray-300">
-                        {editingField?.jobWorkId === assignment.jobWorkId &&
-                        editingField.field === "delivery" ? (
-                          <Input
-                            type="date"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={handleSaveEditField}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleSaveEditField();
-                              if (e.key === "Escape") setEditingField(null);
-                            }}
-                            autoFocus
-                            className="h-7 text-xs"
-                          />
-                        ) : (
-                          <button
-                            onClick={() =>
-                              handleEditField(assignment, "delivery")
-                            }
-                            className="hover:underline text-left"
-                          >
-                            {assignment.completionDate
-                              ? formatDate(assignment.completionDate)
-                              : "—"}
-                          </button>
-                        )}
-                      </td>
-                      <td className="p-3">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() =>
-                            handleRemoveAssignment(assignment.jobWorkId)
+                      </div>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        if (editingCardId === assignment.jobWorkId) {
+                          // Save and exit edit mode
+                          if (editingField) {
+                            handleSaveEditField();
                           }
-                          title="Remove"
+                          setEditingCardId(null);
+                        } else {
+                          // Enter edit mode
+                          setEditingCardId(assignment.jobWorkId);
+                        }
+                      }}
+                      title={
+                        editingCardId === assignment.jobWorkId ? "Save" : "Edit"
+                      }
+                    >
+                      {editingCardId === assignment.jobWorkId ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Edit2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                        Pickup Date
+                      </label>
+                      {editingCardId === assignment.jobWorkId &&
+                      editingField?.jobWorkId === assignment.jobWorkId &&
+                      editingField.field === "pickup" ? (
+                        <Input
+                          type="date"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleSaveEditField}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveEditField();
+                            if (e.key === "Escape") setEditingField(null);
+                          }}
+                          autoFocus
+                          className="h-8 text-sm"
+                        />
+                      ) : editingCardId === assignment.jobWorkId ? (
+                        <button
+                          onClick={() => handleEditField(assignment, "pickup")}
+                          className="w-full text-left px-2 py-1 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded border border-gray-300 dark:border-gray-600"
                         >
-                          <Trash2 className="h-4 w-4 text-red-600" />
+                          {formatDate(assignment.pickupDate)}
+                        </button>
+                      ) : (
+                        <div className="px-2 py-1 text-gray-900 dark:text-gray-100">
+                          {formatDate(assignment.pickupDate)}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                        Delivery Date
+                      </label>
+                      {editingCardId === assignment.jobWorkId &&
+                      editingField?.jobWorkId === assignment.jobWorkId &&
+                      editingField.field === "delivery" ? (
+                        <Input
+                          type="date"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleSaveEditField}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveEditField();
+                            if (e.key === "Escape") setEditingField(null);
+                          }}
+                          autoFocus
+                          className="h-8 text-sm"
+                        />
+                      ) : editingCardId === assignment.jobWorkId ? (
+                        <button
+                          onClick={() =>
+                            handleEditField(assignment, "delivery")
+                          }
+                          className="w-full text-left px-2 py-1 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded border border-gray-300 dark:border-gray-600"
+                        >
+                          {assignment.completionDate
+                            ? formatDate(assignment.completionDate)
+                            : "—"}
+                        </button>
+                      ) : (
+                        <div className="px-2 py-1 text-gray-900 dark:text-gray-100">
+                          {assignment.completionDate
+                            ? formatDate(assignment.completionDate)
+                            : "—"}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {editingCardId === assignment.jobWorkId && (
+                    <div>
+                      <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                        Quantity
+                      </label>
+                      {editingField?.jobWorkId === assignment.jobWorkId &&
+                      editingField.field === "quantity" ? (
+                        <Input
+                          type="number"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleSaveEditField}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveEditField();
+                            if (e.key === "Escape") setEditingField(null);
+                          }}
+                          autoFocus
+                          className="h-8 text-sm"
+                        />
+                      ) : (
+                        <button
+                          onClick={() =>
+                            handleEditField(assignment, "quantity")
+                          }
+                          className="w-full text-left px-2 py-1 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded border border-gray-300 dark:border-gray-600"
+                        >
+                          {assignment.quantity}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    {assignment.status === "pending" && !editingCardId && (
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() =>
+                          handleCompleteAssignment(assignment.jobWorkId)
+                        }
+                      >
+                        Complete
+                      </Button>
+                    )}
+                    {editingCardId === assignment.jobWorkId &&
+                      assignment.status === "completed" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() =>
+                            handleNotComplete(assignment.jobWorkId)
+                          }
+                        >
+                          Not Complete
                         </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      )}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() =>
+                        handleRemoveAssignment(assignment.jobWorkId)
+                      }
+                      title="Remove"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+
+          {!showAddForm && availableJobWorks.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowAddForm(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Job Work
+            </Button>
+          )}
+
+          {showAddForm && (
+            <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4 space-y-3">
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                Add New Job Work
+              </h4>
+
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                  Job Work
+                </label>
+                <select
+                  value={newJobWorkId}
+                  onChange={(e) => setNewJobWorkId(e.target.value)}
+                  className="w-full px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm"
+                >
+                  <option value="">Select a job work...</option>
+                  {availableJobWorks.map((jw) => (
+                    <option key={jw.id} value={jw.id}>
+                      {jw.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                  Quantity
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={newQuantity}
+                  onChange={(e) => setNewQuantity(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
+                  Pickup Date
+                </label>
+                <Input
+                  type="date"
+                  value={newPickupDate}
+                  onChange={(e) => setNewPickupDate(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleAddJobWork}
+                  disabled={!newJobWorkId}
+                >
+                  Add
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowAddForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </SimpleModal>
+
+      <AlertDialog open={deletingId !== null} onOpenChange={handleCancelDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Job Work Assignment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this job work assignment? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

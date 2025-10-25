@@ -28,8 +28,8 @@ export default function SimpleModal(props: {
         className="absolute inset-0 bg-black/40"
         onClick={() => onOpenChange?.(false)}
       />
-      <div className="relative z-10 w-full max-w-2xl rounded-lg bg-background shadow-lg">
-        <div className="flex items-center justify-between border-b p-4">
+      <div className="relative z-10 w-full max-w-2xl mx-4 max-h-[90vh] rounded-lg bg-background shadow-lg flex flex-col">
+        <div className="flex items-center justify-between border-b p-4 flex-shrink-0">
           <h3 className="text-lg font-semibold">{title}</h3>
           <button
             aria-label="Close"
@@ -39,8 +39,8 @@ export default function SimpleModal(props: {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="p-4">{children}</div>
-        {footer && <div className="border-t p-4">{footer}</div>}
+        <div className="p-4 overflow-y-auto flex-1">{children}</div>
+        {footer && <div className="border-t p-4 flex-shrink-0">{footer}</div>}
       </div>
     </div>,
     document.body,

@@ -310,16 +310,10 @@ export default function JobWork() {
           </div>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3">
           {selectedJobWorkId &&
             (() => {
               const assignments = getAssignmentsForJobWork(selectedJobWorkId);
-              const pendingAssignments = assignments.filter(
-                (a) => a.status === "pending",
-              );
-              const completedAssignments = assignments.filter(
-                (a) => a.status === "completed",
-              );
 
               const formatDate = (timestamp: number) => {
                 return new Date(timestamp).toLocaleDateString("en-US", {
@@ -330,75 +324,80 @@ export default function JobWork() {
               };
 
               return (
-                <>
-                  {/* Pending */}
-                  {pendingAssignments.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        Current Models
-                      </div>
-                      <div className="space-y-2">
-                        {pendingAssignments.map((a) => (
-                          <div
-                            key={`${a.orderId}-pending`}
-                            className="rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 p-3"
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border-collapse">
+                    <thead className="bg-gray-100 dark:bg-gray-800">
+                      <tr>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                          Model Name
+                        </th>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                          Quantity
+                        </th>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                          Pickup Date
+                        </th>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                          Delivery Date
+                        </th>
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {assignments.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="p-4 text-center text-muted-foreground"
                           >
-                            <div className="font-medium text-gray-900 dark:text-gray-100">
-                              {a.modelName}
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              Quantity: {a.quantity}
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
-                              <Calendar className="h-4 w-4" />
-                              Pickup: {formatDate(a.pickupDate)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Completed */}
-                  {completedAssignments.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        Completed Records
-                      </div>
-                      <div className="space-y-2">
-                        {completedAssignments.map((a) => (
-                          <div
-                            key={`${a.orderId}-completed`}
-                            className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-3"
+                            No assignment history.
+                          </td>
+                        </tr>
+                      ) : (
+                        assignments.map((a) => (
+                          <tr
+                            key={`${a.orderId}-${a.status}`}
+                            className={`border-t border-gray-200 dark:border-gray-700 ${
+                              a.status === "completed"
+                                ? "bg-green-50 dark:bg-green-900/10"
+                                : "bg-yellow-50 dark:bg-yellow-900/10"
+                            }`}
                           >
-                            <div className="font-medium text-gray-900 dark:text-gray-100">
+                            <td className="p-3 text-gray-900 dark:text-gray-100 font-medium">
                               {a.modelName}
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              Quantity: {a.quantity}
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
-                              <Calendar className="h-4 w-4" />
-                              Pickup: {formatDate(a.pickupDate)}
-                            </div>
-                            {a.completionDate && (
-                              <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-1">
-                                <Calendar className="h-4 w-4" />
-                                Delivered: {formatDate(a.completionDate)}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {assignments.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No assignment history.
-                    </div>
-                  )}
-                </>
+                            </td>
+                            <td className="p-3 text-gray-700 dark:text-gray-300">
+                              {a.quantity}
+                            </td>
+                            <td className="p-3 text-gray-700 dark:text-gray-300">
+                              {formatDate(a.pickupDate)}
+                            </td>
+                            <td className="p-3 text-gray-700 dark:text-gray-300">
+                              {a.completionDate
+                                ? formatDate(a.completionDate)
+                                : "—"}
+                            </td>
+                            <td className="p-3">
+                              <span
+                                className={`text-xs font-semibold px-2 py-1 rounded ${
+                                  a.status === "completed"
+                                    ? "bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-100"
+                                    : "bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100"
+                                }`}
+                              >
+                                {a.status === "completed"
+                                  ? "Completed"
+                                  : "Pending"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               );
             })()}
         </div>
