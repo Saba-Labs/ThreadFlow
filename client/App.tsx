@@ -22,7 +22,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayout />}>
-            <Route path="/" element={<Navigate to="/models/all" replace />} />
+            <Route path="/" element={<Index />} />
             <Route path="/settings" element={<Settings />} />
             <Route
               path="/settings/production-path"
