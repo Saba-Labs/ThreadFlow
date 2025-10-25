@@ -100,6 +100,36 @@ export default function Roadmap() {
     setCards(cards.filter((card) => card.id !== cardId));
   };
 
+  const handleMoveModel = (
+    cardId: string,
+    modelIndex: number,
+    direction: "up" | "down",
+  ) => {
+    setCards(
+      cards.map((card) => {
+        if (card.id === cardId) {
+          const newModelIds = [...card.modelIds];
+          if (direction === "up" && modelIndex > 0) {
+            [newModelIds[modelIndex - 1], newModelIds[modelIndex]] = [
+              newModelIds[modelIndex],
+              newModelIds[modelIndex - 1],
+            ];
+          } else if (
+            direction === "down" &&
+            modelIndex < newModelIds.length - 1
+          ) {
+            [newModelIds[modelIndex + 1], newModelIds[modelIndex]] = [
+              newModelIds[modelIndex],
+              newModelIds[modelIndex + 1],
+            ];
+          }
+          return { ...card, modelIds: newModelIds };
+        }
+        return card;
+      }),
+    );
+  };
+
   const getModelsByIds = (modelIds: string[]) => {
     return modelIds
       .map((id) => pipeline.orders.find((order) => order.id === id))
