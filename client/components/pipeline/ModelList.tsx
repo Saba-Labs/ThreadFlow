@@ -580,6 +580,45 @@ export default function ModelList(props: ModelListProps) {
                               : i >= o.steps.length
                                 ? "Completed"
                                 : (() => {
+                                    const hasJW =
+                                      ((o as any).jobWorkIds || []).length > 0 ||
+                                      (o.jobWorkAssignments || []).length > 0;
+
+                                    if (hasJW) {
+                                      const linkedJwIds = new Set<string>(
+                                        [
+                                          ...(((o as any).jobWorkIds ||
+                                            []) as string[]),
+                                          ...(o.jobWorkAssignments || []).map(
+                                            (a) => a.jobWorkId,
+                                          ),
+                                        ],
+                                      );
+                                      const jwNames = Array.from(linkedJwIds)
+                                        .map((id) =>
+                                          jobWorks.find(
+                                            (j) => j.id === id,
+                                          ),
+                                        )
+                                        .filter(
+                                          (j) => j !== undefined,
+                                        )
+                                        .map((j) => j!.name);
+
+                                      return (
+                                        <div className="flex flex-col gap-0.5">
+                                          {jwNames.map((name) => (
+                                            <div
+                                              key={name}
+                                              className="font-medium text-purple-700 dark:text-purple-300"
+                                            >
+                                              {name}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      );
+                                    }
+
                                     const primaryMachine =
                                       step.kind === "machine"
                                         ? step.machineType
