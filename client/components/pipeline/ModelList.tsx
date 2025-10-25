@@ -960,22 +960,26 @@ export default function ModelList(props: ModelListProps) {
                                         ? "Completed"
                                         : hasPendingJW
                                           ? (() => {
-                                              const linkedJwIds = new Set<string>(
-                                                [
+                                              const linkedJwIds =
+                                                new Set<string>([
                                                   ...(((o as any).jobWorkIds ||
                                                     []) as string[]),
-                                                  ...(o.jobWorkAssignments || [])
+                                                  ...(
+                                                    o.jobWorkAssignments || []
+                                                  )
                                                     .filter(
-                                                      (a) => a.status === "pending",
+                                                      (a) =>
+                                                        a.status === "pending",
                                                     )
                                                     .map((a) => a.jobWorkId),
-                                                ],
-                                              );
+                                                ]);
                                               const jwNames = Array.from(
                                                 linkedJwIds,
                                               )
                                                 .map((id) =>
-                                                  jobWorks.find((j) => j.id === id),
+                                                  jobWorks.find(
+                                                    (j) => j.id === id,
+                                                  ),
                                                 )
                                                 .filter((j) => j !== undefined)
                                                 .map((j) => j!.name);
@@ -1010,24 +1014,23 @@ export default function ModelList(props: ModelListProps) {
                                         onClick={() => toggleCardStatus(o)}
                                       >
                                         <Badge
-                                        variant={"default"}
-                                        className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                          hasPendingJW
-                                            ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                            : displayStatus === "running"
-                                              ? "bg-green-600 text-white"
-                                              : displayStatus === "hold"
-                                                ? "bg-red-600 text-white"
-                                                : "bg-gray-500 text-white"
-                                        }`}
-                                      >
-                                        {hasPendingJW
-                                          ? "Job Work"
-                                          : cap(displayStatus)}
-                                      </Badge>
+                                          variant={"default"}
+                                          className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                            hasPendingJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
+                                        >
+                                          {hasPendingJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
+                                        </Badge>
                                       </button>
                                     </div>
-
                                   </>
                                 )}
                               </div>
@@ -1051,14 +1054,19 @@ export default function ModelList(props: ModelListProps) {
                                                   []) as string[]),
                                                 ...(o.jobWorkAssignments || [])
                                                   .filter(
-                                                    (a) => a.status === "pending",
+                                                    (a) =>
+                                                      a.status === "pending",
                                                   )
                                                   .map((a) => a.jobWorkId),
                                               ],
                                             );
-                                            const jwNames = Array.from(linkedJwIds)
+                                            const jwNames = Array.from(
+                                              linkedJwIds,
+                                            )
                                               .map((id) =>
-                                                jobWorks.find((j) => j.id === id),
+                                                jobWorks.find(
+                                                  (j) => j.id === id,
+                                                ),
                                               )
                                               .filter((j) => j !== undefined)
                                               .map((j) => j!.name);
@@ -1286,7 +1294,10 @@ export default function ModelList(props: ModelListProps) {
                     "completed",
                     completionDate,
                   );
-                  if (o.currentStepIndex >= 0 && o.currentStepIndex < o.steps.length) {
+                  if (
+                    o.currentStepIndex >= 0 &&
+                    o.currentStepIndex < o.steps.length
+                  ) {
                     props.onSetStepStatus(o.id, o.currentStepIndex, "hold");
                   }
                 }
