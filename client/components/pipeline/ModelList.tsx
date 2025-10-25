@@ -582,18 +582,20 @@ export default function ModelList(props: ModelListProps) {
                               : i >= o.steps.length
                                 ? "Completed"
                                 : (() => {
-                                    const hasJW =
+                                    const hasPendingJW =
                                       ((o as any).jobWorkIds || []).length >
                                         0 ||
-                                      (o.jobWorkAssignments || []).length > 0;
+                                      (o.jobWorkAssignments || []).some(
+                                        (a) => a.status === "pending",
+                                      );
 
-                                    if (hasJW) {
+                                    if (hasPendingJW) {
                                       const linkedJwIds = new Set<string>([
                                         ...(((o as any).jobWorkIds ||
                                           []) as string[]),
-                                        ...(o.jobWorkAssignments || []).map(
-                                          (a) => a.jobWorkId,
-                                        ),
+                                        ...(o.jobWorkAssignments || [])
+                                          .filter((a) => a.status === "pending")
+                                          .map((a) => a.jobWorkId),
                                       ]);
                                       const jwNames = Array.from(linkedJwIds)
                                         .map((id) =>
