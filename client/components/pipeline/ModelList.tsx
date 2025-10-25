@@ -1656,6 +1656,48 @@ export default function ModelList(props: ModelListProps) {
               </p>
             </div>
           </SimpleModal>
+
+          {roadmapModalForId && roadmaps.length > 1 && (
+            <SimpleModal
+              open={roadmapModalForId !== null}
+              onOpenChange={(v) => !v && setRoadmapModalForId(null)}
+              title="Add to Roadmap"
+              footer={
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setRoadmapModalForId(null)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (roadmapModalForId && selectedRoadmapId) {
+                        addModelToRoadmap(selectedRoadmapId, roadmapModalForId);
+                      }
+                      setRoadmapModalForId(null);
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+              }
+            >
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Choose a roadmap</div>
+                <div>
+                  <select
+                    className="w-full border rounded-md p-2"
+                    value={selectedRoadmapId}
+                    onChange={(e) => setSelectedRoadmapId(e.target.value)}
+                  >
+                    {roadmaps.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </SimpleModal>
+          )}
         </div>
       </div>
     </div>
