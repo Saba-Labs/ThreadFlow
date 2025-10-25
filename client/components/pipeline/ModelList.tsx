@@ -80,6 +80,9 @@ export default function ModelList(props: ModelListProps) {
   const [jobWorkDetailsModalId, setJobWorkDetailsModalId] = useState<
     string | null
   >(null);
+  const { roadmaps, addModelToRoadmap, createRoadmap } = useRoadmaps();
+  const [roadmapModalForId, setRoadmapModalForId] = useState<string | null>(null);
+  const [selectedRoadmapId, setSelectedRoadmapId] = useState<string>("");
 
   const sorted = useMemo(() => props.orders.slice(), [props.orders]);
 
