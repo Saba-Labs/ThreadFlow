@@ -125,9 +125,38 @@ export default function RoadmapPage() {
                           <div className="font-medium">{o ? o.modelName : "Model removed"}</div>
                           <div className="text-xs text-muted-foreground">{o ? `Qty: ${o.quantity}` : it.modelId}</div>
                         </div>
-                        <Button size="sm" variant="ghost" onClick={() => removeModelFromRoadmap(r.id, it.modelId)} aria-label="Remove" title="Remove" className="text-red-600 hover:text-red-700">
-                          Remove
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
+                              const idx = r.items.findIndex((x) => x.modelId === it.modelId);
+                              if (idx > 0) moveModelWithinRoadmap(r.id, it.modelId, idx - 1);
+                            }}
+                            title="Move up"
+                            aria-label="Move up"
+                          >
+                            ▲
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
+                              const idx = r.items.findIndex((x) => x.modelId === it.modelId);
+                              if (idx >= 0 && idx < r.items.length - 1) moveModelWithinRoadmap(r.id, it.modelId, idx + 1);
+                            }}
+                            title="Move down"
+                            aria-label="Move down"
+                          >
+                            ▼
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => setMoveItem({ fromRoadmapId: r.id, modelId: it.modelId })} title="Move to another roadmap" aria-label="Move to another roadmap">
+                            Move
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => removeModelFromRoadmap(r.id, it.modelId)} aria-label="Remove" title="Remove" className="text-red-600 hover:text-red-700">
+                            Remove
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
