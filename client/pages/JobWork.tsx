@@ -331,7 +331,7 @@ export default function JobWork() {
                   <table className="w-full text-sm border-collapse">
                     <thead className="bg-gray-100 dark:bg-gray-800">
                       <tr>
-                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Pickup
                         </th>
                         <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
@@ -339,7 +339,7 @@ export default function JobWork() {
                         </th>
                         <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Quantity
-                        </th>                        
+                        </th>
                         <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Delivery
                         </th>
@@ -377,7 +377,7 @@ export default function JobWork() {
                             <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                               {a.quantity}
                             </td>
-                            
+
                             <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                               {a.completionDate
                                 ? formatDate(a.completionDate)

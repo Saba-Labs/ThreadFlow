@@ -359,7 +359,9 @@ export default function ModelList(props: ModelListProps) {
 
     if (i < 0) {
       // out of path, treat like hold
-      return hasJW ? "bg-purple-50 dark:bg-purple-900/20" : "bg-red-50 dark:bg-red-900/20";
+      return hasJW
+        ? "bg-purple-50 dark:bg-purple-900/20"
+        : "bg-red-50 dark:bg-red-900/20";
     }
     if (i >= o.steps.length) {
       // completed
@@ -581,28 +583,23 @@ export default function ModelList(props: ModelListProps) {
                                 ? "Completed"
                                 : (() => {
                                     const hasJW =
-                                      ((o as any).jobWorkIds || []).length > 0 ||
+                                      ((o as any).jobWorkIds || []).length >
+                                        0 ||
                                       (o.jobWorkAssignments || []).length > 0;
 
                                     if (hasJW) {
-                                      const linkedJwIds = new Set<string>(
-                                        [
-                                          ...(((o as any).jobWorkIds ||
-                                            []) as string[]),
-                                          ...(o.jobWorkAssignments || []).map(
-                                            (a) => a.jobWorkId,
-                                          ),
-                                        ],
-                                      );
+                                      const linkedJwIds = new Set<string>([
+                                        ...(((o as any).jobWorkIds ||
+                                          []) as string[]),
+                                        ...(o.jobWorkAssignments || []).map(
+                                          (a) => a.jobWorkId,
+                                        ),
+                                      ]);
                                       const jwNames = Array.from(linkedJwIds)
                                         .map((id) =>
-                                          jobWorks.find(
-                                            (j) => j.id === id,
-                                          ),
+                                          jobWorks.find((j) => j.id === id),
                                         )
-                                        .filter(
-                                          (j) => j !== undefined,
-                                        )
+                                        .filter((j) => j !== undefined)
                                         .map((j) => j!.name);
 
                                       return (
@@ -687,7 +684,9 @@ export default function ModelList(props: ModelListProps) {
                                           }`}
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
-                                          {hasJW ? "Job Work" : cap(displayStatus)}
+                                          {hasJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
                                         </Badge>
                                       </button>
                                       {(((o as any).jobWorkIds || []).length >
@@ -700,9 +699,9 @@ export default function ModelList(props: ModelListProps) {
                                               [
                                                 ...(((o as any).jobWorkIds ||
                                                   []) as string[]),
-                                                ...(o.jobWorkAssignments || []).map(
-                                                  (a) => a.jobWorkId,
-                                                ),
+                                                ...(
+                                                  o.jobWorkAssignments || []
+                                                ).map((a) => a.jobWorkId),
                                               ],
                                             );
                                             return Array.from(linkedJwIds)
@@ -711,9 +710,7 @@ export default function ModelList(props: ModelListProps) {
                                                   (j) => j.id === id,
                                                 ),
                                               )
-                                              .filter(
-                                                (j) => j !== undefined,
-                                              )
+                                              .filter((j) => j !== undefined)
                                               .map((j) => (
                                                 <div
                                                   key={j!.id}
@@ -1040,27 +1037,22 @@ export default function ModelList(props: ModelListProps) {
 
                                     {(((o as any).jobWorkIds || []).length >
                                       0 ||
-                                      (o.jobWorkAssignments || []).length > 0) && (
+                                      (o.jobWorkAssignments || []).length >
+                                        0) && (
                                       <div className="mt-1 text-right">
                                         {(() => {
-                                          const linkedJwIds = new Set<string>(
-                                            [
-                                              ...(((o as any).jobWorkIds ||
-                                                []) as string[]),
-                                              ...(o.jobWorkAssignments || []).map(
-                                                (a) => a.jobWorkId,
-                                              ),
-                                            ],
-                                          );
+                                          const linkedJwIds = new Set<string>([
+                                            ...(((o as any).jobWorkIds ||
+                                              []) as string[]),
+                                            ...(o.jobWorkAssignments || []).map(
+                                              (a) => a.jobWorkId,
+                                            ),
+                                          ]);
                                           return Array.from(linkedJwIds)
                                             .map((id) =>
-                                              jobWorks.find(
-                                                (j) => j.id === id,
-                                              ),
+                                              jobWorks.find((j) => j.id === id),
                                             )
-                                            .filter(
-                                              (j) => j !== undefined,
-                                            )
+                                            .filter((j) => j !== undefined)
                                             .map((j) => (
                                               <div
                                                 key={j!.id}
@@ -1130,8 +1122,7 @@ export default function ModelList(props: ModelListProps) {
                                       const hasJW =
                                         ((o as any).jobWorkIds || []).length >
                                           0 ||
-                                        (o.jobWorkAssignments || []).length >
-                                          0;
+                                        (o.jobWorkAssignments || []).length > 0;
                                       return (
                                         <Badge
                                           variant={"default"}
@@ -1145,34 +1136,30 @@ export default function ModelList(props: ModelListProps) {
                                                   : "bg-gray-500 text-white"
                                           }`}
                                         >
-                                          {hasJW ? "Job Work" : cap(displayStatus)}
+                                          {hasJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
                                         </Badge>
                                       );
                                     })()}
                                   </button>
-                                  {(((o as any).jobWorkIds || []).length >
-                                    0 ||
-                                    (o.jobWorkAssignments || []).length > 0) && (
+                                  {(((o as any).jobWorkIds || []).length > 0 ||
+                                    (o.jobWorkAssignments || []).length >
+                                      0) && (
                                     <div className="mt-1 text-right">
                                       {(() => {
-                                        const linkedJwIds = new Set<string>(
-                                          [
-                                            ...(((o as any).jobWorkIds ||
-                                              []) as string[]),
-                                            ...(o.jobWorkAssignments || []).map(
-                                              (a) => a.jobWorkId,
-                                            ),
-                                          ],
-                                        );
+                                        const linkedJwIds = new Set<string>([
+                                          ...(((o as any).jobWorkIds ||
+                                            []) as string[]),
+                                          ...(o.jobWorkAssignments || []).map(
+                                            (a) => a.jobWorkId,
+                                          ),
+                                        ]);
                                         return Array.from(linkedJwIds)
                                           .map((id) =>
-                                            jobWorks.find(
-                                              (j) => j.id === id,
-                                            ),
+                                            jobWorks.find((j) => j.id === id),
                                           )
-                                          .filter(
-                                            (j) => j !== undefined,
-                                          )
+                                          .filter((j) => j !== undefined)
                                           .map((j) => (
                                             <div
                                               key={j!.id}
