@@ -331,17 +331,17 @@ export default function JobWork() {
                   <table className="w-full text-sm border-collapse">
                     <thead className="bg-gray-100 dark:bg-gray-800">
                       <tr>
+                      <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                          Pickup
+                        </th>
                         <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Model Name
                         </th>
                         <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Quantity
-                        </th>
+                        </th>                        
                         <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
-                          Pickup Date
-                        </th>
-                        <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
-                          Delivery Date
+                          Delivery
                         </th>
                         <th className="p-3 text-left font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                           Status
