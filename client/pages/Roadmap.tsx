@@ -133,6 +133,17 @@ export default function RoadmapPage() {
     setEditingTitleId(null);
   };
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?shared=true`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 3000);
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
       <div className="w-full">
