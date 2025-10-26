@@ -44,7 +44,19 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
 }
 
 export default function RoadmapPage() {
-  const [roadmaps, setRoadmaps] = useState(mockRoadmaps);
+  const {
+    roadmaps,
+    createRoadmap,
+    deleteRoadmap,
+    renameRoadmap,
+    removeModelFromRoadmap,
+    addModelToRoadmap,
+    moveModelWithinRoadmap,
+    moveModelToRoadmap,
+  } = useRoadmaps();
+
+  const pipeline = useProductionPipeline();
+
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
@@ -57,34 +69,22 @@ export default function RoadmapPage() {
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+  const eligibleOrders = useMemo(() => {
+    return pipeline.orders.filter((o) => {
+      if (o.currentStepIndex >= o.steps.length) return false;
+      const hasJobWork =
+        ((o as any).jobWorkIds || []).length > 0 ||
+        (o.jobWorkAssignments || []).length > 0;
+      if (hasJobWork) return false;
+      if (o.currentStepIndex < 0) return true;
+      const s = o.steps[o.currentStepIndex]?.status || "hold";
+      return s === "hold" || s === "running";
+    });
+  }, [pipeline.orders]);
+
   const handleAddRoadmap = () => {
     setNewRoadmapTitle("");
     setShowCreateModal(true);
-  };
-
-  const createRoadmap = (title?: string) => {
-    const newId = String(roadmaps.length + 1);
-    setRoadmaps([...roadmaps, {
-      id: newId,
-      title: title || `Roadmap ${roadmaps.length + 1}`,
-      items: []
-    }]);
-  };
-
-  const deleteRoadmap = (id: string) => {
-    setRoadmaps(roadmaps.filter(r => r.id !== id));
-  };
-
-  const renameRoadmap = (id: string, newTitle: string) => {
-    setRoadmaps(roadmaps.map(r => r.id === id ? { ...r, title: newTitle } : r));
-  };
-
-  const removeModelFromRoadmap = (roadmapId: string, modelId: string) => {
-    setRoadmaps(roadmaps.map(r => 
-      r.id === roadmapId 
-        ? { ...r, items: r.items.filter(i => i.modelId !== modelId) }
-        : r
-    ));
   };
 
   const openAddModels = (roadmapId: string) => {
@@ -100,45 +100,9 @@ export default function RoadmapPage() {
 
   const handleAddSelectedToRoadmap = () => {
     if (!openFor) return;
-    const modelsToAdd = mockEligibleOrders.filter(o => selectedModels.includes(o.id));
-    setRoadmaps(roadmaps.map(r =>
-      r.id === openFor
-        ? { ...r, items: [...r.items, ...modelsToAdd.map(m => ({
-            id: `${r.id}-${m.id}-${Date.now()}-${Math.random()}`,
-            modelId: m.id,
-            modelName: m.modelName,
-            quantity: m.quantity
-          }))] }
-        : r
-    ));
+    for (const id of selectedModels) addModelToRoadmap(openFor, id);
     setOpenFor(null);
     setSelectedModels([]);
-  };
-
-  const moveModelWithinRoadmap = (roadmapId: string, modelId: string, newIndex: number) => {
-    setRoadmaps(roadmaps.map(r => {
-      if (r.id !== roadmapId) return r;
-      const items = [...r.items];
-      const oldIndex = items.findIndex(i => i.modelId === modelId);
-      if (oldIndex === -1) return r;
-      const [item] = items.splice(oldIndex, 1);
-      items.splice(newIndex, 0, item);
-      return { ...r, items };
-    }));
-  };
-
-  const moveModelToRoadmap = (fromId: string, toId: string, modelId: string) => {
-    let itemToMove: any = null;
-    setRoadmaps(roadmaps.map(r => {
-      if (r.id === fromId) {
-        itemToMove = r.items.find(i => i.modelId === modelId);
-        return { ...r, items: r.items.filter(i => i.modelId !== modelId) };
-      }
-      if (r.id === toId && itemToMove) {
-        return { ...r, items: [...r.items, itemToMove] };
-      }
-      return r;
-    }));
   };
 
   const handleSaveTitle = (id: string) => {
