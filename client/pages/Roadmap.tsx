@@ -511,7 +511,7 @@ export default function RoadmapPage() {
 
       {/* Move Model Modal */}
       <SimpleModal
-        open={moveItem !== null}
+        open={moveItem !== null && !isShared}
         onOpenChange={(v: boolean) => !v && setMoveItem(null)}
         title="Move Model"
         footer={
