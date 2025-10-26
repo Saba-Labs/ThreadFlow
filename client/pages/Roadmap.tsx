@@ -7,10 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useRoadmaps } from "@/context/RoadmapContext";
 
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
 // Simple Modal Component
 function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
   if (!open) return null;
