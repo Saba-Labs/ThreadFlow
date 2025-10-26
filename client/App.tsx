@@ -14,6 +14,7 @@ import JobWork from "./pages/JobWork";
 import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
 import Roadmap from "./pages/Roadmap";
+import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <AppUpdateNotification />
     </BrowserRouter>
   </QueryClientProvider>
 );

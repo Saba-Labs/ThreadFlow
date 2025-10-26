@@ -2,6 +2,8 @@ import { useCallback, useSyncExternalStore } from "react";
 
 export interface RoadmapItem {
   modelId: string;
+  modelName: string;
+  quantity: number;
   addedAt: number;
 }
 
@@ -16,7 +18,7 @@ interface RoadmapState {
   roadmaps: Roadmap[];
 }
 
-const STORAGE_KEY = "threadflow_roadmaps_v1";
+const STORAGE_KEY = "threadflow_roadmaps_v2";
 
 function uid(prefix = "rdm") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
@@ -83,13 +85,24 @@ export function useRoadmaps() {
   }, []);
 
   const addModelToRoadmap = useCallback(
-    (roadmapId: string, modelId: string) => {
+    (
+      roadmapId: string,
+      modelId: string,
+      modelName: string,
+      quantity: number,
+    ) => {
       setStore((s) => ({
         roadmaps: s.roadmaps.map((r) =>
           r.id === roadmapId
             ? r.items.some((it) => it.modelId === modelId)
               ? r
-              : { ...r, items: [...r.items, { modelId, addedAt: Date.now() }] }
+              : {
+                  ...r,
+                  items: [
+                    ...r.items,
+                    { modelId, modelName, quantity, addedAt: Date.now() },
+                  ],
+                }
             : r,
         ),
       }));
@@ -140,6 +153,9 @@ export function useRoadmaps() {
         const to = s.roadmaps.find((r) => r.id === toRoadmapId);
         if (!from || !to) return s;
         const exists = to.items.some((it) => it.modelId === modelId);
+        // get the item being moved to preserve modelName and quantity
+        const itemToMove = from.items.find((it) => it.modelId === modelId);
+        if (!itemToMove) return s;
         // remove from source
         const newRoadmaps = s.roadmaps.map((r) =>
           r.id === fromRoadmapId
@@ -159,7 +175,12 @@ export function useRoadmaps() {
                   ...r,
                   items: [
                     ...r.items.slice(0, destIndex),
-                    { modelId, addedAt: Date.now() },
+                    {
+                      modelId,
+                      modelName: itemToMove.modelName,
+                      quantity: itemToMove.quantity,
+                      addedAt: Date.now(),
+                    },
                     ...r.items.slice(destIndex),
                   ],
                 }

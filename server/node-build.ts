@@ -9,6 +9,46 @@ const port = process.env.PORT || 3000;
 const __dirname = import.meta.dirname;
 const distPath = path.join(__dirname, "../spa");
 
+// Cache control middleware
+app.use((req, res, next) => {
+  const filepath = req.path;
+
+  // Service worker: always check for updates, no cache
+  if (filepath === "/sw.js") {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    return next();
+  }
+
+  // HTML files: revalidate on each request (check for updates)
+  if (filepath.endsWith(".html") || filepath === "/") {
+    res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+    return next();
+  }
+
+  // Assets with hash (JS, CSS, images): cache long-term
+  if (
+    filepath.includes("-") &&
+    (filepath.includes(".js") ||
+      filepath.includes(".css") ||
+      filepath.includes(".woff") ||
+      filepath.includes(".woff2") ||
+      filepath.includes(".ttf") ||
+      filepath.includes(".png") ||
+      filepath.includes(".svg") ||
+      filepath.includes(".jpg") ||
+      filepath.includes(".jpeg"))
+  ) {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    return next();
+  }
+
+  // Default: cache for 1 hour
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  next();
+});
+
 // Serve static files
 app.use(express.static(distPath));
 
