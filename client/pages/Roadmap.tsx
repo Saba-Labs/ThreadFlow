@@ -140,21 +140,23 @@ export default function RoadmapPage() {
 
         {/* Empty State */}
         {roadmaps.length === 0 && (
-          <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
-            <div className="flex flex-col items-center">
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-4 shadow-sm">
-                <Map className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
+              <div className="flex flex-col items-center">
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-4 shadow-sm">
+                  <Map className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
+                </div>
+                <p className="text-base sm:text-lg font-semibold text-slate-900 mb-2">
+                  No roadmaps yet
+                </p>
+                <p className="text-sm text-slate-600 mb-4">
+                  Create your first roadmap to organize production models
+                </p>
+                <Button onClick={handleAddRoadmap} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Roadmap
+                </Button>
               </div>
-              <p className="text-base sm:text-lg font-semibold text-slate-900 mb-2">
-                No roadmaps yet
-              </p>
-              <p className="text-sm text-slate-600 mb-4">
-                Create your first roadmap to organize production models
-              </p>
-              <Button onClick={handleAddRoadmap} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Roadmap
-              </Button>
             </div>
           </div>
         )}
