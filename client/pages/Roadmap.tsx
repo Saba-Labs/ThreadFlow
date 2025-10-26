@@ -137,12 +137,18 @@ export default function RoadmapPage() {
   const handleAddSelectedToRoadmap = () => {
     if (!openFor) return;
     const modelsToAdd = mockEligibleOrders.filter(o => selectedModels.includes(o.id));
-    setRoadmaps(roadmaps.map(r => 
-      r.id === openFor 
-        ? { ...r, items: [...r.items, ...modelsToAdd.map(m => ({ modelId: m.id, modelName: m.modelName, quantity: m.quantity }))] }
+    setRoadmaps(roadmaps.map(r =>
+      r.id === openFor
+        ? { ...r, items: [...r.items, ...modelsToAdd.map(m => ({
+            id: `${r.id}-${m.id}-${Date.now()}-${Math.random()}`,
+            modelId: m.id,
+            modelName: m.modelName,
+            quantity: m.quantity
+          }))] }
         : r
     ));
     setOpenFor(null);
+    setSelectedModels([]);
   };
 
   const moveModelWithinRoadmap = (roadmapId: string, modelId: string, newIndex: number) => {
