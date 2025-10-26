@@ -85,13 +85,24 @@ export function useRoadmaps() {
   }, []);
 
   const addModelToRoadmap = useCallback(
-    (roadmapId: string, modelId: string, modelName: string, quantity: number) => {
+    (
+      roadmapId: string,
+      modelId: string,
+      modelName: string,
+      quantity: number,
+    ) => {
       setStore((s) => ({
         roadmaps: s.roadmaps.map((r) =>
           r.id === roadmapId
             ? r.items.some((it) => it.modelId === modelId)
               ? r
-              : { ...r, items: [...r.items, { modelId, modelName, quantity, addedAt: Date.now() }] }
+              : {
+                  ...r,
+                  items: [
+                    ...r.items,
+                    { modelId, modelName, quantity, addedAt: Date.now() },
+                  ],
+                }
             : r,
         ),
       }));
@@ -164,7 +175,12 @@ export function useRoadmaps() {
                   ...r,
                   items: [
                     ...r.items.slice(0, destIndex),
-                    { modelId, modelName: itemToMove.modelName, quantity: itemToMove.quantity, addedAt: Date.now() },
+                    {
+                      modelId,
+                      modelName: itemToMove.modelName,
+                      quantity: itemToMove.quantity,
+                      addedAt: Date.now(),
+                    },
                     ...r.items.slice(destIndex),
                   ],
                 }

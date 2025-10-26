@@ -1,6 +1,6 @@
-import { useAppUpdater } from '@/hooks/useAppUpdater';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { useAppUpdater } from "@/hooks/useAppUpdater";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
 /**
  * App Update Notification Component
@@ -17,7 +17,9 @@ export function AppUpdateNotification() {
       <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 border border-blue-200 shadow-lg">
         <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
         <div className="flex-1">
-          <p className="font-semibold text-blue-900 text-sm">Update Available</p>
+          <p className="font-semibold text-blue-900 text-sm">
+            Update Available
+          </p>
           <p className="text-xs text-blue-700 mt-0.5">
             A new version is ready to install
           </p>

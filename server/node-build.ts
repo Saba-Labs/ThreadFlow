@@ -29,8 +29,8 @@ app.use((req, res, next) => {
 
   // Assets with hash (JS, CSS, images): cache long-term
   if (
-    filepath.includes("-") && (
-      filepath.includes(".js") ||
+    filepath.includes("-") &&
+    (filepath.includes(".js") ||
       filepath.includes(".css") ||
       filepath.includes(".woff") ||
       filepath.includes(".woff2") ||
@@ -38,8 +38,7 @@ app.use((req, res, next) => {
       filepath.includes(".png") ||
       filepath.includes(".svg") ||
       filepath.includes(".jpg") ||
-      filepath.includes(".jpeg")
-    )
+      filepath.includes(".jpeg"))
   ) {
     res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
     return next();
