@@ -5,7 +5,7 @@ import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, ArrowRight, X, Check, Map
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// Mock data
+// Mock data - Replace with actual data from your app
 const mockRoadmaps = [
   {
     id: "1",
@@ -23,6 +23,19 @@ const mockRoadmaps = [
     ],
   },
 ];
+
+// IMPORTANT: Replace mockEligibleOrders with eligibleOrders from your original code
+// Use the eligibleOrders logic from your RoadmapPage which filters from pipeline.orders:
+// const eligibleOrders = useMemo(() => {
+//   return pipeline.orders.filter((o) => {
+//     if (o.currentStepIndex >= o.steps.length) return false;
+//     const hasJobWork = ((o as any).jobWorkIds || []).length > 0 || (o.jobWorkAssignments || []).length > 0;
+//     if (hasJobWork) return false;
+//     if (o.currentStepIndex < 0) return true;
+//     const s = o.steps[o.currentStepIndex]?.status || "hold";
+//     return s === "hold" || s === "running";
+//   });
+// }, [pipeline.orders]);
 
 const mockEligibleOrders = [
   { id: "m4", modelName: "Model D-400", quantity: 2 },
@@ -219,7 +232,7 @@ export default function RoadmapPage() {
             <Card key={r.id} className="overflow-hidden shadow-lg border-slate-200 hover:shadow-xl transition-shadow">
               <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6">
                 {editingTitleId === r.id ? (
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full">
                     <Input
                       value={titleDraft}
                       onChange={(e) => setTitleDraft(e.target.value)}
@@ -231,29 +244,26 @@ export default function RoadmapPage() {
                         }
                       }}
                     />
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleSaveTitle(r.id)}
-                        variant="secondary"
-                        className="flex-1 sm:flex-none h-10"
-                      >
-                        <Check className="h-4 w-4 sm:mr-2" />
-                        <span className="sm:inline">Save</span>
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditingTitleId(null)}
-                        className="flex-1 sm:flex-none h-10"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleSaveTitle(r.id)}
+                      variant="secondary"
+                      className="h-10"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditingTitleId(null)}
+                      className="h-10"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
                         {r.title.charAt(0).toUpperCase()}
                       </div>
@@ -267,37 +277,35 @@ export default function RoadmapPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <Button
                         size="sm"
                         variant="secondary"
                         onClick={() => openAddModels(r.id)}
-                        className="flex-1 sm:flex-none h-9 text-xs sm:text-sm"
+                        className="h-9 text-xs sm:text-sm"
                       >
                         <Plus className="h-3.5 w-3.5 mr-1.5" />
-                        Add Models
+                        <span className="hidden sm:inline">Add Models</span>
                       </Button>
-                      <div className="flex gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingTitleId(r.id);
-                            setTitleDraft(r.title);
-                          }}
-                          className="h-9 w-9 bg-white/90 hover:bg-white"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          onClick={() => setDeleteConfirmId(r.id)}
-                          className="h-9 w-9 bg-red-600 hover:bg-red-700"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingTitleId(r.id);
+                          setTitleDraft(r.title);
+                        }}
+                        className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={() => setDeleteConfirmId(r.id)}
+                        className="h-9 w-9 bg-red-600 hover:bg-red-700"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -327,10 +335,7 @@ export default function RoadmapPage() {
                       >
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
-                            {it.modelName}
-                          </div>
-                          <div className="text-xs text-slate-600 mt-0.5">
-                            Qty: {it.quantity}
+                            {it.modelName} ({it.quantity})
                           </div>
                         </div>
                         
