@@ -417,7 +417,7 @@ export default function RoadmapPage() {
 
       {/* Add Models Modal */}
       <SimpleModal
-        open={openFor !== null}
+        open={openFor !== null && !isShared}
         onOpenChange={(v: boolean) => !v && setOpenFor(null)}
         title="Add Models"
         footer={
