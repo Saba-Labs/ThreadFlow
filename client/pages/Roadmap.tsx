@@ -345,61 +345,63 @@ export default function RoadmapPage() {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() =>
-                                moveModelWithinRoadmap(
-                                  r.id,
-                                  it.modelId,
-                                  idx - 1,
-                                )
-                              }
-                              disabled={idx === 0}
-                              className="h-8 w-8 hover:bg-slate-100"
-                            >
-                              <ChevronUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() =>
-                                moveModelWithinRoadmap(
-                                  r.id,
-                                  it.modelId,
-                                  idx + 1,
-                                )
-                              }
-                              disabled={idx === r.items.length - 1}
-                              className="h-8 w-8 hover:bg-slate-100"
-                            >
-                              <ChevronDown className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() =>
-                                setMoveItem({
-                                  fromRoadmapId: r.id,
-                                  modelId: it.modelId,
-                                })
-                              }
-                              className="h-8 w-8 hover:bg-blue-50 text-blue-600"
-                            >
-                              <ArrowRight className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() =>
-                                removeModelFromRoadmap(r.id, it.modelId)
-                              }
-                              className="h-8 w-8 hover:bg-red-50 text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          {!isShared && (
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() =>
+                                  moveModelWithinRoadmap(
+                                    r.id,
+                                    it.modelId,
+                                    idx - 1,
+                                  )
+                                }
+                                disabled={idx === 0}
+                                className="h-8 w-8 hover:bg-slate-100"
+                              >
+                                <ChevronUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() =>
+                                  moveModelWithinRoadmap(
+                                    r.id,
+                                    it.modelId,
+                                    idx + 1,
+                                  )
+                                }
+                                disabled={idx === r.items.length - 1}
+                                className="h-8 w-8 hover:bg-slate-100"
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() =>
+                                  setMoveItem({
+                                    fromRoadmapId: r.id,
+                                    modelId: it.modelId,
+                                  })
+                                }
+                                className="h-8 w-8 hover:bg-blue-50 text-blue-600"
+                              >
+                                <ArrowRight className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() =>
+                                  removeModelFromRoadmap(r.id, it.modelId)
+                                }
+                                className="h-8 w-8 hover:bg-red-50 text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
