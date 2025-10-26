@@ -98,59 +98,68 @@ export default function RoadmapPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {roadmaps.map((r) => (
           <Card key={r.id} className="overflow-hidden">
-            <CardHeader className="bg-blue-600 text-white">
-              <div className="flex items-center justify-between">
-                {editingTitleId === r.id ? (
-                  <form
-                    className="flex items-center gap-2 w-full"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      renameRoadmap(r.id, titleDraft || r.title);
-                      setEditingTitleId(null);
-                    }}
-                  >
-                    <Input
-                      value={titleDraft}
-                      onChange={(e) => setTitleDraft(e.target.value)}
-                      className="bg-white text-black h-8"
-                      autoFocus
-                    />
-                    <Button size="sm" type="submit" variant="secondary">
-                      Save
-                    </Button>
-                  </form>
-                ) : (
-                  <>
-                    <CardTitle className="text-white text-lg">
-                      {r.title}
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        onClick={() => {
-                          setEditingTitleId(r.id);
-                          setTitleDraft(r.title);
-                        }}
-                        aria-label="Rename"
-                        title="Rename"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => setDeleteConfirmId(r.id)}
-                        aria-label="Delete roadmap"
-                        title="Delete roadmap"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+            <div className="w-full flex items-center justify-between gap-4">
+              {editingTitleId === r.id ? (
+                <form
+                  className="flex items-center gap-2 w-full"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    renameRoadmap(r.id, titleDraft || r.title);
+                    setEditingTitleId(null);
+                  }}
+                >
+                  <Input
+                    value={titleDraft}
+                    onChange={(e) => setTitleDraft(e.target.value)}
+                    className="bg-white text-black h-8"
+                    autoFocus
+                  />
+                  <Button size="sm" type="submit" variant="secondary">
+                    Save
+                  </Button>
+                </form>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-md bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+                      {r.title.charAt(0).toUpperCase()}
                     </div>
-                  </>
-                )}
-              </div>
-            </CardHeader>
+                    <div>
+                      <CardTitle className="text-white text-lg leading-tight">
+                        {r.title}
+                      </CardTitle>
+                      <div className="text-xs text-white/80">Created {new Date(r.createdAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingTitleId(r.id);
+                        setTitleDraft(r.title);
+                      }}
+                      aria-label="Rename"
+                      title="Rename"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      onClick={() => setDeleteConfirmId(r.id)}
+                      aria-label="Delete roadmap"
+                      title="Delete roadmap"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </CardHeader>
 
             <CardContent>
               <div className="mb-3 flex items-center justify-between">
