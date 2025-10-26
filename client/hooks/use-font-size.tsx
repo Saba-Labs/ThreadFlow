@@ -7,7 +7,7 @@ type Ctx = {
   setValue: (v: FontSizeOption) => void;
 };
 
-const FontSizeContext = createContext<Ctx | undefined>(undefined);
+const FontSizeContext = React.createContext<Ctx | undefined>(undefined);
 
 const STORAGE_KEY = "app:font-size";
 
