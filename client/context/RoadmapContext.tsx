@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import * as React from "react";
 
 export interface RoadmapItem {
   modelId: string;
