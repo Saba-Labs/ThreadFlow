@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useMemo, useContext } from "react";
+import * as React from "react";
 
 export type FontSizeOption = "small" | "medium" | "large" | "extra-large";
 
