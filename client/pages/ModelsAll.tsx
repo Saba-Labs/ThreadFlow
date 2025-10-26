@@ -53,7 +53,7 @@ export default function ModelsAll() {
       return pipeline.orders.filter((o) => hasPendingJobWork(o));
     }
     if (filter === "onboard") {
-      return pipeline.orders.filter((o) => o.currentStepIndex === -1);
+      return pipeline.orders.filter((o) => o.currentStepIndex < 0);
     }
 
     return pipeline.orders.filter(
