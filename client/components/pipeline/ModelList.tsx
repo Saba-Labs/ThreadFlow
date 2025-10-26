@@ -1251,9 +1251,13 @@ export default function ModelList(props: ModelListProps) {
               onAssign={(assignments) => {
                 const o = sorted.find((x) => x.id === assignJobWorksModalId);
                 if (o) {
-                  const idx = o.currentStepIndex;
-                  if (idx >= 0 && idx < o.steps.length) {
-                    props.onSetStepStatus(o.id, idx, "running");
+                  let targetIdx = o.currentStepIndex;
+                  if (o.steps.length > 0 && (targetIdx < 0)) {
+                    props.onNext(o.id);
+                    targetIdx = 0;
+                  }
+                  if (targetIdx >= 0 && targetIdx < o.steps.length) {
+                    props.onSetStepStatus(o.id, targetIdx, "running");
                   }
                   props.setJobWorkAssignments?.(o.id, assignments);
                 }
@@ -1319,9 +1323,13 @@ export default function ModelList(props: ModelListProps) {
                   onClick={() => {
                     const o = sorted.find((x) => x.id === jwForId);
                     if (o) {
-                      const idx = o.currentStepIndex;
-                      if (idx >= 0 && idx < o.steps.length) {
-                        props.onSetStepStatus(o.id, idx, "running");
+                      let targetIdx = o.currentStepIndex;
+                      if (o.steps.length > 0 && (targetIdx < 0)) {
+                        props.onNext(o.id);
+                        targetIdx = 0;
+                      }
+                      if (targetIdx >= 0 && targetIdx < o.steps.length) {
+                        props.onSetStepStatus(o.id, targetIdx, "running");
                       }
                       props.setOrderJobWorks?.(o.id, jwSelected);
                     }
