@@ -2,6 +2,11 @@ import { useAppUpdater } from '@/hooks/useAppUpdater';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 
+/**
+ * App Update Notification Component
+ * Displays a notification when a new app version is available
+ * Must be rendered inside BrowserRouter context
+ */
 export function AppUpdateNotification() {
   const { updateAvailable, refreshing, handleRefresh } = useAppUpdater();
 
