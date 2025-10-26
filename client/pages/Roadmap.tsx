@@ -469,7 +469,7 @@ export default function RoadmapPage() {
 
       {/* Create Roadmap Modal */}
       <SimpleModal
-        open={showCreateModal}
+        open={showCreateModal && !isShared}
         onOpenChange={(v: boolean) => !v && setShowCreateModal(false)}
         title="Create New Roadmap"
         footer={
