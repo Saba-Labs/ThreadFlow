@@ -30,6 +30,7 @@ export default function RoadmapPage() {
   } | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const ordersById = useMemo(() => {
     const map: Record<string, (typeof pipeline.orders)[number]> = {};
