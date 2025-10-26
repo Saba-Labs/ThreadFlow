@@ -2,46 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, ArrowRight, X, Check, Map } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-
-// Mock data - Replace with actual data from your app
-const mockRoadmaps = [
-  {
-    id: "1",
-    title: "Q4 2024 Production",
-    items: [
-      { modelId: "m1", modelName: "Model A-100", quantity: 5 },
-      { modelId: "m2", modelName: "Model B-200", quantity: 3 },
-    ],
-  },
-  {
-    id: "2",
-    title: "Priority Orders",
-    items: [
-      { modelId: "m3", modelName: "Model C-300", quantity: 8 },
-    ],
-  },
-];
-
-// IMPORTANT: Replace mockEligibleOrders with eligibleOrders from your original code
-// Use the eligibleOrders logic from your RoadmapPage which filters from pipeline.orders:
-// const eligibleOrders = useMemo(() => {
-//   return pipeline.orders.filter((o) => {
-//     if (o.currentStepIndex >= o.steps.length) return false;
-//     const hasJobWork = ((o as any).jobWorkIds || []).length > 0 || (o.jobWorkAssignments || []).length > 0;
-//     if (hasJobWork) return false;
-//     if (o.currentStepIndex < 0) return true;
-//     const s = o.steps[o.currentStepIndex]?.status || "hold";
-//     return s === "hold" || s === "running";
-//   });
-// }, [pipeline.orders]);
-
-const mockEligibleOrders = [
-  { id: "m4", modelName: "Model D-400", quantity: 2 },
-  { id: "m5", modelName: "Model E-500", quantity: 12 },
-  { id: "m6", modelName: "Model F-600", quantity: 7 },
-];
+import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { useRoadmaps } from "@/context/RoadmapContext";
 
 function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
