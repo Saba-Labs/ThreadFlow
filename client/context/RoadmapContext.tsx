@@ -47,13 +47,13 @@ function subscribe(cb: () => void) {
 }
 
 export function useRoadmaps() {
-  const state = React.useSyncExternalStore(
+  const state = useSyncExternalStore(
     subscribe,
     () => STORE,
     () => STORE,
   );
 
-  const createRoadmap = React.useCallback(
+  const createRoadmap = useCallback(
     (title?: string) => {
       const count = state.roadmaps.length + 1;
       const roadmap: Roadmap = {
@@ -68,13 +68,13 @@ export function useRoadmaps() {
     [state.roadmaps.length],
   );
 
-  const deleteRoadmap = React.useCallback((roadmapId: string) => {
+  const deleteRoadmap = useCallback((roadmapId: string) => {
     setStore((s) => ({
       roadmaps: s.roadmaps.filter((r) => r.id !== roadmapId),
     }));
   }, []);
 
-  const renameRoadmap = React.useCallback((roadmapId: string, title: string) => {
+  const renameRoadmap = useCallback((roadmapId: string, title: string) => {
     setStore((s) => ({
       roadmaps: s.roadmaps.map((r) =>
         r.id === roadmapId ? { ...r, title: title.trim() } : r,
@@ -82,7 +82,7 @@ export function useRoadmaps() {
     }));
   }, []);
 
-  const addModelToRoadmap = React.useCallback(
+  const addModelToRoadmap = useCallback(
     (roadmapId: string, modelId: string) => {
       setStore((s) => ({
         roadmaps: s.roadmaps.map((r) =>
@@ -97,7 +97,7 @@ export function useRoadmaps() {
     [],
   );
 
-  const removeModelFromRoadmap = React.useCallback(
+  const removeModelFromRoadmap = useCallback(
     (roadmapId: string, modelId: string) => {
       setStore((s) => ({
         roadmaps: s.roadmaps.map((r) =>
@@ -110,7 +110,7 @@ export function useRoadmaps() {
     [],
   );
 
-  const moveModelWithinRoadmap = React.useCallback(
+  const moveModelWithinRoadmap = useCallback(
     (roadmapId: string, modelId: string, toIndex: number) => {
       setStore((s) => ({
         roadmaps: s.roadmaps.map((r) => {
@@ -128,7 +128,7 @@ export function useRoadmaps() {
     [],
   );
 
-  const moveModelToRoadmap = React.useCallback(
+  const moveModelToRoadmap = useCallback(
     (
       fromRoadmapId: string,
       toRoadmapId: string,
