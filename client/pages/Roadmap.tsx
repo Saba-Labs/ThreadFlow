@@ -64,6 +64,9 @@ export default function RoadmapPage() {
   } = useRoadmaps();
 
   const pipeline = useProductionPipeline();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const isShared = searchParams.get("shared") === "true";
 
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
@@ -76,6 +79,7 @@ export default function RoadmapPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [shareToast, setShareToast] = useState(false);
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
