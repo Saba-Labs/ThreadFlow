@@ -155,7 +155,7 @@ export default function RoadmapPage() {
                 <Map className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
+                <div>
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
                     Roadmaps
                   </h1>
