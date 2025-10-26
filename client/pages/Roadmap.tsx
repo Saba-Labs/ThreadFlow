@@ -323,14 +323,16 @@ export default function RoadmapPage() {
                       <div className="text-sm text-slate-600 mb-3">
                         No models added yet
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => openAddModels(r.id)}
-                        className="h-9 bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Plus className="h-3.5 w-3.5 mr-2" />
-                        Add Models
-                      </Button>
+                      {!isShared && (
+                        <Button
+                          size="sm"
+                          onClick={() => openAddModels(r.id)}
+                          className="h-9 bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-2" />
+                          Add Models
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-2">
