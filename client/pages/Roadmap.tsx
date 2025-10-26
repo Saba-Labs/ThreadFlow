@@ -11,11 +11,14 @@ import {
   X,
   Check,
   Map,
+  Share2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useRoadmaps } from "@/context/RoadmapContext";
+import { useToast } from "@/hooks/use-toast";
 
 // Simple Modal Component
 function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
