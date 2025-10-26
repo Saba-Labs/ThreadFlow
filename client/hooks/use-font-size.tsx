@@ -27,7 +27,7 @@ function applyScale(option: FontSizeOption) {
 const DEFAULT_VALUE: FontSizeOption = "medium";
 
 export function FontSizeProvider({ children }: { children: React.ReactNode }) {
-  const [value, setValue] = useState<FontSizeOption>(() => {
+  const [value, setValue] = React.useState<FontSizeOption>(() => {
     try {
       const saved =
         (localStorage.getItem(STORAGE_KEY) as FontSizeOption | null) ??
@@ -39,7 +39,7 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
   });
 
   // Apply on mount and whenever it changes
-  useEffect(() => {
+  React.useEffect(() => {
     applyScale(value);
     try {
       localStorage.setItem(STORAGE_KEY, value);
@@ -48,7 +48,7 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [value]);
 
-  const ctx = useMemo<Ctx>(() => ({ value, setValue }), [value]);
+  const ctx = React.useMemo<Ctx>(() => ({ value, setValue }), [value]);
   return (
     <FontSizeContext.Provider value={ctx}>{children}</FontSizeContext.Provider>
   );
