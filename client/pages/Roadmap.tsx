@@ -129,11 +129,19 @@ export default function RoadmapPage() {
                       <CardTitle className="text-white text-lg leading-tight">
                         {r.title}
                       </CardTitle>
-                      <div className="text-xs text-white/80">Created {new Date(r.createdAt).toLocaleDateString()}</div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => openAddModels(r.id)}
+                      aria-label="Add models"
+                      title="Add models"
+                    >
+                      <Plus className="h-4 w-4 mr-1" /> Add models
+                    </Button>
                     <Button
                       size="icon"
                       variant="outline"
@@ -162,14 +170,8 @@ export default function RoadmapPage() {
           </CardHeader>
 
             <CardContent>
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium text-gray-700">Models</div>
-                  <div className="text-xs text-muted-foreground">Showing running, hold, and out-of-path (excluding job-work/complete)</div>
-                </div>
-                <Button size="sm" onClick={() => openAddModels(r.id)}>
-                  Add models
-                </Button>
+              <div className="mb-4">
+                <div className="text-sm font-medium text-gray-700">Models</div>
               </div>
 
               {r.items.length === 0 ? (
