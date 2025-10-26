@@ -39,7 +39,7 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
             onClick={() => onOpenChange(false)}
             className="h-8 w-8"
           >
-            <Y className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
