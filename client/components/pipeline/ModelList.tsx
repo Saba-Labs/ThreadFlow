@@ -290,6 +290,10 @@ export default function ModelList(props: ModelListProps) {
     );
     const selectedIndices = currentGroup?.machineIndices || [];
 
+    const hasPendingJW =
+      ((o as any).jobWorkIds || []).length > 0 ||
+      (o.jobWorkAssignments || []).some((a) => a.status === "pending");
+
     return o.steps.map((step, idx) => {
       const machineType =
         step.kind === "machine" ? step.machineType : "Job Work";
@@ -307,7 +311,10 @@ export default function ModelList(props: ModelListProps) {
       let variantClass =
         "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
       if (isCurrent) {
-        if (step.status === "running") {
+        if (hasPendingJW) {
+          // Use purple for models linked to job work
+          variantClass = "bg-purple-700 text-white dark:bg-purple-600";
+        } else if (step.status === "running") {
           // Use a dark pill with white text for running steps (matches status badge style)
           variantClass = "bg-green-700 text-white dark:bg-green-600";
         } else if (step.status === "hold") {
@@ -319,8 +326,8 @@ export default function ModelList(props: ModelListProps) {
           "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 line-through";
       }
 
-      if (isSelectedInCurrent) {
-        // Selected for parallel: use the same dark green pill (no outer ring)
+      if (isSelectedInCurrent && !hasPendingJW) {
+        // Selected for parallel: use the same dark green pill (no outer ring) - but only if not in job work
         variantClass = "bg-green-700 text-white dark:bg-green-600";
       }
 

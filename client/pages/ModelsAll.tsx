@@ -27,10 +27,22 @@ export default function ModelsAll() {
   >("all");
 
   const filtered = useMemo(() => {
+    const hasPendingJobWork = (
+      o: (typeof pipeline.orders)[number],
+    ): boolean => {
+      return (
+        ((o as any).jobWorkIds || []).length > 0 ||
+        (o.jobWorkAssignments || []).some((a) => a.status === "pending")
+      );
+    };
+
     const statusOf = (
       o: (typeof pipeline.orders)[number],
-    ): "hold" | "running" | "completed" => {
-      if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) {
+    ): "hold" | "running" | "completed" | "onboard" => {
+      if (o.currentStepIndex < 0) {
+        return "onboard";
+      }
+      if (o.currentStepIndex >= o.steps.length) {
         return "completed";
       }
       const s = o.steps[o.currentStepIndex]?.status || "hold";
@@ -38,15 +50,15 @@ export default function ModelsAll() {
     };
     if (filter === "all") return pipeline.orders;
     if (filter === "job") {
-      return pipeline.orders.filter(
-        (o) => ((o as any).jobWorkIds || []).length > 0,
-      );
+      return pipeline.orders.filter((o) => hasPendingJobWork(o));
     }
     if (filter === "onboard") {
-      return pipeline.orders.filter((o) => o.currentStepIndex === -1);
+      return pipeline.orders.filter((o) => o.currentStepIndex < 0);
     }
 
-    return pipeline.orders.filter((o) => statusOf(o) === (filter as any));
+    return pipeline.orders.filter(
+      (o) => statusOf(o) === (filter as any) && !hasPendingJobWork(o),
+    );
   }, [pipeline.orders, filter]);
 
   const { query } = useSearch();
