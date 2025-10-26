@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
