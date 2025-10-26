@@ -68,10 +68,13 @@ export default function RoadmapPage() {
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
       if (o.currentStepIndex >= o.steps.length) return false;
-      const hasJobWork =
+
+      // Check if model has pending job work (exclude these)
+      const hasPendingJobWork =
         ((o as any).jobWorkIds || []).length > 0 ||
-        (o.jobWorkAssignments || []).length > 0;
-      if (hasJobWork) return false;
+        (o.jobWorkAssignments || []).some((a) => a.status === "pending");
+      if (hasPendingJobWork) return false;
+
       if (o.currentStepIndex < 0) return true;
       const s = o.steps[o.currentStepIndex]?.status || "hold";
       return s === "hold" || s === "running";
