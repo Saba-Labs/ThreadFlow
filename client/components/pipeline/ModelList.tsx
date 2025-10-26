@@ -1252,7 +1252,7 @@ export default function ModelList(props: ModelListProps) {
                 const o = sorted.find((x) => x.id === assignJobWorksModalId);
                 if (o) {
                   let targetIdx = o.currentStepIndex;
-                  if (o.steps.length > 0 && (targetIdx < 0)) {
+                  if (o.steps.length > 0 && targetIdx < 0) {
                     props.onNext(o.id);
                     targetIdx = 0;
                   }
@@ -1324,7 +1324,7 @@ export default function ModelList(props: ModelListProps) {
                     const o = sorted.find((x) => x.id === jwForId);
                     if (o) {
                       let targetIdx = o.currentStepIndex;
-                      if (o.steps.length > 0 && (targetIdx < 0)) {
+                      if (o.steps.length > 0 && targetIdx < 0) {
                         props.onNext(o.id);
                         targetIdx = 0;
                       }
