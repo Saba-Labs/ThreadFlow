@@ -28,6 +28,8 @@ export default function RoadmapPage() {
     fromRoadmapId: string;
     modelId: string;
   } | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
 
   const ordersById = useMemo(() => {
     const map: Record<string, (typeof pipeline.orders)[number]> = {};
@@ -55,7 +57,10 @@ export default function RoadmapPage() {
     });
   }, [pipeline.orders]);
 
-  const handleAddRoadmap = () => createRoadmap();
+  const handleAddRoadmap = () => {
+    setNewRoadmapTitle("");
+    setShowCreateModal(true);
+  };
 
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
@@ -255,46 +260,81 @@ export default function RoadmapPage() {
       </div>
 
       <SimpleModal
-        open={openFor !== null}
-        onOpenChange={(v) => !v && setOpenFor(null)}
-        title="Add models from All Models"
-        footer={
-          <div className="flex items-center gap-2 justify-end">
-            <Button variant="outline" onClick={() => setOpenFor(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddSelectedToRoadmap}>Add selected</Button>
-          </div>
-        }
-      >
-        <div className="space-y-2 max-h-80 overflow-auto">
-          {eligibleOrders.length === 0 ? (
-            <div className="text-sm text-muted-foreground">
-              No running or hold models available.
-            </div>
-          ) : (
-            eligibleOrders.map((o) => (
-              <label
-                key={o.id}
-                className="flex items-center justify-between p-2 border-b"
-              >
-                <div>
-                  <div className="font-medium">{o.modelName}</div>
-                  <div className="text-xs text-muted-foreground">
-                    Qty: {o.quantity}
-                  </div>
-                </div>
-                <div>
-                  <Checkbox
-                    checked={selectedModels.includes(o.id)}
-                    onCheckedChange={() => toggleModelSelection(o.id)}
-                  />
-                </div>
-              </label>
-            ))
-          )}
+      open={openFor !== null}
+      onOpenChange={(v) => !v && setOpenFor(null)}
+      title="Add models from All Models"
+      footer={
+        <div className="flex items-center gap-2 justify-end">
+          <Button variant="outline" onClick={() => setOpenFor(null)}>
+            Cancel
+          </Button>
+          <Button onClick={handleAddSelectedToRoadmap}>Add selected</Button>
         </div>
-      </SimpleModal>
+      }
+    >
+      <div className="space-y-2 max-h-80 overflow-auto">
+        {eligibleOrders.length === 0 ? (
+          <div className="text-sm text-muted-foreground">
+            No running or hold models available.
+          </div>
+        ) : (
+          eligibleOrders.map((o) => (
+            <label
+              key={o.id}
+              className="flex items-center justify-between p-2 border-b"
+            >
+              <div>
+                <div className="font-medium">{o.modelName}</div>
+                <div className="text-xs text-muted-foreground">
+                  Qty: {o.quantity}
+                </div>
+              </div>
+              <div>
+                <Checkbox
+                  checked={selectedModels.includes(o.id)}
+                  onCheckedChange={() => toggleModelSelection(o.id)}
+                />
+              </div>
+            </label>
+          ))
+        )}
+      </div>
+    </SimpleModal>
+
+    {/* Create Roadmap Modal */}
+    <SimpleModal
+      open={showCreateModal}
+      onOpenChange={(v) => !v && setShowCreateModal(false)}
+      title="Create Roadmap"
+      footer={
+        <div className="flex items-center gap-2 justify-end">
+          <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              createRoadmap(newRoadmapTitle || undefined);
+              setShowCreateModal(false);
+            }}
+          >
+            Create
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-3">
+        <div>
+          <label className="text-sm font-medium">Roadmap name</label>
+          <Input
+            value={newRoadmapTitle}
+            onChange={(e) => setNewRoadmapTitle(e.target.value)}
+            placeholder={`Roadmap ${roadmaps.length + 1}`}
+            className="mt-2"
+            autoFocus
+          />
+        </div>
+      </div>
+    </SimpleModal>
 
       <SimpleModal
         open={moveItem !== null}
