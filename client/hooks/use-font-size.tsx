@@ -55,7 +55,7 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useFontSize() {
-  const ctx = useContext(FontSizeContext);
+  const ctx = React.useContext(FontSizeContext);
   if (!ctx) throw new Error("useFontSize must be used within FontSizeProvider");
   return ctx;
 }
