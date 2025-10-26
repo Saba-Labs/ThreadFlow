@@ -281,36 +281,38 @@ export default function RoadmapPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => openAddModels(r.id)}
-                          className="h-9 text-xs sm:text-sm"
-                        >
-                          <Plus className="h-3.5 w-3.5 mr-1.5" />
-                          <span className="hidden sm:inline">Add Models</span>
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingTitleId(r.id);
-                            setTitleDraft(r.title);
-                          }}
-                          className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          onClick={() => setDeleteConfirmId(r.id)}
-                          className="h-9 w-9 bg-red-600 hover:bg-red-700"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      {!isShared && (
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => openAddModels(r.id)}
+                            className="h-9 text-xs sm:text-sm"
+                          >
+                            <Plus className="h-3.5 w-3.5 mr-1.5" />
+                            <span className="hidden sm:inline">Add Models</span>
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingTitleId(r.id);
+                              setTitleDraft(r.title);
+                            }}
+                            className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => setDeleteConfirmId(r.id)}
+                            className="h-9 w-9 bg-red-600 hover:bg-red-700"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardHeader>
