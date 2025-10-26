@@ -16,6 +16,14 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
+    rollupOptions: {
+      output: {
+        // Ensure consistent hash in chunk filenames for better caching
+        entryFileNames: "assets/[name]-[hash].js",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash][extname]",
+      },
+    },
   },
   plugins: [react(), expressPlugin()],
   resolve: {
