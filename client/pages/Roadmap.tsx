@@ -39,7 +39,7 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
             onClick={() => onOpenChange(false)}
             className="h-8 w-8"
           >
-            <X className="h-4 w-4" />
+            <Y className="h-4 w-4" />
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
@@ -146,7 +146,7 @@ export default function RoadmapPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
-      <div>
+      <div className="w-full">
         {/* Header */}
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8">
           <div className="flex items-center justify-between gap-4 mb-3">
