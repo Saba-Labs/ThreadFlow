@@ -1,7 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, ArrowRight, X, Check, Map } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Pencil,
+  ChevronUp,
+  ChevronDown,
+  ArrowRight,
+  X,
+  Check,
+  Map,
+} from "lucide-react";
 import { useState, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
@@ -10,10 +20,13 @@ import { useRoadmaps } from "@/context/RoadmapContext";
 // Simple Modal Component
 function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
   if (!open) return null;
-  
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
+      <div
+        className="fixed inset-0 bg-black/50"
+        onClick={() => onOpenChange(false)}
+      />
       <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col shadow-xl">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b">
           <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
@@ -26,13 +39,9 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
         {footer && (
-          <div className="border-t p-4 sm:p-6 bg-gray-50">
-            {footer}
-          </div>
+          <div className="border-t p-4 sm:p-6 bg-gray-50">{footer}</div>
         )}
       </div>
     </div>
@@ -93,7 +102,7 @@ export default function RoadmapPage() {
 
   const toggleModelSelection = (id: string) => {
     setSelectedModels((s) =>
-      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
     );
   };
 
@@ -105,7 +114,10 @@ export default function RoadmapPage() {
   };
 
   const handleSaveTitle = (id: string) => {
-    renameRoadmap(id, titleDraft || roadmaps.find(r => r.id === id)?.title || "");
+    renameRoadmap(
+      id,
+      titleDraft || roadmaps.find((r) => r.id === id)?.title || "",
+    );
     setEditingTitleId(null);
   };
 
@@ -124,11 +136,12 @@ export default function RoadmapPage() {
                   Roadmaps
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                  {roadmaps.length} active roadmap{roadmaps.length !== 1 ? 's' : ''}
+                  {roadmaps.length} active roadmap
+                  {roadmaps.length !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={handleAddRoadmap}
               className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
             >
@@ -152,7 +165,10 @@ export default function RoadmapPage() {
                 <p className="text-sm text-slate-600 mb-4">
                   Create your first roadmap to organize production models
                 </p>
-                <Button onClick={handleAddRoadmap} className="bg-blue-600 hover:bg-blue-700">
+                <Button
+                  onClick={handleAddRoadmap}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Roadmap
                 </Button>
@@ -165,158 +181,181 @@ export default function RoadmapPage() {
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {roadmaps.map((r) => (
-              <Card key={r.id} className="overflow-hidden shadow-lg border-slate-200 hover:shadow-xl transition-shadow">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6">
-                {editingTitleId === r.id ? (
-                  <div className="flex items-center gap-2 w-full">
-                    <Input
-                      value={titleDraft}
-                      onChange={(e) => setTitleDraft(e.target.value)}
-                      className="bg-white text-black h-10 flex-1"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleSaveTitle(r.id);
-                        }
-                      }}
-                    />
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleSaveTitle(r.id)}
-                      variant="secondary"
-                      className="h-10"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditingTitleId(null)}
-                      className="h-10"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
-                        {r.title.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
-                          {r.title}
-                        </CardTitle>
-                        <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
-                          {r.items.length} model{r.items.length !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
+              <Card
+                key={r.id}
+                className="overflow-hidden shadow-lg border-slate-200 hover:shadow-xl transition-shadow"
+              >
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6">
+                  {editingTitleId === r.id ? (
+                    <div className="flex items-center gap-2 w-full">
+                      <Input
+                        value={titleDraft}
+                        onChange={(e) => setTitleDraft(e.target.value)}
+                        className="bg-white text-black h-10 flex-1"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveTitle(r.id);
+                          }
+                        }}
+                      />
                       <Button
                         size="sm"
+                        onClick={() => handleSaveTitle(r.id)}
                         variant="secondary"
-                        onClick={() => openAddModels(r.id)}
-                        className="h-9 text-xs sm:text-sm"
+                        className="h-10"
                       >
-                        <Plus className="h-3.5 w-3.5 mr-1.5" />
-                        <span className="hidden sm:inline">Add Models</span>
+                        <Check className="h-4 w-4" />
                       </Button>
                       <Button
-                        size="icon"
+                        size="sm"
                         variant="outline"
-                        onClick={() => {
-                          setEditingTitleId(r.id);
-                          setTitleDraft(r.title);
-                        }}
-                        className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
+                        onClick={() => setEditingTitleId(null)}
+                        className="h-10"
                       >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => setDeleteConfirmId(r.id)}
-                        className="h-9 w-9 bg-red-600 hover:bg-red-700"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                )}
-              </CardHeader>
-
-              <CardContent className="p-4 sm:p-6">
-                {r.items.length === 0 ? (
-                  <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
-                    <div className="text-sm text-slate-600 mb-3">
-                      No models added yet
-                    </div>
-                    <Button 
-                      size="sm" 
-                      onClick={() => openAddModels(r.id)}
-                      className="h-9 bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Plus className="h-3.5 w-3.5 mr-2" />
-                      Add Models
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {r.items.map((it, idx) => (
-                      <div
-                        key={it.id || `${r.id}-${it.modelId}-${idx}`}
-                        className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
-                            {it.modelName} ({it.quantity})
-                          </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                          {r.title.charAt(0).toUpperCase()}
                         </div>
-                        
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => moveModelWithinRoadmap(r.id, it.modelId, idx - 1)}
-                            disabled={idx === 0}
-                            className="h-8 w-8 hover:bg-slate-100"
-                          >
-                            <ChevronUp className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => moveModelWithinRoadmap(r.id, it.modelId, idx + 1)}
-                            disabled={idx === r.items.length - 1}
-                            className="h-8 w-8 hover:bg-slate-100"
-                          >
-                            <ChevronDown className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => setMoveItem({ fromRoadmapId: r.id, modelId: it.modelId })}
-                            className="h-8 w-8 hover:bg-blue-50 text-blue-600"
-                          >
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => removeModelFromRoadmap(r.id, it.modelId)}
-                            className="h-8 w-8 hover:bg-red-50 text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
+                            {r.title}
+                          </CardTitle>
+                          <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
+                            {r.items.length} model
+                            {r.items.length !== 1 ? "s" : ""}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => openAddModels(r.id)}
+                          className="h-9 text-xs sm:text-sm"
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1.5" />
+                          <span className="hidden sm:inline">Add Models</span>
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingTitleId(r.id);
+                            setTitleDraft(r.title);
+                          }}
+                          className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          onClick={() => setDeleteConfirmId(r.id)}
+                          className="h-9 w-9 bg-red-600 hover:bg-red-700"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardHeader>
+
+                <CardContent className="p-4 sm:p-6">
+                  {r.items.length === 0 ? (
+                    <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
+                      <div className="text-sm text-slate-600 mb-3">
+                        No models added yet
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => openAddModels(r.id)}
+                        className="h-9 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-2" />
+                        Add Models
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {r.items.map((it, idx) => (
+                        <div
+                          key={it.id || `${r.id}-${it.modelId}-${idx}`}
+                          className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
+                              {it.modelName} ({it.quantity})
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                moveModelWithinRoadmap(
+                                  r.id,
+                                  it.modelId,
+                                  idx - 1,
+                                )
+                              }
+                              disabled={idx === 0}
+                              className="h-8 w-8 hover:bg-slate-100"
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                moveModelWithinRoadmap(
+                                  r.id,
+                                  it.modelId,
+                                  idx + 1,
+                                )
+                              }
+                              disabled={idx === r.items.length - 1}
+                              className="h-8 w-8 hover:bg-slate-100"
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                setMoveItem({
+                                  fromRoadmapId: r.id,
+                                  modelId: it.modelId,
+                                })
+                              }
+                              className="h-8 w-8 hover:bg-blue-50 text-blue-600"
+                            >
+                              <ArrowRight className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                removeModelFromRoadmap(r.id, it.modelId)
+                              }
+                              className="h-8 w-8 hover:bg-red-50 text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -329,10 +368,17 @@ export default function RoadmapPage() {
         title="Add Models"
         footer={
           <div className="flex items-center gap-3 justify-end">
-            <Button variant="outline" onClick={() => setOpenFor(null)} className="flex-1 sm:flex-none">
+            <Button
+              variant="outline"
+              onClick={() => setOpenFor(null)}
+              className="flex-1 sm:flex-none"
+            >
               Cancel
             </Button>
-            <Button onClick={handleAddSelectedToRoadmap} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700">
+            <Button
+              onClick={handleAddSelectedToRoadmap}
+              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700"
+            >
               Add Selected ({selectedModels.length})
             </Button>
           </div>
@@ -374,7 +420,11 @@ export default function RoadmapPage() {
         title="Create New Roadmap"
         footer={
           <div className="flex items-center gap-3 justify-end">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)} className="flex-1 sm:flex-none">
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateModal(false)}
+              className="flex-1 sm:flex-none"
+            >
               Cancel
             </Button>
             <Button
@@ -425,7 +475,8 @@ export default function RoadmapPage() {
                 Choose destination roadmap
               </p>
               <div className="space-y-2">
-                {roadmaps.filter((rr) => rr.id !== moveItem.fromRoadmapId).length === 0 ? (
+                {roadmaps.filter((rr) => rr.id !== moveItem.fromRoadmapId)
+                  .length === 0 ? (
                   <div className="text-center py-8 text-sm text-slate-600">
                     No other roadmaps available
                   </div>
@@ -442,7 +493,11 @@ export default function RoadmapPage() {
                         </div>
                         <Button
                           onClick={() => {
-                            moveModelToRoadmap(moveItem.fromRoadmapId, rr.id, moveItem.modelId);
+                            moveModelToRoadmap(
+                              moveItem.fromRoadmapId,
+                              rr.id,
+                              moveItem.modelId,
+                            );
                             setMoveItem(null);
                           }}
                           size="sm"
@@ -466,7 +521,11 @@ export default function RoadmapPage() {
         title="Delete Roadmap"
         footer={
           <div className="flex items-center gap-3 justify-end">
-            <Button variant="outline" onClick={() => setDeleteConfirmId(null)} className="flex-1 sm:flex-none">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirmId(null)}
+              className="flex-1 sm:flex-none"
+            >
               Cancel
             </Button>
             <Button
@@ -484,7 +543,8 @@ export default function RoadmapPage() {
       >
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
-            Are you sure you want to delete this roadmap? This action cannot be undone.
+            Are you sure you want to delete this roadmap? This action cannot be
+            undone.
           </p>
           {deleteConfirmId && (
             <div className="p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
