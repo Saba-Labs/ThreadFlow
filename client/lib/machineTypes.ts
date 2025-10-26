@@ -74,5 +74,5 @@ export function getMachineTypeConfig(
 
 // React hook for components
 export function useMachineTypes() {
-  return React.useSyncExternalStore(subscribe, getMachineTypes, getMachineTypes);
+  return useSyncExternalStore(subscribe, getMachineTypes, getMachineTypes);
 }
