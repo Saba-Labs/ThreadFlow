@@ -108,7 +108,12 @@ export default function RoadmapPage() {
 
   const handleAddSelectedToRoadmap = () => {
     if (!openFor) return;
-    for (const id of selectedModels) addModelToRoadmap(openFor, id);
+    for (const id of selectedModels) {
+      const order = eligibleOrders.find((o) => o.id === id);
+      if (order) {
+        addModelToRoadmap(openFor, id, order.modelName, order.quantity);
+      }
+    }
     setOpenFor(null);
     setSelectedModels([]);
   };
