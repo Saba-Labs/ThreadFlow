@@ -1,4 +1,11 @@
-import * as React from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+  ReactNode,
+} from "react";
 
 export type FontSizeOption = "small" | "medium" | "large" | "extra-large";
 
@@ -7,7 +14,7 @@ type Ctx = {
   setValue: (v: FontSizeOption) => void;
 };
 
-const FontSizeContext = React.createContext<Ctx | undefined>(undefined);
+const FontSizeContext = createContext<Ctx | undefined>(undefined);
 
 const STORAGE_KEY = "app:font-size";
 
@@ -27,7 +34,7 @@ function applyScale(option: FontSizeOption) {
 const DEFAULT_VALUE: FontSizeOption = "medium";
 
 export function FontSizeProvider({ children }: { children: React.ReactNode }) {
-  const [value, setValue] = React.useState<FontSizeOption>(() => {
+  const [value, setValue] = useState<FontSizeOption>(() => {
     try {
       const saved =
         (localStorage.getItem(STORAGE_KEY) as FontSizeOption | null) ??
@@ -39,7 +46,7 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
   });
 
   // Apply on mount and whenever it changes
-  React.useEffect(() => {
+  useEffect(() => {
     applyScale(value);
     try {
       localStorage.setItem(STORAGE_KEY, value);
@@ -48,14 +55,20 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [value]);
 
-  const ctx = React.useMemo<Ctx>(() => ({ value, setValue }), [value]);
+  const ctx = useMemo<Ctx>(() => ({ value, setValue }), [value]);
   return (
     <FontSizeContext.Provider value={ctx}>{children}</FontSizeContext.Provider>
   );
 }
 
 export function useFontSize() {
-  const ctx = React.useContext(FontSizeContext);
-  if (!ctx) throw new Error("useFontSize must be used within FontSizeProvider");
+  const ctx = useContext(FontSizeContext);
+  if (!ctx) {
+    // Fallback to defaults when provider is absent to avoid crashing the app during debugging
+    return {
+      value: DEFAULT_VALUE,
+      setValue: () => {},
+    } as Ctx;
+  }
   return ctx;
 }

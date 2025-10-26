@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useState, useContext, ReactNode } from "react";
 
 type SearchContextValue = {
   query: string;
@@ -7,7 +7,7 @@ type SearchContextValue = {
 
 const SearchContext = createContext<SearchContextValue | undefined>(undefined);
 
-export function SearchProvider({ children }: { children: React.ReactNode }) {
+export function SearchProvider({ children }: { children: ReactNode }) {
   const [query, setQuery] = useState("");
   return (
     <SearchContext.Provider value={{ query, setQuery }}>
