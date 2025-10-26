@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import * as React from "react";
 
 export interface JobWork {
   id: string;
