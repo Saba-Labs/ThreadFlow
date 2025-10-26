@@ -18,7 +18,7 @@ interface RoadmapState {
   roadmaps: Roadmap[];
 }
 
-const STORAGE_KEY = "threadflow_roadmaps_v1";
+const STORAGE_KEY = "threadflow_roadmaps_v2";
 
 function uid(prefix = "rdm") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
