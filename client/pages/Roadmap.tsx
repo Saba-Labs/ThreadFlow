@@ -162,9 +162,10 @@ export default function RoadmapPage() {
           </CardHeader>
 
             <CardContent>
-              <div className="mb-3 flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  Models (only Running or Hold)
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-700">Models</div>
+                  <div className="text-xs text-muted-foreground">Showing running, hold, and out-of-path (excluding job-work/complete)</div>
                 </div>
                 <Button size="sm" onClick={() => openAddModels(r.id)}>
                   Add models
@@ -172,21 +173,27 @@ export default function RoadmapPage() {
               </div>
 
               {r.items.length === 0 ? (
-                <div className="text-sm text-muted-foreground">
-                  No models added yet. Use "Add models" to pick from All Models
-                  (running or hold).
+                <div className="rounded-lg border border-dashed border-gray-200 p-4 text-center">
+                  <div className="text-sm text-muted-foreground">
+                    No models added yet.
+                  </div>
+                  <div className="mt-3">
+                    <Button size="sm" onClick={() => openAddModels(r.id)}>
+                      Add models
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <div className="divide-y">
+                <ul className="space-y-2">
                   {r.items.map((it) => {
                     const o = ordersById[it.modelId];
                     return (
-                      <div
+                      <li
                         key={it.modelId}
-                        className="flex items-center justify-between py-3"
+                        className="flex items-center justify-between p-3 rounded-md border border-gray-100 hover:shadow hover:bg-white transition"
                       >
-                        <div>
-                          <div className="font-medium">
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">
                             {o ? o.modelName : "Model removed"}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -259,10 +266,10 @@ export default function RoadmapPage() {
                             Remove
                           </Button>
                         </div>
-                      </div>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               )}
             </CardContent>
           </Card>
