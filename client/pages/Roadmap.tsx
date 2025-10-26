@@ -570,7 +570,7 @@ export default function RoadmapPage() {
 
       {/* Delete Confirmation Modal */}
       <SimpleModal
-        open={deleteConfirmId !== null}
+        open={deleteConfirmId !== null && !isShared}
         onOpenChange={(v: boolean) => !v && setDeleteConfirmId(null)}
         title="Delete Roadmap"
         footer={
