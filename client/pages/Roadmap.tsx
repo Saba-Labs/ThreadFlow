@@ -336,12 +336,12 @@ export default function RoadmapPage() {
         }
       >
         <div className="space-y-2">
-          {mockEligibleOrders.length === 0 ? (
+          {eligibleOrders.length === 0 ? (
             <div className="text-center py-8 text-sm text-slate-600">
               No models available to add
             </div>
           ) : (
-            mockEligibleOrders.map((o) => (
+            eligibleOrders.map((o) => (
               <label
                 key={o.id}
                 className="flex items-center gap-3 p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
