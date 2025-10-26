@@ -140,7 +140,7 @@ export default function RoadmapPage() {
                       <Button
                         size="icon"
                         variant="destructive"
-                        onClick={() => deleteRoadmap(r.id)}
+                        onClick={() => setDeleteConfirmId(r.id)}
                         aria-label="Delete roadmap"
                         title="Delete roadmap"
                       >
