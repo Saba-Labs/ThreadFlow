@@ -155,23 +155,48 @@ export default function RoadmapPage() {
                 <Map className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
-                  Roadmaps
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+                    Roadmaps
+                  </h1>
+                  {isShared && (
+                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-800">
+                      Shared View
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
                   {roadmaps.length} active roadmap
                   {roadmaps.length !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
-            <Button
-              onClick={handleAddRoadmap}
-              className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
-            >
-              <Plus className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Add Roadmap</span>
-            </Button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
+                title="Copy share link to clipboard"
+              >
+                <Share2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Share</span>
+              </Button>
+              {!isShared && (
+                <Button
+                  onClick={handleAddRoadmap}
+                  className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
+                >
+                  <Plus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Add Roadmap</span>
+                </Button>
+              )}
+            </div>
           </div>
+          {shareToast && (
+            <div className="mt-3 p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-800">
+              ✓ Share link copied to clipboard!
+            </div>
+          )}
         </div>
 
         {/* Empty State */}
