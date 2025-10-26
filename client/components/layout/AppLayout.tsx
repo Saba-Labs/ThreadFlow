@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
 import { Settings, Menu, X, Search as SearchIcon } from "lucide-react";
 import { SearchProvider, useSearch } from "@/context/SearchContext";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
 function HeaderSearch({ className }: { className?: string }) {
