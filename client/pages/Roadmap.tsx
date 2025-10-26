@@ -37,8 +37,19 @@ export default function RoadmapPage() {
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
-      if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
-        return false;
+      // Exclude completed orders (beyond last step)
+      if (o.currentStepIndex >= o.steps.length) return false;
+
+      // Exclude any orders linked to Job Work (either by ids or assignments)
+      const hasJobWork =
+        ((o as any).jobWorkIds || []).length > 0 ||
+        (o.jobWorkAssignments || []).length > 0;
+      if (hasJobWork) return false;
+
+      // Include orders that are out of path (-1)
+      if (o.currentStepIndex < 0) return true;
+
+      // Otherwise include only if current step is hold or running
       const s = o.steps[o.currentStepIndex]?.status || "hold";
       return s === "hold" || s === "running";
     });
