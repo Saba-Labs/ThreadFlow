@@ -80,13 +80,13 @@ function subscribe(cb: () => void) {
 }
 
 export function useProductionPipeline() {
-  const state = React.useSyncExternalStore(
+  const state = useSyncExternalStore(
     subscribe,
     () => STORE,
     () => STORE,
   );
 
-  const createWorkOrder = React.useCallback(
+  const createWorkOrder = useCallback(
     (input: {
       modelName: string;
       quantity: number;
@@ -123,11 +123,11 @@ export function useProductionPipeline() {
     [],
   );
 
-  const deleteOrder = React.useCallback((orderId: string) => {
+  const deleteOrder = useCallback((orderId: string) => {
     setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
   }, []);
 
-  const editPath = React.useCallback(
+  const editPath = useCallback(
     (orderId: string, editor: (steps: PathStep[]) => PathStep[]) => {
       setStore((s) => ({
         orders: s.orders.map((o) => {
@@ -146,7 +146,7 @@ export function useProductionPipeline() {
     [],
   );
 
-  const updateStepStatus = React.useCallback(
+  const updateStepStatus = useCallback(
     (
       orderId: string,
       stepIndex: number,
@@ -167,7 +167,7 @@ export function useProductionPipeline() {
     [],
   );
 
-  const moveToNextStep = React.useCallback((orderId: string) => {
+  const moveToNextStep = useCallback((orderId: string) => {
     setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
@@ -204,7 +204,7 @@ export function useProductionPipeline() {
     }));
   }, []);
 
-  const moveToPrevStep = React.useCallback((orderId: string) => {
+  const moveToPrevStep = useCallback((orderId: string) => {
     setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
@@ -248,7 +248,7 @@ export function useProductionPipeline() {
     }));
   }, []);
 
-  const setCurrentStep = React.useCallback((orderId: string, index: number) => {
+  const setCurrentStep = useCallback((orderId: string, index: number) => {
     setStore((s) => ({
       orders: s.orders.map((o) => {
         if (o.id !== orderId) return o;
@@ -258,7 +258,7 @@ export function useProductionPipeline() {
     }));
   }, []);
 
-  const toggleParallelMachine = React.useCallback(
+  const toggleParallelMachine = useCallback(
     (orderId: string, stepIndex: number, machineIndex: number) => {
       setStore((s) => ({
         orders: s.orders.map((o) => {
@@ -310,7 +310,7 @@ export function useProductionPipeline() {
     [],
   );
 
-  const splitOrder = React.useCallback((orderId: string, quantities: number[]) => {
+  const splitOrder = useCallback((orderId: string, quantities: number[]) => {
     setStore((s) => {
       const src = s.orders.find((o) => o.id === orderId);
       if (!src) return s;
@@ -372,7 +372,7 @@ export function useProductionPipeline() {
 
   const machineTypes = useMachineTypes();
 
-  const board = React.useMemo(() => {
+  const board = useMemo(() => {
     const map: Record<MachineType, WorkOrder[]> = Object.fromEntries(
       machineTypes.map((m) => [m.name, [] as WorkOrder[]]),
     ) as Record<MachineType, WorkOrder[]>;
@@ -391,7 +391,7 @@ export function useProductionPipeline() {
     return map;
   }, [state.orders, machineTypes]);
 
-  const progressOf = React.useMemo(
+  const progressOf = useMemo(
     () => (o: WorkOrder) => {
       if (o.steps.length === 0) return 1;
       const completed = o.steps.filter((s) => s.status === "completed").length;
