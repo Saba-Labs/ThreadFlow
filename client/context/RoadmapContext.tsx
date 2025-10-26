@@ -142,6 +142,9 @@ export function useRoadmaps() {
         const to = s.roadmaps.find((r) => r.id === toRoadmapId);
         if (!from || !to) return s;
         const exists = to.items.some((it) => it.modelId === modelId);
+        // get the item being moved to preserve modelName and quantity
+        const itemToMove = from.items.find((it) => it.modelId === modelId);
+        if (!itemToMove) return s;
         // remove from source
         const newRoadmaps = s.roadmaps.map((r) =>
           r.id === fromRoadmapId
@@ -161,7 +164,7 @@ export function useRoadmaps() {
                   ...r,
                   items: [
                     ...r.items.slice(0, destIndex),
-                    { modelId, addedAt: Date.now() },
+                    { modelId, modelName: itemToMove.modelName, quantity: itemToMove.quantity, addedAt: Date.now() },
                     ...r.items.slice(destIndex),
                   ],
                 }
