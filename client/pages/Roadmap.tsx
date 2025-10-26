@@ -146,7 +146,7 @@ export default function RoadmapPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
-      <div className="w-full">
+      <div>
         {/* Header */}
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8">
           <div className="flex items-center justify-between gap-4 mb-3">
@@ -155,7 +155,7 @@ export default function RoadmapPage() {
                 <Map className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <div>
+                <div className="flex items-center gap-2">
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
                     Roadmaps
                   </h1>
