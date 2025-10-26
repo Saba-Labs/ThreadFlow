@@ -56,6 +56,12 @@ export function FontSizeProvider({ children }: { children: React.ReactNode }) {
 
 export function useFontSize() {
   const ctx = useContext(FontSizeContext);
-  if (!ctx) throw new Error("useFontSize must be used within FontSizeProvider");
+  if (!ctx) {
+    // Fallback to defaults when provider is absent to avoid crashing the app during debugging
+    return {
+      value: DEFAULT_VALUE,
+      setValue: () => {},
+    } as Ctx;
+  }
   return ctx;
 }
