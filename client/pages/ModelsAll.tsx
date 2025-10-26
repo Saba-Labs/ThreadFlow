@@ -38,8 +38,11 @@ export default function ModelsAll() {
 
     const statusOf = (
       o: (typeof pipeline.orders)[number],
-    ): "hold" | "running" | "completed" => {
-      if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length) {
+    ): "hold" | "running" | "completed" | "onboard" => {
+      if (o.currentStepIndex < 0) {
+        return "onboard";
+      }
+      if (o.currentStepIndex >= o.steps.length) {
         return "completed";
       }
       const s = o.steps[o.currentStepIndex]?.status || "hold";
