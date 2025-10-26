@@ -164,8 +164,8 @@ export default function RoadmapPage() {
         {/* Roadmaps Grid */}
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          {roadmaps.map((r) => (
-            <Card key={r.id} className="overflow-hidden shadow-lg border-slate-200 hover:shadow-xl transition-shadow">
+            {roadmaps.map((r) => (
+              <Card key={r.id} className="overflow-hidden shadow-lg border-slate-200 hover:shadow-xl transition-shadow">
               <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6">
                 {editingTitleId === r.id ? (
                   <div className="flex items-center gap-2 w-full">
