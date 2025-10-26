@@ -1,25 +1,73 @@
-import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Trash2, Plus, Pencil } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useRoadmaps } from "@/context/RoadmapContext";
-import SimpleModal from "@/components/ui/SimpleModal";
+import { Trash2, Plus, Pencil, ChevronUp, ChevronDown, ArrowRight, X, Check, Map } from "lucide-react";
+import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
+// Mock data
+const mockRoadmaps = [
+  {
+    id: "1",
+    title: "Q4 2024 Production",
+    items: [
+      { modelId: "m1", modelName: "Model A-100", quantity: 5 },
+      { modelId: "m2", modelName: "Model B-200", quantity: 3 },
+    ],
+  },
+  {
+    id: "2",
+    title: "Priority Orders",
+    items: [
+      { modelId: "m3", modelName: "Model C-300", quantity: 8 },
+    ],
+  },
+];
+
+const mockEligibleOrders = [
+  { id: "m4", modelName: "Model D-400", quantity: 2 },
+  { id: "m5", modelName: "Model E-500", quantity: 12 },
+  { id: "m6", modelName: "Model F-600", quantity: 7 },
+];
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+// Simple Modal Component
+function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
+  if (!open) return null;
+  
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="fixed inset-0 bg-black/50" onClick={() => onOpenChange(false)} />
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col shadow-xl">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
+          <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="h-8 w-8"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          {children}
+        </div>
+        {footer && (
+          <div className="border-t p-4 sm:p-6 bg-gray-50">
+            {footer}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function RoadmapPage() {
-  const {
-    roadmaps,
-    createRoadmap,
-    deleteRoadmap,
-    renameRoadmap,
-    removeModelFromRoadmap,
-    addModelToRoadmap,
-    moveModelWithinRoadmap,
-    moveModelToRoadmap,
-  } = useRoadmaps();
-  const pipeline = useProductionPipeline();
+  const [roadmaps, setRoadmaps] = useState(mockRoadmaps);
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
@@ -32,35 +80,34 @@ export default function RoadmapPage() {
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const ordersById = useMemo(() => {
-    const map: Record<string, (typeof pipeline.orders)[number]> = {};
-    for (const o of pipeline.orders) map[o.id] = o;
-    return map;
-  }, [pipeline.orders]);
-
-  const eligibleOrders = useMemo(() => {
-    return pipeline.orders.filter((o) => {
-      // Exclude completed orders (beyond last step)
-      if (o.currentStepIndex >= o.steps.length) return false;
-
-      // Exclude any orders linked to Job Work (either by ids or assignments)
-      const hasJobWork =
-        ((o as any).jobWorkIds || []).length > 0 ||
-        (o.jobWorkAssignments || []).length > 0;
-      if (hasJobWork) return false;
-
-      // Include orders that are out of path (-1)
-      if (o.currentStepIndex < 0) return true;
-
-      // Otherwise include only if current step is hold or running
-      const s = o.steps[o.currentStepIndex]?.status || "hold";
-      return s === "hold" || s === "running";
-    });
-  }, [pipeline.orders]);
-
   const handleAddRoadmap = () => {
     setNewRoadmapTitle("");
     setShowCreateModal(true);
+  };
+
+  const createRoadmap = (title?: string) => {
+    const newId = String(roadmaps.length + 1);
+    setRoadmaps([...roadmaps, {
+      id: newId,
+      title: title || `Roadmap ${roadmaps.length + 1}`,
+      items: []
+    }]);
+  };
+
+  const deleteRoadmap = (id: string) => {
+    setRoadmaps(roadmaps.filter(r => r.id !== id));
+  };
+
+  const renameRoadmap = (id: string, newTitle: string) => {
+    setRoadmaps(roadmaps.map(r => r.id === id ? { ...r, title: newTitle } : r));
+  };
+
+  const removeModelFromRoadmap = (roadmapId: string, modelId: string) => {
+    setRoadmaps(roadmaps.map(r => 
+      r.id === roadmapId 
+        ? { ...r, items: r.items.filter(i => i.modelId !== modelId) }
+        : r
+    ));
   };
 
   const openAddModels = (roadmapId: string) => {
@@ -70,315 +117,375 @@ export default function RoadmapPage() {
 
   const toggleModelSelection = (id: string) => {
     setSelectedModels((s) =>
-      s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
     );
   };
 
   const handleAddSelectedToRoadmap = () => {
     if (!openFor) return;
-    for (const id of selectedModels) addModelToRoadmap(openFor, id);
+    const modelsToAdd = mockEligibleOrders.filter(o => selectedModels.includes(o.id));
+    setRoadmaps(roadmaps.map(r => 
+      r.id === openFor 
+        ? { ...r, items: [...r.items, ...modelsToAdd.map(m => ({ modelId: m.id, modelName: m.modelName, quantity: m.quantity }))] }
+        : r
+    ));
     setOpenFor(null);
   };
 
+  const moveModelWithinRoadmap = (roadmapId: string, modelId: string, newIndex: number) => {
+    setRoadmaps(roadmaps.map(r => {
+      if (r.id !== roadmapId) return r;
+      const items = [...r.items];
+      const oldIndex = items.findIndex(i => i.modelId === modelId);
+      if (oldIndex === -1) return r;
+      const [item] = items.splice(oldIndex, 1);
+      items.splice(newIndex, 0, item);
+      return { ...r, items };
+    }));
+  };
+
+  const moveModelToRoadmap = (fromId: string, toId: string, modelId: string) => {
+    let itemToMove: any = null;
+    setRoadmaps(roadmaps.map(r => {
+      if (r.id === fromId) {
+        itemToMove = r.items.find(i => i.modelId === modelId);
+        return { ...r, items: r.items.filter(i => i.modelId !== modelId) };
+      }
+      if (r.id === toId && itemToMove) {
+        return { ...r, items: [...r.items, itemToMove] };
+      }
+      return r;
+    }));
+  };
+
+  const handleSaveTitle = (id: string) => {
+    renameRoadmap(id, titleDraft || roadmaps.find(r => r.id === id)?.title || "");
+    setEditingTitleId(null);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Roadmap</h1>
-        <Button onClick={handleAddRoadmap}>
-          <Plus className="h-4 w-4 mr-2" /> Add Roadmap
-        </Button>
-      </div>
-
-      {roadmaps.length === 0 && (
-        <div className="text-sm text-muted-foreground">
-          No roadmaps yet. Click "Add Roadmap" to create one.
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {roadmaps.map((r) => (
-          <Card key={r.id} className="overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-500 text-white">
-            <div className="w-full flex items-center justify-between gap-4">
-              {editingTitleId === r.id ? (
-                <form
-                  className="flex items-center gap-2 w-full"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    renameRoadmap(r.id, titleDraft || r.title);
-                    setEditingTitleId(null);
-                  }}
-                >
-                  <Input
-                    value={titleDraft}
-                    onChange={(e) => setTitleDraft(e.target.value)}
-                    className="bg-white text-black h-8"
-                    autoFocus
-                  />
-                  <Button size="sm" type="submit" variant="secondary">
-                    Save
-                  </Button>
-                </form>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-md bg-white/20 flex items-center justify-center text-white font-bold text-sm">
-                      {r.title.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <CardTitle className="text-white text-lg leading-tight">
-                        {r.title}
-                      </CardTitle>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => openAddModels(r.id)}
-                      aria-label="Add models"
-                      title="Add models"
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> Add models
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        setEditingTitleId(r.id);
-                        setTitleDraft(r.title);
-                      }}
-                      aria-label="Rename"
-                      title="Rename"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      onClick={() => setDeleteConfirmId(r.id)}
-                      aria-label="Delete roadmap"
-                      title="Delete roadmap"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <Map className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+                  Roadmaps
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
+                  {roadmaps.length} active roadmap{roadmaps.length !== 1 ? 's' : ''}
+                </p>
+              </div>
             </div>
-          </CardHeader>
+            <Button 
+              onClick={handleAddRoadmap}
+              className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
+            >
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Add Roadmap</span>
+            </Button>
+          </div>
+        </div>
 
-            <CardContent>
-              <div className="mb-4">
-                <div className="text-sm font-medium text-gray-700">Models</div>
+        {/* Empty State */}
+        {roadmaps.length === 0 && (
+          <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
+            <div className="flex flex-col items-center">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mb-4 shadow-sm">
+                <Map className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
               </div>
+              <p className="text-base sm:text-lg font-semibold text-slate-900 mb-2">
+                No roadmaps yet
+              </p>
+              <p className="text-sm text-slate-600 mb-4">
+                Create your first roadmap to organize production models
+              </p>
+              <Button onClick={handleAddRoadmap} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Roadmap
+              </Button>
+            </div>
+          </div>
+        )}
 
-              {r.items.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-gray-200 p-4 text-center">
-                  <div className="text-sm text-muted-foreground">
-                    No models added yet.
+        {/* Roadmaps Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          {roadmaps.map((r) => (
+            <Card key={r.id} className="overflow-hidden shadow-lg border-slate-200 hover:shadow-xl transition-shadow">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6">
+                {editingTitleId === r.id ? (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+                    <Input
+                      value={titleDraft}
+                      onChange={(e) => setTitleDraft(e.target.value)}
+                      className="bg-white text-black h-10 flex-1"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveTitle(r.id);
+                        }
+                      }}
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleSaveTitle(r.id)}
+                        variant="secondary"
+                        className="flex-1 sm:flex-none h-10"
+                      >
+                        <Check className="h-4 w-4 sm:mr-2" />
+                        <span className="sm:inline">Save</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingTitleId(null)}
+                        className="flex-1 sm:flex-none h-10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="mt-3">
-                    <Button size="sm" onClick={() => openAddModels(r.id)}>
-                      Add models
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                        {r.title.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
+                          {r.title}
+                        </CardTitle>
+                        <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
+                          {r.items.length} model{r.items.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => openAddModels(r.id)}
+                        className="flex-1 sm:flex-none h-9 text-xs sm:text-sm"
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                        Add Models
+                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingTitleId(r.id);
+                            setTitleDraft(r.title);
+                          }}
+                          className="h-9 w-9 bg-white/90 hover:bg-white"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          onClick={() => setDeleteConfirmId(r.id)}
+                          className="h-9 w-9 bg-red-600 hover:bg-red-700"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardHeader>
+
+              <CardContent className="p-4 sm:p-6">
+                {r.items.length === 0 ? (
+                  <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
+                    <div className="text-sm text-slate-600 mb-3">
+                      No models added yet
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => openAddModels(r.id)}
+                      className="h-9 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-2" />
+                      Add Models
                     </Button>
                   </div>
-                </div>
-              ) : (
-                <ul className="space-y-2">
-                  {r.items.map((it) => {
-                    const o = ordersById[it.modelId];
-                    return (
-                      <li
+                ) : (
+                  <div className="space-y-2">
+                    {r.items.map((it, idx) => (
+                      <div
                         key={it.modelId}
-                        className="flex items-center justify-between p-3 rounded-md border border-gray-100 hover:shadow hover:bg-white transition"
+                        className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
                       >
-                        <div className="min-w-0">
-                          <div className="font-medium truncate">
-                            {o ? o.modelName : "Model removed"}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
+                            {it.modelName}
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {o ? `Qty: ${o.quantity}` : it.modelId}
+                          <div className="text-xs text-slate-600 mt-0.5">
+                            Qty: {it.quantity}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => {
-                              const idx = r.items.findIndex(
-                                (x) => x.modelId === it.modelId,
-                              );
-                              if (idx > 0)
-                                moveModelWithinRoadmap(
-                                  r.id,
-                                  it.modelId,
-                                  idx - 1,
-                                );
-                            }}
-                            title="Move up"
-                            aria-label="Move up"
+                            onClick={() => moveModelWithinRoadmap(r.id, it.modelId, idx - 1)}
+                            disabled={idx === 0}
+                            className="h-8 w-8 hover:bg-slate-100"
                           >
-                            ▲
+                            <ChevronUp className="h-4 w-4" />
                           </Button>
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => {
-                              const idx = r.items.findIndex(
-                                (x) => x.modelId === it.modelId,
-                              );
-                              if (idx >= 0 && idx < r.items.length - 1)
-                                moveModelWithinRoadmap(
-                                  r.id,
-                                  it.modelId,
-                                  idx + 1,
-                                );
-                            }}
-                            title="Move down"
-                            aria-label="Move down"
+                            onClick={() => moveModelWithinRoadmap(r.id, it.modelId, idx + 1)}
+                            disabled={idx === r.items.length - 1}
+                            className="h-8 w-8 hover:bg-slate-100"
                           >
-                            ▼
+                            <ChevronDown className="h-4 w-4" />
                           </Button>
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() =>
-                              setMoveItem({
-                                fromRoadmapId: r.id,
-                                modelId: it.modelId,
-                              })
-                            }
-                            title="Move to another roadmap"
-                            aria-label="Move to another roadmap"
+                            onClick={() => setMoveItem({ fromRoadmapId: r.id, modelId: it.modelId })}
+                            className="h-8 w-8 hover:bg-blue-50 text-blue-600"
                           >
-                            Move
+                            <ArrowRight className="h-4 w-4" />
                           </Button>
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
-                            onClick={() =>
-                              removeModelFromRoadmap(r.id, it.modelId)
-                            }
-                            aria-label="Remove"
-                            title="Remove"
-                            className="text-red-600 hover:text-red-700"
+                            onClick={() => removeModelFromRoadmap(r.id, it.modelId)}
+                            className="h-8 w-8 hover:bg-red-50 text-red-600"
                           >
-                            Remove
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
+      {/* Add Models Modal */}
       <SimpleModal
-      open={openFor !== null}
-      onOpenChange={(v) => !v && setOpenFor(null)}
-      title="Add models from All Models"
-      footer={
-        <div className="flex items-center gap-2 justify-end">
-          <Button variant="outline" onClick={() => setOpenFor(null)}>
-            Cancel
-          </Button>
-          <Button onClick={handleAddSelectedToRoadmap}>Add selected</Button>
-        </div>
-      }
-    >
-      <div className="space-y-2 max-h-80 overflow-auto">
-        {eligibleOrders.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            No running or hold models available.
-          </div>
-        ) : (
-          eligibleOrders.map((o) => (
-            <label
-              key={o.id}
-              className="flex items-center justify-between p-2 border-b"
-            >
-              <div>
-                <div className="font-medium">{o.modelName}</div>
-                <div className="text-xs text-muted-foreground">
-                  Qty: {o.quantity}
-                </div>
-              </div>
-              <div>
-                <Checkbox
-                  checked={selectedModels.includes(o.id)}
-                  onCheckedChange={() => toggleModelSelection(o.id)}
-                />
-              </div>
-            </label>
-          ))
-        )}
-      </div>
-    </SimpleModal>
-
-    {/* Create Roadmap Modal */}
-    <SimpleModal
-      open={showCreateModal}
-      onOpenChange={(v) => !v && setShowCreateModal(false)}
-      title="Create Roadmap"
-      footer={
-        <div className="flex items-center gap-2 justify-end">
-          <Button variant="outline" onClick={() => setShowCreateModal(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              createRoadmap(newRoadmapTitle || undefined);
-              setShowCreateModal(false);
-            }}
-          >
-            Create
-          </Button>
-        </div>
-      }
-    >
-      <div className="space-y-3">
-        <div>
-          <label className="text-sm font-medium">Roadmap name</label>
-          <Input
-            value={newRoadmapTitle}
-            onChange={(e) => setNewRoadmapTitle(e.target.value)}
-            placeholder={`Roadmap ${roadmaps.length + 1}`}
-            className="mt-2"
-            autoFocus
-          />
-        </div>
-      </div>
-    </SimpleModal>
-
-      <SimpleModal
-        open={moveItem !== null}
-        onOpenChange={(v) => !v && setMoveItem(null)}
-        title="Move model to another roadmap"
+        open={openFor !== null}
+        onOpenChange={(v: boolean) => !v && setOpenFor(null)}
+        title="Add Models"
         footer={
-          <div className="flex items-center gap-2 justify-end">
-            <Button variant="outline" onClick={() => setMoveItem(null)}>
+          <div className="flex items-center gap-3 justify-end">
+            <Button variant="outline" onClick={() => setOpenFor(null)} className="flex-1 sm:flex-none">
               Cancel
             </Button>
-            <Button onClick={() => setMoveItem(null)}>Close</Button>
+            <Button onClick={handleAddSelectedToRoadmap} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700">
+              Add Selected ({selectedModels.length})
+            </Button>
           </div>
         }
       >
         <div className="space-y-2">
-          {moveItem ? (
-            <div>
-              <div className="text-sm text-muted-foreground mb-2">
+          {mockEligibleOrders.length === 0 ? (
+            <div className="text-center py-8 text-sm text-slate-600">
+              No models available to add
+            </div>
+          ) : (
+            mockEligibleOrders.map((o) => (
+              <label
+                key={o.id}
+                className="flex items-center gap-3 p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+              >
+                <Checkbox
+                  checked={selectedModels.includes(o.id)}
+                  onCheckedChange={() => toggleModelSelection(o.id)}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm sm:text-base text-slate-900 truncate">
+                    {o.modelName}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">
+                    Qty: {o.quantity}
+                  </div>
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+      </SimpleModal>
+
+      {/* Create Roadmap Modal */}
+      <SimpleModal
+        open={showCreateModal}
+        onOpenChange={(v: boolean) => !v && setShowCreateModal(false)}
+        title="Create New Roadmap"
+        footer={
+          <div className="flex items-center gap-3 justify-end">
+            <Button variant="outline" onClick={() => setShowCreateModal(false)} className="flex-1 sm:flex-none">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                createRoadmap(newRoadmapTitle || undefined);
+                setShowCreateModal(false);
+              }}
+              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700"
+            >
+              Create Roadmap
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <div>
+            <label className="text-sm font-medium text-slate-900 mb-2 block">
+              Roadmap Name
+            </label>
+            <Input
+              value={newRoadmapTitle}
+              onChange={(e) => setNewRoadmapTitle(e.target.value)}
+              placeholder={`Roadmap ${roadmaps.length + 1}`}
+              className="h-11"
+              autoFocus
+            />
+          </div>
+        </div>
+      </SimpleModal>
+
+      {/* Move Model Modal */}
+      <SimpleModal
+        open={moveItem !== null}
+        onOpenChange={(v: boolean) => !v && setMoveItem(null)}
+        title="Move Model"
+        footer={
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setMoveItem(null)}>
+              Cancel
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          {moveItem && (
+            <>
+              <p className="text-sm text-slate-600 mb-4">
                 Choose destination roadmap
-              </div>
+              </p>
               <div className="space-y-2">
-                {roadmaps.filter((rr) => rr.id !== moveItem.fromRoadmapId)
-                  .length === 0 ? (
-                  <div className="text-sm text-muted-foreground">
-                    No other roadmaps available.
+                {roadmaps.filter((rr) => rr.id !== moveItem.fromRoadmapId).length === 0 ? (
+                  <div className="text-center py-8 text-sm text-slate-600">
+                    No other roadmaps available
                   </div>
                 ) : (
                   roadmaps
@@ -386,41 +493,38 @@ export default function RoadmapPage() {
                     .map((rr) => (
                       <div
                         key={rr.id}
-                        className="flex items-center justify-between p-2 border rounded"
+                        className="flex items-center justify-between gap-3 p-3 sm:p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                       >
-                        <div className="font-medium">{rr.title}</div>
-                        <div>
-                          <Button
-                            onClick={() => {
-                              if (!moveItem) return;
-                              moveModelToRoadmap(
-                                moveItem.fromRoadmapId,
-                                rr.id,
-                                moveItem.modelId,
-                              );
-                              setMoveItem(null);
-                            }}
-                          >
-                            Move here
-                          </Button>
+                        <div className="font-medium text-sm sm:text-base text-slate-900 truncate flex-1">
+                          {rr.title}
                         </div>
+                        <Button
+                          onClick={() => {
+                            moveModelToRoadmap(moveItem.fromRoadmapId, rr.id, moveItem.modelId);
+                            setMoveItem(null);
+                          }}
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+                        >
+                          Move Here
+                        </Button>
                       </div>
                     ))
                 )}
               </div>
-            </div>
-          ) : null}
+            </>
+          )}
         </div>
       </SimpleModal>
 
-      {/* Delete confirmation modal */}
+      {/* Delete Confirmation Modal */}
       <SimpleModal
         open={deleteConfirmId !== null}
-        onOpenChange={(v) => !v && setDeleteConfirmId(null)}
+        onOpenChange={(v: boolean) => !v && setDeleteConfirmId(null)}
         title="Delete Roadmap"
         footer={
-          <div className="flex items-center gap-2 justify-end">
-            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
+          <div className="flex items-center gap-3 justify-end">
+            <Button variant="outline" onClick={() => setDeleteConfirmId(null)} className="flex-1 sm:flex-none">
               Cancel
             </Button>
             <Button
@@ -429,22 +533,24 @@ export default function RoadmapPage() {
                 if (deleteConfirmId) deleteRoadmap(deleteConfirmId);
                 setDeleteConfirmId(null);
               }}
-              className="bg-red-600 hover:bg-red-700"
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700"
             >
               Delete
             </Button>
           </div>
         }
       >
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
             Are you sure you want to delete this roadmap? This action cannot be undone.
           </p>
-          <div className="text-sm">
-            <strong>
-              {deleteConfirmId ? roadmaps.find((r) => r.id === deleteConfirmId)?.title : ""}
-            </strong>
-          </div>
+          {deleteConfirmId && (
+            <div className="p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-sm font-semibold text-slate-900">
+                {roadmaps.find((r) => r.id === deleteConfirmId)?.title}
+              </p>
+            </div>
+          )}
         </div>
       </SimpleModal>
     </div>
