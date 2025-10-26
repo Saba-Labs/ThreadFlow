@@ -394,6 +394,41 @@ export default function RoadmapPage() {
           ) : null}
         </div>
       </SimpleModal>
+
+      {/* Delete confirmation modal */}
+      <SimpleModal
+        open={deleteConfirmId !== null}
+        onOpenChange={(v) => !v && setDeleteConfirmId(null)}
+        title="Delete Roadmap"
+        footer={
+          <div className="flex items-center gap-2 justify-end">
+            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleteConfirmId) deleteRoadmap(deleteConfirmId);
+                setDeleteConfirmId(null);
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to delete this roadmap? This action cannot be undone.
+          </p>
+          <div className="text-sm">
+            <strong>
+              {deleteConfirmId ? roadmaps.find((r) => r.id === deleteConfirmId)?.title : ""}
+            </strong>
+          </div>
+        </div>
+      </SimpleModal>
     </div>
   );
 }
