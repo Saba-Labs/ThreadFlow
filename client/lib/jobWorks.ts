@@ -57,5 +57,5 @@ export function subscribe(cb: () => void) {
 }
 
 export function useJobWorks() {
-  return React.useSyncExternalStore(subscribe, getJobWorks, getJobWorks);
+  return useSyncExternalStore(subscribe, getJobWorks, getJobWorks);
 }
