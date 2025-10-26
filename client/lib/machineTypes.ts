@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "threadflow_machine_types_v2";
 const LEGACY_STORAGE_KEY = "threadflow_machine_types_v1";
