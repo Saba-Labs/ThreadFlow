@@ -78,7 +78,7 @@ export default function JobWorkDetailsModal({
   const handleSaveEditField = () => {
     if (!editingField) return;
 
-    const updated = assignments.map((a) => {
+    const updated: JobWorkAssignment[] = assignments.map((a) => {
       if (a.jobWorkId !== editingField.jobWorkId) return a;
 
       if (editingField.field === "pickup") {
@@ -92,13 +92,13 @@ export default function JobWorkDetailsModal({
           return {
             ...a,
             completionDate: undefined,
-            status: "pending",
+            status: "pending" as const,
           };
         }
         return {
           ...a,
           completionDate: new Date(editValue).getTime(),
-          status: "completed",
+          status: "completed" as const,
         };
       } else {
         return {
