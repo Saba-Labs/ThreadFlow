@@ -22,6 +22,7 @@ interface EditItemModalProps {
   onAddSubItem: (name: string, lowStock: number) => void;
   onUpdateSubItem: (subItemId: string, name: string, lowStock: number) => void;
   onDeleteSubItem: (subItemId: string) => void;
+  onDeleteItem: () => void;
 }
 
 export default function EditItemModal({
@@ -35,6 +36,7 @@ export default function EditItemModal({
   onAddSubItem,
   onUpdateSubItem,
   onDeleteSubItem,
+  onDeleteItem,
 }: EditItemModalProps) {
   const [editingName, setEditingName] = useState(itemName);
   const [editingLowStock, setEditingLowStock] = useState(lowStock);
@@ -104,11 +106,19 @@ export default function EditItemModal({
       onOpenChange={onOpenChange}
       title={`Edit Item — ${itemName}`}
       footer={
-        <div className="flex gap-2 justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmitItem}>Save Changes</Button>
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <Button variant="destructive" onClick={onDeleteItem} className="gap-1">
+              <Trash2 className="h-3 w-3" />
+              Delete Item
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitItem}>Save Changes</Button>
+          </div>
         </div>
       }
     >
