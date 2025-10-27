@@ -26,8 +26,10 @@ export default function ReStok() {
   const [editMode, setEditMode] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
-  const [newItemQuantity, setNewItemQuantity] = useState(0);
   const [newItemLowStock, setNewItemLowStock] = useState(0);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingItemName, setEditingItemName] = useState("");
+  const [editingItemLowStock, setEditingItemLowStock] = useState(0);
   const [showAddSubItem, setShowAddSubItem] = useState<string | null>(null);
   const [newSubItemName, setNewSubItemName] = useState("");
   const [newSubItemQuantity, setNewSubItemQuantity] = useState(0);
