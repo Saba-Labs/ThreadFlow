@@ -139,32 +139,34 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
     const now = Date.now();
 
     await query(
-      "UPDATE work_orders SET model_name = $1, quantity = $2, current_step_index = $3, updated_at = $4 WHERE id = $5",
-      [modelName, quantity, currentStepIndex, now, id],
+      "UPDATE work_orders SET model_name = COALESCE($1, model_name), quantity = COALESCE($2, quantity), current_step_index = COALESCE($3, current_step_index), updated_at = $4 WHERE id = $5",
+      [modelName || null, quantity || null, currentStepIndex !== undefined ? currentStepIndex : null, now, id],
     );
 
-    // Update steps
-    await query("DELETE FROM path_steps WHERE order_id = $1", [id]);
-    for (let i = 0; i < steps.length; i++) {
-      const step = steps[i];
-      await query(
-        `INSERT INTO path_steps 
-         (id, order_id, kind, machine_type, external_unit_name, status, active_machines, quantity_done, step_index, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [
-          step.id,
-          id,
-          step.kind,
-          step.machineType || null,
-          step.externalUnitName || null,
-          step.status,
-          step.activeMachines,
-          step.quantityDone,
-          i,
-          now,
-          now,
-        ],
-      );
+    // Update steps only if provided
+    if (steps && steps.length > 0) {
+      await query("DELETE FROM path_steps WHERE order_id = $1", [id]);
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        await query(
+          `INSERT INTO path_steps
+           (id, order_id, kind, machine_type, external_unit_name, status, active_machines, quantity_done, step_index, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          [
+            step.id,
+            id,
+            step.kind,
+            step.machineType || null,
+            step.externalUnitName || null,
+            step.status,
+            step.activeMachines,
+            step.quantityDone,
+            i,
+            now,
+            now,
+          ],
+        );
+      }
     }
 
     res.json({ success: true });
