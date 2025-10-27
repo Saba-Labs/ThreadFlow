@@ -16,11 +16,16 @@ export const getJobWorks: RequestHandler = async (req, res) => {
 export const createJobWork: RequestHandler = async (req, res) => {
   try {
     const { id, name, description } = req.body;
+
+    if (!id || !name) {
+      return res.status(400).json({ error: "Missing required fields: id and name" });
+    }
+
     const now = Date.now();
 
     await query(
       "INSERT INTO job_works (id, name, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)",
-      [id, name, description || "", now, now],
+      [id, name.trim(), description?.trim() || "", now, now],
     );
 
     res.json({ success: true, id });
