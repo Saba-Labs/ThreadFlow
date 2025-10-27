@@ -63,15 +63,19 @@ export default function JobWork() {
     setModalOpen(true);
   };
 
-  const save = () => {
+  const save = async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    if (editing) {
-      updateJobWork(editing.id, { name: trimmed, description: desc.trim() });
-    } else {
-      addJobWork({ name: trimmed, description: desc.trim() });
+    try {
+      if (editing) {
+        await updateJobWork(editing.id, { name: trimmed, description: desc.trim() });
+      } else {
+        await addJobWork({ name: trimmed, description: desc.trim() });
+      }
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save job work:", error);
     }
-    setModalOpen(false);
   };
 
   const handleDelete = (id: string) => {
