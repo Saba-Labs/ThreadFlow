@@ -13,7 +13,12 @@ interface SubItem {
 interface AddItemModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (name: string, lowStock: number, subItems: SubItem[], note: string) => void;
+  onSubmit: (
+    name: string,
+    lowStock: number,
+    subItems: SubItem[],
+    note: string,
+  ) => void;
 }
 
 export default function AddItemModal({

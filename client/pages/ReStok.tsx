@@ -62,8 +62,10 @@ export default function ReStok() {
     // If item has sub-items, determine status from sub-items using lowest-priority rule:
     // any out-of-stock => out-of-stock, else any low-stock => low-stock, else normal
     if (item.subItems.length > 0) {
-      if (item.subItems.some((sub) => sub.quantity === 0)) return "out-of-stock";
-      if (item.subItems.some((sub) => sub.quantity < sub.lowStock)) return "low-stock";
+      if (item.subItems.some((sub) => sub.quantity === 0))
+        return "out-of-stock";
+      if (item.subItems.some((sub) => sub.quantity < sub.lowStock))
+        return "low-stock";
       return "normal";
     }
     // Otherwise use parent item's own values
@@ -364,7 +366,10 @@ export default function ReStok() {
                           <div
                             key={subItem.id}
                             className={`rounded-md p-2 ${getStatusColor(
-                              getStockStatus(subItem.quantity, subItem.lowStock),
+                              getStockStatus(
+                                subItem.quantity,
+                                subItem.lowStock,
+                              ),
                             )}`}
                           >
                             <div className="flex items-center justify-between gap-2 ml-6">
