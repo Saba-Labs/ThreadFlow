@@ -311,7 +311,7 @@ export default function EditItemModal({
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => onDeleteSubItem(subItem.id)}
+                            onClick={() => handleDeleteSubItem(subItem.id)}
                             className="h-8 w-8 p-0 text-destructive"
                           >
                             <Trash2 className="h-3 w-3" />
