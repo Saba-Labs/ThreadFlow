@@ -469,21 +469,6 @@ export default function ReStok() {
                     </div>
                   )}
 
-                  {/* Add Sub Item Button - Only in Edit Mode */}
-                  {editMode && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setAddingSubItemToId(item.id);
-                        setShowAddSubItemModal(true);
-                      }}
-                      className="mt-2 gap-1 w-full text-xs"
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add Sub-item
-                    </Button>
-                  )}
                 </div>
               </div>
             );
