@@ -183,6 +183,20 @@ export default function AppLayout() {
                   Job Work
                 </NavLink>
                 <NavLink
+                  to="/restok"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  ReStok
+                </NavLink>
+                <NavLink
                   to="/settings"
                   onClick={() => setMenuOpen(false)}
                   className={({ isActive }) =>
