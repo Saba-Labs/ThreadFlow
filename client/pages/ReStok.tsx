@@ -493,6 +493,11 @@ export default function ReStok() {
           onSubmit={(name, lowStock) =>
             saveEditItemDetails(editingItemId, name, lowStock)
           }
+          onAddSubItem={() => {
+            setAddingSubItemToId(editingItemId);
+            setShowAddSubItemModal(true);
+            setShowEditItemModal(false);
+          }}
         />
       )}
 
