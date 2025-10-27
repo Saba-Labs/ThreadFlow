@@ -10,6 +10,7 @@ interface EditItemModalProps {
   lowStock: number;
   hasSubItems: boolean;
   onSubmit: (name: string, lowStock: number) => void;
+  onAddSubItem: () => void;
 }
 
 export default function EditItemModal({
@@ -19,6 +20,7 @@ export default function EditItemModal({
   lowStock,
   hasSubItems,
   onSubmit,
+  onAddSubItem,
 }: EditItemModalProps) {
   const [editingName, setEditingName] = useState(itemName);
   const [editingLowStock, setEditingLowStock] = useState(lowStock);
