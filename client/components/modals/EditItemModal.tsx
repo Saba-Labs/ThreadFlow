@@ -129,6 +129,14 @@ export default function EditItemModal({
     setEditingSubItem(null);
   };
 
+  const handleDeleteSubItem = async (subItemId: string) => {
+    try {
+      await onDeleteSubItem(subItemId);
+    } catch (error) {
+      console.error("Failed to delete sub-item:", error);
+    }
+  };
+
   return (
     <SimpleModal
       open={open}
