@@ -10,14 +10,18 @@ export default function NewModel() {
       <h1 className="text-2xl font-semibold">Create New Model</h1>
       <ModelForm
         inline
-        onCreate={(data) => {
-          pipeline.createWorkOrder({
-            modelName: data.modelName,
-            quantity: data.quantity,
-            createdAt: data.createdAt,
-            path: data.path as any,
-          });
-          navigate("/models/all");
+        onCreate={async (data) => {
+          try {
+            await pipeline.createWorkOrder({
+              modelName: data.modelName,
+              quantity: data.quantity,
+              createdAt: data.createdAt,
+              path: data.path as any,
+            });
+            navigate("/models/all");
+          } catch (error) {
+            console.error("Failed to create model:", error);
+          }
         }}
         onCancel={() => navigate("/models/all")}
       />

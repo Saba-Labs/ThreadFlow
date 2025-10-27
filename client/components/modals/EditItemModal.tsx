@@ -19,11 +19,19 @@ interface EditItemModalProps {
   note: string;
   subItems: SubItem[];
   hasSubItems: boolean;
-  onSubmit: (name: string, lowStock: number, note: string) => void;
-  onAddSubItem: (name: string, lowStock: number) => void;
-  onUpdateSubItem: (subItemId: string, name: string, lowStock: number) => void;
-  onDeleteSubItem: (subItemId: string) => void;
-  onDeleteItem: () => void;
+  onSubmit: (
+    name: string,
+    lowStock: number,
+    note: string,
+  ) => void | Promise<void>;
+  onAddSubItem: (name: string, lowStock: number) => void | Promise<void>;
+  onUpdateSubItem: (
+    subItemId: string,
+    name: string,
+    lowStock: number,
+  ) => void | Promise<void>;
+  onDeleteSubItem: (subItemId: string) => void | Promise<void>;
+  onDeleteItem: () => void | Promise<void>;
 }
 
 export default function EditItemModal({
@@ -65,27 +73,39 @@ export default function EditItemModal({
     }
   }, [open, itemName, lowStock, note]);
 
-  const handleSubmitItem = () => {
+  const handleSubmitItem = async () => {
     if (!editingName.trim()) return;
-    onSubmit(editingName, editingLowStock, editingNote);
-    onOpenChange(false);
+    try {
+      await onSubmit(editingName, editingLowStock, editingNote);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to submit:", error);
+    }
   };
 
-  const handleDeleteItem = () => {
+  const handleDeleteItem = async () => {
     const confirmed = window.confirm(
       `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
-    onDeleteItem();
-    onOpenChange(false);
+    try {
+      await onDeleteItem();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
   };
 
-  const handleAddSubItem = () => {
+  const handleAddSubItem = async () => {
     if (!newSubItemName.trim()) return;
-    onAddSubItem(newSubItemName, newSubItemLowStock);
-    setNewSubItemName("");
-    setNewSubItemLowStock(0);
-    setShowAddSubItemForm(false);
+    try {
+      await onAddSubItem(newSubItemName, newSubItemLowStock);
+      setNewSubItemName("");
+      setNewSubItemLowStock(0);
+      setShowAddSubItemForm(false);
+    } catch (error) {
+      console.error("Failed to add sub-item:", error);
+    }
   };
 
   const handleStartEditSubItem = (subItem: SubItem) => {
@@ -96,21 +116,33 @@ export default function EditItemModal({
     });
   };
 
-  const handleSaveSubItem = () => {
+  const handleSaveSubItem = async () => {
     if (!editingSubItem || !editingSubItemId || !editingSubItem.name.trim())
       return;
-    onUpdateSubItem(
-      editingSubItemId,
-      editingSubItem.name,
-      editingSubItem.lowStock,
-    );
-    setEditingSubItemId(null);
-    setEditingSubItem(null);
+    try {
+      await onUpdateSubItem(
+        editingSubItemId,
+        editingSubItem.name,
+        editingSubItem.lowStock,
+      );
+      setEditingSubItemId(null);
+      setEditingSubItem(null);
+    } catch (error) {
+      console.error("Failed to save sub-item:", error);
+    }
   };
 
   const handleCancelEditSubItem = () => {
     setEditingSubItemId(null);
     setEditingSubItem(null);
+  };
+
+  const handleDeleteSubItem = async (subItemId: string) => {
+    try {
+      await onDeleteSubItem(subItemId);
+    } catch (error) {
+      console.error("Failed to delete sub-item:", error);
+    }
   };
 
   return (
@@ -287,7 +319,7 @@ export default function EditItemModal({
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => onDeleteSubItem(subItem.id)}
+                            onClick={() => handleDeleteSubItem(subItem.id)}
                             className="h-8 w-8 p-0 text-destructive"
                           >
                             <Trash2 className="h-3 w-3" />

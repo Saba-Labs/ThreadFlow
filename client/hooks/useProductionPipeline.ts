@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useSyncExternalStore, useEffect } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
@@ -9,24 +9,24 @@ export interface PathStep {
   id: string;
   kind: "machine" | "job";
   machineType?: Exclude<MachineType, "Job Work">;
-  externalUnitName?: string; // for job work
+  externalUnitName?: string;
   status: StepStatus;
-  activeMachines: number; // how many machines are currently working this step
-  quantityDone: number; // optional tracking of pieces done in this step
+  activeMachines: number;
+  quantityDone: number;
 }
 
 export interface ParallelMachineGroup {
   stepIndex: number;
-  machineIndices: number[]; // indices of machines in the parallel group
+  machineIndices: number[];
   status: StepStatus;
 }
 
 export interface JobWorkAssignment {
   jobWorkId: string;
   quantity: number;
-  pickupDate: number; // timestamp
-  completionDate?: number; // timestamp, only set when completed
-  status: "pending" | "completed"; // pending = assigned, completed = done
+  pickupDate: number;
+  completionDate?: number;
+  status: "pending" | "completed";
 }
 
 export interface WorkOrder {
@@ -35,47 +35,54 @@ export interface WorkOrder {
   quantity: number;
   createdAt: number;
   steps: PathStep[];
-  currentStepIndex: number; // -1 if not started, len if completed
-  parentId?: string; // if split from another
-  parallelGroups: ParallelMachineGroup[]; // groups of machines running in parallel
+  currentStepIndex: number;
+  parentId?: string;
+  parallelGroups: ParallelMachineGroup[];
   jobWorkIds?: string[];
-  jobWorkAssignments?: JobWorkAssignment[]; // new: detailed assignments with quantities and dates
+  jobWorkAssignments?: JobWorkAssignment[];
 }
 
 function uid(prefix = "id") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-const STORAGE_KEY = "threadflow_pipeline_v1";
-
 export interface PipelineState {
   orders: WorkOrder[];
 }
 
-// Module-level shared store so multiple components see the same data
-let STORE: PipelineState = (function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as PipelineState;
-  } catch {}
-  return { orders: [] };
-})();
+let STORE: PipelineState = { orders: [] };
+let isLoading = false;
+let initialized = false;
 
 const subscribers = new Set<() => void>();
-function persist() {
+
+async function fetchFromServer() {
+  if (isLoading) return;
+  isLoading = true;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(STORE));
-  } catch {}
+    const response = await fetch("/api/pipeline/orders");
+    if (!response.ok) throw new Error("Failed to fetch orders");
+    const orders = await response.json();
+    STORE = { orders };
+    for (const s of Array.from(subscribers)) s();
+  } catch (error) {
+    console.error("Failed to fetch pipeline orders:", error);
+  } finally {
+    isLoading = false;
+  }
 }
 
 function setStore(updater: (s: PipelineState) => PipelineState) {
   STORE = updater(STORE);
-  persist();
   for (const s of Array.from(subscribers)) s();
 }
 
 function subscribe(cb: () => void) {
   subscribers.add(cb);
+  if (!initialized) {
+    initialized = true;
+    fetchFromServer();
+  }
   return () => subscribers.delete(cb);
 }
 
@@ -87,10 +94,10 @@ export function useProductionPipeline() {
   );
 
   const createWorkOrder = useCallback(
-    (input: {
+    async (input: {
       modelName: string;
       quantity: number;
-      createdAt?: number; // allow custom creation date
+      createdAt?: number;
       path: (
         | { kind: "machine"; machineType: Exclude<MachineType, "Job Work"> }
         | { kind: "job"; externalUnitName: string }
@@ -117,136 +124,259 @@ export function useProductionPipeline() {
         jobWorkIds: [],
         jobWorkAssignments: [],
       };
-      setStore((s) => ({ orders: [order, ...s.orders] }));
-      return order.id;
+
+      try {
+        const response = await fetch("/api/pipeline/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(order),
+        });
+        if (!response.ok) throw new Error("Failed to create order");
+        await fetchFromServer();
+        return order.id;
+      } catch (error) {
+        console.error("Failed to create work order:", error);
+        throw error;
+      }
     },
     [],
   );
 
-  const deleteOrder = useCallback((orderId: string) => {
-    setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
+  const deleteOrder = useCallback(async (orderId: string) => {
+    try {
+      const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete order");
+      setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
+    } catch (error) {
+      console.error("Failed to delete order:", error);
+      throw error;
+    }
   }, []);
 
   const editPath = useCallback(
-    (orderId: string, editor: (steps: PathStep[]) => PathStep[]) => {
-      setStore((s) => ({
-        orders: s.orders.map((o) => {
-          if (o.id !== orderId) return o;
-          const currentStepId = o.steps[o.currentStepIndex]?.id;
-          const nextSteps = editor([...o.steps]);
-          const newIndex = currentStepId
-            ? nextSteps.findIndex((st) => st.id === currentStepId)
-            : nextSteps.length > 0
-              ? 0
-              : -1;
-          return { ...o, steps: nextSteps, currentStepIndex: newIndex };
-        }),
-      }));
+    async (orderId: string, editor: (steps: PathStep[]) => PathStep[]) => {
+      const order = state.orders.find((o) => o.id === orderId);
+      if (!order) return;
+
+      const currentStepId = order.steps[order.currentStepIndex]?.id;
+      const nextSteps = editor([...order.steps]);
+      const newIndex = currentStepId
+        ? nextSteps.findIndex((st) => st.id === currentStepId)
+        : nextSteps.length > 0
+          ? 0
+          : -1;
+
+      try {
+        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modelName: order.modelName,
+            quantity: order.quantity,
+            currentStepIndex: newIndex,
+            steps: nextSteps,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to update path");
+        setStore((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === orderId
+              ? { ...o, steps: nextSteps, currentStepIndex: newIndex }
+              : o,
+          ),
+        }));
+      } catch (error) {
+        console.error("Failed to edit path:", error);
+        throw error;
+      }
     },
-    [],
+    [state.orders],
   );
 
   const updateStepStatus = useCallback(
-    (
+    async (
       orderId: string,
       stepIndex: number,
       patch: Partial<
         Pick<PathStep, "status" | "activeMachines" | "quantityDone">
       >,
     ) => {
-      setStore((s) => ({
-        orders: s.orders.map((o) => {
-          if (o.id !== orderId) return o;
-          const steps = o.steps.map((st, i) =>
-            i === stepIndex ? { ...st, ...patch } : st,
-          );
-          return { ...o, steps };
-        }),
-      }));
+      try {
+        const response = await fetch(
+          `/api/pipeline/orders/${orderId}/steps/${stepIndex}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(patch),
+          },
+        );
+        if (!response.ok) throw new Error("Failed to update step status");
+        setStore((s) => ({
+          orders: s.orders.map((o) => {
+            if (o.id !== orderId) return o;
+            const steps = o.steps.map((st, i) =>
+              i === stepIndex ? { ...st, ...patch } : st,
+            );
+            return { ...o, steps };
+          }),
+        }));
+      } catch (error) {
+        console.error("Failed to update step status:", error);
+        throw error;
+      }
     },
     [],
   );
 
-  const moveToNextStep = useCallback((orderId: string) => {
-    setStore((s) => ({
-      orders: s.orders.map((o) => {
-        if (o.id !== orderId) return o;
-        const idx = o.currentStepIndex;
-        const steps = o.steps.slice();
+  const moveToNextStep = useCallback(
+    async (orderId: string) => {
+      const order = state.orders.find((o) => o.id === orderId);
+      if (!order) return;
 
-        // If out of path (-1), enter the first path
-        if (idx < 0) {
-          if (steps.length > 0 && steps[0]) {
-            steps[0] = { ...steps[0], status: "hold", activeMachines: 0 };
-          }
-          return { ...o, steps, currentStepIndex: 0, parallelGroups: [] };
+      const idx = order.currentStepIndex;
+      const steps = order.steps.slice();
+
+      if (idx < 0) {
+        if (steps.length > 0 && steps[0]) {
+          steps[0] = { ...steps[0], status: "hold", activeMachines: 0 };
         }
-
-        // Do NOT mark previous step as completed; keep it as hold
-        if (steps[idx]) {
-          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+        const newIndex = 0;
+        try {
+          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              modelName: order.modelName,
+              quantity: order.quantity,
+              currentStepIndex: newIndex,
+              steps,
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to move to next step");
+          setStore((s) => ({
+            orders: s.orders.map((o) =>
+              o.id === orderId
+                ? { ...o, steps, currentStepIndex: newIndex }
+                : o,
+            ),
+          }));
+        } catch (error) {
+          console.error("Failed to move to next step:", error);
         }
+        return;
+      }
 
-        const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+      if (steps[idx]) {
+        steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+      }
 
-        // Set next step explicitly to hold
-        if (nextIndex < steps.length && steps[nextIndex]) {
-          steps[nextIndex] = {
-            ...steps[nextIndex],
-            status: "hold",
-            activeMachines: 0,
-          };
-        }
+      const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
 
-        // Clear any parallel machine selections when moving steps
-        return { ...o, steps, currentStepIndex: nextIndex, parallelGroups: [] };
-      }),
-    }));
-  }, []);
-
-  const moveToPrevStep = useCallback((orderId: string) => {
-    setStore((s) => ({
-      orders: s.orders.map((o) => {
-        if (o.id !== orderId) return o;
-        const idx = o.currentStepIndex;
-
-        // If at first step (0), go back out of path (-1)
-        if (idx === 0) {
-          return { ...o, currentStepIndex: -1, parallelGroups: [] };
-        }
-
-        // If already out of path, stay out of path
-        if (idx < 0) {
-          return o;
-        }
-
-        const steps = o.steps.slice();
-        const target = idx - 1;
-
-        // Ensure current step remains/sets to hold
-        if (idx >= 0 && steps[idx]) {
-          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
-        }
-
-        // Set target step explicitly to hold
-        if (target >= 0 && steps[target]) {
-          steps[target] = {
-            ...steps[target],
-            status: "hold",
-            activeMachines: 0,
-          };
-        }
-
-        // Clear any parallel machine selections when moving steps
-        return {
-          ...o,
-          steps,
-          currentStepIndex: target,
-          parallelGroups: [],
+      if (nextIndex < steps.length && steps[nextIndex]) {
+        steps[nextIndex] = {
+          ...steps[nextIndex],
+          status: "hold",
+          activeMachines: 0,
         };
-      }),
-    }));
-  }, []);
+      }
+
+      try {
+        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modelName: order.modelName,
+            quantity: order.quantity,
+            currentStepIndex: nextIndex,
+            steps,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to move to next step");
+        setStore((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === orderId ? { ...o, steps, currentStepIndex: nextIndex } : o,
+          ),
+        }));
+      } catch (error) {
+        console.error("Failed to move to next step:", error);
+      }
+    },
+    [state.orders],
+  );
+
+  const moveToPrevStep = useCallback(
+    async (orderId: string) => {
+      const order = state.orders.find((o) => o.id === orderId);
+      if (!order) return;
+
+      const idx = order.currentStepIndex;
+
+      if (idx === 0) {
+        try {
+          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              modelName: order.modelName,
+              quantity: order.quantity,
+              currentStepIndex: -1,
+              steps: order.steps,
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to move to prev step");
+          setStore((s) => ({
+            orders: s.orders.map((o) =>
+              o.id === orderId ? { ...o, currentStepIndex: -1 } : o,
+            ),
+          }));
+        } catch (error) {
+          console.error("Failed to move to prev step:", error);
+        }
+        return;
+      }
+
+      if (idx < 0) return;
+
+      const steps = order.steps.slice();
+      const target = idx - 1;
+
+      if (idx >= 0 && steps[idx]) {
+        steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+      }
+
+      if (target >= 0 && steps[target]) {
+        steps[target] = {
+          ...steps[target],
+          status: "hold",
+          activeMachines: 0,
+        };
+      }
+
+      try {
+        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modelName: order.modelName,
+            quantity: order.quantity,
+            currentStepIndex: target,
+            steps,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to move to prev step");
+        setStore((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === orderId ? { ...o, steps, currentStepIndex: target } : o,
+          ),
+        }));
+      } catch (error) {
+        console.error("Failed to move to prev step:", error);
+      }
+    },
+    [state.orders],
+  );
 
   const setCurrentStep = useCallback((orderId: string, index: number) => {
     setStore((s) => ({
@@ -267,7 +397,6 @@ export function useProductionPipeline() {
           const groups = (o.parallelGroups || []).slice();
           const idx = groups.findIndex((g) => g.stepIndex === stepIndex);
 
-          // If a group exists for this stepIndex, toggle the machineIndex immutably
           if (idx >= 0) {
             const existing = groups[idx];
             const has = existing.machineIndices.includes(machineIndex);
@@ -276,7 +405,6 @@ export function useProductionPipeline() {
                 (m) => m !== machineIndex,
               );
               if (newIndices.length === 0) {
-                // remove the group entirely
                 return {
                   ...o,
                   parallelGroups: groups.filter((_, i) => i !== idx),
@@ -297,7 +425,6 @@ export function useProductionPipeline() {
             }
           }
 
-          // otherwise add new group
           const added = {
             stepIndex,
             machineIndices: [machineIndex],
@@ -322,7 +449,6 @@ export function useProductionPipeline() {
       if (src.quantity > 0 && sum >= src.quantity) return s;
       const remainder = src.quantity - sum;
 
-      // Helper to create a new child order with steps set to 'hold' (unless completed)
       const createChild = (q: number): WorkOrder => ({
         id: uid("order"),
         modelName: src.modelName,
@@ -338,7 +464,6 @@ export function useProductionPipeline() {
           activeMachines: 0,
           quantityDone: 0,
         })),
-        // Keep the same logical position but these new orders are placed on hold
         currentStepIndex: src.currentStepIndex,
         parentId: src.id,
         parallelGroups: (src.parallelGroups || []).map((g) => ({
@@ -351,15 +476,12 @@ export function useProductionPipeline() {
 
       const children = valid.map((q) => createChild(q));
 
-      // Update the original source order to have the remainder quantity but keep its statuses unchanged
       const updatedSrc: WorkOrder = { ...src, quantity: remainder };
 
-      // Rebuild orders: keep original order position but replace src with updatedSrc and append children after it
       const newOrders: WorkOrder[] = [];
       for (const o of s.orders) {
         if (o.id === src.id) {
           newOrders.push(updatedSrc);
-          // insert children right after the original
           for (const c of children) newOrders.push(c);
         } else {
           newOrders.push(o);
@@ -455,7 +577,6 @@ export function useProductionPipeline() {
         }),
       }));
     },
-    // update an existing order's basic properties (modelName, quantity, createdAt, path)
     updateOrder: (
       orderId: string,
       data: {

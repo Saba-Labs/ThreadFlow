@@ -44,14 +44,18 @@ export default function EditModel() {
       <ModelForm
         inline
         initialData={initialData}
-        onCreate={(data) => {
-          pipeline.updateOrder(order.id, {
-            modelName: data.modelName,
-            quantity: data.quantity,
-            createdAt: data.createdAt,
-            path: data.path as any,
-          });
-          navigate("/models/all");
+        onCreate={async (data) => {
+          try {
+            pipeline.updateOrder(order.id, {
+              modelName: data.modelName,
+              quantity: data.quantity,
+              createdAt: data.createdAt,
+              path: data.path as any,
+            });
+            navigate("/models/all");
+          } catch (error) {
+            console.error("Failed to update model:", error);
+          }
         }}
         onCancel={() => navigate("/models/all")}
       />

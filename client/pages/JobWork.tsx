@@ -63,33 +63,45 @@ export default function JobWork() {
     setModalOpen(true);
   };
 
-  const save = () => {
+  const save = async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    if (editing) {
-      updateJobWork(editing.id, { name: trimmed, description: desc.trim() });
-    } else {
-      addJobWork({ name: trimmed, description: desc.trim() });
+    try {
+      if (editing) {
+        await updateJobWork(editing.id, {
+          name: trimmed,
+          description: desc.trim(),
+        });
+      } else {
+        await addJobWork({ name: trimmed, description: desc.trim() });
+      }
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save job work:", error);
     }
-    setModalOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    // simple delete
-    deleteJobWork(id);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteJobWork(id);
+    } catch (error) {
+      console.error("Failed to delete job work:", error);
+    }
   };
 
-  const saveAll = () => {
+  const saveAll = async () => {
     const cleaned = local.map((j) => ({
       ...j,
       name: j.name.trim(),
       description: j.description.trim(),
     }));
-    // reuse setJobWorks through update functions by replacing store
-    // jobWorks lib exposes setJobWorks only internally here; to persist we update each
-    cleaned.forEach((j) =>
-      updateJobWork(j.id, { name: j.name, description: j.description }),
-    );
+    try {
+      for (const j of cleaned) {
+        await updateJobWork(j.id, { name: j.name, description: j.description });
+      }
+    } catch (error) {
+      console.error("Failed to save all job works:", error);
+    }
   };
 
   // helper: return assignments for this job work

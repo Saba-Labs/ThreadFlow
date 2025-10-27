@@ -20,12 +20,11 @@ interface Item {
   subItems: SubItem[];
 }
 
-const STORAGE_KEY = "restok_items";
-
 export default function ReStok() {
   const [items, setItems] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Add Item Modal
   const [showAddItemModal, setShowAddItemModal] = useState(false);
@@ -34,23 +33,24 @@ export default function ReStok() {
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
-  // Load data from local storage
+  // Load data from API
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        setItems(data || []);
-      } catch (error) {
-        console.error("Failed to load data from storage:", error);
-      }
-    }
+    fetchItems();
   }, []);
 
-  // Save data to local storage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/restok/items");
+      if (!response.ok) throw new Error("Failed to fetch items");
+      const data = await response.json();
+      setItems(data);
+    } catch (error) {
+      console.error("Failed to load items:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStockStatus = (quantity: number, lowStock: number) => {
     if (quantity === 0) return "out-of-stock";
@@ -90,30 +90,48 @@ export default function ReStok() {
     return <span className="text-xs font-bold text-green-700">NORMAL</span>;
   };
 
-  const addItem = (
+  const addItem = async (
     name: string,
     lowStock: number,
     subItems: any[] = [],
     note: string = "",
   ) => {
-    const newItem: Item = {
-      id: Date.now().toString(),
-      name,
-      quantity: 0,
-      lowStock,
-      note,
-      subItems: subItems.map((sub) => ({
-        id: sub.id,
-        name: sub.name,
-        quantity: 0,
-        lowStock: sub.lowStock,
-      })),
-    };
-    setItems([...items, newItem]);
+    try {
+      const id = Date.now().toString();
+      const response = await fetch("/api/restok/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          name,
+          quantity: 0,
+          lowStock,
+          note,
+          subItems: subItems.map((sub) => ({
+            id: sub.id,
+            name: sub.name,
+            quantity: 0,
+            lowStock: sub.lowStock,
+          })),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to create item");
+      await fetchItems();
+    } catch (error) {
+      console.error("Failed to create item:", error);
+    }
   };
 
-  const deleteItem = (itemId: string) => {
-    setItems(items.filter((i) => i.id !== itemId));
+  const deleteItem = async (itemId: string) => {
+    try {
+      const response = await fetch(`/api/restok/items/${itemId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete item");
+      setItems(items.filter((i) => i.id !== itemId));
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
   };
 
   const toggleItemExpanded = (itemId: string) => {
@@ -128,99 +146,220 @@ export default function ReStok() {
     });
   };
 
-  const updateItemQuantity = (itemId: string, newQuantity: number) => {
-    setItems(
-      items.map((item) =>
-        item.id === itemId
-          ? { ...item, quantity: Math.max(0, newQuantity) }
-          : item,
-      ),
-    );
+  const updateItemQuantity = async (itemId: string, newQuantity: number) => {
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const updatedQuantity = Math.max(0, newQuantity);
+    try {
+      const response = await fetch(`/api/restok/items/${itemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: item.name,
+          quantity: updatedQuantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to update item");
+      setItems(
+        items.map((i) =>
+          i.id === itemId ? { ...i, quantity: updatedQuantity } : i,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update item quantity:", error);
+    }
   };
 
-  const saveEditItemDetails = (
+  const saveEditItemDetails = async (
     itemId: string,
     name: string,
     lowStock: number,
     note: string,
   ) => {
-    setItems(
-      items.map((item) =>
-        item.id === itemId ? { ...item, name, lowStock, note } : item,
-      ),
-    );
-    setEditingItemId(null);
-    setShowEditItemModal(false);
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    try {
+      const response = await fetch(`/api/restok/items/${itemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          quantity: item.quantity,
+          lowStock,
+          note,
+          subItems: item.subItems,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to update item");
+      setItems(
+        items.map((i) =>
+          i.id === itemId ? { ...i, name, lowStock, note } : i,
+        ),
+      );
+      setEditingItemId(null);
+      setShowEditItemModal(false);
+    } catch (error) {
+      console.error("Failed to update item details:", error);
+    }
   };
 
-  const addSubItem = (parentItemId: string, name: string, lowStock: number) => {
+  const addSubItem = async (
+    parentItemId: string,
+    name: string,
+    lowStock: number,
+  ) => {
+    const item = items.find((i) => i.id === parentItemId);
+    if (!item) return;
+
     const newSubItem: SubItem = {
       id: Date.now().toString(),
       name,
       quantity: 0,
       lowStock,
     };
-    setItems(
-      items.map((item) =>
-        item.id === parentItemId
-          ? { ...item, subItems: [...item.subItems, newSubItem] }
-          : item,
-      ),
-    );
+
+    try {
+      const response = await fetch(`/api/restok/items/${parentItemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: [...item.subItems, newSubItem],
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to add sub-item");
+      setItems(
+        items.map((i) =>
+          i.id === parentItemId
+            ? { ...i, subItems: [...i.subItems, newSubItem] }
+            : i,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to add sub-item:", error);
+    }
   };
 
-  const deleteSubItem = (parentItemId: string, subItemId: string) => {
-    setItems(
-      items.map((item) =>
-        item.id === parentItemId
-          ? {
-              ...item,
-              subItems: item.subItems.filter((s) => s.id !== subItemId),
-            }
-          : item,
-      ),
-    );
+  const deleteSubItem = async (parentItemId: string, subItemId: string) => {
+    const item = items.find((i) => i.id === parentItemId);
+    if (!item) return;
+
+    try {
+      const response = await fetch(`/api/restok/items/${parentItemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems.filter((s) => s.id !== subItemId),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to delete sub-item");
+      setItems(
+        items.map((i) =>
+          i.id === parentItemId
+            ? {
+                ...i,
+                subItems: i.subItems.filter((s) => s.id !== subItemId),
+              }
+            : i,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to delete sub-item:", error);
+    }
   };
 
-  const updateSubItemQuantity = (
+  const updateSubItemQuantity = async (
     parentItemId: string,
     subItemId: string,
     newQuantity: number,
   ) => {
-    setItems(
-      items.map((item) =>
-        item.id === parentItemId
-          ? {
-              ...item,
-              subItems: item.subItems.map((s) =>
-                s.id === subItemId
-                  ? { ...s, quantity: Math.max(0, newQuantity) }
-                  : s,
-              ),
-            }
-          : item,
-      ),
-    );
+    const item = items.find((i) => i.id === parentItemId);
+    if (!item) return;
+
+    const updatedQuantity = Math.max(0, newQuantity);
+    try {
+      const response = await fetch(`/api/restok/items/${parentItemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems.map((s) =>
+            s.id === subItemId ? { ...s, quantity: updatedQuantity } : s,
+          ),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to update sub-item quantity");
+      setItems(
+        items.map((i) =>
+          i.id === parentItemId
+            ? {
+                ...i,
+                subItems: i.subItems.map((s) =>
+                  s.id === subItemId ? { ...s, quantity: updatedQuantity } : s,
+                ),
+              }
+            : i,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update sub-item quantity:", error);
+    }
   };
 
-  const updateSubItem = (
+  const updateSubItem = async (
     parentItemId: string,
     subItemId: string,
     name: string,
     lowStock: number,
   ) => {
-    setItems(
-      items.map((item) =>
-        item.id === parentItemId
-          ? {
-              ...item,
-              subItems: item.subItems.map((s) =>
-                s.id === subItemId ? { ...s, name, lowStock } : s,
-              ),
-            }
-          : item,
-      ),
-    );
+    const item = items.find((i) => i.id === parentItemId);
+    if (!item) return;
+
+    try {
+      const response = await fetch(`/api/restok/items/${parentItemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems.map((s) =>
+            s.id === subItemId ? { ...s, name, lowStock } : s,
+          ),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to update sub-item");
+      setItems(
+        items.map((i) =>
+          i.id === parentItemId
+            ? {
+                ...i,
+                subItems: i.subItems.map((s) =>
+                  s.id === subItemId ? { ...s, name, lowStock } : s,
+                ),
+              }
+            : i,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update sub-item:", error);
+    }
   };
 
   const getItem = (id: string) => items.find((item) => item.id === id);
@@ -459,17 +598,17 @@ export default function ReStok() {
           onSubmit={(name, lowStock, note) =>
             saveEditItemDetails(editingItemId, name, lowStock, note)
           }
-          onAddSubItem={(name, lowStock) =>
-            addSubItem(editingItemId, name, lowStock)
+          onAddSubItem={async (name, lowStock) =>
+            await addSubItem(editingItemId, name, lowStock)
           }
-          onUpdateSubItem={(subItemId, name, lowStock) =>
-            updateSubItem(editingItemId, subItemId, name, lowStock)
+          onUpdateSubItem={async (subItemId, name, lowStock) =>
+            await updateSubItem(editingItemId, subItemId, name, lowStock)
           }
-          onDeleteSubItem={(subItemId) =>
-            deleteSubItem(editingItemId, subItemId)
+          onDeleteSubItem={async (subItemId) =>
+            await deleteSubItem(editingItemId, subItemId)
           }
-          onDeleteItem={() => {
-            deleteItem(editingItemId);
+          onDeleteItem={async () => {
+            await deleteItem(editingItemId);
             setShowEditItemModal(false);
             setEditingItemId(null);
           }}
