@@ -264,7 +264,7 @@ export default function ReStok() {
           </div>
         ) : (
           items.map((item) => {
-            const status = getStockStatus(item.quantity, item.lowStock);
+            const status = getItemStockStatus(item);
             const isExpanded = expandedItems.has(item.id);
 
             return (
