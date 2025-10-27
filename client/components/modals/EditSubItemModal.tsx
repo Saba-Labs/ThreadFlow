@@ -47,10 +47,7 @@ export default function EditSubItemModal({
       title={`Edit Sub-item in ${parentItemName}`}
       footer={
         <div className="flex gap-2 justify-end">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit}>Save Changes</Button>
@@ -76,7 +73,9 @@ export default function EditSubItemModal({
               placeholder="0"
               min="0"
               value={editingQuantity}
-              onChange={(e) => setEditingQuantity(parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                setEditingQuantity(parseInt(e.target.value) || 0)
+              }
             />
           </div>
           <div className="space-y-2">
@@ -86,7 +85,9 @@ export default function EditSubItemModal({
               placeholder="0"
               min="0"
               value={editingLowStock}
-              onChange={(e) => setEditingLowStock(parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                setEditingLowStock(parseInt(e.target.value) || 0)
+              }
             />
           </div>
         </div>

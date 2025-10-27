@@ -134,12 +134,14 @@ export default function ReStok() {
     );
   };
 
-  const saveEditItemDetails = (itemId: string, name: string, lowStock: number) => {
+  const saveEditItemDetails = (
+    itemId: string,
+    name: string,
+    lowStock: number,
+  ) => {
     setItems(
       items.map((item) =>
-        item.id === itemId
-          ? { ...item, name, lowStock }
-          : item,
+        item.id === itemId ? { ...item, name, lowStock } : item,
       ),
     );
     setEditingItemId(null);
@@ -208,9 +210,7 @@ export default function ReStok() {
           ? {
               ...item,
               subItems: item.subItems.map((s) =>
-                s.id === subItemId
-                  ? { ...s, name, lowStock }
-                  : s,
+                s.id === subItemId ? { ...s, name, lowStock } : s,
               ),
             }
           : item,
@@ -310,7 +310,9 @@ export default function ReStok() {
                               −
                             </Button>
                             <div className="w-12 text-center">
-                              <p className="font-bold text-sm">{item.quantity}</p>
+                              <p className="font-bold text-sm">
+                                {item.quantity}
+                              </p>
                             </div>
                             <Button
                               size="sm"
@@ -413,7 +415,6 @@ export default function ReStok() {
                       })}
                     </div>
                   )}
-
                 </div>
               </div>
             );

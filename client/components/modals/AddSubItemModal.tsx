@@ -44,10 +44,7 @@ export default function AddSubItemModal({
       title={`Add Sub-item to ${parentItemName}`}
       footer={
         <div className="flex gap-2 justify-end">
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit}>Add Sub-item</Button>

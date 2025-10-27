@@ -74,10 +74,7 @@ export default function AddItemModal({
       title="Add New Item"
       footer={
         <div className="flex gap-2 justify-end">
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={!itemName.trim()}>
@@ -133,10 +130,15 @@ export default function AddItemModal({
           {subItems.length > 0 && (
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {subItems.map((subItem) => (
-                <div key={subItem.id} className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30 flex items-center justify-between gap-2">
+                <div
+                  key={subItem.id}
+                  className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30 flex items-center justify-between gap-2"
+                >
                   <div className="flex-1">
                     <p className="text-sm font-medium">{subItem.name}</p>
-                    <p className="text-xs text-muted-foreground">Low: {subItem.lowStock}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Low: {subItem.lowStock}
+                    </p>
                   </div>
                   <Button
                     size="sm"
@@ -178,7 +180,9 @@ export default function AddItemModal({
                   placeholder="0"
                   min="0"
                   value={newSubItemLowStock}
-                  onChange={(e) => setNewSubItemLowStock(parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setNewSubItemLowStock(parseInt(e.target.value) || 0)
+                  }
                   className="text-sm"
                 />
               </div>

@@ -42,7 +42,10 @@ export default function EditItemModal({
   const [newSubItemName, setNewSubItemName] = useState("");
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
   const [editingSubItemId, setEditingSubItemId] = useState<string | null>(null);
-  const [editingSubItem, setEditingSubItem] = useState<{ name: string; lowStock: number } | null>(null);
+  const [editingSubItem, setEditingSubItem] = useState<{
+    name: string;
+    lowStock: number;
+  } | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -79,8 +82,13 @@ export default function EditItemModal({
   };
 
   const handleSaveSubItem = () => {
-    if (!editingSubItem || !editingSubItemId || !editingSubItem.name.trim()) return;
-    onUpdateSubItem(editingSubItemId, editingSubItem.name, editingSubItem.lowStock);
+    if (!editingSubItem || !editingSubItemId || !editingSubItem.name.trim())
+      return;
+    onUpdateSubItem(
+      editingSubItemId,
+      editingSubItem.name,
+      editingSubItem.lowStock,
+    );
     setEditingSubItemId(null);
     setEditingSubItem(null);
   };
@@ -97,10 +105,7 @@ export default function EditItemModal({
       title={`Edit Item — ${itemName}`}
       footer={
         <div className="flex gap-2 justify-end">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmitItem}>Save Changes</Button>
@@ -129,7 +134,9 @@ export default function EditItemModal({
                 placeholder="Enter low stock threshold"
                 min="0"
                 value={editingLowStock}
-                onChange={(e) => setEditingLowStock(parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  setEditingLowStock(parseInt(e.target.value) || 0)
+                }
               />
             </div>
           )}
@@ -143,7 +150,9 @@ export default function EditItemModal({
         {/* Sub-items Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Sub-items ({subItems.length})</h3>
+            <h3 className="font-semibold text-sm">
+              Sub-items ({subItems.length})
+            </h3>
             {!showAddSubItemForm && (
               <Button
                 size="sm"
@@ -161,26 +170,43 @@ export default function EditItemModal({
           {subItems.length > 0 && (
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {subItems.map((subItem) => (
-                <div key={subItem.id} className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30 space-y-2">
+                <div
+                  key={subItem.id}
+                  className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-900/30 space-y-2"
+                >
                   {editingSubItemId === subItem.id && editingSubItem ? (
                     <>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Sub-item Name</label>
+                        <label className="text-sm font-medium">
+                          Sub-item Name
+                        </label>
                         <Input
                           placeholder="Sub-item name"
                           value={editingSubItem.name}
-                          onChange={(e) => setEditingSubItem({ ...editingSubItem, name: e.target.value })}
+                          onChange={(e) =>
+                            setEditingSubItem({
+                              ...editingSubItem,
+                              name: e.target.value,
+                            })
+                          }
                           className="text-sm"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Low Stock Value</label>
+                        <label className="text-sm font-medium">
+                          Low Stock Value
+                        </label>
                         <Input
                           type="number"
                           placeholder="Low stock"
                           min="0"
                           value={editingSubItem.lowStock}
-                          onChange={(e) => setEditingSubItem({ ...editingSubItem, lowStock: parseInt(e.target.value) || 0 })}
+                          onChange={(e) =>
+                            setEditingSubItem({
+                              ...editingSubItem,
+                              lowStock: parseInt(e.target.value) || 0,
+                            })
+                          }
                           className="text-sm"
                         />
                       </div>
@@ -209,7 +235,9 @@ export default function EditItemModal({
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <p className="text-sm font-medium">{subItem.name}</p>
-                          <p className="text-xs text-muted-foreground">Qty: {subItem.quantity} | Low: {subItem.lowStock}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Qty: {subItem.quantity} | Low: {subItem.lowStock}
+                          </p>
                         </div>
                         <div className="flex gap-1">
                           <Button
@@ -264,7 +292,9 @@ export default function EditItemModal({
                   placeholder="0"
                   min="0"
                   value={newSubItemLowStock}
-                  onChange={(e) => setNewSubItemLowStock(parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setNewSubItemLowStock(parseInt(e.target.value) || 0)
+                  }
                   className="text-sm"
                 />
               </div>
