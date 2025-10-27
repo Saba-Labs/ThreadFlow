@@ -24,8 +24,6 @@ export default function ReStok() {
   const [items, setItems] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
-  const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{ [key: string]: number }>({});
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [newItemQuantity, setNewItemQuantity] = useState(0);
