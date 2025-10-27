@@ -448,45 +448,19 @@ export default function ReStok() {
           onOpenChange={setShowEditItemModal}
           itemName={getItem(editingItemId)?.name || ""}
           lowStock={getItem(editingItemId)?.lowStock || 0}
+          subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={getItem(editingItemId)?.subItems.length || 0 > 0}
           onSubmit={(name, lowStock) =>
             saveEditItemDetails(editingItemId, name, lowStock)
           }
-          onAddSubItem={() => {
-            setAddingSubItemToId(editingItemId);
-            setShowAddSubItemModal(true);
-            setShowEditItemModal(false);
-          }}
-        />
-      )}
-
-      {addingSubItemToId && (
-        <AddSubItemModal
-          open={showAddSubItemModal}
-          onOpenChange={setShowAddSubItemModal}
-          parentItemName={getItem(addingSubItemToId)?.name || ""}
-          onSubmit={(name, quantity, lowStock) =>
-            addSubItem(addingSubItemToId, name, quantity, lowStock)
+          onAddSubItem={(name, quantity, lowStock) =>
+            addSubItem(editingItemId, name, quantity, lowStock)
           }
-        />
-      )}
-
-      {editingSubItemData && (
-        <EditSubItemModal
-          open={showEditSubItemModal}
-          onOpenChange={setShowEditSubItemModal}
-          parentItemName={getItem(editingSubItemData.parentItemId)?.name || ""}
-          subItemName={editingSubItemData.name}
-          quantity={editingSubItemData.quantity}
-          lowStock={editingSubItemData.lowStock}
-          onSubmit={(name, quantity, lowStock) =>
-            updateSubItem(
-              editingSubItemData.parentItemId,
-              editingSubItemData.subItemId,
-              name,
-              quantity,
-              lowStock,
-            )
+          onUpdateSubItem={(subItemId, name, quantity, lowStock) =>
+            updateSubItem(editingItemId, subItemId, name, quantity, lowStock)
+          }
+          onDeleteSubItem={(subItemId) =>
+            deleteSubItem(editingItemId, subItemId)
           }
         />
       )}
