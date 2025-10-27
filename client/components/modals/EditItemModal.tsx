@@ -67,6 +67,15 @@ export default function EditItemModal({
     onOpenChange(false);
   };
 
+  const handleDeleteItem = () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+    onDeleteItem();
+    onOpenChange(false);
+  };
+
   const handleAddSubItem = () => {
     if (!newSubItemName.trim()) return;
     onAddSubItem(newSubItemName, newSubItemLowStock);
@@ -108,7 +117,11 @@ export default function EditItemModal({
       footer={
         <div className="flex items-center justify-between gap-2">
           <div>
-            <Button variant="destructive" onClick={onDeleteItem} className="gap-1">
+            <Button
+              variant="ghost"
+              onClick={handleDeleteItem}
+              className="gap-1 text-red-600 bg-white hover:bg-red-50 border"
+            >
               <Trash2 className="h-3 w-3" />
               Delete Item
             </Button>
