@@ -329,7 +329,7 @@ export default function ReStok() {
                           )}
                           <div className="flex-1">
                             <p className="font-medium text-sm">{item.name}</p>
-                            {editMode && <p className="text-xs">Low Stock: {item.lowStock}</p>}
+                            {editMode && item.subItems.length === 0 && <p className="text-xs">Low Stock: {item.lowStock}</p>}
                           </div>
                         </div>
 
