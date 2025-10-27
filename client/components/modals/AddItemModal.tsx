@@ -34,11 +34,15 @@ export default function AddItemModal({
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
   const [note, setNote] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!itemName.trim()) return;
-    onSubmit(itemName, lowStock, subItems, note);
-    resetForm();
-    onOpenChange(false);
+    try {
+      await onSubmit(itemName, lowStock, subItems, note);
+      resetForm();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to submit:", error);
+    }
   };
 
   const resetForm = () => {
