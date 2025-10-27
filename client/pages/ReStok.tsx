@@ -35,22 +35,34 @@ export default function ReStok() {
   const [newSubItemQuantity, setNewSubItemQuantity] = useState(0);
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
 
-  // Load data from local storage
+  // Load data from storage
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    const loadData = async () => {
       try {
-        const data = JSON.parse(stored);
-        setItems(data || []);
+        const result = await window.storage.get(STORAGE_KEY);
+        if (result && result.value) {
+          const data = JSON.parse(result.value);
+          setItems(data || []);
+        }
       } catch (error) {
-        console.error("Failed to load data from storage:", error);
+        console.log("No saved data found");
       }
-    }
+    };
+    loadData();
   }, []);
 
-  // Save data to local storage
+  // Save data to storage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const saveData = async () => {
+      try {
+        await window.storage.set(STORAGE_KEY, JSON.stringify(items));
+      } catch (error) {
+        console.error("Failed to save data:", error);
+      }
+    };
+    if (items.length >= 0) {
+      saveData();
+    }
   }, [items]);
 
   const getStockStatus = (quantity: number, lowStock: number) => {
@@ -60,7 +72,6 @@ export default function ReStok() {
   };
 
   const getItemStockStatus = (item: Item): string => {
-    // If item has sub-items, determine status from sub-items
     if (item.subItems.length > 0) {
       const allOutOfStock = item.subItems.every((sub) => sub.quantity === 0);
       if (allOutOfStock) return "out-of-stock";
@@ -70,20 +81,19 @@ export default function ReStok() {
 
       return "normal";
     }
-    // Otherwise use parent item's own values
     return getStockStatus(item.quantity, item.lowStock);
   };
 
   const getStatusColor = (status: string) => {
-    if (status === "out-of-stock") return "bg-red-100 border border-red-300";
-    if (status === "low-stock") return "bg-yellow-100 border border-yellow-300";
-    return "bg-green-100 border border-green-300";
+    if (status === "out-of-stock") return "bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300";
+    if (status === "low-stock") return "bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300";
+    return "bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-300";
   };
 
   const getStatusBadge = (status: string) => {
-    if (status === "out-of-stock") return <span className="text-xs font-bold text-red-700">OUT OF STOCK</span>;
-    if (status === "low-stock") return <span className="text-xs font-bold text-yellow-700">LOW STOCK</span>;
-    return <span className="text-xs font-bold text-green-700">NORMAL</span>;
+    if (status === "out-of-stock") return <span className="text-xs md:text-sm font-bold text-red-700 bg-red-200 px-3 py-1 rounded-full">OUT OF STOCK</span>;
+    if (status === "low-stock") return <span className="text-xs md:text-sm font-bold text-amber-700 bg-amber-200 px-3 py-1 rounded-full">LOW STOCK</span>;
+    return <span className="text-xs md:text-sm font-bold text-emerald-700 bg-emerald-200 px-3 py-1 rounded-full">IN STOCK</span>;
   };
 
   const addItem = () => {
@@ -171,9 +181,9 @@ export default function ReStok() {
       items.map((item) =>
         item.id === parentItemId
           ? {
-              ...item,
-              subItems: item.subItems.filter((s) => s.id !== subItemId),
-            }
+            ...item,
+            subItems: item.subItems.filter((s) => s.id !== subItemId),
+          }
           : item
       )
     );
@@ -184,364 +194,387 @@ export default function ReStok() {
       items.map((item) =>
         item.id === parentItemId
           ? {
-              ...item,
-              subItems: item.subItems.map((s) =>
-                s.id === subItemId ? { ...s, quantity: Math.max(0, newQuantity) } : s
-              ),
-            }
+            ...item,
+            subItems: item.subItems.map((s) =>
+              s.id === subItemId ? { ...s, quantity: Math.max(0, newQuantity) } : s
+            ),
+          }
           : item
       )
     );
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">ReStok</h1>
-          <p className="text-muted-foreground">Manage your inventory items and stock levels</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center md:text-left">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            ReStok
+          </h1>
+          <p className="text-slate-600 mt-2">Manage your inventory with ease</p>
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 flex-wrap">
-        <Button onClick={() => setShowAddItem(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Item
-        </Button>
-        <Button
-          onClick={() => setEditMode(!editMode)}
-          variant={editMode ? "default" : "outline"}
-          className="gap-2"
-        >
-          <Edit2 className="h-4 w-4" />
-          {editMode ? "Done Editing" : "Edit"}
-        </Button>
-      </div>
-
-      {/* Add Item Form */}
-      {showAddItem && (
-        <div className="bg-card rounded-lg border p-4 shadow-sm space-y-3">
-          <h2 className="text-lg font-semibold">Add New Item</h2>
-          <Input
-            placeholder="Item name"
-            value={newItemName}
-            onChange={(e) => setNewItemName(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && addItem()}
-          />
-          <Input
-            type="number"
-            placeholder="Low stock value"
-            min="0"
-            value={newItemLowStock}
-            onChange={(e) => setNewItemLowStock(parseInt(e.target.value) || 0)}
-          />
-          <div className="flex gap-2">
-            <Button onClick={addItem} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Item
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAddItem(false);
-                setNewItemName("");
-                setNewItemLowStock(0);
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
+        {/* Action Buttons */}
+        <div className="flex gap-3 flex-wrap justify-center md:justify-start">
+          <Button
+            onClick={() => setShowAddItem(true)}
+            className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg transition-all h-11 px-6"
+          >
+            <Plus className="h-5 w-5" />
+            Add Item
+          </Button>
+          <Button
+            onClick={() => setEditMode(!editMode)}
+            variant={editMode ? "default" : "outline"}
+            className={`gap-2 h-11 px-6 transition-all ${editMode
+                ? "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-md"
+                : "border-2 hover:bg-slate-100"
+              }`}
+          >
+            <Edit2 className="h-5 w-5" />
+            {editMode ? "Done" : "Edit Mode"}
+          </Button>
         </div>
-      )}
 
-      {/* Items List */}
-      <div className="space-y-3">
-        {items.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card">
-            <p>No items yet. Add your first item to get started.</p>
+        {/* Add Item Form */}
+        {showAddItem && (
+          <div className="bg-white rounded-2xl border-2 border-blue-200 p-5 md:p-6 shadow-lg space-y-4">
+            <h2 className="text-xl font-bold text-slate-800">Add New Item</h2>
+            <Input
+              placeholder="Item name"
+              value={newItemName}
+              onChange={(e) => setNewItemName(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && addItem()}
+              className="h-12 text-base border-2 focus:border-blue-500"
+            />
+            <Input
+              type="number"
+              placeholder="Low stock threshold"
+              min="0"
+              value={newItemLowStock}
+              onChange={(e) => setNewItemLowStock(parseInt(e.target.value) || 0)}
+              className="h-12 text-base border-2 focus:border-blue-500"
+            />
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={addItem}
+                className="flex-1 gap-2 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-base font-medium"
+              >
+                <Plus className="h-5 w-5" />
+                Add Item
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddItem(false);
+                  setNewItemName("");
+                  setNewItemLowStock(0);
+                }}
+                className="flex-1 h-12 border-2 text-base font-medium"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
-        ) : (
-          items.map((item) => {
-            const status = getItemStockStatus(item);
-            const isExpanded = expandedItems.has(item.id);
+        )}
 
-            return (
-              <div key={item.id}>
-                <div className={`rounded-lg p-3 ${getStatusColor(status)}`}>
-                  {editMode && editingItemId === item.id ? (
-                    <div className="space-y-3 pb-3">
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium">Item Name</label>
-                        <Input
-                          value={editingItemName}
-                          onChange={(e) => setEditingItemName(e.target.value)}
-                          className="text-sm"
-                        />
-                      </div>
-                      {item.subItems.length === 0 && (
+        {/* Items List */}
+        <div className="space-y-4">
+          {items.length === 0 ? (
+            <div className="text-center py-16 text-slate-500 border-2 border-dashed rounded-2xl bg-white">
+              <div className="text-5xl mb-4">📦</div>
+              <p className="text-lg font-medium">No items yet</p>
+              <p className="text-sm mt-1">Add your first item to get started</p>
+            </div>
+          ) : (
+            items.map((item) => {
+              const status = getItemStockStatus(item);
+              const isExpanded = expandedItems.has(item.id);
+
+              return (
+                <div key={item.id}>
+                  <div className={`rounded-2xl p-4 md:p-5 shadow-md transition-all ${getStatusColor(status)}`}>
+                    {editMode && editingItemId === item.id ? (
+                      <div className="space-y-4">
                         <div className="space-y-2">
-                          <label className="text-xs font-medium">Low Stock Value</label>
+                          <label className="text-sm font-semibold text-slate-700">Item Name</label>
                           <Input
-                            type="number"
-                            min="0"
-                            value={editingItemLowStock}
-                            onChange={(e) => setEditingItemLowStock(parseInt(e.target.value) || 0)}
-                            className="text-sm"
+                            value={editingItemName}
+                            onChange={(e) => setEditingItemName(e.target.value)}
+                            className="h-12 text-base border-2"
                           />
                         </div>
-                      )}
-                      {item.subItems.length > 0 && (
-                        <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
-                          <p>Low stock is determined by sub-items</p>
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => saveEditItemDetails(item.id)} className="gap-1">
-                          <Plus className="h-3 w-3" />
-                          Save
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setEditingItemId(null)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-1">
-                          {item.subItems.length > 0 && (
-                            <button
-                              onClick={() => toggleItemExpanded(item.id)}
-                              className="text-muted-foreground hover:text-foreground"
-                            >
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </button>
-                          )}
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{item.name}</p>
-                            {editMode && item.subItems.length === 0 && <p className="text-xs">Low Stock: {item.lowStock}</p>}
-                          </div>
-                        </div>
-
-                        {editMode ? (
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => startEditItemDetails(item.id, item.name, item.lowStock)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </Button>
-                            {item.subItems.length === 0 && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                                  className="h-8 w-8 p-0 text-lg font-bold"
-                                >
-                                  −
-                                </Button>
-                                <div className="w-12 text-center">
-                                  <p className="font-bold text-sm">{item.quantity}</p>
-                                </div>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                                  className="h-8 w-8 p-0 text-lg font-bold"
-                                >
-                                  +
-                                </Button>
-                              </>
-                            )}
-                            {item.subItems.length > 0 && (
-                              <div className="text-xs text-muted-foreground">
-                                {item.subItems.length} sub-item{item.subItems.length !== 1 ? 's' : ''}
-                              </div>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => deleteItem(item.id)}
-                              className="h-8 w-8 p-0 text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <div className="text-right">
-                              {item.subItems.length === 0 && <p className="font-bold text-sm">{item.quantity}</p>}
-                              {getStatusBadge(status)}
-                            </div>
+                        {item.subItems.length === 0 && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-slate-700">Low Stock Threshold</label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={editingItemLowStock}
+                              onChange={(e) => setEditingItemLowStock(parseInt(e.target.value) || 0)}
+                              className="h-12 text-base border-2"
+                            />
                           </div>
                         )}
-                      </div>
-                    </>
-                  )}
-
-                  {/* Sub Items - Visible in both modes */}
-                  {isExpanded && item.subItems.length > 0 && (
-                    <div className="mt-3 space-y-2 border-t pt-3">
-                      {item.subItems.map((subItem) => {
-                        return (
-                          <div
-                            key={subItem.id}
-                            className="rounded-md p-2 bg-white/50"
+                        {item.subItems.length > 0 && (
+                          <div className="text-sm text-slate-600 bg-blue-50 p-3 rounded-xl border border-blue-200">
+                            <p>Stock levels managed by sub-items</p>
+                          </div>
+                        )}
+                        <div className="flex gap-3 pt-2">
+                          <Button
+                            size="sm"
+                            onClick={() => saveEditItemDetails(item.id)}
+                            className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                           >
-                            <div className="flex items-center justify-between gap-2 ml-6">
-                              <div className="flex-1">
-                                <p className="font-medium text-xs">
-                                  {subItem.name}
-                                </p>
-                                {editMode && (
-                                  <p className="text-xs text-muted-foreground">
-                                    Low: {subItem.lowStock}
-                                  </p>
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingItemId(null)}
+                            className="flex-1 h-11 border-2"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            {item.subItems.length > 0 && (
+                              <button
+                                onClick={() => toggleItemExpanded(item.id)}
+                                className="text-slate-600 hover:text-slate-900 transition-colors flex-shrink-0 p-1 hover:bg-white/50 rounded-lg"
+                              >
+                                {isExpanded ? (
+                                  <ChevronUp className="h-6 w-6" />
+                                ) : (
+                                  <ChevronDown className="h-6 w-6" />
                                 )}
-                              </div>
+                              </button>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-base md:text-lg text-slate-800 truncate">{item.name}</p>
+                              {editMode && item.subItems.length === 0 && (
+                                <p className="text-xs md:text-sm text-slate-600 mt-1">Low Stock: {item.lowStock}</p>
+                              )}
+                            </div>
+                          </div>
 
-                              {editMode ? (
-                                <div className="flex items-center gap-1">
+                          {editMode ? (
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => startEditItemDetails(item.id, item.name, item.lowStock)}
+                                className="h-10 w-10 p-0 border-2"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              {item.subItems.length === 0 && (
+                                <>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                      updateSubItemQuantity(
-                                        item.id,
-                                        subItem.id,
-                                        subItem.quantity - 1
-                                      )
-                                    }
-                                    className="h-7 w-7 p-0 text-sm font-bold"
+                                    onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                                    className="h-10 w-10 p-0 text-xl font-bold border-2 hover:bg-red-50"
                                   >
-                                    ���
+                                    −
                                   </Button>
-                                  <div className="w-10 text-center">
-                                    <p className="font-bold text-xs">
-                                      {subItem.quantity}
-                                    </p>
+                                  <div className="w-14 text-center">
+                                    <p className="font-bold text-lg">{item.quantity}</p>
                                   </div>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                      updateSubItemQuantity(
-                                        item.id,
-                                        subItem.id,
-                                        subItem.quantity + 1
-                                      )
-                                    }
-                                    className="h-7 w-7 p-0 text-sm font-bold"
+                                    onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                    className="h-10 w-10 p-0 text-xl font-bold border-2 hover:bg-green-50"
                                   >
                                     +
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() =>
-                                      deleteSubItem(item.id, subItem.id)
-                                    }
-                                    className="h-7 w-7 p-0 text-destructive"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="text-right">
-                                  <p className="font-bold text-xs">
-                                    {subItem.quantity}
-                                  </p>
+                                </>
+                              )}
+                              {item.subItems.length > 0 && (
+                                <div className="text-sm font-medium text-slate-600 bg-white/50 px-3 py-2 rounded-lg">
+                                  {item.subItems.length} sub
                                 </div>
                               )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => deleteItem(item.id)}
+                                className="h-10 w-10 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                              {item.subItems.length === 0 && (
+                                <p className="font-bold text-xl md:text-2xl text-slate-800">{item.quantity}</p>
+                              )}
+                              {getStatusBadge(status)}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Sub Items - Visible in both modes */}
+                    {isExpanded && item.subItems.length > 0 && (
+                      <div className="mt-4 space-y-3 border-t-2 pt-4 border-white/40">
+                        {item.subItems.map((subItem) => {
+                          return (
+                            <div
+                              key={subItem.id}
+                              className="rounded-xl p-3 md:p-4 bg-white/70 backdrop-blur-sm shadow-sm"
+                            >
+                              <div className="flex items-center justify-between gap-3 ml-2 md:ml-6">
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-sm md:text-base text-slate-800 truncate">
+                                    {subItem.name}
+                                  </p>
+                                  {editMode && (
+                                    <p className="text-xs md:text-sm text-slate-600 mt-1">
+                                      Low: {subItem.lowStock}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {editMode ? (
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        updateSubItemQuantity(
+                                          item.id,
+                                          subItem.id,
+                                          subItem.quantity - 1
+                                        )
+                                      }
+                                      className="h-9 w-9 p-0 text-lg font-bold border-2 hover:bg-red-50"
+                                    >
+                                      −
+                                    </Button>
+                                    <div className="w-12 text-center">
+                                      <p className="font-bold text-base">
+                                        {subItem.quantity}
+                                      </p>
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        updateSubItemQuantity(
+                                          item.id,
+                                          subItem.id,
+                                          subItem.quantity + 1
+                                        )
+                                      }
+                                      className="h-9 w-9 p-0 text-lg font-bold border-2 hover:bg-green-50"
+                                    >
+                                      +
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() =>
+                                        deleteSubItem(item.id, subItem.id)
+                                      }
+                                      className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div className="text-right flex-shrink-0">
+                                    <p className="font-bold text-lg md:text-xl text-slate-800">
+                                      {subItem.quantity}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Add Sub Item - Only in Edit Mode */}
+                    {editMode && (
+                      <>
+                        {showAddSubItem === item.id ? (
+                          <div className="mt-4 border-t-2 pt-4 space-y-3 border-white/40">
+                            <Input
+                              placeholder="Sub-item name"
+                              value={newSubItemName}
+                              onChange={(e) => setNewSubItemName(e.target.value)}
+                              className="h-12 text-base border-2"
+                            />
+                            <div className="flex gap-3">
+                              <Input
+                                type="number"
+                                placeholder="Quantity"
+                                min="0"
+                                value={newSubItemQuantity}
+                                onChange={(e) =>
+                                  setNewSubItemQuantity(parseInt(e.target.value) || 0)
+                                }
+                                className="h-12 text-base border-2 flex-1"
+                              />
+                              <Input
+                                type="number"
+                                placeholder="Low stock"
+                                min="0"
+                                value={newSubItemLowStock}
+                                onChange={(e) =>
+                                  setNewSubItemLowStock(parseInt(e.target.value) || 0)
+                                }
+                                className="h-12 text-base border-2 flex-1"
+                              />
+                            </div>
+                            <div className="flex gap-3">
+                              <Button
+                                size="sm"
+                                onClick={() => addSubItem(item.id)}
+                                className="flex-1 gap-2 h-11 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                              >
+                                <Plus className="h-4 w-4" />
+                                Add
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setShowAddSubItem(null)}
+                                className="flex-1 h-11 border-2"
+                              >
+                                Cancel
+                              </Button>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Add Sub Item - Only in Edit Mode */}
-                  {editMode && (
-                    <>
-                      {showAddSubItem === item.id ? (
-                        <div className="mt-3 border-t pt-3 space-y-2">
-                          <Input
-                            placeholder="Sub-item name"
-                            value={newSubItemName}
-                            onChange={(e) => setNewSubItemName(e.target.value)}
-                            className="text-sm"
-                          />
-                          <div className="flex gap-2">
-                            <Input
-                              type="number"
-                              placeholder="Quantity"
-                              min="0"
-                              value={newSubItemQuantity}
-                              onChange={(e) =>
-                                setNewSubItemQuantity(parseInt(e.target.value) || 0)
-                              }
-                              className="text-sm"
-                            />
-                            <Input
-                              type="number"
-                              placeholder="Low stock"
-                              min="0"
-                              value={newSubItemLowStock}
-                              onChange={(e) =>
-                                setNewSubItemLowStock(parseInt(e.target.value) || 0)
-                              }
-                              className="text-sm"
-                            />
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => addSubItem(item.id)}
-                              className="gap-1"
-                            >
-                              <Plus className="h-3 w-3" />
-                              Add
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setShowAddSubItem(null)}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setShowAddSubItem(item.id)}
-                          className="mt-2 gap-1 w-full text-xs"
-                        >
-                          <Plus className="h-3 w-3" />
-                          Add Sub-item
-                        </Button>
-                      )}
-                    </>
-                  )}
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowAddSubItem(item.id)}
+                            className="mt-4 gap-2 w-full h-11 border-2 text-sm font-medium hover:bg-white/50"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Sub-item
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );
