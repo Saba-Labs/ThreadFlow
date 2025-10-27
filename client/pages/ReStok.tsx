@@ -330,14 +330,6 @@ export default function ReStok() {
                             {item.subItems.length !== 1 ? "s" : ""}
                           </div>
                         )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteItem(item.id)}
-                          className="h-8 w-8 p-0 text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
