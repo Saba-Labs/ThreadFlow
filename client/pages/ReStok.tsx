@@ -280,16 +280,23 @@ export default function ReStok() {
                           className="text-sm"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-medium">Low Stock Value</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={editingItemLowStock}
-                          onChange={(e) => setEditingItemLowStock(parseInt(e.target.value) || 0)}
-                          className="text-sm"
-                        />
-                      </div>
+                      {item.subItems.length === 0 && (
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium">Low Stock Value</label>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={editingItemLowStock}
+                            onChange={(e) => setEditingItemLowStock(parseInt(e.target.value) || 0)}
+                            className="text-sm"
+                          />
+                        </div>
+                      )}
+                      {item.subItems.length > 0 && (
+                        <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
+                          <p>Low stock is determined by sub-items</p>
+                        </div>
+                      )}
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => saveEditItemDetails(item.id)} className="gap-1">
                           <Plus className="h-3 w-3" />
