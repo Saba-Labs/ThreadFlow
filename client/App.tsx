@@ -14,6 +14,7 @@ import JobWork from "./pages/JobWork";
 import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
 import Roadmap from "./pages/Roadmap";
+import ReStok from "./pages/ReStok";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 
 const queryClient = new QueryClient();
