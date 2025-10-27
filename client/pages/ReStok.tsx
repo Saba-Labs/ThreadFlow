@@ -110,6 +110,26 @@ export default function ReStok() {
     );
   };
 
+  const startEditItemDetails = (itemId: string, name: string, lowStock: number) => {
+    setEditingItemId(itemId);
+    setEditingItemName(name);
+    setEditingItemLowStock(lowStock);
+  };
+
+  const saveEditItemDetails = (itemId: string) => {
+    if (!editingItemName.trim()) return;
+    setItems(
+      items.map((item) =>
+        item.id === itemId
+          ? { ...item, name: editingItemName, lowStock: editingItemLowStock }
+          : item
+      )
+    );
+    setEditingItemId(null);
+    setEditingItemName("");
+    setEditingItemLowStock(0);
+  };
+
   const addSubItem = (parentItemId: string) => {
     if (!newSubItemName.trim()) return;
     const newSubItem: SubItem = {
