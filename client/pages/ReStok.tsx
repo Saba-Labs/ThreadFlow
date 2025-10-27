@@ -603,8 +603,8 @@ export default function ReStok() {
           onDeleteSubItem={(subItemId) =>
             deleteSubItem(editingItemId, subItemId)
           }
-          onDeleteItem={() => {
-            deleteItem(editingItemId);
+          onDeleteItem={async () => {
+            await deleteItem(editingItemId);
             setShowEditItemModal(false);
             setEditingItemId(null);
           }}
