@@ -59,16 +59,11 @@ export default function ReStok() {
   };
 
   const getItemStockStatus = (item: Item): string => {
-    // If item has sub-items, determine status from sub-items
+    // If item has sub-items, determine status from sub-items using lowest-priority rule:
+    // any out-of-stock => out-of-stock, else any low-stock => low-stock, else normal
     if (item.subItems.length > 0) {
-      const allOutOfStock = item.subItems.every((sub) => sub.quantity === 0);
-      if (allOutOfStock) return "out-of-stock";
-
-      const anyLowStock = item.subItems.some(
-        (sub) => sub.quantity < sub.lowStock && sub.quantity > 0,
-      );
-      if (anyLowStock) return "low-stock";
-
+      if (item.subItems.some((sub) => sub.quantity === 0)) return "out-of-stock";
+      if (item.subItems.some((sub) => sub.quantity < sub.lowStock)) return "low-stock";
       return "normal";
     }
     // Otherwise use parent item's own values
