@@ -16,6 +16,7 @@ interface Item {
   name: string;
   quantity: number;
   lowStock: number;
+  note?: string;
   subItems: SubItem[];
 }
 
@@ -58,16 +59,13 @@ export default function ReStok() {
   };
 
   const getItemStockStatus = (item: Item): string => {
-    // If item has sub-items, determine status from sub-items
+    // If item has sub-items, determine status from sub-items using lowest-priority rule:
+    // any out-of-stock => out-of-stock, else any low-stock => low-stock, else normal
     if (item.subItems.length > 0) {
-      const allOutOfStock = item.subItems.every((sub) => sub.quantity === 0);
-      if (allOutOfStock) return "out-of-stock";
-
-      const anyLowStock = item.subItems.some(
-        (sub) => sub.quantity < sub.lowStock && sub.quantity > 0,
-      );
-      if (anyLowStock) return "low-stock";
-
+      if (item.subItems.some((sub) => sub.quantity === 0))
+        return "out-of-stock";
+      if (item.subItems.some((sub) => sub.quantity < sub.lowStock))
+        return "low-stock";
       return "normal";
     }
     // Otherwise use parent item's own values
@@ -92,12 +90,18 @@ export default function ReStok() {
     return <span className="text-xs font-bold text-green-700">NORMAL</span>;
   };
 
-  const addItem = (name: string, lowStock: number, subItems: any[] = []) => {
+  const addItem = (
+    name: string,
+    lowStock: number,
+    subItems: any[] = [],
+    note: string = "",
+  ) => {
     const newItem: Item = {
       id: Date.now().toString(),
       name,
       quantity: 0,
       lowStock,
+      note,
       subItems: subItems.map((sub) => ({
         id: sub.id,
         name: sub.name,
@@ -138,10 +142,11 @@ export default function ReStok() {
     itemId: string,
     name: string,
     lowStock: number,
+    note: string,
   ) => {
     setItems(
       items.map((item) =>
-        item.id === itemId ? { ...item, name, lowStock } : item,
+        item.id === itemId ? { ...item, name, lowStock, note } : item,
       ),
     );
     setEditingItemId(null);
@@ -261,7 +266,13 @@ export default function ReStok() {
 
             return (
               <div key={item.id}>
-                <div className={`rounded-lg p-3 ${getStatusColor(status)}`}>
+                <div
+                  className={`rounded-lg p-3 ${
+                    item.subItems.length > 0 && isExpanded
+                      ? "bg-blue-50 border border-blue-200"
+                      : getStatusColor(status)
+                  }`}
+                >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1">
                       {item.subItems.length > 0 && (
@@ -278,8 +289,10 @@ export default function ReStok() {
                       )}
                       <div className="flex-1">
                         <p className="font-medium text-sm">{item.name}</p>
-                        {editMode && item.subItems.length === 0 && (
-                          <p className="text-xs">Low Stock: {item.lowStock}</p>
+                        {item.note && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {item.note}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -352,7 +365,12 @@ export default function ReStok() {
                         return (
                           <div
                             key={subItem.id}
-                            className="rounded-md p-2 bg-white/50"
+                            className={`rounded-md p-2 ${getStatusColor(
+                              getStockStatus(
+                                subItem.quantity,
+                                subItem.lowStock,
+                              ),
+                            )}`}
                           >
                             <div className="flex items-center justify-between gap-2 ml-6">
                               <div className="flex-1">
@@ -435,10 +453,11 @@ export default function ReStok() {
           onOpenChange={setShowEditItemModal}
           itemName={getItem(editingItemId)?.name || ""}
           lowStock={getItem(editingItemId)?.lowStock || 0}
+          note={getItem(editingItemId)?.note || ""}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={getItem(editingItemId)?.subItems.length || 0 > 0}
-          onSubmit={(name, lowStock) =>
-            saveEditItemDetails(editingItemId, name, lowStock)
+          onSubmit={(name, lowStock, note) =>
+            saveEditItemDetails(editingItemId, name, lowStock, note)
           }
           onAddSubItem={(name, lowStock) =>
             addSubItem(editingItemId, name, lowStock)
@@ -449,6 +468,11 @@ export default function ReStok() {
           onDeleteSubItem={(subItemId) =>
             deleteSubItem(editingItemId, subItemId)
           }
+          onDeleteItem={() => {
+            deleteItem(editingItemId);
+            setShowEditItemModal(false);
+            setEditingItemId(null);
+          }}
         />
       )}
     </div>

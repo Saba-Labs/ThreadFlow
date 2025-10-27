@@ -16,12 +16,14 @@ interface EditItemModalProps {
   onOpenChange: (open: boolean) => void;
   itemName: string;
   lowStock: number;
+  note: string;
   subItems: SubItem[];
   hasSubItems: boolean;
-  onSubmit: (name: string, lowStock: number) => void;
+  onSubmit: (name: string, lowStock: number, note: string) => void;
   onAddSubItem: (name: string, lowStock: number) => void;
   onUpdateSubItem: (subItemId: string, name: string, lowStock: number) => void;
   onDeleteSubItem: (subItemId: string) => void;
+  onDeleteItem: () => void;
 }
 
 export default function EditItemModal({
@@ -29,15 +31,18 @@ export default function EditItemModal({
   onOpenChange,
   itemName,
   lowStock,
+  note,
   subItems,
   hasSubItems,
   onSubmit,
   onAddSubItem,
   onUpdateSubItem,
   onDeleteSubItem,
+  onDeleteItem,
 }: EditItemModalProps) {
   const [editingName, setEditingName] = useState(itemName);
   const [editingLowStock, setEditingLowStock] = useState(lowStock);
+  const [editingNote, setEditingNote] = useState(note);
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
@@ -51,17 +56,27 @@ export default function EditItemModal({
     if (open) {
       setEditingName(itemName);
       setEditingLowStock(lowStock);
+      setEditingNote(note);
       setShowAddSubItemForm(false);
       setNewSubItemName("");
       setNewSubItemLowStock(0);
       setEditingSubItemId(null);
       setEditingSubItem(null);
     }
-  }, [open, itemName, lowStock]);
+  }, [open, itemName, lowStock, note]);
 
   const handleSubmitItem = () => {
     if (!editingName.trim()) return;
-    onSubmit(editingName, editingLowStock);
+    onSubmit(editingName, editingLowStock, editingNote);
+    onOpenChange(false);
+  };
+
+  const handleDeleteItem = () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+    onDeleteItem();
     onOpenChange(false);
   };
 
@@ -104,11 +119,23 @@ export default function EditItemModal({
       onOpenChange={onOpenChange}
       title={`Edit Item — ${itemName}`}
       footer={
-        <div className="flex gap-2 justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmitItem}>Save Changes</Button>
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <Button
+              variant="ghost"
+              onClick={handleDeleteItem}
+              className="gap-1 text-red-600 bg-white hover:bg-red-50 border"
+            >
+              <Trash2 className="h-3 w-3" />
+              Delete Item
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitItem}>Save Changes</Button>
+          </div>
         </div>
       }
     >
@@ -145,6 +172,15 @@ export default function EditItemModal({
               <p>Low stock is determined by sub-items</p>
             </div>
           )}
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Note (Optional)</label>
+            <Input
+              placeholder="Add a note"
+              value={editingNote}
+              onChange={(e) => setEditingNote(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Sub-items Section */}
