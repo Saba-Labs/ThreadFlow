@@ -3,8 +3,6 @@ import { Trash2, Plus, ChevronDown, ChevronUp, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
-import AddSubItemModal from "@/components/modals/AddSubItemModal";
-import EditSubItemModal from "@/components/modals/EditSubItemModal";
 
 interface SubItem {
   id: string;
