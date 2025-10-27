@@ -13,7 +13,7 @@ interface SubItem {
 interface AddItemModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (name: string, lowStock: number, subItems: SubItem[]) => void;
+  onSubmit: (name: string, lowStock: number, subItems: SubItem[], note: string) => void;
 }
 
 export default function AddItemModal({
@@ -27,10 +27,11 @@ export default function AddItemModal({
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
+  const [note, setNote] = useState("");
 
   const handleSubmit = () => {
     if (!itemName.trim()) return;
-    onSubmit(itemName, lowStock, subItems);
+    onSubmit(itemName, lowStock, subItems, note);
     resetForm();
     onOpenChange(false);
   };
@@ -42,6 +43,7 @@ export default function AddItemModal({
     setShowAddSubItemForm(false);
     setNewSubItemName("");
     setNewSubItemLowStock(0);
+    setNote("");
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -106,6 +108,14 @@ export default function AddItemModal({
               min="0"
               value={lowStock}
               onChange={(e) => setLowStock(parseInt(e.target.value) || 0)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Note (Optional)</label>
+            <Input
+              placeholder="Add a note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
             />
           </div>
         </div>
