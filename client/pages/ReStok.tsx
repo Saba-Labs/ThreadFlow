@@ -267,7 +267,7 @@ export default function ReStok() {
                 <div className={`rounded-lg p-3 ${getStatusColor(status)}`}>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1">
-                      {item.subItems.length > 0 && editMode && (
+                      {item.subItems.length > 0 && (
                         <button
                           onClick={() => toggleItemExpanded(item.id)}
                           className="text-muted-foreground hover:text-foreground"
