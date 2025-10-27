@@ -292,9 +292,6 @@ export default function ReStok() {
                             {item.note}
                           </p>
                         )}
-                        {!editMode && item.subItems.length === 0 && (
-                          <p className="text-xs">Low Stock: {item.lowStock}</p>
-                        )}
                       </div>
                     </div>
 
