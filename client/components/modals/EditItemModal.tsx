@@ -65,27 +65,39 @@ export default function EditItemModal({
     }
   }, [open, itemName, lowStock, note]);
 
-  const handleSubmitItem = () => {
+  const handleSubmitItem = async () => {
     if (!editingName.trim()) return;
-    onSubmit(editingName, editingLowStock, editingNote);
-    onOpenChange(false);
+    try {
+      await onSubmit(editingName, editingLowStock, editingNote);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to submit:", error);
+    }
   };
 
-  const handleDeleteItem = () => {
+  const handleDeleteItem = async () => {
     const confirmed = window.confirm(
       `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
     );
     if (!confirmed) return;
-    onDeleteItem();
-    onOpenChange(false);
+    try {
+      await onDeleteItem();
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
   };
 
-  const handleAddSubItem = () => {
+  const handleAddSubItem = async () => {
     if (!newSubItemName.trim()) return;
-    onAddSubItem(newSubItemName, newSubItemLowStock);
-    setNewSubItemName("");
-    setNewSubItemLowStock(0);
-    setShowAddSubItemForm(false);
+    try {
+      await onAddSubItem(newSubItemName, newSubItemLowStock);
+      setNewSubItemName("");
+      setNewSubItemLowStock(0);
+      setShowAddSubItemForm(false);
+    } catch (error) {
+      console.error("Failed to add sub-item:", error);
+    }
   };
 
   const handleStartEditSubItem = (subItem: SubItem) => {
