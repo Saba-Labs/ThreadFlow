@@ -57,9 +57,26 @@ export const createRestokItem: RequestHandler = async (req, res) => {
     const { id, name, quantity, lowStock, note, subItems } = req.body;
     const now = Date.now();
 
+    // Validate required fields
+    if (!id || id.trim() === "") {
+      return res.status(400).json({ error: "Item ID is required" });
+    }
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ error: "Item name is required" });
+    }
+
+    if (quantity === undefined || quantity === null || isNaN(Number(quantity))) {
+      return res.status(400).json({ error: "Item quantity must be a valid number" });
+    }
+
+    if (lowStock === undefined || lowStock === null || isNaN(Number(lowStock))) {
+      return res.status(400).json({ error: "Low stock threshold must be a valid number" });
+    }
+
     await query(
       "INSERT INTO restok_items (id, name, quantity, low_stock, note, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [id, name, quantity, lowStock, note || null, now, now],
+      [id.trim(), name.trim(), Number(quantity), Number(lowStock), note || null, now, now],
     );
 
     if (subItems && Array.isArray(subItems)) {
@@ -84,9 +101,22 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     const { name, quantity, lowStock, note, subItems } = req.body;
     const now = Date.now();
 
+    // Validate required fields
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ error: "Item name is required" });
+    }
+
+    if (quantity === undefined || quantity === null || isNaN(Number(quantity))) {
+      return res.status(400).json({ error: "Item quantity must be a valid number" });
+    }
+
+    if (lowStock === undefined || lowStock === null || isNaN(Number(lowStock))) {
+      return res.status(400).json({ error: "Low stock threshold must be a valid number" });
+    }
+
     await query(
       "UPDATE restok_items SET name = $1, quantity = $2, low_stock = $3, note = $4, updated_at = $5 WHERE id = $6",
-      [name, quantity, lowStock, note || null, now, id],
+      [name.trim(), Number(quantity), Number(lowStock), note || null, now, id],
     );
 
     // Delete existing sub-items and insert new ones
