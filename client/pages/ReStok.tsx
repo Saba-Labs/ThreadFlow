@@ -366,7 +366,9 @@ export default function ReStok() {
                         return (
                           <div
                             key={subItem.id}
-                            className="rounded-md p-2 bg-white/50"
+                            className={`rounded-md p-2 ${getStatusColor(
+                              getStockStatus(subItem.quantity, subItem.lowStock),
+                            )}`}
                           >
                             <div className="flex items-center justify-between gap-2 ml-6">
                               <div className="flex-1">
