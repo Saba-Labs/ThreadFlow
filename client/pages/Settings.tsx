@@ -105,7 +105,12 @@ export default function SettingsPage() {
                     <div className="relative">
                       <select
                         value={fontSize}
-                        onChange={(e) => setFontSize(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "small" || value === "medium" || value === "large" || value === "extra-large") {
+                            setFontSize(value);
+                          }
+                        }}
                         className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-300/60 bg-white/90 text-slate-900 appearance-none cursor-pointer hover:bg-slate-50 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-all shadow-sm"
                       >
                         <option value="small">Small · 87.5%</option>

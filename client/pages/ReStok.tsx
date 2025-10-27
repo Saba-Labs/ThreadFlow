@@ -594,7 +594,7 @@ export default function ReStok() {
           lowStock={getItem(editingItemId)?.lowStock || 0}
           note={getItem(editingItemId)?.note || ""}
           subItems={getItem(editingItemId)?.subItems || []}
-          hasSubItems={getItem(editingItemId)?.subItems.length || 0 > 0}
+          hasSubItems={(getItem(editingItemId)?.subItems.length || 0) > 0}
           onSubmit={(name, lowStock, note) =>
             saveEditItemDetails(editingItemId, name, lowStock, note)
           }
