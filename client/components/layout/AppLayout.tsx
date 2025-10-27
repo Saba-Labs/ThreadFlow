@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
-import { Settings, Menu, X, Search as SearchIcon } from "lucide-react";
+import { Settings, Menu, X, Search as SearchIcon, Package } from "lucide-react";
 import { SearchProvider, useSearch } from "@/context/SearchContext";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
