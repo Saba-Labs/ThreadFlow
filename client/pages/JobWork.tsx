@@ -78,22 +78,27 @@ export default function JobWork() {
     }
   };
 
-  const handleDelete = (id: string) => {
-    // simple delete
-    deleteJobWork(id);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteJobWork(id);
+    } catch (error) {
+      console.error("Failed to delete job work:", error);
+    }
   };
 
-  const saveAll = () => {
+  const saveAll = async () => {
     const cleaned = local.map((j) => ({
       ...j,
       name: j.name.trim(),
       description: j.description.trim(),
     }));
-    // reuse setJobWorks through update functions by replacing store
-    // jobWorks lib exposes setJobWorks only internally here; to persist we update each
-    cleaned.forEach((j) =>
-      updateJobWork(j.id, { name: j.name, description: j.description }),
-    );
+    try {
+      for (const j of cleaned) {
+        await updateJobWork(j.id, { name: j.name, description: j.description });
+      }
+    } catch (error) {
+      console.error("Failed to save all job works:", error);
+    }
   };
 
   // helper: return assignments for this job work
