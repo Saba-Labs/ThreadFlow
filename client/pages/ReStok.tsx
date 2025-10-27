@@ -239,7 +239,6 @@ export default function ReStok() {
         ) : (
           items.map((item) => {
             const status = getStockStatus(item.quantity, item.lowStock);
-            const isEditing = editingItem === item.id;
             const isExpanded = expandedItems.has(item.id);
 
             return (
