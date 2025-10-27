@@ -267,7 +267,7 @@ export default function ReStok() {
                 <div
                   className={`rounded-lg p-3 ${
                     item.subItems.length > 0 && isExpanded
-                      ? "bg-white border border-gray-200"
+                      ? "bg-blue-50 border border-blue-200"
                       : getStatusColor(status)
                   }`}
                 >
