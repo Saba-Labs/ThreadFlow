@@ -20,12 +20,11 @@ interface Item {
   subItems: SubItem[];
 }
 
-const STORAGE_KEY = "restok_items";
-
 export default function ReStok() {
   const [items, setItems] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Add Item Modal
   const [showAddItemModal, setShowAddItemModal] = useState(false);
@@ -34,23 +33,24 @@ export default function ReStok() {
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
-  // Load data from local storage
+  // Load data from API
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        setItems(data || []);
-      } catch (error) {
-        console.error("Failed to load data from storage:", error);
-      }
-    }
+    fetchItems();
   }, []);
 
-  // Save data to local storage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/restok/items");
+      if (!response.ok) throw new Error("Failed to fetch items");
+      const data = await response.json();
+      setItems(data);
+    } catch (error) {
+      console.error("Failed to load items:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStockStatus = (quantity: number, lowStock: number) => {
     if (quantity === 0) return "out-of-stock";
