@@ -343,25 +343,34 @@ export default function ReStok() {
                             >
                               <Edit2 className="h-3 w-3" />
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                              className="h-8 w-8 p-0 text-lg font-bold"
-                            >
-                              −
-                            </Button>
-                            <div className="w-12 text-center">
-                              <p className="font-bold text-sm">{item.quantity}</p>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                              className="h-8 w-8 p-0 text-lg font-bold"
-                            >
-                              +
-                            </Button>
+                            {item.subItems.length === 0 && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                                  className="h-8 w-8 p-0 text-lg font-bold"
+                                >
+                                  −
+                                </Button>
+                                <div className="w-12 text-center">
+                                  <p className="font-bold text-sm">{item.quantity}</p>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                  className="h-8 w-8 p-0 text-lg font-bold"
+                                >
+                                  +
+                                </Button>
+                              </>
+                            )}
+                            {item.subItems.length > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                {item.subItems.length} sub-item{item.subItems.length !== 1 ? 's' : ''}
+                              </div>
+                            )}
                             <Button
                               size="sm"
                               variant="ghost"
@@ -374,7 +383,7 @@ export default function ReStok() {
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="text-right">
-                              <p className="font-bold text-sm">{item.quantity}</p>
+                              {item.subItems.length === 0 && <p className="font-bold text-sm">{item.quantity}</p>}
                               {getStatusBadge(status)}
                             </div>
                           </div>
