@@ -23,6 +23,7 @@ const STORAGE_KEY = "restok_items";
 export default function ReStok() {
   const [items, setItems] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [editMode, setEditMode] = useState(false);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<{ [key: string]: number }>({});
   const [showAddItem, setShowAddItem] = useState(false);
@@ -187,13 +188,21 @@ export default function ReStok() {
         </div>
       </div>
 
-      {/* Add Item Button */}
-      {!showAddItem && (
-        <Button onClick={() => setShowAddItem(true)} className="gap-2 w-full sm:w-auto">
+      {/* Action Buttons */}
+      <div className="flex gap-2 flex-wrap">
+        <Button onClick={() => setShowAddItem(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           Add Item
         </Button>
-      )}
+        <Button
+          onClick={() => setEditMode(!editMode)}
+          variant={editMode ? "default" : "outline"}
+          className="gap-2"
+        >
+          <Edit2 className="h-4 w-4" />
+          {editMode ? "Done Editing" : "Edit"}
+        </Button>
+      </div>
 
       {/* Add Item Form */}
       {showAddItem && (
@@ -258,7 +267,7 @@ export default function ReStok() {
                 <div className={`rounded-lg p-3 ${getStatusColor(status)}`}>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1">
-                      {item.subItems.length > 0 && (
+                      {item.subItems.length > 0 && editMode && (
                         <button
                           onClick={() => toggleItemExpanded(item.id)}
                           className="text-muted-foreground hover:text-foreground"
@@ -272,40 +281,66 @@ export default function ReStok() {
                       )}
                       <div className="flex-1">
                         <p className="font-medium text-sm">{item.name}</p>
-                        <p className="text-xs">Low Stock: {item.lowStock}</p>
+                        {editMode && <p className="text-xs">Low Stock: {item.lowStock}</p>}
                       </div>
                     </div>
 
-                    {isEditing ? (
+                    {editMode ? (
                       <div className="flex items-center gap-1">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={editValues[item.id] || 0}
-                          onChange={(e) =>
-                            setEditValues({
-                              ...editValues,
-                              [item.id]: parseInt(e.target.value) || 0,
-                            })
-                          }
-                          className="w-16 h-8 text-sm"
-                        />
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => saveEditItem(item.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Save className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setEditingItem(null)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                        {isEditing ? (
+                          <>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={editValues[item.id] || 0}
+                              onChange={(e) =>
+                                setEditValues({
+                                  ...editValues,
+                                  [item.id]: parseInt(e.target.value) || 0,
+                                })
+                              }
+                              className="w-16 h-8 text-sm"
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => saveEditItem(item.id)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Save className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingItem(null)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-right">
+                              <p className="font-bold text-sm">{item.quantity}</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => startEditItem(item.id, item.quantity)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteItem(item.id)}
+                              className="h-8 w-8 p-0 text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
@@ -313,185 +348,168 @@ export default function ReStok() {
                           <p className="font-bold text-sm">{item.quantity}</p>
                           {getStatusBadge(status)}
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => startEditItem(item.id, item.quantity)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit2 className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteItem(item.id)}
-                          className="h-8 w-8 p-0 text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
                       </div>
                     )}
                   </div>
 
-                  {/* Sub Items */}
-                  {isExpanded && item.subItems.length > 0 && (
-                    <div className="mt-3 space-y-2 border-t pt-3">
-                      {item.subItems.map((subItem) => {
-                        const subStatus = getStockStatus(
-                          subItem.quantity,
-                          subItem.lowStock
-                        );
-                        const editKey = `${item.id}-${subItem.id}`;
-                        const isEditingSub = editingItem === editKey;
+                  {/* Sub Items - Only in Edit Mode */}
+                  {editMode && (
+                    <>
+                      {isExpanded && item.subItems.length > 0 && (
+                        <div className="mt-3 space-y-2 border-t pt-3">
+                          {item.subItems.map((subItem) => {
+                            const editKey = `${item.id}-${subItem.id}`;
+                            const isEditingSub = editingItem === editKey;
 
-                        return (
-                          <div
-                            key={subItem.id}
-                            className="rounded-md p-2 bg-white/50"
-                          >
-                            <div className="flex items-center justify-between gap-2 ml-6">
-                              <div className="flex-1">
-                                <p className="font-medium text-xs">
-                                  {subItem.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Low: {subItem.lowStock}
-                                </p>
-                              </div>
-
-                              {isEditingSub ? (
-                                <div className="flex items-center gap-1">
-                                  <Input
-                                    type="number"
-                                    min="0"
-                                    value={editValues[editKey] || 0}
-                                    onChange={(e) =>
-                                      setEditValues({
-                                        ...editValues,
-                                        [editKey]: parseInt(e.target.value) || 0,
-                                      })
-                                    }
-                                    className="w-16 h-7 text-xs"
-                                  />
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() =>
-                                      saveEditSubItem(item.id, subItem.id)
-                                    }
-                                    className="h-7 w-7 p-0"
-                                  >
-                                    <Save className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setEditingItem(null)}
-                                    className="h-7 w-7 p-0"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  <div className="text-right">
-                                    <p className="font-bold text-xs">
-                                      {subItem.quantity}
+                            return (
+                              <div
+                                key={subItem.id}
+                                className="rounded-md p-2 bg-white/50"
+                              >
+                                <div className="flex items-center justify-between gap-2 ml-6">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-xs">
+                                      {subItem.name}
                                     </p>
-                                    {getStatusBadge(subStatus)}
+                                    <p className="text-xs text-muted-foreground">
+                                      Low: {subItem.lowStock}
+                                    </p>
                                   </div>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() =>
-                                      startEditSubItem(
-                                        item.id,
-                                        subItem.id,
-                                        subItem.quantity
-                                      )
-                                    }
-                                    className="h-7 w-7 p-0"
-                                  >
-                                    <Edit2 className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() =>
-                                      deleteSubItem(item.id, subItem.id)
-                                    }
-                                    className="h-7 w-7 p-0 text-destructive"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
 
-                  {/* Add Sub Item */}
-                  {showAddSubItem === item.id ? (
-                    <div className="mt-3 border-t pt-3 space-y-2">
-                      <Input
-                        placeholder="Sub-item name"
-                        value={newSubItemName}
-                        onChange={(e) => setNewSubItemName(e.target.value)}
-                        className="text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Quantity"
-                          min="0"
-                          value={newSubItemQuantity}
-                          onChange={(e) =>
-                            setNewSubItemQuantity(parseInt(e.target.value) || 0)
-                          }
-                          className="text-sm"
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Low stock"
-                          min="0"
-                          value={newSubItemLowStock}
-                          onChange={(e) =>
-                            setNewSubItemLowStock(parseInt(e.target.value) || 0)
-                          }
-                          className="text-sm"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => addSubItem(item.id)}
-                          className="gap-1"
-                        >
-                          <Plus className="h-3 w-3" />
-                          Add
-                        </Button>
+                                  {isEditingSub ? (
+                                    <div className="flex items-center gap-1">
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        value={editValues[editKey] || 0}
+                                        onChange={(e) =>
+                                          setEditValues({
+                                            ...editValues,
+                                            [editKey]: parseInt(e.target.value) || 0,
+                                          })
+                                        }
+                                        className="w-16 h-7 text-xs"
+                                      />
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() =>
+                                          saveEditSubItem(item.id, subItem.id)
+                                        }
+                                        className="h-7 w-7 p-0"
+                                      >
+                                        <Save className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setEditingItem(null)}
+                                        className="h-7 w-7 p-0"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <div className="text-right">
+                                        <p className="font-bold text-xs">
+                                          {subItem.quantity}
+                                        </p>
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() =>
+                                          startEditSubItem(
+                                            item.id,
+                                            subItem.id,
+                                            subItem.quantity
+                                          )
+                                        }
+                                        className="h-7 w-7 p-0"
+                                      >
+                                        <Edit2 className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() =>
+                                          deleteSubItem(item.id, subItem.id)
+                                        }
+                                        className="h-7 w-7 p-0 text-destructive"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Add Sub Item */}
+                      {showAddSubItem === item.id ? (
+                        <div className="mt-3 border-t pt-3 space-y-2">
+                          <Input
+                            placeholder="Sub-item name"
+                            value={newSubItemName}
+                            onChange={(e) => setNewSubItemName(e.target.value)}
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              placeholder="Quantity"
+                              min="0"
+                              value={newSubItemQuantity}
+                              onChange={(e) =>
+                                setNewSubItemQuantity(parseInt(e.target.value) || 0)
+                              }
+                              className="text-sm"
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Low stock"
+                              min="0"
+                              value={newSubItemLowStock}
+                              onChange={(e) =>
+                                setNewSubItemLowStock(parseInt(e.target.value) || 0)
+                              }
+                              className="text-sm"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => addSubItem(item.id)}
+                              className="gap-1"
+                            >
+                              <Plus className="h-3 w-3" />
+                              Add
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setShowAddSubItem(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setShowAddSubItem(null)}
+                          onClick={() => setShowAddSubItem(item.id)}
+                          className="mt-2 gap-1 w-full text-xs"
                         >
-                          Cancel
+                          <Plus className="h-3 w-3" />
+                          Add Sub-item
                         </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowAddSubItem(item.id)}
-                      className="mt-2 gap-1 w-full text-xs"
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add Sub-item
-                    </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
