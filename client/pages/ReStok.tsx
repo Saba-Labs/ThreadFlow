@@ -255,65 +255,111 @@ export default function ReStok() {
             return (
               <div key={item.id}>
                 <div className={`rounded-lg p-3 ${getStatusColor(status)}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-1">
-                      {item.subItems.length > 0 && (
-                        <button
-                          onClick={() => toggleItemExpanded(item.id)}
-                          className="text-muted-foreground hover:text-foreground"
+                  {editMode && editingItemId === item.id ? (
+                    <div className="space-y-3 pb-3">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium">Item Name</label>
+                        <Input
+                          value={editingItemName}
+                          onChange={(e) => setEditingItemName(e.target.value)}
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium">Low Stock Value</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={editingItemLowStock}
+                          onChange={(e) => setEditingItemLowStock(parseInt(e.target.value) || 0)}
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => saveEditItemDetails(item.id)} className="gap-1">
+                          <Plus className="h-3 w-3" />
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingItemId(null)}
                         >
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </button>
-                      )}
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.name}</p>
-                        {editMode && <p className="text-xs">Low Stock: {item.lowStock}</p>}
+                          Cancel
+                        </Button>
                       </div>
                     </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1">
+                          {item.subItems.length > 0 && (
+                            <button
+                              onClick={() => toggleItemExpanded(item.id)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{item.name}</p>
+                            {editMode && <p className="text-xs">Low Stock: {item.lowStock}</p>}
+                          </div>
+                        </div>
 
-                    {editMode ? (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                          className="h-8 w-8 p-0 text-lg font-bold"
-                        >
-                          −
-                        </Button>
-                        <div className="w-12 text-center">
-                          <p className="font-bold text-sm">{item.quantity}</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                          className="h-8 w-8 p-0 text-lg font-bold"
-                        >
-                          +
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteItem(item.id)}
-                          className="h-8 w-8 p-0 text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        {editMode ? (
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startEditItemDetails(item.id, item.name, item.lowStock)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                              className="h-8 w-8 p-0 text-lg font-bold"
+                            >
+                              −
+                            </Button>
+                            <div className="w-12 text-center">
+                              <p className="font-bold text-sm">{item.quantity}</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                              className="h-8 w-8 p-0 text-lg font-bold"
+                            >
+                              +
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteItem(item.id)}
+                              className="h-8 w-8 p-0 text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <div className="text-right">
+                              <p className="font-bold text-sm">{item.quantity}</p>
+                              {getStatusBadge(status)}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="text-right">
-                          <p className="font-bold text-sm">{item.quantity}</p>
-                          {getStatusBadge(status)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    </>
+                  )}
 
                   {/* Sub Items - Visible in both modes */}
                   {isExpanded && item.subItems.length > 0 && (
@@ -350,7 +396,7 @@ export default function ReStok() {
                                     }
                                     className="h-7 w-7 p-0 text-sm font-bold"
                                   >
-                                    −
+                                    ���
                                   </Button>
                                   <div className="w-10 text-center">
                                     <p className="font-bold text-xs">
