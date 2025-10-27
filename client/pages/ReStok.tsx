@@ -146,11 +146,11 @@ export default function ReStok() {
     setShowEditItemModal(false);
   };
 
-  const addSubItem = (parentItemId: string, name: string, quantity: number, lowStock: number) => {
+  const addSubItem = (parentItemId: string, name: string, lowStock: number) => {
     const newSubItem: SubItem = {
       id: Date.now().toString(),
       name,
-      quantity,
+      quantity: 0,
       lowStock,
     };
     setItems(
