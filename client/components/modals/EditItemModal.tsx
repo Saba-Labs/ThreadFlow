@@ -19,8 +19,8 @@ interface EditItemModalProps {
   subItems: SubItem[];
   hasSubItems: boolean;
   onSubmit: (name: string, lowStock: number) => void;
-  onAddSubItem: (name: string, quantity: number, lowStock: number) => void;
-  onUpdateSubItem: (subItemId: string, name: string, quantity: number, lowStock: number) => void;
+  onAddSubItem: (name: string, lowStock: number) => void;
+  onUpdateSubItem: (subItemId: string, name: string, lowStock: number) => void;
   onDeleteSubItem: (subItemId: string) => void;
 }
 
@@ -40,10 +40,9 @@ export default function EditItemModal({
   const [editingLowStock, setEditingLowStock] = useState(lowStock);
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
-  const [newSubItemQuantity, setNewSubItemQuantity] = useState(0);
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
   const [editingSubItemId, setEditingSubItemId] = useState<string | null>(null);
-  const [editingSubItem, setEditingSubItem] = useState<{ name: string; quantity: number; lowStock: number } | null>(null);
+  const [editingSubItem, setEditingSubItem] = useState<{ name: string; lowStock: number } | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -51,7 +50,6 @@ export default function EditItemModal({
       setEditingLowStock(lowStock);
       setShowAddSubItemForm(false);
       setNewSubItemName("");
-      setNewSubItemQuantity(0);
       setNewSubItemLowStock(0);
       setEditingSubItemId(null);
       setEditingSubItem(null);
@@ -66,9 +64,8 @@ export default function EditItemModal({
 
   const handleAddSubItem = () => {
     if (!newSubItemName.trim()) return;
-    onAddSubItem(newSubItemName, newSubItemQuantity, newSubItemLowStock);
+    onAddSubItem(newSubItemName, newSubItemLowStock);
     setNewSubItemName("");
-    setNewSubItemQuantity(0);
     setNewSubItemLowStock(0);
     setShowAddSubItemForm(false);
   };
@@ -77,14 +74,13 @@ export default function EditItemModal({
     setEditingSubItemId(subItem.id);
     setEditingSubItem({
       name: subItem.name,
-      quantity: subItem.quantity,
       lowStock: subItem.lowStock,
     });
   };
 
   const handleSaveSubItem = () => {
     if (!editingSubItem || !editingSubItemId || !editingSubItem.name.trim()) return;
-    onUpdateSubItem(editingSubItemId, editingSubItem.name, editingSubItem.quantity, editingSubItem.lowStock);
+    onUpdateSubItem(editingSubItemId, editingSubItem.name, editingSubItem.lowStock);
     setEditingSubItemId(null);
     setEditingSubItem(null);
   };
@@ -169,6 +165,7 @@ export default function EditItemModal({
                   {editingSubItemId === subItem.id && editingSubItem ? (
                     <>
                       <div className="space-y-2">
+                        <label className="text-sm font-medium">Sub-item Name</label>
                         <Input
                           placeholder="Sub-item name"
                           value={editingSubItem.name}
@@ -176,15 +173,8 @@ export default function EditItemModal({
                           className="text-sm"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          type="number"
-                          placeholder="Quantity"
-                          min="0"
-                          value={editingSubItem.quantity}
-                          onChange={(e) => setEditingSubItem({ ...editingSubItem, quantity: parseInt(e.target.value) || 0 })}
-                          className="text-sm"
-                        />
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Low Stock Value</label>
                         <Input
                           type="number"
                           placeholder="Low stock"
@@ -267,34 +257,22 @@ export default function EditItemModal({
                   autoFocus
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Quantity</label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    min="0"
-                    value={newSubItemQuantity}
-                    onChange={(e) => setNewSubItemQuantity(parseInt(e.target.value) || 0)}
-                    className="text-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Low Stock Value</label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    min="0"
-                    value={newSubItemLowStock}
-                    onChange={(e) => setNewSubItemLowStock(parseInt(e.target.value) || 0)}
-                    className="text-sm"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Low Stock Value</label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  value={newSubItemLowStock}
+                  onChange={(e) => setNewSubItemLowStock(parseInt(e.target.value) || 0)}
+                  className="text-sm"
+                />
               </div>
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   onClick={handleAddSubItem}
+                  disabled={!newSubItemName.trim()}
                   className="flex-1 gap-1"
                 >
                   <Plus className="h-3 w-3" />
@@ -306,7 +284,6 @@ export default function EditItemModal({
                   onClick={() => {
                     setShowAddSubItemForm(false);
                     setNewSubItemName("");
-                    setNewSubItemQuantity(0);
                     setNewSubItemLowStock(0);
                   }}
                   className="flex-1"
