@@ -449,6 +449,11 @@ export default function ReStok() {
           onDeleteSubItem={(subItemId) =>
             deleteSubItem(editingItemId, subItemId)
           }
+          onDeleteItem={() => {
+            deleteItem(editingItemId);
+            setShowEditItemModal(false);
+            setEditingItemId(null);
+          }}
         />
       )}
     </div>
