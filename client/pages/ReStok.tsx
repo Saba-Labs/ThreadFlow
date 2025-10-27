@@ -594,14 +594,14 @@ export default function ReStok() {
           onSubmit={(name, lowStock, note) =>
             saveEditItemDetails(editingItemId, name, lowStock, note)
           }
-          onAddSubItem={(name, lowStock) =>
-            addSubItem(editingItemId, name, lowStock)
+          onAddSubItem={async (name, lowStock) =>
+            await addSubItem(editingItemId, name, lowStock)
           }
-          onUpdateSubItem={(subItemId, name, lowStock) =>
-            updateSubItem(editingItemId, subItemId, name, lowStock)
+          onUpdateSubItem={async (subItemId, name, lowStock) =>
+            await updateSubItem(editingItemId, subItemId, name, lowStock)
           }
-          onDeleteSubItem={(subItemId) =>
-            deleteSubItem(editingItemId, subItemId)
+          onDeleteSubItem={async (subItemId) =>
+            await deleteSubItem(editingItemId, subItemId)
           }
           onDeleteItem={async () => {
             await deleteItem(editingItemId);
