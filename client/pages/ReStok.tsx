@@ -65,7 +65,9 @@ export default function ReStok() {
       const allOutOfStock = item.subItems.every((sub) => sub.quantity === 0);
       if (allOutOfStock) return "out-of-stock";
 
-      const anyLowStock = item.subItems.some((sub) => sub.quantity < sub.lowStock && sub.quantity > 0);
+      const anyLowStock = item.subItems.some(
+        (sub) => sub.quantity < sub.lowStock && sub.quantity > 0,
+      );
       if (anyLowStock) return "low-stock";
 
       return "normal";
@@ -81,8 +83,14 @@ export default function ReStok() {
   };
 
   const getStatusBadge = (status: string) => {
-    if (status === "out-of-stock") return <span className="text-xs font-bold text-red-700">OUT OF STOCK</span>;
-    if (status === "low-stock") return <span className="text-xs font-bold text-yellow-700">LOW STOCK</span>;
+    if (status === "out-of-stock")
+      return (
+        <span className="text-xs font-bold text-red-700">OUT OF STOCK</span>
+      );
+    if (status === "low-stock")
+      return (
+        <span className="text-xs font-bold text-yellow-700">LOW STOCK</span>
+      );
     return <span className="text-xs font-bold text-green-700">NORMAL</span>;
   };
 
@@ -120,12 +128,18 @@ export default function ReStok() {
   const updateItemQuantity = (itemId: string, newQuantity: number) => {
     setItems(
       items.map((item) =>
-        item.id === itemId ? { ...item, quantity: Math.max(0, newQuantity) } : item
-      )
+        item.id === itemId
+          ? { ...item, quantity: Math.max(0, newQuantity) }
+          : item,
+      ),
     );
   };
 
-  const startEditItemDetails = (itemId: string, name: string, lowStock: number) => {
+  const startEditItemDetails = (
+    itemId: string,
+    name: string,
+    lowStock: number,
+  ) => {
     setEditingItemId(itemId);
     setEditingItemName(name);
     setEditingItemLowStock(lowStock);
@@ -137,8 +151,8 @@ export default function ReStok() {
       items.map((item) =>
         item.id === itemId
           ? { ...item, name: editingItemName, lowStock: editingItemLowStock }
-          : item
-      )
+          : item,
+      ),
     );
     setEditingItemId(null);
     setEditingItemName("");
@@ -157,8 +171,8 @@ export default function ReStok() {
       items.map((item) =>
         item.id === parentItemId
           ? { ...item, subItems: [...item.subItems, newSubItem] }
-          : item
-      )
+          : item,
+      ),
     );
     setNewSubItemName("");
     setNewSubItemQuantity(0);
@@ -174,23 +188,29 @@ export default function ReStok() {
               ...item,
               subItems: item.subItems.filter((s) => s.id !== subItemId),
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
-  const updateSubItemQuantity = (parentItemId: string, subItemId: string, newQuantity: number) => {
+  const updateSubItemQuantity = (
+    parentItemId: string,
+    subItemId: string,
+    newQuantity: number,
+  ) => {
     setItems(
       items.map((item) =>
         item.id === parentItemId
           ? {
               ...item,
               subItems: item.subItems.map((s) =>
-                s.id === subItemId ? { ...s, quantity: Math.max(0, newQuantity) } : s
+                s.id === subItemId
+                  ? { ...s, quantity: Math.max(0, newQuantity) }
+                  : s,
               ),
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -200,7 +220,9 @@ export default function ReStok() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">ReStok</h1>
-          <p className="text-muted-foreground">Manage your inventory items and stock levels</p>
+          <p className="text-muted-foreground">
+            Manage your inventory items and stock levels
+          </p>
         </div>
       </div>
 
@@ -282,12 +304,18 @@ export default function ReStok() {
                       </div>
                       {item.subItems.length === 0 && (
                         <div className="space-y-2">
-                          <label className="text-xs font-medium">Low Stock Value</label>
+                          <label className="text-xs font-medium">
+                            Low Stock Value
+                          </label>
                           <Input
                             type="number"
                             min="0"
                             value={editingItemLowStock}
-                            onChange={(e) => setEditingItemLowStock(parseInt(e.target.value) || 0)}
+                            onChange={(e) =>
+                              setEditingItemLowStock(
+                                parseInt(e.target.value) || 0,
+                              )
+                            }
                             className="text-sm"
                           />
                         </div>
@@ -298,7 +326,11 @@ export default function ReStok() {
                         </div>
                       )}
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={() => saveEditItemDetails(item.id)} className="gap-1">
+                        <Button
+                          size="sm"
+                          onClick={() => saveEditItemDetails(item.id)}
+                          className="gap-1"
+                        >
                           <Plus className="h-3 w-3" />
                           Save
                         </Button>
@@ -329,7 +361,11 @@ export default function ReStok() {
                           )}
                           <div className="flex-1">
                             <p className="font-medium text-sm">{item.name}</p>
-                            {editMode && item.subItems.length === 0 && <p className="text-xs">Low Stock: {item.lowStock}</p>}
+                            {editMode && item.subItems.length === 0 && (
+                              <p className="text-xs">
+                                Low Stock: {item.lowStock}
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -338,7 +374,13 @@ export default function ReStok() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => startEditItemDetails(item.id, item.name, item.lowStock)}
+                              onClick={() =>
+                                startEditItemDetails(
+                                  item.id,
+                                  item.name,
+                                  item.lowStock,
+                                )
+                              }
                               className="h-8 w-8 p-0"
                             >
                               <Edit2 className="h-3 w-3" />
@@ -348,18 +390,30 @@ export default function ReStok() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                                  onClick={() =>
+                                    updateItemQuantity(
+                                      item.id,
+                                      item.quantity - 1,
+                                    )
+                                  }
                                   className="h-8 w-8 p-0 text-lg font-bold"
                                 >
                                   −
                                 </Button>
                                 <div className="w-12 text-center">
-                                  <p className="font-bold text-sm">{item.quantity}</p>
+                                  <p className="font-bold text-sm">
+                                    {item.quantity}
+                                  </p>
                                 </div>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                  onClick={() =>
+                                    updateItemQuantity(
+                                      item.id,
+                                      item.quantity + 1,
+                                    )
+                                  }
                                   className="h-8 w-8 p-0 text-lg font-bold"
                                 >
                                   +
@@ -368,7 +422,8 @@ export default function ReStok() {
                             )}
                             {item.subItems.length > 0 && (
                               <div className="text-xs text-muted-foreground">
-                                {item.subItems.length} sub-item{item.subItems.length !== 1 ? 's' : ''}
+                                {item.subItems.length} sub-item
+                                {item.subItems.length !== 1 ? "s" : ""}
                               </div>
                             )}
                             <Button
@@ -383,7 +438,11 @@ export default function ReStok() {
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="text-right">
-                              {item.subItems.length === 0 && <p className="font-bold text-sm">{item.quantity}</p>}
+                              {item.subItems.length === 0 && (
+                                <p className="font-bold text-sm">
+                                  {item.quantity}
+                                </p>
+                              )}
                               {getStatusBadge(status)}
                             </div>
                           </div>
@@ -422,7 +481,7 @@ export default function ReStok() {
                                       updateSubItemQuantity(
                                         item.id,
                                         subItem.id,
-                                        subItem.quantity - 1
+                                        subItem.quantity - 1,
                                       )
                                     }
                                     className="h-7 w-7 p-0 text-sm font-bold"
@@ -441,7 +500,7 @@ export default function ReStok() {
                                       updateSubItemQuantity(
                                         item.id,
                                         subItem.id,
-                                        subItem.quantity + 1
+                                        subItem.quantity + 1,
                                       )
                                     }
                                     className="h-7 w-7 p-0 text-sm font-bold"
@@ -491,7 +550,9 @@ export default function ReStok() {
                               min="0"
                               value={newSubItemQuantity}
                               onChange={(e) =>
-                                setNewSubItemQuantity(parseInt(e.target.value) || 0)
+                                setNewSubItemQuantity(
+                                  parseInt(e.target.value) || 0,
+                                )
                               }
                               className="text-sm"
                             />
@@ -501,7 +562,9 @@ export default function ReStok() {
                               min="0"
                               value={newSubItemLowStock}
                               onChange={(e) =>
-                                setNewSubItemLowStock(parseInt(e.target.value) || 0)
+                                setNewSubItemLowStock(
+                                  parseInt(e.target.value) || 0,
+                                )
                               }
                               className="text-sm"
                             />
