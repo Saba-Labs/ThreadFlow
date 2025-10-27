@@ -33,20 +33,6 @@ export default function ReStok() {
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
-  // Add Sub Item Modal
-  const [showAddSubItemModal, setShowAddSubItemModal] = useState(false);
-  const [addingSubItemToId, setAddingSubItemToId] = useState<string | null>(null);
-
-  // Edit Sub Item Modal
-  const [showEditSubItemModal, setShowEditSubItemModal] = useState(false);
-  const [editingSubItemData, setEditingSubItemData] = useState<{
-    parentItemId: string;
-    subItemId: string;
-    name: string;
-    quantity: number;
-    lowStock: number;
-  } | null>(null);
-
   // Load data from local storage
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
