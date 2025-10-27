@@ -16,6 +16,7 @@ interface Item {
   name: string;
   quantity: number;
   lowStock: number;
+  note?: string;
   subItems: SubItem[];
 }
 
@@ -92,12 +93,18 @@ export default function ReStok() {
     return <span className="text-xs font-bold text-green-700">NORMAL</span>;
   };
 
-  const addItem = (name: string, lowStock: number, subItems: any[] = []) => {
+  const addItem = (
+    name: string,
+    lowStock: number,
+    subItems: any[] = [],
+    note: string = "",
+  ) => {
     const newItem: Item = {
       id: Date.now().toString(),
       name,
       quantity: 0,
       lowStock,
+      note,
       subItems: subItems.map((sub) => ({
         id: sub.id,
         name: sub.name,
@@ -138,10 +145,11 @@ export default function ReStok() {
     itemId: string,
     name: string,
     lowStock: number,
+    note: string,
   ) => {
     setItems(
       items.map((item) =>
-        item.id === itemId ? { ...item, name, lowStock } : item,
+        item.id === itemId ? { ...item, name, lowStock, note } : item,
       ),
     );
     setEditingItemId(null);
@@ -278,6 +286,11 @@ export default function ReStok() {
                       )}
                       <div className="flex-1">
                         <p className="font-medium text-sm">{item.name}</p>
+                        {item.note && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {item.note}
+                          </p>
+                        )}
                         {editMode && item.subItems.length === 0 && (
                           <p className="text-xs">Low Stock: {item.lowStock}</p>
                         )}
@@ -435,10 +448,11 @@ export default function ReStok() {
           onOpenChange={setShowEditItemModal}
           itemName={getItem(editingItemId)?.name || ""}
           lowStock={getItem(editingItemId)?.lowStock || 0}
+          note={getItem(editingItemId)?.note || ""}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={getItem(editingItemId)?.subItems.length || 0 > 0}
-          onSubmit={(name, lowStock) =>
-            saveEditItemDetails(editingItemId, name, lowStock)
+          onSubmit={(name, lowStock, note) =>
+            saveEditItemDetails(editingItemId, name, lowStock, note)
           }
           onAddSubItem={(name, lowStock) =>
             addSubItem(editingItemId, name, lowStock)
