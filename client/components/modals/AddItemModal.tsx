@@ -18,7 +18,7 @@ interface AddItemModalProps {
     lowStock: number,
     subItems: SubItem[],
     note: string,
-  ) => void;
+  ) => void | Promise<void>;
 }
 
 export default function AddItemModal({
