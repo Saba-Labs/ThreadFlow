@@ -145,29 +145,19 @@ export default function ReStok() {
     );
   };
 
-  const startEditSubItem = (parentItemId: string, subItemId: string, currentQuantity: number) => {
-    const editKey = `${parentItemId}-${subItemId}`;
-    setEditingItem(editKey);
-    setEditValues({ [editKey]: currentQuantity });
-  };
-
-  const saveEditSubItem = (parentItemId: string, subItemId: string) => {
-    const editKey = `${parentItemId}-${subItemId}`;
-    const newQuantity = editValues[editKey];
+  const updateSubItemQuantity = (parentItemId: string, subItemId: string, newQuantity: number) => {
     setItems(
       items.map((item) =>
         item.id === parentItemId
           ? {
               ...item,
               subItems: item.subItems.map((s) =>
-                s.id === subItemId ? { ...s, quantity: newQuantity } : s
+                s.id === subItemId ? { ...s, quantity: Math.max(0, newQuantity) } : s
               ),
             }
           : item
       )
     );
-    setEditingItem(null);
-    setEditValues({});
   };
 
   return (
