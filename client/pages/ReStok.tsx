@@ -308,9 +308,6 @@ export default function ReStok() {
                   {isExpanded && item.subItems.length > 0 && (
                     <div className="mt-3 space-y-2 border-t pt-3">
                       {item.subItems.map((subItem) => {
-                        const editKey = `${item.id}-${subItem.id}`;
-                        const isEditingSub = editingItem === editKey;
-
                         return (
                           <div
                             key={subItem.id}
