@@ -18,7 +18,9 @@ export const createJobWork: RequestHandler = async (req, res) => {
     const { id, name, description } = req.body;
 
     if (!id || !name) {
-      return res.status(400).json({ error: "Missing required fields: id and name" });
+      return res
+        .status(400)
+        .json({ error: "Missing required fields: id and name" });
     }
 
     const now = Date.now();

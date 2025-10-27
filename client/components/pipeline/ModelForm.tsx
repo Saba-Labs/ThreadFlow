@@ -80,9 +80,10 @@ export default function ModelForm(props: {
       setQuantity(props.initialData.quantity || null);
 
       const timestamp = props.initialData.createdAt;
-      const dateValue = timestamp && typeof timestamp === "number" && timestamp > 0
-        ? new Date(timestamp).toISOString().slice(0, 10)
-        : new Date().toISOString().slice(0, 10);
+      const dateValue =
+        timestamp && typeof timestamp === "number" && timestamp > 0
+          ? new Date(timestamp).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10);
       setDateStr(dateValue);
 
       const sel = new Set<string>();
