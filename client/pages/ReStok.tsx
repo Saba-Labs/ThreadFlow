@@ -59,6 +59,21 @@ export default function ReStok() {
     return "normal";
   };
 
+  const getItemStockStatus = (item: Item): string => {
+    // If item has sub-items, determine status from sub-items
+    if (item.subItems.length > 0) {
+      const allOutOfStock = item.subItems.every((sub) => sub.quantity === 0);
+      if (allOutOfStock) return "out-of-stock";
+
+      const anyLowStock = item.subItems.some((sub) => sub.quantity < sub.lowStock && sub.quantity > 0);
+      if (anyLowStock) return "low-stock";
+
+      return "normal";
+    }
+    // Otherwise use parent item's own values
+    return getStockStatus(item.quantity, item.lowStock);
+  };
+
   const getStatusColor = (status: string) => {
     if (status === "out-of-stock") return "bg-red-100 border border-red-300";
     if (status === "low-stock") return "bg-yellow-100 border border-yellow-300";
