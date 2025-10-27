@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
-import { Settings, Menu, X, Search as SearchIcon } from "lucide-react";
+import { Settings, Menu, X, Search as SearchIcon, Package } from "lucide-react";
 import { SearchProvider, useSearch } from "@/context/SearchContext";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 
@@ -183,6 +183,20 @@ export default function AppLayout() {
                   Job Work
                 </NavLink>
                 <NavLink
+                  to="/restok"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  ReStok
+                </NavLink>
+                <NavLink
                   to="/settings"
                   onClick={() => setMenuOpen(false)}
                   className={({ isActive }) =>
@@ -289,6 +303,20 @@ export default function AppLayout() {
                   }
                 >
                   Job Work
+                </NavLink>
+
+                <NavLink
+                  to="/restok"
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium",
+                      isActive
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )
+                  }
+                >
+                  ReStok
                 </NavLink>
 
                 <NavLink

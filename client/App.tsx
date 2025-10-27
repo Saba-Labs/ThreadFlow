@@ -14,6 +14,7 @@ import JobWork from "./pages/JobWork";
 import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
 import Roadmap from "./pages/Roadmap";
+import ReStok from "./pages/ReStok";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/models/new" element={<NewModel />} />
           <Route path="/models/:id/edit" element={<EditModel />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/restok" element={<ReStok />} />
         </Route>
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

@@ -231,9 +231,9 @@ export default function RoadmapPage() {
             {roadmaps.map((r) => (
               <Card
                 key={r.id}
-                className="overflow-hidden shadow-lg border-slate-200 hover:shadow-xl transition-shadow"
+                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
               >
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6">
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
                   {editingTitleId === r.id ? (
                     <div className="flex items-center gap-2 w-full">
                       <Input
