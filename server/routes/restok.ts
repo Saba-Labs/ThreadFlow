@@ -19,15 +19,17 @@ interface Item {
 
 export const getRestokItems: RequestHandler = async (req, res) => {
   try {
-    const result = await query("SELECT * FROM restok_items ORDER BY created_at DESC");
-    
+    const result = await query(
+      "SELECT * FROM restok_items ORDER BY created_at DESC",
+    );
+
     const items: Item[] = [];
     for (const row of result.rows) {
       const subItemsResult = await query(
         "SELECT id, name, quantity, low_stock as lowStock FROM restok_sub_items WHERE item_id = $1 ORDER BY created_at ASC",
-        [row.id]
+        [row.id],
       );
-      
+
       items.push({
         id: row.id,
         name: row.name,
@@ -42,7 +44,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
         })),
       });
     }
-    
+
     res.json(items);
   } catch (error) {
     console.error("Error fetching restok items:", error);
@@ -54,21 +56,21 @@ export const createRestokItem: RequestHandler = async (req, res) => {
   try {
     const { id, name, quantity, lowStock, note, subItems } = req.body;
     const now = Date.now();
-    
+
     await query(
       "INSERT INTO restok_items (id, name, quantity, low_stock, note, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [id, name, quantity, lowStock, note || null, now, now]
+      [id, name, quantity, lowStock, note || null, now, now],
     );
-    
+
     if (subItems && Array.isArray(subItems)) {
       for (const sub of subItems) {
         await query(
           "INSERT INTO restok_sub_items (id, item_id, name, quantity, low_stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-          [sub.id, id, sub.name, sub.quantity, sub.lowStock, now, now]
+          [sub.id, id, sub.name, sub.quantity, sub.lowStock, now, now],
         );
       }
     }
-    
+
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating restok item:", error);
@@ -81,24 +83,24 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     const { id } = req.params;
     const { name, quantity, lowStock, note, subItems } = req.body;
     const now = Date.now();
-    
+
     await query(
       "UPDATE restok_items SET name = $1, quantity = $2, low_stock = $3, note = $4, updated_at = $5 WHERE id = $6",
-      [name, quantity, lowStock, note || null, now, id]
+      [name, quantity, lowStock, note || null, now, id],
     );
-    
+
     // Delete existing sub-items and insert new ones
     await query("DELETE FROM restok_sub_items WHERE item_id = $1", [id]);
-    
+
     if (subItems && Array.isArray(subItems)) {
       for (const sub of subItems) {
         await query(
           "INSERT INTO restok_sub_items (id, item_id, name, quantity, low_stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-          [sub.id, id, sub.name, sub.quantity, sub.lowStock, now, now]
+          [sub.id, id, sub.name, sub.quantity, sub.lowStock, now, now],
         );
       }
     }
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating restok item:", error);
@@ -109,10 +111,10 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
 export const deleteRestokItem: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     await query("DELETE FROM restok_sub_items WHERE item_id = $1", [id]);
     await query("DELETE FROM restok_items WHERE id = $1", [id]);
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting restok item:", error);

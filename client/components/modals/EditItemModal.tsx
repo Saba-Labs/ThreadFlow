@@ -19,9 +19,17 @@ interface EditItemModalProps {
   note: string;
   subItems: SubItem[];
   hasSubItems: boolean;
-  onSubmit: (name: string, lowStock: number, note: string) => void | Promise<void>;
+  onSubmit: (
+    name: string,
+    lowStock: number,
+    note: string,
+  ) => void | Promise<void>;
   onAddSubItem: (name: string, lowStock: number) => void | Promise<void>;
-  onUpdateSubItem: (subItemId: string, name: string, lowStock: number) => void | Promise<void>;
+  onUpdateSubItem: (
+    subItemId: string,
+    name: string,
+    lowStock: number,
+  ) => void | Promise<void>;
   onDeleteSubItem: (subItemId: string) => void | Promise<void>;
   onDeleteItem: () => void | Promise<void>;
 }

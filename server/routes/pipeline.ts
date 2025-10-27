@@ -36,16 +36,18 @@ export interface WorkOrder {
 
 export const getPipelineOrders: RequestHandler = async (req, res) => {
   try {
-    const result = await query("SELECT * FROM work_orders ORDER BY created_at DESC");
-    
+    const result = await query(
+      "SELECT * FROM work_orders ORDER BY created_at DESC",
+    );
+
     const orders: WorkOrder[] = [];
     for (const row of result.rows) {
       // Fetch steps
       const stepsResult = await query(
         "SELECT * FROM path_steps WHERE order_id = $1 ORDER BY step_index ASC",
-        [row.id]
+        [row.id],
       );
-      
+
       const steps = stepsResult.rows.map((s: any) => ({
         id: s.id,
         kind: s.kind,
@@ -55,13 +57,13 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         activeMachines: s.active_machines,
         quantityDone: s.quantity_done,
       }));
-      
+
       // Fetch job work assignments
       const assignmentsResult = await query(
         "SELECT job_work_id as jobWorkId, quantity, pickup_date as pickupDate, completion_date as completionDate, status FROM job_work_assignments WHERE order_id = $1",
-        [row.id]
+        [row.id],
       );
-      
+
       const jobWorkAssignments = assignmentsResult.rows.map((a: any) => ({
         jobWorkId: a.jobWorkId,
         quantity: a.quantity,
@@ -69,7 +71,7 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         completionDate: a.completionDate,
         status: a.status,
       }));
-      
+
       orders.push({
         id: row.id,
         modelName: row.model_name,
@@ -82,7 +84,7 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         jobWorkAssignments,
       });
     }
-    
+
     res.json(orders);
   } catch (error) {
     console.error("Error fetching pipeline orders:", error);
@@ -94,12 +96,12 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
   try {
     const { id, modelName, quantity, createdAt, steps } = req.body;
     const now = Date.now();
-    
+
     await query(
       "INSERT INTO work_orders (id, model_name, quantity, created_at, updated_at, current_step_index) VALUES ($1, $2, $3, $4, $5, $6)",
-      [id, modelName, quantity, createdAt || now, now, -1]
+      [id, modelName, quantity, createdAt || now, now, -1],
     );
-    
+
     // Insert steps
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
@@ -107,10 +109,22 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
         `INSERT INTO path_steps 
          (id, order_id, kind, machine_type, external_unit_name, status, active_machines, quantity_done, step_index, created_at, updated_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [step.id, id, step.kind, step.machineType || null, step.externalUnitName || null, step.status, step.activeMachines, step.quantityDone, i, now, now]
+        [
+          step.id,
+          id,
+          step.kind,
+          step.machineType || null,
+          step.externalUnitName || null,
+          step.status,
+          step.activeMachines,
+          step.quantityDone,
+          i,
+          now,
+          now,
+        ],
       );
     }
-    
+
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating work order:", error);
@@ -123,12 +137,12 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
     const { id } = req.params;
     const { modelName, quantity, currentStepIndex, steps } = req.body;
     const now = Date.now();
-    
+
     await query(
       "UPDATE work_orders SET model_name = $1, quantity = $2, current_step_index = $3, updated_at = $4 WHERE id = $5",
-      [modelName, quantity, currentStepIndex, now, id]
+      [modelName, quantity, currentStepIndex, now, id],
     );
-    
+
     // Update steps
     await query("DELETE FROM path_steps WHERE order_id = $1", [id]);
     for (let i = 0; i < steps.length; i++) {
@@ -137,10 +151,22 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
         `INSERT INTO path_steps 
          (id, order_id, kind, machine_type, external_unit_name, status, active_machines, quantity_done, step_index, created_at, updated_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [step.id, id, step.kind, step.machineType || null, step.externalUnitName || null, step.status, step.activeMachines, step.quantityDone, i, now, now]
+        [
+          step.id,
+          id,
+          step.kind,
+          step.machineType || null,
+          step.externalUnitName || null,
+          step.status,
+          step.activeMachines,
+          step.quantityDone,
+          i,
+          now,
+          now,
+        ],
       );
     }
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating work order:", error);
@@ -151,11 +177,11 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
 export const deleteWorkOrder: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     await query("DELETE FROM job_work_assignments WHERE order_id = $1", [id]);
     await query("DELETE FROM path_steps WHERE order_id = $1", [id]);
     await query("DELETE FROM work_orders WHERE id = $1", [id]);
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting work order:", error);
@@ -168,14 +194,21 @@ export const updateStepStatus: RequestHandler = async (req, res) => {
     const { orderId, stepIndex } = req.params;
     const { status, activeMachines, quantityDone } = req.body;
     const now = Date.now();
-    
+
     await query(
       `UPDATE path_steps 
        SET status = COALESCE($1, status), active_machines = COALESCE($2, active_machines), quantity_done = COALESCE($3, quantity_done), updated_at = $4
        WHERE order_id = $5 AND step_index = $6`,
-      [status || null, activeMachines !== undefined ? activeMachines : null, quantityDone !== undefined ? quantityDone : null, now, orderId, parseInt(stepIndex)]
+      [
+        status || null,
+        activeMachines !== undefined ? activeMachines : null,
+        quantityDone !== undefined ? quantityDone : null,
+        now,
+        orderId,
+        parseInt(stepIndex),
+      ],
     );
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating step status:", error);

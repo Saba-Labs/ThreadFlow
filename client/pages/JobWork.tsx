@@ -68,7 +68,10 @@ export default function JobWork() {
     if (!trimmed) return;
     try {
       if (editing) {
-        await updateJobWork(editing.id, { name: trimmed, description: desc.trim() });
+        await updateJobWork(editing.id, {
+          name: trimmed,
+          description: desc.trim(),
+        });
       } else {
         await addJobWork({ name: trimmed, description: desc.trim() });
       }

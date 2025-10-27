@@ -208,7 +208,11 @@ export default function ReStok() {
     }
   };
 
-  const addSubItem = async (parentItemId: string, name: string, lowStock: number) => {
+  const addSubItem = async (
+    parentItemId: string,
+    name: string,
+    lowStock: number,
+  ) => {
     const item = items.find((i) => i.id === parentItemId);
     if (!item) return;
 

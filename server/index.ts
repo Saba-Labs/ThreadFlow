@@ -15,10 +15,7 @@ import {
   updateJobWork,
   deleteJobWork,
 } from "./routes/jobworks";
-import {
-  getMachineTypes,
-  setMachineTypes,
-} from "./routes/machine-types";
+import { getMachineTypes, setMachineTypes } from "./routes/machine-types";
 import {
   getPipelineOrders,
   createWorkOrder,

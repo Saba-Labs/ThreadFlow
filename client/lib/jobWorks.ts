@@ -96,9 +96,5 @@ export function subscribe(cb: () => void) {
 }
 
 export function useJobWorks() {
-  return useSyncExternalStore(
-    subscribe,
-    getJobWorks,
-    getJobWorks,
-  );
+  return useSyncExternalStore(subscribe, getJobWorks, getJobWorks);
 }

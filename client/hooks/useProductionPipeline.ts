@@ -230,18 +230,58 @@ export function useProductionPipeline() {
     [],
   );
 
-  const moveToNextStep = useCallback(async (orderId: string) => {
-    const order = state.orders.find((o) => o.id === orderId);
-    if (!order) return;
+  const moveToNextStep = useCallback(
+    async (orderId: string) => {
+      const order = state.orders.find((o) => o.id === orderId);
+      if (!order) return;
 
-    const idx = order.currentStepIndex;
-    const steps = order.steps.slice();
+      const idx = order.currentStepIndex;
+      const steps = order.steps.slice();
 
-    if (idx < 0) {
-      if (steps.length > 0 && steps[0]) {
-        steps[0] = { ...steps[0], status: "hold", activeMachines: 0 };
+      if (idx < 0) {
+        if (steps.length > 0 && steps[0]) {
+          steps[0] = { ...steps[0], status: "hold", activeMachines: 0 };
+        }
+        const newIndex = 0;
+        try {
+          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              modelName: order.modelName,
+              quantity: order.quantity,
+              currentStepIndex: newIndex,
+              steps,
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to move to next step");
+          setStore((s) => ({
+            orders: s.orders.map((o) =>
+              o.id === orderId
+                ? { ...o, steps, currentStepIndex: newIndex }
+                : o,
+            ),
+          }));
+        } catch (error) {
+          console.error("Failed to move to next step:", error);
+        }
+        return;
       }
-      const newIndex = 0;
+
+      if (steps[idx]) {
+        steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+      }
+
+      const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+
+      if (nextIndex < steps.length && steps[nextIndex]) {
+        steps[nextIndex] = {
+          ...steps[nextIndex],
+          status: "hold",
+          activeMachines: 0,
+        };
+      }
+
       try {
         const response = await fetch(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
@@ -249,65 +289,71 @@ export function useProductionPipeline() {
           body: JSON.stringify({
             modelName: order.modelName,
             quantity: order.quantity,
-            currentStepIndex: newIndex,
+            currentStepIndex: nextIndex,
             steps,
           }),
         });
         if (!response.ok) throw new Error("Failed to move to next step");
         setStore((s) => ({
           orders: s.orders.map((o) =>
-            o.id === orderId ? { ...o, steps, currentStepIndex: newIndex } : o,
+            o.id === orderId ? { ...o, steps, currentStepIndex: nextIndex } : o,
           ),
         }));
       } catch (error) {
         console.error("Failed to move to next step:", error);
       }
-      return;
-    }
+    },
+    [state.orders],
+  );
 
-    if (steps[idx]) {
-      steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
-    }
+  const moveToPrevStep = useCallback(
+    async (orderId: string) => {
+      const order = state.orders.find((o) => o.id === orderId);
+      if (!order) return;
 
-    const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+      const idx = order.currentStepIndex;
 
-    if (nextIndex < steps.length && steps[nextIndex]) {
-      steps[nextIndex] = {
-        ...steps[nextIndex],
-        status: "hold",
-        activeMachines: 0,
-      };
-    }
+      if (idx === 0) {
+        try {
+          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              modelName: order.modelName,
+              quantity: order.quantity,
+              currentStepIndex: -1,
+              steps: order.steps,
+            }),
+          });
+          if (!response.ok) throw new Error("Failed to move to prev step");
+          setStore((s) => ({
+            orders: s.orders.map((o) =>
+              o.id === orderId ? { ...o, currentStepIndex: -1 } : o,
+            ),
+          }));
+        } catch (error) {
+          console.error("Failed to move to prev step:", error);
+        }
+        return;
+      }
 
-    try {
-      const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          modelName: order.modelName,
-          quantity: order.quantity,
-          currentStepIndex: nextIndex,
-          steps,
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to move to next step");
-      setStore((s) => ({
-        orders: s.orders.map((o) =>
-          o.id === orderId ? { ...o, steps, currentStepIndex: nextIndex } : o,
-        ),
-      }));
-    } catch (error) {
-      console.error("Failed to move to next step:", error);
-    }
-  }, [state.orders]);
+      if (idx < 0) return;
 
-  const moveToPrevStep = useCallback(async (orderId: string) => {
-    const order = state.orders.find((o) => o.id === orderId);
-    if (!order) return;
+      const steps = order.steps.slice();
+      const target = idx - 1;
 
-    const idx = order.currentStepIndex;
+      if (idx >= 0 && steps[idx]) {
+        steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
+      }
 
-    if (idx === 0) {
+      if (target >= 0 && steps[target]) {
+        steps[target] = {
+          ...steps[target],
+          status: "hold",
+          activeMachines: 0,
+        };
+      }
+
       try {
         const response = await fetch(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
@@ -315,60 +361,22 @@ export function useProductionPipeline() {
           body: JSON.stringify({
             modelName: order.modelName,
             quantity: order.quantity,
-            currentStepIndex: -1,
-            steps: order.steps,
+            currentStepIndex: target,
+            steps,
           }),
         });
         if (!response.ok) throw new Error("Failed to move to prev step");
         setStore((s) => ({
           orders: s.orders.map((o) =>
-            o.id === orderId ? { ...o, currentStepIndex: -1 } : o,
+            o.id === orderId ? { ...o, steps, currentStepIndex: target } : o,
           ),
         }));
       } catch (error) {
         console.error("Failed to move to prev step:", error);
       }
-      return;
-    }
-
-    if (idx < 0) return;
-
-    const steps = order.steps.slice();
-    const target = idx - 1;
-
-    if (idx >= 0 && steps[idx]) {
-      steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
-    }
-
-    if (target >= 0 && steps[target]) {
-      steps[target] = {
-        ...steps[target],
-        status: "hold",
-        activeMachines: 0,
-      };
-    }
-
-    try {
-      const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          modelName: order.modelName,
-          quantity: order.quantity,
-          currentStepIndex: target,
-          steps,
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to move to prev step");
-      setStore((s) => ({
-        orders: s.orders.map((o) =>
-          o.id === orderId ? { ...o, steps, currentStepIndex: target } : o,
-        ),
-      }));
-    } catch (error) {
-      console.error("Failed to move to prev step:", error);
-    }
-  }, [state.orders]);
+    },
+    [state.orders],
+  );
 
   const setCurrentStep = useCallback((orderId: string, index: number) => {
     setStore((s) => ({
