@@ -215,10 +215,6 @@ export default function ReStok() {
   };
 
   const getItem = (id: string) => items.find((item) => item.id === id);
-  const getSubItem = (parentId: string, subId: string) => {
-    const item = getItem(parentId);
-    return item?.subItems.find((s) => s.id === subId);
-  };
 
   return (
     <div className="space-y-6">
