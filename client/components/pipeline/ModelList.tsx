@@ -260,7 +260,9 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const formatDate = (ts: number) => {
+    if (!ts || typeof ts !== "number" || ts <= 0) return "—";
     const d = new Date(ts);
+    if (isNaN(d.getTime())) return "—";
     const dd = String(d.getDate()).padStart(2, "0");
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const yyyy = String(d.getFullYear());
@@ -268,7 +270,9 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const formatDateShort = (ts: number) => {
+    if (!ts || typeof ts !== "number" || ts <= 0) return "—";
     const d = new Date(ts);
+    if (isNaN(d.getTime())) return "—";
     const dd = String(d.getDate()).padStart(2, "0");
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     return `${dd}/${mm}`;
