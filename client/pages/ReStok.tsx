@@ -92,13 +92,18 @@ export default function ReStok() {
     return <span className="text-xs font-bold text-green-700">NORMAL</span>;
   };
 
-  const addItem = (name: string, lowStock: number) => {
+  const addItem = (name: string, lowStock: number, subItems: any[] = []) => {
     const newItem: Item = {
       id: Date.now().toString(),
       name,
       quantity: 0,
       lowStock,
-      subItems: [],
+      subItems: subItems.map((sub) => ({
+        id: sub.id,
+        name: sub.name,
+        quantity: 0,
+        lowStock: sub.lowStock,
+      })),
     };
     setItems([...items, newItem]);
   };
