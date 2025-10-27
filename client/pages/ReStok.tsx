@@ -90,30 +90,48 @@ export default function ReStok() {
     return <span className="text-xs font-bold text-green-700">NORMAL</span>;
   };
 
-  const addItem = (
+  const addItem = async (
     name: string,
     lowStock: number,
     subItems: any[] = [],
     note: string = "",
   ) => {
-    const newItem: Item = {
-      id: Date.now().toString(),
-      name,
-      quantity: 0,
-      lowStock,
-      note,
-      subItems: subItems.map((sub) => ({
-        id: sub.id,
-        name: sub.name,
-        quantity: 0,
-        lowStock: sub.lowStock,
-      })),
-    };
-    setItems([...items, newItem]);
+    try {
+      const id = Date.now().toString();
+      const response = await fetch("/api/restok/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          name,
+          quantity: 0,
+          lowStock,
+          note,
+          subItems: subItems.map((sub) => ({
+            id: sub.id,
+            name: sub.name,
+            quantity: 0,
+            lowStock: sub.lowStock,
+          })),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to create item");
+      await fetchItems();
+    } catch (error) {
+      console.error("Failed to create item:", error);
+    }
   };
 
-  const deleteItem = (itemId: string) => {
-    setItems(items.filter((i) => i.id !== itemId));
+  const deleteItem = async (itemId: string) => {
+    try {
+      const response = await fetch(`/api/restok/items/${itemId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete item");
+      setItems(items.filter((i) => i.id !== itemId));
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
   };
 
   const toggleItemExpanded = (itemId: string) => {
