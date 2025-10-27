@@ -457,11 +457,11 @@ export default function ReStok() {
           onSubmit={(name, lowStock) =>
             saveEditItemDetails(editingItemId, name, lowStock)
           }
-          onAddSubItem={(name, quantity, lowStock) =>
-            addSubItem(editingItemId, name, quantity, lowStock)
+          onAddSubItem={(name, lowStock) =>
+            addSubItem(editingItemId, name, lowStock)
           }
-          onUpdateSubItem={(subItemId, name, quantity, lowStock) =>
-            updateSubItem(editingItemId, subItemId, name, quantity, lowStock)
+          onUpdateSubItem={(subItemId, name, lowStock) =>
+            updateSubItem(editingItemId, subItemId, name, lowStock)
           }
           onDeleteSubItem={(subItemId) =>
             deleteSubItem(editingItemId, subItemId)
