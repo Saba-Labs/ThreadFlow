@@ -83,6 +83,17 @@ export default function EditItemModal({
             <p>Low stock is determined by sub-items</p>
           </div>
         )}
+        <div className="border-t pt-4">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onAddSubItem}
+            className="w-full gap-1"
+          >
+            <Plus className="h-4 w-4" />
+            Add Sub-item
+          </Button>
+        </div>
       </div>
     </SimpleModal>
   );
