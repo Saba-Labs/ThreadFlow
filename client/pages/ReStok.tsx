@@ -332,72 +332,51 @@ export default function ReStok() {
                               </div>
 
                               {editMode ? (
-                                isEditingSub ? (
-                                  <div className="flex items-center gap-1">
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      value={editValues[editKey] || 0}
-                                      onChange={(e) =>
-                                        setEditValues({
-                                          ...editValues,
-                                          [editKey]: parseInt(e.target.value) || 0,
-                                        })
-                                      }
-                                      className="w-16 h-7 text-xs"
-                                    />
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        saveEditSubItem(item.id, subItem.id)
-                                      }
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      <Save className="h-3 w-3" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => setEditingItem(null)}
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      updateSubItemQuantity(
+                                        item.id,
+                                        subItem.id,
+                                        subItem.quantity - 1
+                                      )
+                                    }
+                                    className="h-7 w-7 p-0 text-sm font-bold"
+                                  >
+                                    −
+                                  </Button>
+                                  <div className="w-10 text-center">
+                                    <p className="font-bold text-xs">
+                                      {subItem.quantity}
+                                    </p>
                                   </div>
-                                ) : (
-                                  <div className="flex items-center gap-2">
-                                    <div className="text-right">
-                                      <p className="font-bold text-xs">
-                                        {subItem.quantity}
-                                      </p>
-                                    </div>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        startEditSubItem(
-                                          item.id,
-                                          subItem.id,
-                                          subItem.quantity
-                                        )
-                                      }
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      <Edit2 className="h-3 w-3" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        deleteSubItem(item.id, subItem.id)
-                                      }
-                                      className="h-7 w-7 p-0 text-destructive"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                )
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      updateSubItemQuantity(
+                                        item.id,
+                                        subItem.id,
+                                        subItem.quantity + 1
+                                      )
+                                    }
+                                    className="h-7 w-7 p-0 text-sm font-bold"
+                                  >
+                                    +
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      deleteSubItem(item.id, subItem.id)
+                                    }
+                                    className="h-7 w-7 p-0 text-destructive"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
                               ) : (
                                 <div className="text-right">
                                   <p className="font-bold text-xs">
