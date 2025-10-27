@@ -16,9 +16,10 @@ interface EditItemModalProps {
   onOpenChange: (open: boolean) => void;
   itemName: string;
   lowStock: number;
+  note: string;
   subItems: SubItem[];
   hasSubItems: boolean;
-  onSubmit: (name: string, lowStock: number) => void;
+  onSubmit: (name: string, lowStock: number, note: string) => void;
   onAddSubItem: (name: string, lowStock: number) => void;
   onUpdateSubItem: (subItemId: string, name: string, lowStock: number) => void;
   onDeleteSubItem: (subItemId: string) => void;
@@ -30,6 +31,7 @@ export default function EditItemModal({
   onOpenChange,
   itemName,
   lowStock,
+  note,
   subItems,
   hasSubItems,
   onSubmit,
@@ -40,6 +42,7 @@ export default function EditItemModal({
 }: EditItemModalProps) {
   const [editingName, setEditingName] = useState(itemName);
   const [editingLowStock, setEditingLowStock] = useState(lowStock);
+  const [editingNote, setEditingNote] = useState(note);
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
@@ -53,17 +56,18 @@ export default function EditItemModal({
     if (open) {
       setEditingName(itemName);
       setEditingLowStock(lowStock);
+      setEditingNote(note);
       setShowAddSubItemForm(false);
       setNewSubItemName("");
       setNewSubItemLowStock(0);
       setEditingSubItemId(null);
       setEditingSubItem(null);
     }
-  }, [open, itemName, lowStock]);
+  }, [open, itemName, lowStock, note]);
 
   const handleSubmitItem = () => {
     if (!editingName.trim()) return;
-    onSubmit(editingName, editingLowStock);
+    onSubmit(editingName, editingLowStock, editingNote);
     onOpenChange(false);
   };
 
@@ -168,6 +172,15 @@ export default function EditItemModal({
               <p>Low stock is determined by sub-items</p>
             </div>
           )}
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Note (Optional)</label>
+            <Input
+              placeholder="Add a note"
+              value={editingNote}
+              onChange={(e) => setEditingNote(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Sub-items Section */}
