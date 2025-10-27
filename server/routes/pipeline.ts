@@ -72,18 +72,18 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         status: a.status,
       }));
 
+      const normalizedSteps = steps.map(s => ({
+        ...s,
+        activeMachines: typeof s.activeMachines === "number" ? s.activeMachines : parseInt(s.activeMachines || "0"),
+        quantityDone: typeof s.quantityDone === "number" ? s.quantityDone : parseInt(s.quantityDone || "0"),
+      }));
+
       orders.push({
         id: row.id,
         modelName: row.model_name,
         quantity: row.quantity,
         createdAt: typeof row.created_at === "number" ? row.created_at : parseInt(row.created_at || "0"),
-        steps,
-        currentStepIndex: row.current_step_index,
-        steps: steps.map(s => ({
-          ...s,
-          activeMachines: typeof s.activeMachines === "number" ? s.activeMachines : parseInt(s.activeMachines || "0"),
-          quantityDone: typeof s.quantityDone === "number" ? s.quantityDone : parseInt(s.quantityDone || "0"),
-        })),
+        steps: normalizedSteps,
         currentStepIndex: row.current_step_index,
         parentId: row.parent_id,
         parallelGroups: [],
