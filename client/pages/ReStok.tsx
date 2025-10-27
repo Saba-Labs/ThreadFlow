@@ -200,7 +200,6 @@ export default function ReStok() {
     parentItemId: string,
     subItemId: string,
     name: string,
-    quantity: number,
     lowStock: number,
   ) => {
     setItems(
@@ -210,7 +209,7 @@ export default function ReStok() {
               ...item,
               subItems: item.subItems.map((s) =>
                 s.id === subItemId
-                  ? { ...s, name, quantity, lowStock }
+                  ? { ...s, name, lowStock }
                   : s,
               ),
             }
