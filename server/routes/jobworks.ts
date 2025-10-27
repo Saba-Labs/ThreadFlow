@@ -39,11 +39,16 @@ export const updateJobWork: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description } = req.body;
+
+    if (!name || !String(name).trim()) {
+      return res.status(400).json({ error: "Name is required and cannot be empty" });
+    }
+
     const now = Date.now();
 
     await query(
       "UPDATE job_works SET name = $1, description = $2, updated_at = $3 WHERE id = $4",
-      [name, description || "", now, id],
+      [String(name).trim(), description || "", now, id],
     );
 
     res.json({ success: true });
