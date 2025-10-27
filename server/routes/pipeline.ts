@@ -72,12 +72,27 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         status: a.status,
       }));
 
+      const normalizedSteps = steps.map((s) => ({
+        ...s,
+        activeMachines:
+          typeof s.activeMachines === "number"
+            ? s.activeMachines
+            : parseInt(s.activeMachines || "0"),
+        quantityDone:
+          typeof s.quantityDone === "number"
+            ? s.quantityDone
+            : parseInt(s.quantityDone || "0"),
+      }));
+
       orders.push({
         id: row.id,
         modelName: row.model_name,
         quantity: row.quantity,
-        createdAt: row.created_at,
-        steps,
+        createdAt:
+          typeof row.created_at === "number"
+            ? row.created_at
+            : parseInt(row.created_at || "0"),
+        steps: normalizedSteps,
         currentStepIndex: row.current_step_index,
         parentId: row.parent_id,
         parallelGroups: [],
@@ -95,6 +110,15 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
 export const createWorkOrder: RequestHandler = async (req, res) => {
   try {
     const { id, modelName, quantity, createdAt, steps } = req.body;
+
+    if (!id || !modelName || quantity === undefined || quantity === null) {
+      return res
+        .status(400)
+        .json({
+          error: "Missing required fields: id, modelName, and quantity",
+        });
+    }
+
     const now = Date.now();
 
     await query(
@@ -103,26 +127,28 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
     );
 
     // Insert steps
-    for (let i = 0; i < steps.length; i++) {
-      const step = steps[i];
-      await query(
-        `INSERT INTO path_steps 
-         (id, order_id, kind, machine_type, external_unit_name, status, active_machines, quantity_done, step_index, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [
-          step.id,
-          id,
-          step.kind,
-          step.machineType || null,
-          step.externalUnitName || null,
-          step.status,
-          step.activeMachines,
-          step.quantityDone,
-          i,
-          now,
-          now,
-        ],
-      );
+    if (steps && Array.isArray(steps)) {
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        await query(
+          `INSERT INTO path_steps
+           (id, order_id, kind, machine_type, external_unit_name, status, active_machines, quantity_done, step_index, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          [
+            step.id,
+            id,
+            step.kind,
+            step.machineType || null,
+            step.externalUnitName || null,
+            step.status,
+            step.activeMachines,
+            step.quantityDone,
+            i,
+            now,
+            now,
+          ],
+        );
+      }
     }
 
     res.json({ success: true, id });

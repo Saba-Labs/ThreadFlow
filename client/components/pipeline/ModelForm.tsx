@@ -78,9 +78,14 @@ export default function ModelForm(props: {
       setModelNamePart2(parsed.part2);
       setModelNamePart3(parsed.part3);
       setQuantity(props.initialData.quantity || null);
-      setDateStr(
-        new Date(props.initialData.createdAt).toISOString().slice(0, 10),
-      );
+
+      const timestamp = props.initialData.createdAt;
+      const dateValue =
+        timestamp && typeof timestamp === "number" && timestamp > 0
+          ? new Date(timestamp).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10);
+      setDateStr(dateValue);
+
       const sel = new Set<string>();
       let job = false;
       for (const p of props.initialData.path) {
