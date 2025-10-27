@@ -212,8 +212,6 @@ export default function ReStok() {
           : item,
       ),
     );
-    setEditingSubItemData(null);
-    setShowEditSubItemModal(false);
   };
 
   const getItem = (id: string) => items.find((item) => item.id === id);
