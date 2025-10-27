@@ -405,23 +405,6 @@ export default function ReStok() {
                                   </Button>
                                   <Button
                                     size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      setEditingSubItemData({
-                                        parentItemId: item.id,
-                                        subItemId: subItem.id,
-                                        name: subItem.name,
-                                        quantity: subItem.quantity,
-                                        lowStock: subItem.lowStock,
-                                      });
-                                      setShowEditSubItemModal(true);
-                                    }}
-                                    className="h-7 w-7 p-0"
-                                  >
-                                    <Edit2 className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
                                     variant="ghost"
                                     onClick={() =>
                                       deleteSubItem(item.id, subItem.id)
