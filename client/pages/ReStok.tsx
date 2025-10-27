@@ -268,61 +268,34 @@ export default function ReStok() {
                     </div>
 
                     {editMode ? (
-                      <div className="flex items-center gap-1">
-                        {isEditing ? (
-                          <>
-                            <Input
-                              type="number"
-                              min="0"
-                              value={editValues[item.id] || 0}
-                              onChange={(e) =>
-                                setEditValues({
-                                  ...editValues,
-                                  [item.id]: parseInt(e.target.value) || 0,
-                                })
-                              }
-                              className="w-16 h-8 text-sm"
-                            />
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => saveEditItem(item.id)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Save className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setEditingItem(null)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-right">
-                              <p className="font-bold text-sm">{item.quantity}</p>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => startEditItem(item.id, item.quantity)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => deleteItem(item.id)}
-                              className="h-8 w-8 p-0 text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                          className="h-8 w-8 p-0 text-lg font-bold"
+                        >
+                          −
+                        </Button>
+                        <div className="w-12 text-center">
+                          <p className="font-bold text-sm">{item.quantity}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                          className="h-8 w-8 p-0 text-lg font-bold"
+                        >
+                          +
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteItem(item.id)}
+                          className="h-8 w-8 p-0 text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
