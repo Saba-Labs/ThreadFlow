@@ -76,13 +76,12 @@ export default function ReStok() {
     const newItem: Item = {
       id: Date.now().toString(),
       name: newItemName,
-      quantity: newItemQuantity,
+      quantity: 0,
       lowStock: newItemLowStock,
       subItems: [],
     };
     setItems([...items, newItem]);
     setNewItemName("");
-    setNewItemQuantity(0);
     setNewItemLowStock(0);
     setShowAddItem(false);
   };
