@@ -155,8 +155,6 @@ export default function ReStok() {
           : item,
       ),
     );
-    setAddingSubItemToId(null);
-    setShowAddSubItemModal(false);
   };
 
   const deleteSubItem = (parentItemId: string, subItemId: string) => {
