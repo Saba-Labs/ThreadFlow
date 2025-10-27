@@ -215,22 +215,13 @@ export default function ReStok() {
             onChange={(e) => setNewItemName(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && addItem()}
           />
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              placeholder="Quantity"
-              min="0"
-              value={newItemQuantity}
-              onChange={(e) => setNewItemQuantity(parseInt(e.target.value) || 0)}
-            />
-            <Input
-              type="number"
-              placeholder="Low stock value"
-              min="0"
-              value={newItemLowStock}
-              onChange={(e) => setNewItemLowStock(parseInt(e.target.value) || 0)}
-            />
-          </div>
+          <Input
+            type="number"
+            placeholder="Low stock value"
+            min="0"
+            value={newItemLowStock}
+            onChange={(e) => setNewItemLowStock(parseInt(e.target.value) || 0)}
+          />
           <div className="flex gap-2">
             <Button onClick={addItem} className="gap-2">
               <Plus className="h-4 w-4" />
@@ -241,7 +232,6 @@ export default function ReStok() {
               onClick={() => {
                 setShowAddItem(false);
                 setNewItemName("");
-                setNewItemQuantity(0);
                 setNewItemLowStock(0);
               }}
             >
