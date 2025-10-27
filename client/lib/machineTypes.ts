@@ -1,8 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "threadflow_machine_types_v2";
-const LEGACY_STORAGE_KEY = "threadflow_machine_types_v1";
-
 export interface MachineTypeConfig {
   name: string;
   letter: string;
@@ -25,44 +22,64 @@ export const DEFAULT_MACHINE_TYPES: MachineTypeConfig[] = [
   { name: "Job Work", letter: "J" },
 ];
 
-function migrateFromLegacy(legacy: string[]): MachineTypeConfig[] {
-  return legacy.map((name) => ({
-    name,
-    letter: name.charAt(0).toUpperCase(),
-  }));
-}
-
-let STORE: MachineTypeConfig[] = (function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as MachineTypeConfig[];
-  } catch {}
-  try {
-    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (legacy) {
-      const parsed = JSON.parse(legacy) as string[];
-      return migrateFromLegacy(parsed);
-    }
-  } catch {}
-  return DEFAULT_MACHINE_TYPES.slice();
-})();
+let STORE: MachineTypeConfig[] = DEFAULT_MACHINE_TYPES.slice();
+let isLoading = false;
+let initialized = false;
 
 const subscribers = new Set<() => void>();
+
+async function fetchFromServer() {
+  if (isLoading) return;
+  isLoading = true;
+  try {
+    const response = await fetch("/api/machine-types");
+    if (!response.ok) throw new Error("Failed to fetch machine types");
+    const data = await response.json();
+    if (data.length > 0) {
+      STORE = data;
+    } else {
+      // If no machine types in DB, save defaults
+      await saveToServer(DEFAULT_MACHINE_TYPES);
+      STORE = DEFAULT_MACHINE_TYPES.slice();
+    }
+    for (const s of Array.from(subscribers)) s();
+  } catch (error) {
+    console.error("Failed to fetch machine types:", error);
+  } finally {
+    isLoading = false;
+  }
+}
+
+async function saveToServer(types: MachineTypeConfig[]) {
+  try {
+    const response = await fetch("/api/machine-types", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(types),
+    });
+    if (!response.ok) throw new Error("Failed to save machine types");
+  } catch (error) {
+    console.error("Failed to save machine types:", error);
+    throw error;
+  }
+}
 
 export function getMachineTypes() {
   return STORE;
 }
 
-export function setMachineTypes(list: MachineTypeConfig[]) {
+export async function setMachineTypes(list: MachineTypeConfig[]) {
   STORE = list.slice();
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(STORE));
-  } catch {}
+  await saveToServer(STORE);
   for (const s of Array.from(subscribers)) s();
 }
 
 export function subscribe(cb: () => void) {
   subscribers.add(cb);
+  if (!initialized) {
+    initialized = true;
+    fetchFromServer();
+  }
   return () => subscribers.delete(cb);
 }
 
