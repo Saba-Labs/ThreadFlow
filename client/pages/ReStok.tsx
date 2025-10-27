@@ -264,7 +264,13 @@ export default function ReStok() {
 
             return (
               <div key={item.id}>
-                <div className={`rounded-lg p-3 ${getStatusColor(status)}`}>
+                <div
+                  className={`rounded-lg p-3 ${
+                    item.subItems.length > 0 && isExpanded
+                      ? "bg-white border border-gray-200"
+                      : getStatusColor(status)
+                  }`}
+                >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1">
                       {item.subItems.length > 0 && (
