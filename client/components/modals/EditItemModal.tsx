@@ -108,16 +108,20 @@ export default function EditItemModal({
     });
   };
 
-  const handleSaveSubItem = () => {
+  const handleSaveSubItem = async () => {
     if (!editingSubItem || !editingSubItemId || !editingSubItem.name.trim())
       return;
-    onUpdateSubItem(
-      editingSubItemId,
-      editingSubItem.name,
-      editingSubItem.lowStock,
-    );
-    setEditingSubItemId(null);
-    setEditingSubItem(null);
+    try {
+      await onUpdateSubItem(
+        editingSubItemId,
+        editingSubItem.name,
+        editingSubItem.lowStock,
+      );
+      setEditingSubItemId(null);
+      setEditingSubItem(null);
+    } catch (error) {
+      console.error("Failed to save sub-item:", error);
+    }
   };
 
   const handleCancelEditSubItem = () => {
