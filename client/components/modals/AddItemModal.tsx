@@ -32,6 +32,7 @@ export default function AddItemModal({
     if (!itemName.trim()) return;
     onSubmit(itemName, lowStock, subItems);
     resetForm();
+    onOpenChange(false);
   };
 
   const resetForm = () => {
