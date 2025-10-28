@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 export interface RoadmapItem {
   modelId: string;
@@ -16,184 +16,235 @@ export interface Roadmap {
 
 interface RoadmapState {
   roadmaps: Roadmap[];
+  loading: boolean;
+  error: string | null;
 }
-
-const STORAGE_KEY = "threadflow_roadmaps_v2";
 
 function uid(prefix = "rdm") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-let STORE: RoadmapState = (function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as RoadmapState;
-  } catch {}
-  return { roadmaps: [] };
-})();
+let globalState: RoadmapState = {
+  roadmaps: [],
+  loading: true,
+  error: null,
+};
 
 const subscribers = new Set<() => void>();
-function persist() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(STORE));
-  } catch {}
-}
-function setStore(updater: (s: RoadmapState) => RoadmapState) {
-  STORE = updater(STORE);
-  persist();
+
+function notifySubscribers() {
   for (const s of Array.from(subscribers)) s();
 }
+
+async function fetchRoadmaps() {
+  try {
+    globalState.loading = true;
+    globalState.error = null;
+    const response = await fetch("/api/roadmaps");
+    if (!response.ok) throw new Error("Failed to fetch roadmaps");
+    globalState.roadmaps = await response.json();
+  } catch (error) {
+    globalState.error = String(error);
+    console.error("Error fetching roadmaps:", error);
+  } finally {
+    globalState.loading = false;
+    notifySubscribers();
+  }
+}
+
 function subscribe(cb: () => void) {
   subscribers.add(cb);
   return () => subscribers.delete(cb);
 }
 
+// Initial fetch
+fetchRoadmaps();
+
+// Set up polling for changes
+const pollInterval = setInterval(() => {
+  fetchRoadmaps();
+}, 5000);
+
+// Clean up interval on module unload
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", () => {
+    clearInterval(pollInterval);
+  });
+}
+
 export function useRoadmaps() {
-  const state = useSyncExternalStore(
-    subscribe,
-    () => STORE,
-    () => STORE,
-  );
+  const [state, setState] = useState<RoadmapState>(globalState);
 
-  const createRoadmap = useCallback(
-    (title?: string) => {
-      const count = state.roadmaps.length + 1;
-      const roadmap: Roadmap = {
-        id: uid("roadmap"),
-        title: (title || `Roadmap ${count}`).trim(),
-        createdAt: Date.now(),
-        items: [],
-      };
-      setStore((s) => ({ roadmaps: [...s.roadmaps, roadmap] }));
-      return roadmap.id;
-    },
-    [state.roadmaps.length],
-  );
-
-  const deleteRoadmap = useCallback((roadmapId: string) => {
-    setStore((s) => ({
-      roadmaps: s.roadmaps.filter((r) => r.id !== roadmapId),
-    }));
+  useEffect(() => {
+    setState(globalState);
+    const unsub = subscribe(() => {
+      setState({ ...globalState });
+    });
+    return unsub;
   }, []);
 
-  const renameRoadmap = useCallback((roadmapId: string, title: string) => {
-    setStore((s) => ({
-      roadmaps: s.roadmaps.map((r) =>
-        r.id === roadmapId ? { ...r, title: title.trim() } : r,
-      ),
-    }));
+  const createRoadmap = useCallback(
+    async (title?: string) => {
+      try {
+        const count = globalState.roadmaps.length + 1;
+        const roadmapId = uid("roadmap");
+        const response = await fetch("/api/roadmaps", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: roadmapId,
+            title: (title || `Roadmap ${count}`).trim(),
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to create roadmap");
+        await fetchRoadmaps();
+        return roadmapId;
+      } catch (error) {
+        console.error("Error creating roadmap:", error);
+        throw error;
+      }
+    },
+    []
+  );
+
+  const deleteRoadmap = useCallback(async (roadmapId: string) => {
+    try {
+      const response = await fetch(`/api/roadmaps/${roadmapId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete roadmap");
+      await fetchRoadmaps();
+    } catch (error) {
+      console.error("Error deleting roadmap:", error);
+      throw error;
+    }
+  }, []);
+
+  const renameRoadmap = useCallback(async (roadmapId: string, title: string) => {
+    try {
+      const response = await fetch(`/api/roadmaps/${roadmapId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: title.trim() }),
+      });
+      if (!response.ok) throw new Error("Failed to update roadmap");
+      await fetchRoadmaps();
+    } catch (error) {
+      console.error("Error renaming roadmap:", error);
+      throw error;
+    }
   }, []);
 
   const addModelToRoadmap = useCallback(
-    (
+    async (
       roadmapId: string,
       modelId: string,
       modelName: string,
-      quantity: number,
+      quantity: number
     ) => {
-      setStore((s) => ({
-        roadmaps: s.roadmaps.map((r) =>
-          r.id === roadmapId
-            ? r.items.some((it) => it.modelId === modelId)
-              ? r
-              : {
-                  ...r,
-                  items: [
-                    ...r.items,
-                    { modelId, modelName, quantity, addedAt: Date.now() },
-                  ],
-                }
-            : r,
-        ),
-      }));
+      try {
+        const response = await fetch(`/api/roadmaps/${roadmapId}/models`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modelId,
+            modelName,
+            quantity,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to add model to roadmap");
+        await fetchRoadmaps();
+      } catch (error) {
+        console.error("Error adding model to roadmap:", error);
+        throw error;
+      }
     },
-    [],
+    []
   );
 
   const removeModelFromRoadmap = useCallback(
-    (roadmapId: string, modelId: string) => {
-      setStore((s) => ({
-        roadmaps: s.roadmaps.map((r) =>
-          r.id === roadmapId
-            ? { ...r, items: r.items.filter((it) => it.modelId !== modelId) }
-            : r,
-        ),
-      }));
+    async (roadmapId: string, modelId: string) => {
+      try {
+        const response = await fetch(
+          `/api/roadmaps/${roadmapId}/models/${modelId}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (!response.ok) throw new Error("Failed to remove model from roadmap");
+        await fetchRoadmaps();
+      } catch (error) {
+        console.error("Error removing model from roadmap:", error);
+        throw error;
+      }
     },
-    [],
+    []
   );
 
   const moveModelWithinRoadmap = useCallback(
-    (roadmapId: string, modelId: string, toIndex: number) => {
-      setStore((s) => ({
-        roadmaps: s.roadmaps.map((r) => {
-          if (r.id !== roadmapId) return r;
-          const idx = r.items.findIndex((it) => it.modelId === modelId);
-          if (idx === -1) return r;
-          const items = r.items.slice();
-          const [item] = items.splice(idx, 1);
-          const dest = Math.max(0, Math.min(toIndex, items.length));
-          items.splice(dest, 0, item);
-          return { ...r, items };
-        }),
-      }));
+    async (roadmapId: string, modelId: string, toIndex: number) => {
+      try {
+        const roadmap = globalState.roadmaps.find((r) => r.id === roadmapId);
+        if (!roadmap) return;
+
+        const items = roadmap.items;
+        const currentIndex = items.findIndex((it) => it.modelId === modelId);
+        if (currentIndex === -1) return;
+
+        const newItems = items.slice();
+        const [item] = newItems.splice(currentIndex, 1);
+        const dest = Math.max(0, Math.min(toIndex, newItems.length));
+        newItems.splice(dest, 0, item);
+
+        const modelIds = newItems.map((it) => it.modelId);
+        const response = await fetch(`/api/roadmaps/${roadmapId}/reorder`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: modelIds }),
+        });
+
+        if (!response.ok) throw new Error("Failed to reorder items");
+        await fetchRoadmaps();
+      } catch (error) {
+        console.error("Error moving model within roadmap:", error);
+        throw error;
+      }
     },
-    [],
+    []
   );
 
   const moveModelToRoadmap = useCallback(
-    (
+    async (
       fromRoadmapId: string,
       toRoadmapId: string,
       modelId: string,
-      toIndex?: number,
+      toIndex?: number
     ) => {
-      setStore((s) => {
-        const from = s.roadmaps.find((r) => r.id === fromRoadmapId);
-        const to = s.roadmaps.find((r) => r.id === toRoadmapId);
-        if (!from || !to) return s;
-        const exists = to.items.some((it) => it.modelId === modelId);
-        // get the item being moved to preserve modelName and quantity
-        const itemToMove = from.items.find((it) => it.modelId === modelId);
-        if (!itemToMove) return s;
-        // remove from source
-        const newRoadmaps = s.roadmaps.map((r) =>
-          r.id === fromRoadmapId
-            ? { ...r, items: r.items.filter((it) => it.modelId !== modelId) }
-            : r,
-        );
-        if (exists) return { roadmaps: newRoadmaps };
-        // insert into dest
-        const destIndex =
-          typeof toIndex === "number"
-            ? Math.max(0, Math.min(toIndex, to.items.length))
-            : to.items.length;
-        return {
-          roadmaps: newRoadmaps.map((r) =>
-            r.id === toRoadmapId
-              ? {
-                  ...r,
-                  items: [
-                    ...r.items.slice(0, destIndex),
-                    {
-                      modelId,
-                      modelName: itemToMove.modelName,
-                      quantity: itemToMove.quantity,
-                      addedAt: Date.now(),
-                    },
-                    ...r.items.slice(destIndex),
-                  ],
-                }
-              : r,
-          ),
-        };
-      });
+      try {
+        const response = await fetch("/api/roadmaps/move-model", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fromRoadmapId,
+            toRoadmapId,
+            modelId,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to move model between roadmaps");
+        await fetchRoadmaps();
+      } catch (error) {
+        console.error("Error moving model to roadmap:", error);
+        throw error;
+      }
     },
-    [],
+    []
   );
 
   return {
     roadmaps: state.roadmaps,
+    loading: state.loading,
+    error: state.error,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
