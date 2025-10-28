@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 type DataChangeCallback = (event: {
-  type: "pipeline_updated" | "jobworks_updated" | "machine_types_updated";
+  type: "pipeline_updated" | "jobworks_updated" | "machine_types_updated" | "restok_updated";
 }) => void;
 
 export function useSSESubscription(onDataChange: DataChangeCallback) {
