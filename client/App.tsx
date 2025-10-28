@@ -22,6 +22,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
+      <AppUpdateNotification />
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Index />} />
@@ -40,7 +41,6 @@ const App = () => (
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <AppUpdateNotification />
     </BrowserRouter>
   </QueryClientProvider>
 );

@@ -606,11 +606,18 @@ export function useProductionPipeline() {
             body: JSON.stringify({ status, completionDate }),
           },
         );
-        if (!response.ok)
-          throw new Error("Failed to update job work assignment status");
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(
+            `Failed to update job work assignment status: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+          );
+        }
         await fetchFromServer();
       } catch (error) {
-        console.error("Error updating job work assignment status:", error);
+        console.error(
+          `Error updating job work assignment status for jobWorkId ${jobWorkId} in order ${orderId}:`,
+          error,
+        );
         throw error;
       }
     },

@@ -303,16 +303,33 @@ export const updateJobWorkAssignmentStatus: RequestHandler = async (
     const { status, completionDate } = req.body;
     const now = Date.now();
 
+    if (!orderId || !jobWorkId) {
+      return res.status(400).json({
+        error: "Missing required parameters: orderId and jobWorkId",
+      });
+    }
+
+    if (!status || !["pending", "completed"].includes(status)) {
+      return res.status(400).json({
+        error: "Invalid status. Must be 'pending' or 'completed'",
+      });
+    }
+
     const result = await query(
       "SELECT id FROM job_work_assignments WHERE order_id = $1 AND job_work_id = $2",
       [orderId, jobWorkId],
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Assignment not found" });
+      console.warn(
+        `Assignment not found for orderId: ${orderId}, jobWorkId: ${jobWorkId}`,
+      );
+      return res.status(404).json({
+        error: `Assignment not found for jobWorkId: ${jobWorkId}`,
+      });
     }
 
-    await query(
+    const updateResult = await query(
       "UPDATE job_work_assignments SET status = $1, completion_date = $2, updated_at = $3 WHERE order_id = $4 AND job_work_id = $5",
       [
         status,
@@ -323,12 +340,18 @@ export const updateJobWorkAssignmentStatus: RequestHandler = async (
       ],
     );
 
+    if (!updateResult) {
+      return res.status(500).json({
+        error: "Failed to update assignment status",
+      });
+    }
+
     broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating job work assignment status:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to update job work assignment status" });
+    res.status(500).json({
+      error: `Failed to update job work assignment status: ${error instanceof Error ? error.message : "Unknown error"}`,
+    });
   }
 };

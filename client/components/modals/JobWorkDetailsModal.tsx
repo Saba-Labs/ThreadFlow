@@ -115,7 +115,21 @@ export default function JobWorkDetailsModal({
   const handleCompleteAssignment = (jwId: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    onComplete(jwId, today.getTime());
+    const completionDate = today.getTime();
+
+    // Update local state first
+    const updated = assignments.map((a) => {
+      if (a.jobWorkId !== jwId) return a;
+      return {
+        ...a,
+        completionDate,
+        status: "completed" as const,
+      };
+    });
+
+    // Sync to server and call the completion handler
+    onUpdateAssignments(updated);
+    onComplete(jwId, completionDate);
   };
 
   const handleRemoveAssignment = (jwId: string) => {
@@ -199,7 +213,7 @@ export default function JobWorkDetailsModal({
           ) : (
             assignments.map((assignment) => (
               <div
-                key={assignment.jobWorkId}
+                key={`${assignment.jobWorkId}-${assignment.pickupDate}`}
                 className={`rounded-lg border p-4 ${
                   assignment.status === "completed"
                     ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
