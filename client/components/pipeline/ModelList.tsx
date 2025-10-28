@@ -1000,8 +1000,8 @@ export default function ModelList(props: ModelListProps) {
                                           </span>
                                         ))
                                       ) : (
-                                        <span className="font-medium text-gray-900 dark:text-gray-100">
-                                          {primaryMachine}
+                                        <span className="font-medium text-purple-700 dark:text-purple-300">
+                                          Job Work
                                         </span>
                                       );
                                     })()}
