@@ -46,17 +46,17 @@ interface ModelListProps {
     stepIndex: number,
     machineIndex: number,
   ) => void;
-  setOrderJobWorks?: (orderId: string, ids: string[]) => void;
+  setOrderJobWorks?: (orderId: string, ids: string[]) => void | Promise<void>;
   setJobWorkAssignments?: (
     orderId: string,
     assignments: JobWorkAssignment[],
-  ) => void;
+  ) => void | Promise<void>;
   updateJobWorkAssignmentStatus?: (
     orderId: string,
     jobWorkId: string,
     status: "pending" | "completed",
     completionDate?: number,
-  ) => void;
+  ) => void | Promise<void>;
   showDetails?: boolean;
   viewMode?: "cards" | "list";
 }
