@@ -601,23 +601,12 @@ export default function ModelList(props: ModelListProps) {
                                       );
 
                                     if (hasPendingJW) {
-                                      const linkedJwIds = new Set<string>([
-                                        ...(((o as any).jobWorkIds ||
-                                          []) as string[]),
-                                        ...(o.jobWorkAssignments || [])
-                                          .filter((a) => a.status === "pending")
-                                          .map((a) => a.jobWorkId),
-                                      ]);
-                                      const jwNames = Array.from(linkedJwIds)
-                                        .map((id) =>
-                                          jobWorks.find((j) => j.id === id),
-                                        )
-                                        .filter((j) => j !== undefined)
-                                        .map((j) => j!.name);
+                                      const pendingAssignments = (o.jobWorkAssignments || []).filter((a) => a.status === "pending");
+                                      const uniqueNames = Array.from(new Set(pendingAssignments.map((a) => a.jobWorkName).filter(Boolean)));
 
                                       return (
                                         <div className="flex flex-col gap-0.5">
-                                          {jwNames.map((name) => (
+                                          {uniqueNames.map((name) => (
                                             <div
                                               key={name}
                                               className="font-medium text-purple-700 dark:text-purple-300"
