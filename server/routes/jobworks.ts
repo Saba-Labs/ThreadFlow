@@ -57,6 +57,7 @@ export const updateJobWork: RequestHandler = async (req, res) => {
       [String(name).trim(), description || "", now, id],
     );
 
+    broadcastChange({ type: "jobworks_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating job work:", error);
