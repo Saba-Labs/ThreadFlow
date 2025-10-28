@@ -64,11 +64,6 @@ async function fetchFromServer() {
     const response = await fetch("/api/pipeline/orders");
     if (!response.ok) throw new Error("Failed to fetch orders");
     const orders = await response.json();
-    console.log("Fetched pipeline orders:", {
-      count: orders.length,
-      firstOrderAssignments: orders[0]?.jobWorkAssignments?.length || 0,
-      orders,
-    });
     STORE = { orders };
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
