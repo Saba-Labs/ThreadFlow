@@ -263,7 +263,9 @@ export function useProductionPipeline() {
           });
           if (!response.ok) {
             const errorData = await response.text();
-            throw new Error(`Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`);
+            throw new Error(
+              `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+            );
           }
           setStore((s) => ({
             orders: s.orders.map((o) =>
@@ -306,7 +308,9 @@ export function useProductionPipeline() {
         });
         if (!response.ok) {
           const errorData = await response.text();
-          throw new Error(`Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`);
+          throw new Error(
+            `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+          );
         }
         setStore((s) => ({
           orders: s.orders.map((o) =>
@@ -342,7 +346,9 @@ export function useProductionPipeline() {
           });
           if (!response.ok) {
             const errorData = await response.text();
-            throw new Error(`Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`);
+            throw new Error(
+              `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+            );
           }
           setStore((s) => ({
             orders: s.orders.map((o) =>
@@ -386,7 +392,9 @@ export function useProductionPipeline() {
         });
         if (!response.ok) {
           const errorData = await response.text();
-          throw new Error(`Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`);
+          throw new Error(
+            `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+          );
         }
         setStore((s) => ({
           orders: s.orders.map((o) =>

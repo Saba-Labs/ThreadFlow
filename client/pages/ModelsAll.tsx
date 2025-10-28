@@ -27,7 +27,10 @@ export default function ModelsAll() {
       } catch (error) {
         toast({
           title: "Error",
-          description: error instanceof Error ? error.message : "Failed to move to next step",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Failed to move to next step",
           variant: "destructive",
         });
       }
@@ -42,7 +45,10 @@ export default function ModelsAll() {
       } catch (error) {
         toast({
           title: "Error",
-          description: error instanceof Error ? error.message : "Failed to move to previous step",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Failed to move to previous step",
           variant: "destructive",
         });
       }

@@ -67,17 +67,37 @@ export const createRestokItem: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Item name is required" });
     }
 
-    if (quantity === undefined || quantity === null || isNaN(Number(quantity))) {
-      return res.status(400).json({ error: "Item quantity must be a valid number" });
+    if (
+      quantity === undefined ||
+      quantity === null ||
+      isNaN(Number(quantity))
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Item quantity must be a valid number" });
     }
 
-    if (lowStock === undefined || lowStock === null || isNaN(Number(lowStock))) {
-      return res.status(400).json({ error: "Low stock threshold must be a valid number" });
+    if (
+      lowStock === undefined ||
+      lowStock === null ||
+      isNaN(Number(lowStock))
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Low stock threshold must be a valid number" });
     }
 
     await query(
       "INSERT INTO restok_items (id, name, quantity, low_stock, note, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [id.trim(), name.trim(), Number(quantity), Number(lowStock), note || null, now, now],
+      [
+        id.trim(),
+        name.trim(),
+        Number(quantity),
+        Number(lowStock),
+        note || null,
+        now,
+        now,
+      ],
     );
 
     if (subItems && Array.isArray(subItems)) {
@@ -108,12 +128,24 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Item name is required" });
     }
 
-    if (quantity === undefined || quantity === null || isNaN(Number(quantity))) {
-      return res.status(400).json({ error: "Item quantity must be a valid number" });
+    if (
+      quantity === undefined ||
+      quantity === null ||
+      isNaN(Number(quantity))
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Item quantity must be a valid number" });
     }
 
-    if (lowStock === undefined || lowStock === null || isNaN(Number(lowStock))) {
-      return res.status(400).json({ error: "Low stock threshold must be a valid number" });
+    if (
+      lowStock === undefined ||
+      lowStock === null ||
+      isNaN(Number(lowStock))
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Low stock threshold must be a valid number" });
     }
 
     await query(

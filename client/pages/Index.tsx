@@ -17,7 +17,10 @@ export default function Index() {
       } catch (error) {
         toast({
           title: "Error",
-          description: error instanceof Error ? error.message : "Failed to move to next step",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Failed to move to next step",
           variant: "destructive",
         });
       }
