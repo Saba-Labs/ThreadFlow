@@ -213,6 +213,7 @@ export const deleteWorkOrder: RequestHandler = async (req, res) => {
     await query("DELETE FROM path_steps WHERE order_id = $1", [id]);
     await query("DELETE FROM work_orders WHERE id = $1", [id]);
 
+    broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting work order:", error);
