@@ -38,7 +38,7 @@ export interface WorkOrder {
 export const getPipelineOrders: RequestHandler = async (req, res) => {
   try {
     const result = await query(
-      "SELECT * FROM work_orders ORDER BY created_at DESC",
+      "SELECT * FROM work_orders ORDER BY created_at DESC, id ASC",
     );
 
     const orders: WorkOrder[] = [];
