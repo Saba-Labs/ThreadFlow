@@ -103,7 +103,7 @@ export function useJobWorks() {
     if (event.type === "jobworks_updated") {
       fetchFromServer();
     }
-  }, []);
+  });
 
   return state;
 }
