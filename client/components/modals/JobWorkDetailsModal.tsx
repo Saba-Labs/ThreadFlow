@@ -115,7 +115,21 @@ export default function JobWorkDetailsModal({
   const handleCompleteAssignment = (jwId: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    onComplete(jwId, today.getTime());
+    const completionDate = today.getTime();
+
+    // Update local state first
+    const updated = assignments.map((a) => {
+      if (a.jobWorkId !== jwId) return a;
+      return {
+        ...a,
+        completionDate,
+        status: "completed" as const,
+      };
+    });
+
+    // Sync to server and call the completion handler
+    onUpdateAssignments(updated);
+    onComplete(jwId, completionDate);
   };
 
   const handleRemoveAssignment = (jwId: string) => {
