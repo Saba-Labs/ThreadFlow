@@ -50,7 +50,8 @@ export default function JobWorkDetailsModal({
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const formatDate = (timestamp: number | undefined) => {
-    if (!timestamp || typeof timestamp !== "number" || timestamp <= 0) return "—";
+    if (!timestamp || typeof timestamp !== "number" || timestamp <= 0)
+      return "—";
     try {
       const d = new Date(timestamp);
       if (isNaN(d.getTime())) return "—";

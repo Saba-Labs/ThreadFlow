@@ -1365,7 +1365,9 @@ export default function ModelList(props: ModelListProps) {
                 const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
                 if (o) {
                   // Validate that all assignments have jobWorkId before sending
-                  const validAssignments = assignments.every((a) => a.jobWorkId);
+                  const validAssignments = assignments.every(
+                    (a) => a.jobWorkId,
+                  );
                   if (!validAssignments) {
                     throw new Error("Invalid assignments: missing jobWorkId");
                   }
