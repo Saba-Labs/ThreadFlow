@@ -38,6 +38,28 @@ function initializeHandler() {
   app.use(express.urlencoded({ extended: true, limit: "50mb" }));
   app.use(cors());
 
+  // Middleware to handle raw body for serverless environments
+  app.use((req, res, next) => {
+    // If body is a string, try to parse it
+    if (typeof req.body === "string") {
+      try {
+        req.body = JSON.parse(req.body);
+      } catch (e) {
+        console.error("Failed to parse body string:", req.body);
+      }
+    }
+
+    // Debug logging
+    if (req.method === "POST" || req.method === "PUT") {
+      console.log(`[${req.method}] ${req.path}:`, {
+        contentType: req.get("content-type"),
+        bodyType: typeof req.body,
+        body: JSON.stringify(req.body).substring(0, 500)
+      });
+    }
+    next();
+  });
+
   // Initialize database once
   if (!dbInitialized) {
     initializeDatabase().catch((error) => {
@@ -55,10 +77,10 @@ function initializeHandler() {
   app.get("/api/demo", handleDemo);
 
   // Restok routes
-  app.get("/api/restok", getRestokItems);
-  app.post("/api/restok", createRestokItem);
-  app.put("/api/restok/:id", updateRestokItem);
-  app.delete("/api/restok/:id", deleteRestokItem);
+  app.get("/api/restok/items", getRestokItems);
+  app.post("/api/restok/items", createRestokItem);
+  app.put("/api/restok/items/:id", updateRestokItem);
+  app.delete("/api/restok/items/:id", deleteRestokItem);
 
   // Job works routes
   app.get("/api/jobworks", getJobWorks);
