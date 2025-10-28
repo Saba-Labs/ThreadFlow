@@ -74,7 +74,7 @@ function initializeHandler() {
         bodyType: typeof req.body,
         bodyKeys: Object.keys(req.body),
         hasId: !!req.body.id,
-        hasModelName: !!req.body.modelName
+        hasModelName: !!req.body.modelName,
       });
     }
     next();
@@ -119,8 +119,14 @@ function initializeHandler() {
   app.put("/api/pipeline/orders/:id", updateWorkOrder);
   app.delete("/api/pipeline/orders/:id", deleteWorkOrder);
   app.put("/api/pipeline/orders/:orderId/steps/:stepIndex", updateStepStatus);
-  app.put("/api/pipeline/orders/:orderId/job-work-assignments", setJobWorkAssignments);
-  app.put("/api/pipeline/orders/:orderId/job-works/:jobWorkId/status", updateJobWorkAssignmentStatus);
+  app.put(
+    "/api/pipeline/orders/:orderId/job-work-assignments",
+    setJobWorkAssignments,
+  );
+  app.put(
+    "/api/pipeline/orders/:orderId/job-works/:jobWorkId/status",
+    updateJobWorkAssignmentStatus,
+  );
 
   return serverless(app);
 }
