@@ -85,7 +85,7 @@ export default function Models() {
               status: "hold",
             })
           }
-          onNext={(o) => pipeline.moveToNextStep(o.id)}
+          onNext={(o) => handleMoveNext(o.id)}
         />
       </section>
 
@@ -93,8 +93,8 @@ export default function Models() {
         <ModelList
           orders={filteredOrders}
           onDelete={pipeline.deleteOrder}
-          onNext={(id) => pipeline.moveToNextStep(id)}
-          onPrev={(id) => pipeline.moveToPrevStep(id)}
+          onNext={handleMoveNext}
+          onPrev={handleMovePrev}
           onEditPath={pipeline.editPath}
           onSplit={pipeline.splitOrder}
           onSetStepStatus={(id, idx, status) => pipeline.updateStepStatus(id, idx, { status })}
