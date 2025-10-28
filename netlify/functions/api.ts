@@ -1,5 +1,4 @@
 import serverless from "serverless-http";
-import express from "express";
 import { createServer } from "../../server";
 
 let handler: any = null;
@@ -10,20 +9,15 @@ function createHandler() {
 }
 
 export async function apiHandler(event: any, context: any) {
-  // Parse body from Lambda event and inject it into the event
-  if (event.body && typeof event.body === "string") {
-    try {
-      event.body = JSON.parse(event.body);
-    } catch (e) {
-      console.error("Failed to parse body from event:", event.body, e);
-    }
+  // Ensure body is a string so express.json() middleware can parse it
+  if (event.body && typeof event.body === "object") {
+    event.body = JSON.stringify(event.body);
   }
 
-  // Set isBase64Encoded to false to ensure body is treated as string
-  if (event.isBase64Encoded) {
+  // Handle base64 encoded bodies
+  if (event.isBase64Encoded && event.body) {
     try {
-      const decoded = Buffer.from(event.body, "base64").toString("utf-8");
-      event.body = JSON.parse(decoded);
+      event.body = Buffer.from(event.body, "base64").toString("utf-8");
     } catch (e) {
       console.error("Failed to decode base64 body:", e);
     }
