@@ -89,6 +89,7 @@ export const createRestokItem: RequestHandler = async (req, res) => {
       }
     }
 
+    broadcastChange({ type: "restok_updated" });
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating restok item:", error);
