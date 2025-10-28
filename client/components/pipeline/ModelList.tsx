@@ -1057,21 +1057,10 @@ export default function ModelList(props: ModelListProps) {
                               ) : hasPendingJW ? (
                                 <div className="flex flex-col items-end gap-0.5 text-sm">
                                   {(() => {
-                                    const linkedJwIds = new Set<string>([
-                                      ...(((o as any).jobWorkIds ||
-                                        []) as string[]),
-                                      ...(o.jobWorkAssignments || [])
-                                        .filter((a) => a.status === "pending")
-                                        .map((a) => a.jobWorkId),
-                                    ]);
-                                    const jwNames = Array.from(linkedJwIds)
-                                      .map((id) =>
-                                        jobWorks.find((j) => j.id === id),
-                                      )
-                                      .filter((j) => j !== undefined)
-                                      .map((j) => j!.name);
-                                    return jwNames.length > 0 ? (
-                                      jwNames.map((name) => (
+                                    const pendingAssignments = (o.jobWorkAssignments || []).filter((a) => a.status === "pending");
+                                    const uniqueNames = Array.from(new Set(pendingAssignments.map((a) => a.jobWorkName).filter(Boolean)));
+                                    return uniqueNames.length > 0 ? (
+                                      uniqueNames.map((name) => (
                                         <span
                                           key={name}
                                           className="font-medium text-purple-700 dark:text-purple-300"
