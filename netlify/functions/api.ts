@@ -29,6 +29,7 @@ import { initializeDatabase } from "../../server/db";
 
 let cachedHandler: any = null;
 let dbInitialized = false;
+let dbInitPromise: Promise<void> | null = null;
 
 function initializeHandler() {
   const app = express();
@@ -45,8 +46,13 @@ function initializeHandler() {
       try {
         req.body = JSON.parse(req.body);
       } catch (e) {
-        console.error("Failed to parse body string:", req.body);
+        console.error("Failed to parse body string:", e, req.body);
       }
+    }
+
+    // If there's no body, initialize it as empty object
+    if (!req.body) {
+      req.body = {};
     }
 
     // Debug logging
@@ -54,6 +60,7 @@ function initializeHandler() {
       console.log(`[${req.method}] ${req.path}:`, {
         contentType: req.get("content-type"),
         bodyType: typeof req.body,
+        bodyKeys: req.body ? Object.keys(req.body) : [],
         body: JSON.stringify(req.body).substring(0, 500)
       });
     }
@@ -62,7 +69,8 @@ function initializeHandler() {
 
   // Initialize database once
   if (!dbInitialized) {
-    initializeDatabase().catch((error) => {
+    dbInitPromise = initializeDatabase();
+    dbInitPromise.catch((error) => {
       console.error("Failed to initialize database:", error);
     });
     dbInitialized = true;
@@ -103,8 +111,29 @@ function initializeHandler() {
 }
 
 export const handler = async (event: any, context: any) => {
+  // Ensure database is initialized
+  if (dbInitPromise) {
+    try {
+      await dbInitPromise;
+    } catch (error) {
+      console.error("Database initialization failed:", error);
+    }
+  }
+
+  // Log the event for debugging
+  console.log("Netlify Function Event:", {
+    httpMethod: event.httpMethod,
+    path: event.path,
+    headers: event.headers,
+    bodyLength: event.body ? event.body.length : 0,
+    bodyType: typeof event.body,
+    isBase64: event.isBase64Encoded,
+    body: event.body ? event.body.substring(0, 500) : null
+  });
+
   if (!cachedHandler) {
     cachedHandler = initializeHandler();
   }
+
   return cachedHandler(event, context);
 };
