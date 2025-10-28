@@ -104,6 +104,8 @@ export function createServer() {
   app.put("/api/pipeline/orders/:id", updateWorkOrder);
   app.delete("/api/pipeline/orders/:id", deleteWorkOrder);
   app.put("/api/pipeline/orders/:orderId/steps/:stepIndex", updateStepStatus);
+  app.put("/api/pipeline/orders/:orderId/job-work-assignments", setJobWorkAssignments);
+  app.put("/api/pipeline/orders/:orderId/job-works/:jobWorkId/status", updateJobWorkAssignmentStatus);
 
   // Roadmap routes
   app.get("/api/roadmaps", getRoadmaps);
