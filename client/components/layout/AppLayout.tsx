@@ -5,6 +5,7 @@ import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
 import { Settings, Menu, X, Search as SearchIcon, Package } from "lucide-react";
 import { SearchProvider, useSearch } from "@/context/SearchContext";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 
 function HeaderSearch({ className }: { className?: string }) {
   const { query, setQuery } = useSearch();
