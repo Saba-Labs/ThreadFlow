@@ -8,7 +8,10 @@ import {
   deleteWorkOrder,
   updateStepStatus,
 } from "../../server/routes/pipeline";
-import { getMachineTypes, setMachineTypes } from "../../server/routes/machine-types";
+import {
+  getMachineTypes,
+  setMachineTypes,
+} from "../../server/routes/machine-types";
 import {
   getJobWorks,
   createJobWork,
