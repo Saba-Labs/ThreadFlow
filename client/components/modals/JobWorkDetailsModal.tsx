@@ -177,8 +177,10 @@ export default function JobWorkDetailsModal({
   const handleAddJobWork = () => {
     if (!newJobWorkId) return;
 
+    const jobWork = jobWorks.find((j) => j.id === newJobWorkId);
     const newAssignment: JobWorkAssignment = {
       jobWorkId: newJobWorkId,
+      jobWorkName: jobWork?.name,
       quantity: Math.max(1, Math.floor(Number(newQuantity) || 1)),
       pickupDate: new Date(newPickupDate).getTime(),
       status: "pending",
