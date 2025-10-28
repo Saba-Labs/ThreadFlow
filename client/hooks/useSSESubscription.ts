@@ -1,10 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type DataChangeCallback = (event: {
   type: "pipeline_updated" | "jobworks_updated" | "machine_types_updated";
 }) => void;
 
 export function useSSESubscription(onDataChange: DataChangeCallback) {
+  const callbackRef = useRef(onDataChange);
+
+  useEffect(() => {
+    callbackRef.current = onDataChange;
+  }, [onDataChange]);
+
   useEffect(() => {
     let eventSource: EventSource | null = null;
     let reconnectTimeout: NodeJS.Timeout | null = null;
@@ -29,7 +35,7 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
               data.type === "jobworks_updated" ||
               data.type === "machine_types_updated"
             ) {
-              onDataChange(data);
+              callbackRef.current(data);
             }
           } catch (error) {
             console.error("Failed to parse SSE message:", error);
@@ -64,5 +70,5 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         clearTimeout(reconnectTimeout);
       }
     };
-  }, [onDataChange]);
+  }, []);
 }
