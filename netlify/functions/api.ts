@@ -39,14 +39,24 @@ function initializeHandler() {
   app.use(express.urlencoded({ extended: true, limit: "50mb" }));
   app.use(cors());
 
-  // Middleware to handle raw body for serverless environments
+  // Middleware to handle Buffers from serverless-http
   app.use((req, res, next) => {
-    // If body is a string, try to parse it
-    if (typeof req.body === "string") {
+    // Convert Buffer to string if needed
+    if (Buffer.isBuffer(req.body)) {
+      try {
+        const bodyString = req.body.toString("utf-8");
+        req.body = JSON.parse(bodyString);
+        console.log("Converted Buffer to JSON");
+      } catch (e) {
+        console.error("Failed to convert Buffer:", e);
+        req.body = {};
+      }
+    } else if (typeof req.body === "string") {
       try {
         req.body = JSON.parse(req.body);
       } catch (e) {
-        console.error("Failed to parse body string:", e, req.body);
+        console.error("Failed to parse body string:", e);
+        req.body = {};
       }
     }
 
@@ -60,8 +70,9 @@ function initializeHandler() {
       console.log(`[${req.method}] ${req.path}:`, {
         contentType: req.get("content-type"),
         bodyType: typeof req.body,
-        bodyKeys: req.body ? Object.keys(req.body) : [],
-        body: JSON.stringify(req.body).substring(0, 500)
+        bodyKeys: Object.keys(req.body),
+        hasId: !!req.body.id,
+        hasModelName: !!req.body.modelName
       });
     }
     next();
@@ -119,17 +130,6 @@ export const handler = async (event: any, context: any) => {
       console.error("Database initialization failed:", error);
     }
   }
-
-  // Log the event for debugging
-  console.log("Netlify Function Event:", {
-    httpMethod: event.httpMethod,
-    path: event.path,
-    headers: event.headers,
-    bodyLength: event.body ? event.body.length : 0,
-    bodyType: typeof event.body,
-    isBase64: event.isBase64Encoded,
-    body: event.body ? event.body.substring(0, 500) : null
-  });
 
   if (!cachedHandler) {
     cachedHandler = initializeHandler();
