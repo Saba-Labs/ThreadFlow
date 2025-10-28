@@ -24,6 +24,7 @@ export interface ParallelMachineGroup {
 
 export interface JobWorkAssignment {
   jobWorkId: string;
+  jobWorkName?: string;
   quantity: number;
   pickupDate: number;
   completionDate?: number;

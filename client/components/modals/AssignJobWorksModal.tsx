@@ -66,12 +66,16 @@ export default function AssignJobWorksModal({
   const handleAssign = () => {
     if (selectedIds.length === 0) return;
 
-    const assignments: JobWorkAssignment[] = selectedIds.map((jwId) => ({
-      jobWorkId: jwId,
-      quantity: quantitiesAfterSplit[jwId] || 0,
-      pickupDate: new Date(pickupDate).getTime(),
-      status: "pending",
-    }));
+    const assignments: JobWorkAssignment[] = selectedIds.map((jwId) => {
+      const jobWork = jobWorks.find((j) => j.id === jwId);
+      return {
+        jobWorkId: jwId,
+        jobWorkName: jobWork?.name,
+        quantity: quantitiesAfterSplit[jwId] || 0,
+        pickupDate: new Date(pickupDate).getTime(),
+        status: "pending",
+      };
+    });
 
     onAssign(assignments);
     handleClose();

@@ -159,8 +159,14 @@ export default function JobWorkDetailsModal({
     onUpdateAssignments(updated);
   };
 
-  const getJobWorkName = (jwId: string) => {
-    return jobWorks.find((j) => j.id === jwId)?.name || "Unknown";
+  const getJobWorkName = (jwId: string, storedName?: string) => {
+    // First try the stored name from the assignment
+    if (storedName) return storedName;
+    // Then try to find it in the job works list
+    const found = jobWorks.find((j) => j.id === jwId);
+    if (found) return found.name;
+    // Fallback to showing the ID
+    return jwId;
   };
 
   const getAvailableJobWorks = () => {
@@ -171,8 +177,10 @@ export default function JobWorkDetailsModal({
   const handleAddJobWork = () => {
     if (!newJobWorkId) return;
 
+    const jobWork = jobWorks.find((j) => j.id === newJobWorkId);
     const newAssignment: JobWorkAssignment = {
       jobWorkId: newJobWorkId,
+      jobWorkName: jobWork?.name,
       quantity: Math.max(1, Math.floor(Number(newQuantity) || 1)),
       pickupDate: new Date(newPickupDate).getTime(),
       status: "pending",
@@ -227,7 +235,10 @@ export default function JobWorkDetailsModal({
                         Job Work
                       </div>
                       <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {getJobWorkName(assignment.jobWorkId)}
+                        {getJobWorkName(
+                          assignment.jobWorkId,
+                          assignment.jobWorkName,
+                        )}
                         <span className="text-gray-600 dark:text-gray-400 ml-2">
                           ({assignment.quantity})
                         </span>

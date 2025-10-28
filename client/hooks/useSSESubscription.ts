@@ -11,6 +11,7 @@ type DataChangeCallback = (event: {
 
 export function useSSESubscription(onDataChange: DataChangeCallback) {
   const callbackRef = useRef(onDataChange);
+  const sseFailedRef = useRef(false);
 
   useEffect(() => {
     callbackRef.current = onDataChange;
@@ -19,6 +20,17 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
   useEffect(() => {
     let eventSource: EventSource | null = null;
     let reconnectTimeout: NodeJS.Timeout | null = null;
+    let pollingInterval: NodeJS.Timeout | null = null;
+
+    function setupPollingFallback() {
+      console.log("SSE not available, switching to polling");
+      sseFailedRef.current = true;
+
+      pollingInterval = setInterval(() => {
+        callbackRef.current({ type: "pipeline_updated" });
+        callbackRef.current({ type: "jobworks_updated" });
+      }, 2000);
+    }
 
     function connect() {
       try {
@@ -26,9 +38,14 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
 
         eventSource.onopen = () => {
           console.log("SSE connection established");
+          sseFailedRef.current = false;
           if (reconnectTimeout) {
             clearTimeout(reconnectTimeout);
             reconnectTimeout = null;
+          }
+          if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
           }
         };
 
@@ -50,19 +67,28 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         };
 
         eventSource.onerror = () => {
-          console.log("SSE connection error, attempting to reconnect...");
+          console.log("SSE connection error");
           if (eventSource) {
             eventSource.close();
             eventSource = null;
           }
-          if (!reconnectTimeout) {
-            reconnectTimeout = setTimeout(connect, 3000);
+
+          if (!sseFailedRef.current) {
+            if (!reconnectTimeout) {
+              reconnectTimeout = setTimeout(connect, 3000);
+            }
+          } else {
+            setupPollingFallback();
           }
         };
       } catch (error) {
         console.error("Failed to establish SSE connection:", error);
-        if (!reconnectTimeout) {
-          reconnectTimeout = setTimeout(connect, 3000);
+        if (!sseFailedRef.current) {
+          if (!reconnectTimeout) {
+            reconnectTimeout = setTimeout(connect, 3000);
+          }
+        } else {
+          setupPollingFallback();
         }
       }
     }
@@ -75,6 +101,9 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
       }
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout);
+      }
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
       }
     };
   }, []);
