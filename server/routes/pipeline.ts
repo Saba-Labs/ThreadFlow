@@ -109,6 +109,13 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
 
 export const createWorkOrder: RequestHandler = async (req, res) => {
   try {
+    console.log("createWorkOrder received:", {
+      contentType: req.get("content-type"),
+      bodyType: typeof req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : [],
+      fullBody: JSON.stringify(req.body)
+    });
+
     const { id, modelName, quantity, createdAt, steps } = req.body;
 
     if (!id || !modelName || quantity === undefined || quantity === null) {
@@ -120,7 +127,8 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
         .status(400)
         .json({
           error: "Missing required fields: id, modelName, and quantity",
-          received: { id, modelName, quantity }
+          received: { id, modelName, quantity },
+          debug: { bodyType: typeof req.body, bodyKeys: req.body ? Object.keys(req.body) : [] }
         });
     }
 
