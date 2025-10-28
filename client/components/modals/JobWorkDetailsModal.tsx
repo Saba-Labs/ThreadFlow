@@ -233,7 +233,7 @@ export default function JobWorkDetailsModal({
                         Job Work
                       </div>
                       <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {getJobWorkName(assignment.jobWorkId)}
+                        {getJobWorkName(assignment.jobWorkId, assignment.jobWorkName)}
                         <span className="text-gray-600 dark:text-gray-400 ml-2">
                           ({assignment.quantity})
                         </span>
