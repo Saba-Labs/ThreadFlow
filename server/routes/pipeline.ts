@@ -272,6 +272,9 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
 
     for (const assignment of assignments) {
       const id = `jwa_${Math.random().toString(36).slice(2, 9)}`;
+      const pickupDateMs = typeof assignment.pickupDate === "number" ? assignment.pickupDate : (assignment.pickupDate ? new Date(assignment.pickupDate).getTime() : now);
+      const completionDateMs = assignment.completionDate ? (typeof assignment.completionDate === "number" ? assignment.completionDate : new Date(assignment.completionDate).getTime()) : null;
+
       await query(
         "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
         [
@@ -279,8 +282,8 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
           orderId,
           assignment.jobWorkId,
           assignment.quantity || 1,
-          assignment.pickupDate || now,
-          assignment.completionDate || null,
+          pickupDateMs,
+          completionDateMs,
           assignment.status || "pending",
           now,
           now,
