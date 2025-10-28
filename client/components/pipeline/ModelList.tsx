@@ -613,14 +613,20 @@ export default function ModelList(props: ModelListProps) {
 
                                       return (
                                         <div className="flex flex-col gap-0.5">
-                                          {allNames.map((name) => (
-                                            <div
-                                              key={name}
-                                              className="font-medium text-purple-700 dark:text-purple-300"
-                                            >
-                                              {name}
+                                          {allNames.length > 0 ? (
+                                            allNames.map((name) => (
+                                              <div
+                                                key={name}
+                                                className="font-medium text-purple-700 dark:text-purple-300"
+                                              >
+                                                {name}
+                                              </div>
+                                            ))
+                                          ) : (
+                                            <div className="font-medium text-purple-700 dark:text-purple-300">
+                                              Job Work
                                             </div>
-                                          ))}
+                                          )}
                                         </div>
                                       );
                                     }
