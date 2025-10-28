@@ -49,12 +49,20 @@ export default function JobWorkDetailsModal({
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const formatDate = (timestamp: number | undefined) => {
+    if (!timestamp || typeof timestamp !== "number" || timestamp <= 0)
+      return "—";
+    try {
+      const d = new Date(timestamp);
+      if (isNaN(d.getTime())) return "—";
+      return d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return "—";
+    }
   };
 
   const handleEditField = (
@@ -75,88 +83,132 @@ export default function JobWorkDetailsModal({
     }
   };
 
-  const handleSaveEditField = () => {
+  const handleSaveEditField = async () => {
     if (!editingField) return;
 
     const updated: JobWorkAssignment[] = assignments.map((a) => {
       if (a.jobWorkId !== editingField.jobWorkId) return a;
 
       if (editingField.field === "pickup") {
+        const pickupMs = new Date(editValue).getTime();
         return {
-          ...a,
-          pickupDate: new Date(editValue).getTime(),
+          jobWorkId: a.jobWorkId,
+          jobWorkName: a.jobWorkName,
+          quantity: a.quantity,
+          pickupDate: pickupMs,
+          completionDate: a.completionDate,
+          status: a.status,
         };
       } else if (editingField.field === "delivery") {
         // If delivery date is empty, revert to pending status
         if (!editValue) {
           return {
-            ...a,
+            jobWorkId: a.jobWorkId,
+            jobWorkName: a.jobWorkName,
+            quantity: a.quantity,
+            pickupDate: a.pickupDate,
             completionDate: undefined,
             status: "pending" as const,
           };
         }
+        const completionMs = new Date(editValue).getTime();
         return {
-          ...a,
-          completionDate: new Date(editValue).getTime(),
+          jobWorkId: a.jobWorkId,
+          jobWorkName: a.jobWorkName,
+          quantity: a.quantity,
+          pickupDate: a.pickupDate,
+          completionDate: completionMs,
           status: "completed" as const,
         };
       } else {
         return {
-          ...a,
+          jobWorkId: a.jobWorkId,
+          jobWorkName: a.jobWorkName,
           quantity: Math.max(0, Math.floor(Number(editValue) || 0)),
+          pickupDate: a.pickupDate,
+          completionDate: a.completionDate,
+          status: a.status,
         };
       }
     });
 
-    onUpdateAssignments(updated);
-    setEditingField(null);
+    try {
+      await onUpdateAssignments(updated);
+      setEditingField(null);
+    } catch (error) {
+      console.error("Failed to update field:", error);
+    }
   };
 
-  const handleCompleteAssignment = (jwId: string) => {
+  const handleCompleteAssignment = async (jwId: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const completionDate = today.getTime();
 
-    // Update local state first
+    // Find the assignment to validate it exists and has jobWorkId
+    const assignment = assignments.find((a) => a.jobWorkId === jwId);
+    if (!assignment || !assignment.jobWorkId) {
+      console.error("Assignment not found or invalid jobWorkId:", jwId);
+      return;
+    }
+
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
         ...a,
+        jobWorkId: a.jobWorkId,
+        jobWorkName: a.jobWorkName,
+        quantity: a.quantity,
+        pickupDate: a.pickupDate,
         completionDate,
         status: "completed" as const,
       };
     });
 
-    // Sync to server and call the completion handler
-    onUpdateAssignments(updated);
-    onComplete(jwId, completionDate);
+    try {
+      await onUpdateAssignments(updated);
+      await onComplete(jwId, completionDate);
+    } catch (error) {
+      console.error("Failed to complete assignment:", error);
+    }
   };
 
   const handleRemoveAssignment = (jwId: string) => {
     setDeletingId(jwId);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deletingId) return;
     const filtered = assignments.filter((a) => a.jobWorkId !== deletingId);
-    onUpdateAssignments(filtered);
-    setDeletingId(null);
+    try {
+      await onUpdateAssignments(filtered);
+      setDeletingId(null);
+    } catch (error) {
+      console.error("Failed to delete assignment:", error);
+    }
   };
 
   const handleCancelDelete = () => {
     setDeletingId(null);
   };
 
-  const handleNotComplete = (jwId: string) => {
+  const handleNotComplete = async (jwId: string) => {
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
-        ...a,
+        jobWorkId: a.jobWorkId,
+        jobWorkName: a.jobWorkName,
+        quantity: a.quantity,
+        pickupDate: a.pickupDate,
         completionDate: undefined,
         status: "pending" as const,
       };
     });
-    onUpdateAssignments(updated);
+    try {
+      await onUpdateAssignments(updated);
+    } catch (error) {
+      console.error("Failed to update assignment:", error);
+    }
   };
 
   const getJobWorkName = (jwId: string, storedName?: string) => {
@@ -174,23 +226,27 @@ export default function JobWorkDetailsModal({
     return jobWorks.filter((j) => !assignedIds.has(j.id));
   };
 
-  const handleAddJobWork = () => {
+  const handleAddJobWork = async () => {
     if (!newJobWorkId) return;
 
     const jobWork = jobWorks.find((j) => j.id === newJobWorkId);
     const newAssignment: JobWorkAssignment = {
       jobWorkId: newJobWorkId,
-      jobWorkName: jobWork?.name,
+      jobWorkName: jobWork?.name || "",
       quantity: Math.max(1, Math.floor(Number(newQuantity) || 1)),
       pickupDate: new Date(newPickupDate).getTime(),
       status: "pending",
     };
 
-    onUpdateAssignments([...assignments, newAssignment]);
-    setShowAddForm(false);
-    setNewJobWorkId("");
-    setNewQuantity("1");
-    setNewPickupDate(new Date().toISOString().split("T")[0]);
+    try {
+      await onUpdateAssignments([...assignments, newAssignment]);
+      setShowAddForm(false);
+      setNewJobWorkId("");
+      setNewQuantity("1");
+      setNewPickupDate(new Date().toISOString().split("T")[0]);
+    } catch (error) {
+      console.error("Failed to add job work:", error);
+    }
   };
 
   const pendingAssignments = assignments.filter((a) => a.status === "pending");
@@ -234,14 +290,14 @@ export default function JobWorkDetailsModal({
                       <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                         Job Work
                       </div>
-                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                      <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">
                         {getJobWorkName(
                           assignment.jobWorkId,
                           assignment.jobWorkName,
                         )}
-                        <span className="text-gray-600 dark:text-gray-400 ml-2">
-                          ({assignment.quantity})
-                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Qty: {assignment.quantity}
                       </div>
                     </div>
                     <Button
