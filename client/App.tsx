@@ -15,14 +15,11 @@ import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
 import Roadmap from "./pages/Roadmap";
 import ReStok from "./pages/ReStok";
-import { AppUpdateNotification } from "@/components/AppUpdateNotification";
-
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <AppUpdateNotification />
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Index />} />
