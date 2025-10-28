@@ -92,5 +92,13 @@ export function getMachineTypeConfig(
 
 // React hook for components
 export function useMachineTypes() {
-  return useSyncExternalStore(subscribe, getMachineTypes, getMachineTypes);
+  const state = useSyncExternalStore(subscribe, getMachineTypes, getMachineTypes);
+
+  useSSESubscription((event) => {
+    if (event.type === "machine_types_updated") {
+      fetchFromServer();
+    }
+  });
+
+  return state;
 }
