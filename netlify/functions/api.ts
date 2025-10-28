@@ -1,14 +1,12 @@
 import serverless from "serverless-http";
 import { createServer } from "../../server";
 
-let handler: ReturnType<typeof serverless> | null = null;
+let handler: any = null;
 
-export async function apiHandler(event: any, context: any) {
+export const handler = async (event: any, context: any) => {
   if (!handler) {
-    handler = serverless(createServer());
+    const app = createServer();
+    handler = serverless(app);
   }
   return handler(event, context);
-}
-
-// Export as the default handler
-exports.handler = apiHandler;
+};
