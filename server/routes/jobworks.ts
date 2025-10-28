@@ -31,6 +31,7 @@ export const createJobWork: RequestHandler = async (req, res) => {
       [id, name.trim(), description?.trim() || "", now, now],
     );
 
+    broadcastChange({ type: "jobworks_updated" });
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating job work:", error);
