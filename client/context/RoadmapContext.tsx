@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { useSSESubscription } from "@/hooks/useSSESubscription";
 
 export interface RoadmapItem {
@@ -63,7 +63,7 @@ export function useRoadmaps() {
   const createRoadmap = useCallback(
     async (title?: string) => {
       try {
-        const count = globalState.roadmaps.length + 1;
+        const count = STORE.length + 1;
         const roadmapId = uid("roadmap");
         const response = await fetch("/api/roadmaps", {
           method: "POST",
@@ -162,7 +162,7 @@ export function useRoadmaps() {
   const moveModelWithinRoadmap = useCallback(
     async (roadmapId: string, modelId: string, toIndex: number) => {
       try {
-        const roadmap = globalState.roadmaps.find((r) => r.id === roadmapId);
+        const roadmap = STORE.find((r) => r.id === roadmapId);
         if (!roadmap) return;
 
         const items = roadmap.items;
@@ -219,9 +219,7 @@ export function useRoadmaps() {
   );
 
   return {
-    roadmaps: state.roadmaps,
-    loading: state.loading,
-    error: state.error,
+    roadmaps: state,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
