@@ -252,6 +252,7 @@ export default function RoadmapPage() {
         )}
 
         {/* Roadmaps Grid */}
+        {!loading && roadmaps.length > 0 && (
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {roadmaps.map((r) => (
@@ -439,6 +440,7 @@ export default function RoadmapPage() {
             ))}
           </div>
         </div>
+        )}
       </div>
 
       {/* Add Models Modal */}
