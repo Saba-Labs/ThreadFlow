@@ -65,6 +65,11 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Real-time sync endpoint
+  app.get("/api/subscribe", (_req, res) => {
+    subscribeToChanges(res);
+  });
+
   // ReStok routes
   app.get("/api/restok/items", getRestokItems);
   app.post("/api/restok/items", createRestokItem);
