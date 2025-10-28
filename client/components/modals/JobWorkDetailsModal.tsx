@@ -121,22 +121,37 @@ export default function JobWorkDetailsModal({
     setEditingField(null);
   };
 
-  const handleCompleteAssignment = (jwId: string) => {
+  const handleCompleteAssignment = async (jwId: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const completionDate = today.getTime();
+
+    // Find the assignment to validate it exists and has jobWorkId
+    const assignment = assignments.find((a) => a.jobWorkId === jwId);
+    if (!assignment || !assignment.jobWorkId) {
+      console.error("Assignment not found or invalid jobWorkId:", jwId);
+      return;
+    }
 
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
         ...a,
+        jobWorkId: a.jobWorkId,
+        jobWorkName: a.jobWorkName,
+        quantity: a.quantity,
+        pickupDate: a.pickupDate,
         completionDate,
         status: "completed" as const,
       };
     });
 
-    onUpdateAssignments(updated);
-    onComplete(jwId, completionDate);
+    try {
+      await onUpdateAssignments(updated);
+      await onComplete(jwId, completionDate);
+    } catch (error) {
+      console.error("Failed to complete assignment:", error);
+    }
   };
 
   const handleRemoveAssignment = (jwId: string) => {
