@@ -1,4 +1,5 @@
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef, useSyncExternalStore } from "react";
+import { useSSESubscription } from "@/hooks/useSSESubscription";
 
 export interface RoadmapItem {
   modelId: string;
@@ -14,82 +15,50 @@ export interface Roadmap {
   items: RoadmapItem[];
 }
 
-interface RoadmapState {
-  roadmaps: Roadmap[];
-  loading: boolean;
-  error: string | null;
-}
-
 function uid(prefix = "rdm") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-let globalState: RoadmapState = {
-  roadmaps: [],
-  loading: true,
-  error: null,
-};
+let STORE: Roadmap[] = [];
+let isLoading = false;
 
 const subscribers = new Set<() => void>();
-let pollInterval: NodeJS.Timeout | null = null;
-
-function notifySubscribers() {
-  for (const s of Array.from(subscribers)) s();
-}
 
 async function fetchRoadmaps() {
+  if (isLoading) return;
+  isLoading = true;
   try {
-    globalState.loading = true;
-    globalState.error = null;
     const response = await fetch("/api/roadmaps");
     if (!response.ok) throw new Error("Failed to fetch roadmaps");
-    globalState.roadmaps = await response.json();
+    STORE = await response.json();
+    for (const s of Array.from(subscribers)) s();
   } catch (error) {
-    globalState.error = String(error);
     console.error("Error fetching roadmaps:", error);
   } finally {
-    globalState.loading = false;
-    notifySubscribers();
+    isLoading = false;
   }
+}
+
+function getRoadmaps() {
+  return STORE;
 }
 
 function subscribe(cb: () => void) {
   subscribers.add(cb);
+  if (STORE.length === 0) {
+    fetchRoadmaps();
+  }
   return () => subscribers.delete(cb);
 }
 
-function startPolling() {
-  if (pollInterval) return;
-  fetchRoadmaps();
-  pollInterval = setInterval(() => {
-    fetchRoadmaps();
-  }, 5000);
-}
-
-function stopPolling() {
-  if (pollInterval) {
-    clearInterval(pollInterval);
-    pollInterval = null;
-  }
-}
-
 export function useRoadmaps() {
-  const [state, setState] = useState<RoadmapState>(globalState);
-  const hasInitialized = useRef(false);
+  const state = useSyncExternalStore(subscribe, getRoadmaps, getRoadmaps);
 
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      startPolling();
+  useSSESubscription((event) => {
+    if (event.type === "roadmaps_updated") {
+      fetchRoadmaps();
     }
-
-    setState(globalState);
-    const unsub = subscribe(() => {
-      setState({ ...globalState });
-    });
-
-    return unsub;
-  }, []);
+  });
 
   const createRoadmap = useCallback(
     async (title?: string) => {
