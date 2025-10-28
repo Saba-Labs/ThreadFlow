@@ -133,6 +133,7 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
       }
     }
 
+    broadcastChange({ type: "restok_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating restok item:", error);
