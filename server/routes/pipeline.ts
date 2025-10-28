@@ -152,6 +152,7 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
       }
     }
 
+    broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating work order:", error);
