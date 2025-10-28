@@ -159,10 +159,13 @@ export default function JobWorkDetailsModal({
     onUpdateAssignments(updated);
   };
 
-  const getJobWorkName = (jwId: string) => {
+  const getJobWorkName = (jwId: string, storedName?: string) => {
+    // First try the stored name from the assignment
+    if (storedName) return storedName;
+    // Then try to find it in the job works list
     const found = jobWorks.find((j) => j.id === jwId);
     if (found) return found.name;
-    // If job work not found, show ID as fallback (better than "Unknown")
+    // Fallback to showing the ID
     return jwId;
   };
 
