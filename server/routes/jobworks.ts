@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { query } from "../db";
+import { broadcastChange } from "../events";
 
 export const getJobWorks: RequestHandler = async (req, res) => {
   try {
