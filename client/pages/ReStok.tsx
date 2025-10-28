@@ -34,12 +34,8 @@ export default function ReStok() {
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
-  // Load data from API
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const fetchItems = async () => {
+  // Define fetchItems before using it in useEffect and SSE subscription
+  const fetchItems = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch("/api/restok/items");
@@ -51,7 +47,19 @@ export default function ReStok() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Load data from API on mount
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  // Subscribe to real-time updates
+  useSSESubscription((event) => {
+    if (event.type === "restok_updated") {
+      fetchItems();
+    }
+  });
 
   const getStockStatus = (quantity: number, lowStock: number) => {
     if (quantity === 0) return "out-of-stock";
