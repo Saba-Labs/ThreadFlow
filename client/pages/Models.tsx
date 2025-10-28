@@ -1,12 +1,43 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import ModelList from "@/components/pipeline/ModelList";
 import MachineBoard from "@/components/pipeline/MachineBoard";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
+import { toast } from "@/hooks/use-toast";
 
 export default function Models() {
   const { view } = useParams();
   const pipeline = useProductionPipeline();
+
+  const handleMoveNext = useCallback(
+    async (id: string) => {
+      try {
+        await pipeline.moveToNextStep(id);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to move to next step",
+          variant: "destructive",
+        });
+      }
+    },
+    [pipeline],
+  );
+
+  const handleMovePrev = useCallback(
+    async (id: string) => {
+      try {
+        await pipeline.moveToPrevStep(id);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to move to previous step",
+          variant: "destructive",
+        });
+      }
+    },
+    [pipeline],
+  );
 
   const filter = view ?? "all";
 
