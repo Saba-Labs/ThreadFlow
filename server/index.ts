@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { initializeDatabase } from "./db";
+import { subscribeToChanges } from "./events";
 import {
   getRestokItems,
   createRestokItem,
