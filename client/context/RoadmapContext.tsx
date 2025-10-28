@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 
 export interface RoadmapItem {
   modelId: string;
@@ -31,6 +31,7 @@ let globalState: RoadmapState = {
 };
 
 const subscribers = new Set<() => void>();
+let pollInterval: NodeJS.Timeout | null = null;
 
 function notifySubscribers() {
   for (const s of Array.from(subscribers)) s();
@@ -57,29 +58,36 @@ function subscribe(cb: () => void) {
   return () => subscribers.delete(cb);
 }
 
-// Initial fetch
-fetchRoadmaps();
-
-// Set up polling for changes
-const pollInterval = setInterval(() => {
+function startPolling() {
+  if (pollInterval) return;
   fetchRoadmaps();
-}, 5000);
+  pollInterval = setInterval(() => {
+    fetchRoadmaps();
+  }, 5000);
+}
 
-// Clean up interval on module unload
-if (typeof window !== "undefined") {
-  window.addEventListener("beforeunload", () => {
+function stopPolling() {
+  if (pollInterval) {
     clearInterval(pollInterval);
-  });
+    pollInterval = null;
+  }
 }
 
 export function useRoadmaps() {
   const [state, setState] = useState<RoadmapState>(globalState);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      startPolling();
+    }
+
     setState(globalState);
     const unsub = subscribe(() => {
       setState({ ...globalState });
     });
+
     return unsub;
   }, []);
 
