@@ -74,6 +74,7 @@ export const deleteJobWork: RequestHandler = async (req, res) => {
     ]);
     await query("DELETE FROM job_works WHERE id = $1", [id]);
 
+    broadcastChange({ type: "jobworks_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting job work:", error);
