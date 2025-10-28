@@ -18,14 +18,6 @@ import { useSearch } from "@/context/SearchContext";
 export default function JobWork() {
   const list = useJobWorks();
   const pipeline = useProductionPipeline();
-
-  useEffect(() => {
-    console.log("Pipeline orders:", pipeline.orders);
-    if (pipeline.orders.length > 0) {
-      console.log("First order jobWorkAssignments:", pipeline.orders[0].jobWorkAssignments);
-    }
-  }, [pipeline.orders]);
-
   useSwipeNavigation({
     leftPage: "/models/all",
     rightPage: "/models/all",
