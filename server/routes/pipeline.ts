@@ -112,10 +112,15 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
     const { id, modelName, quantity, createdAt, steps } = req.body;
 
     if (!id || !modelName || quantity === undefined || quantity === null) {
+      console.error("Validation failed for createWorkOrder:", {
+        received: { id, modelName, quantity, createdAt, steps: steps ? `${steps.length} steps` : 'none' },
+        body: req.body
+      });
       return res
         .status(400)
         .json({
           error: "Missing required fields: id, modelName, and quantity",
+          received: { id, modelName, quantity }
         });
     }
 
