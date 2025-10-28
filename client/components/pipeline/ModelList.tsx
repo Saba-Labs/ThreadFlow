@@ -601,8 +601,8 @@ export default function ModelList(props: ModelListProps) {
                                       );
 
                                     if (hasPendingJW) {
-                                      const pendingAssignments = (o.jobWorkAssignments || []).filter((a) => a.status === "pending");
-                                      const assignmentNames = pendingAssignments.map((a) => a.jobWorkName).filter(Boolean);
+                                      const allAssignments = (o.jobWorkAssignments || []);
+                                      const assignmentNames = allAssignments.map((a) => a.jobWorkName).filter(Boolean);
 
                                       const jobWorkIdNames = ((o as any).jobWorkIds || []).map((id: string) => {
                                         const jw = jobWorks.find((j) => j.id === id);
