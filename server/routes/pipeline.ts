@@ -232,7 +232,7 @@ export const updateStepStatus: RequestHandler = async (req, res) => {
     const now = Date.now();
 
     await query(
-      `UPDATE path_steps 
+      `UPDATE path_steps
        SET status = COALESCE($1, status), active_machines = COALESCE($2, active_machines), quantity_done = COALESCE($3, quantity_done), updated_at = $4
        WHERE order_id = $5 AND step_index = $6`,
       [
@@ -250,5 +250,87 @@ export const updateStepStatus: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error updating step status:", error);
     res.status(500).json({ error: "Failed to update step" });
+  }
+};
+
+export const setJobWorkAssignments: RequestHandler = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { assignments } = req.body;
+
+    if (!Array.isArray(assignments)) {
+      return res
+        .status(400)
+        .json({ error: "Assignments must be an array" });
+    }
+
+    const now = Date.now();
+
+    await query("DELETE FROM job_work_assignments WHERE order_id = $1", [
+      orderId,
+    ]);
+
+    for (const assignment of assignments) {
+      const id = `jwa_${Math.random().toString(36).slice(2, 9)}`;
+      await query(
+        "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+        [
+          id,
+          orderId,
+          assignment.jobWorkId,
+          assignment.quantity || 1,
+          assignment.pickupDate || now,
+          assignment.completionDate || null,
+          assignment.status || "pending",
+          now,
+          now,
+        ],
+      );
+    }
+
+    broadcastChange({ type: "pipeline_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error setting job work assignments:", error);
+    res.status(500).json({ error: "Failed to set job work assignments" });
+  }
+};
+
+export const updateJobWorkAssignmentStatus: RequestHandler = async (
+  req,
+  res,
+) => {
+  try {
+    const { orderId, jobWorkId } = req.params;
+    const { status, completionDate } = req.body;
+    const now = Date.now();
+
+    const result = await query(
+      "SELECT id FROM job_work_assignments WHERE order_id = $1 AND job_work_id = $2",
+      [orderId, jobWorkId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Assignment not found" });
+    }
+
+    await query(
+      "UPDATE job_work_assignments SET status = $1, completion_date = $2, updated_at = $3 WHERE order_id = $4 AND job_work_id = $5",
+      [
+        status,
+        status === "completed" ? (completionDate || now) : null,
+        now,
+        orderId,
+        jobWorkId,
+      ],
+    );
+
+    broadcastChange({ type: "pipeline_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating job work assignment status:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to update job work assignment status" });
   }
 };
