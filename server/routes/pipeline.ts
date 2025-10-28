@@ -258,7 +258,15 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
     const { orderId } = req.params;
     const { assignments } = req.body;
 
+    console.log("setJobWorkAssignments called", {
+      orderId,
+      assignmentsReceived: Array.isArray(assignments),
+      count: Array.isArray(assignments) ? assignments.length : 0,
+      assignments,
+    });
+
     if (!Array.isArray(assignments)) {
+      console.error("Assignments is not an array:", typeof assignments);
       return res.status(400).json({ error: "Assignments must be an array" });
     }
 
@@ -267,9 +275,19 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
     await query("DELETE FROM job_work_assignments WHERE order_id = $1", [
       orderId,
     ]);
+    console.log("Deleted existing assignments for order:", orderId);
 
     for (const assignment of assignments) {
       const id = `jwa_${Math.random().toString(36).slice(2, 9)}`;
+      console.log("Inserting assignment:", {
+        id,
+        orderId,
+        jobWorkId: assignment.jobWorkId,
+        quantity: assignment.quantity || 1,
+        pickupDate: assignment.pickupDate || now,
+        status: assignment.status || "pending",
+      });
+
       await query(
         "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
         [
@@ -286,6 +304,7 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
       );
     }
 
+    console.log("Assignments inserted successfully for order:", orderId);
     broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true });
   } catch (error) {
