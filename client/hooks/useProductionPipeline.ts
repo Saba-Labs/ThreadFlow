@@ -94,6 +94,12 @@ export function useProductionPipeline() {
     () => STORE,
   );
 
+  useSSESubscription((event) => {
+    if (event.type === "pipeline_updated") {
+      fetchFromServer();
+    }
+  });
+
   const createWorkOrder = useCallback(
     async (input: {
       modelName: string;
