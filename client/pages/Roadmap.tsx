@@ -198,22 +198,8 @@ export default function RoadmapPage() {
           )}
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 sm:p-16 text-center shadow-sm">
-              <div className="flex flex-col items-center">
-                <div className="h-12 w-12 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin mb-4" />
-                <p className="text-sm text-slate-600">
-                  Loading roadmaps...
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Empty State */}
-        {!loading && roadmaps.length === 0 && (
+        {roadmaps.length === 0 && (
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
               <div className="flex flex-col items-center">
