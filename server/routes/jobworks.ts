@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { query } from "../db";
+import { broadcastChange } from "../events";
 
 export const getJobWorks: RequestHandler = async (req, res) => {
   try {
@@ -30,6 +31,7 @@ export const createJobWork: RequestHandler = async (req, res) => {
       [id, name.trim(), description?.trim() || "", now, now],
     );
 
+    broadcastChange({ type: "jobworks_updated" });
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating job work:", error);
@@ -55,6 +57,7 @@ export const updateJobWork: RequestHandler = async (req, res) => {
       [String(name).trim(), description || "", now, id],
     );
 
+    broadcastChange({ type: "jobworks_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating job work:", error);
@@ -71,6 +74,7 @@ export const deleteJobWork: RequestHandler = async (req, res) => {
     ]);
     await query("DELETE FROM job_works WHERE id = $1", [id]);
 
+    broadcastChange({ type: "jobworks_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting job work:", error);

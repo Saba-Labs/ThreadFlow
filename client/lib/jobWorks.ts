@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { useSSESubscription } from "@/hooks/useSSESubscription";
 
 export interface JobWork {
   id: string;
@@ -96,5 +97,13 @@ export function subscribe(cb: () => void) {
 }
 
 export function useJobWorks() {
-  return useSyncExternalStore(subscribe, getJobWorks, getJobWorks);
+  const state = useSyncExternalStore(subscribe, getJobWorks, getJobWorks);
+
+  useSSESubscription((event) => {
+    if (event.type === "jobworks_updated") {
+      fetchFromServer();
+    }
+  });
+
+  return state;
 }

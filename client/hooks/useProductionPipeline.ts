@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useSyncExternalStore, useEffect } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
+import { useSSESubscription } from "./useSSESubscription";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
@@ -92,6 +93,12 @@ export function useProductionPipeline() {
     () => STORE,
     () => STORE,
   );
+
+  useSSESubscription((event) => {
+    if (event.type === "pipeline_updated") {
+      fetchFromServer();
+    }
+  });
 
   const createWorkOrder = useCallback(
     async (input: {

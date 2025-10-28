@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { query } from "../db";
+import { broadcastChange } from "../events";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
@@ -112,11 +113,9 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
     const { id, modelName, quantity, createdAt, steps } = req.body;
 
     if (!id || !modelName || quantity === undefined || quantity === null) {
-      return res
-        .status(400)
-        .json({
-          error: "Missing required fields: id, modelName, and quantity",
-        });
+      return res.status(400).json({
+        error: "Missing required fields: id, modelName, and quantity",
+      });
     }
 
     const now = Date.now();
@@ -151,6 +150,7 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
       }
     }
 
+    broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating work order:", error);
@@ -166,7 +166,13 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
 
     await query(
       "UPDATE work_orders SET model_name = COALESCE($1, model_name), quantity = COALESCE($2, quantity), current_step_index = COALESCE($3, current_step_index), updated_at = $4 WHERE id = $5",
-      [modelName || null, quantity || null, currentStepIndex !== undefined ? currentStepIndex : null, now, id],
+      [
+        modelName || null,
+        quantity || null,
+        currentStepIndex !== undefined ? currentStepIndex : null,
+        now,
+        id,
+      ],
     );
 
     // Update steps only if provided
@@ -195,6 +201,7 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
       }
     }
 
+    broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating work order:", error);
@@ -210,6 +217,7 @@ export const deleteWorkOrder: RequestHandler = async (req, res) => {
     await query("DELETE FROM path_steps WHERE order_id = $1", [id]);
     await query("DELETE FROM work_orders WHERE id = $1", [id]);
 
+    broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting work order:", error);
@@ -237,6 +245,7 @@ export const updateStepStatus: RequestHandler = async (req, res) => {
       ],
     );
 
+    broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating step status:", error);

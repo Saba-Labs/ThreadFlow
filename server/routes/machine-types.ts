@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { query } from "../db";
+import { broadcastChange } from "../events";
 
 export interface MachineTypeConfig {
   name: string;
@@ -35,6 +36,7 @@ export const setMachineTypes: RequestHandler = async (req, res) => {
       );
     }
 
+    broadcastChange({ type: "machine_types_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error setting machine types:", error);

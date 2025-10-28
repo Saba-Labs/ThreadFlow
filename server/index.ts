@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { initializeDatabase } from "./db";
+import { subscribeToChanges } from "./events";
 import {
   getRestokItems,
   createRestokItem,
@@ -29,10 +30,24 @@ let dbInitialized = false;
 export function createServer() {
   const app = express();
 
-  // Middleware
+  // Middleware - MUST be first
   app.use(cors());
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.text({ limit: "50mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
+  // Ensure body is parsed for serverless environments
+  app.use((req: any, res, next) => {
+    // If body is a string and looks like JSON, parse it
+    if (typeof req.body === "string") {
+      try {
+        req.body = JSON.parse(req.body);
+      } catch (e) {
+        // Leave as string if not JSON
+      }
+    }
+    next();
+  });
 
   // Initialize database once
   if (!dbInitialized) {
@@ -49,6 +64,11 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Real-time sync endpoint
+  app.get("/api/subscribe", (_req, res) => {
+    subscribeToChanges(res);
+  });
 
   // ReStok routes
   app.get("/api/restok/items", getRestokItems);
