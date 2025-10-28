@@ -61,10 +61,10 @@ function initializeHandler() {
   app.delete("/api/restok/:id", deleteRestokItem);
 
   // Job works routes
-  app.get("/api/job-works", getJobWorks);
-  app.post("/api/job-works", createJobWork);
-  app.put("/api/job-works/:id", updateJobWork);
-  app.delete("/api/job-works/:id", deleteJobWork);
+  app.get("/api/jobworks", getJobWorks);
+  app.post("/api/jobworks", createJobWork);
+  app.put("/api/jobworks/:id", updateJobWork);
+  app.delete("/api/jobworks/:id", deleteJobWork);
 
   // Machine types routes
   app.get("/api/machine-types", getMachineTypes);
