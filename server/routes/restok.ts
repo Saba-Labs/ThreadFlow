@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { query } from "../db";
+import { broadcastChange } from "../events";
 
 interface SubItem {
   id: string;
