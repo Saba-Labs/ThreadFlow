@@ -338,7 +338,7 @@ export default function RoadmapPage() {
                     <div className="space-y-2">
                       {r.items.map((it, idx) => (
                         <div
-                          key={it.id || `${r.id}-${it.modelId}-${idx}`}
+                          key={`${r.id}-${it.modelId}-${idx}`}
                           className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
                         >
                           <div className="flex-1 min-w-0">

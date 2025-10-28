@@ -25,9 +25,9 @@ export default function EditModel() {
     createdAt: order.createdAt,
     path: order.steps.map((st) =>
       st.kind === "machine"
-        ? { kind: "machine", machineType: st.machineType! }
+        ? { kind: "machine" as const, machineType: st.machineType! }
         : {
-            kind: "job",
+            kind: "job" as const,
             externalUnitName: st.externalUnitName || "Job Work Unit",
           },
     ),
