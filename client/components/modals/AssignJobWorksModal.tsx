@@ -6,6 +6,7 @@ import SimpleModal from "@/components/ui/SimpleModal";
 import { useJobWorks } from "@/lib/jobWorks";
 import type { JobWorkAssignment } from "@/hooks/useProductionPipeline";
 import { Calendar } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface AssignJobWorksModalProps {
   open: boolean;
