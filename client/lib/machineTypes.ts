@@ -1,4 +1,5 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, useEffect } from "react";
+import { useSSESubscription } from "@/hooks/useSSESubscription";
 
 export interface MachineTypeConfig {
   name: string;
