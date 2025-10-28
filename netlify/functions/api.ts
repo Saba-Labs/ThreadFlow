@@ -7,18 +7,20 @@ let cachedHandler: any = null;
 function initializeHandler() {
   const app = createServer();
 
-  // Add explicit body parsing middleware with larger limit for serverless
+  // Parse body BEFORE serverless-http wraps the app
   app.use(express.json({ limit: "50mb" }));
+  app.use(express.text({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-  // Add request logging middleware for debugging
-  app.use((req, res, next) => {
-    console.log("Request:", {
-      method: req.method,
-      path: req.path,
-      contentType: req.headers["content-type"],
-      bodyLength: JSON.stringify(req.body).length,
-    });
+  // Manual body parsing for serverless environments
+  app.use((req: any, res, next) => {
+    if (!req.body && req.rawBody) {
+      try {
+        req.body = JSON.parse(typeof req.rawBody === "string" ? req.rawBody : Buffer.from(req.rawBody).toString());
+      } catch (e) {
+        console.error("Failed to parse rawBody:", e);
+      }
+    }
     next();
   });
 
