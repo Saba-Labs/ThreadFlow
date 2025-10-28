@@ -148,6 +148,7 @@ export const deleteRestokItem: RequestHandler = async (req, res) => {
     await query("DELETE FROM restok_sub_items WHERE item_id = $1", [id]);
     await query("DELETE FROM restok_items WHERE id = $1", [id]);
 
+    broadcastChange({ type: "restok_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting restok item:", error);
