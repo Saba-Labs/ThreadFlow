@@ -69,21 +69,18 @@ export default function AssignJobWorksModal({
 
     const assignments: JobWorkAssignment[] = selectedIds.map((jwId) => {
       const jobWork = jobWorks.find((j) => j.id === jwId);
+      const pickupDateMs = new Date(pickupDate).getTime();
       return {
         jobWorkId: jwId,
-        jobWorkName: jobWork?.name,
+        jobWorkName: jobWork?.name || "",
         quantity: quantitiesAfterSplit[jwId] || 0,
-        pickupDate: new Date(pickupDate).getTime(),
+        pickupDate: pickupDateMs,
         status: "pending",
       };
     });
 
     try {
       await onAssign(assignments);
-      toast({
-        title: "Success",
-        description: "Job works assigned successfully",
-      });
       handleClose();
     } catch (error) {
       toast({
