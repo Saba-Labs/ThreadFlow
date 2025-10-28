@@ -975,9 +975,17 @@ export default function ModelList(props: ModelListProps) {
                                   <div className="flex flex-col items-end gap-0.5 text-sm">
                                     {(() => {
                                       const pendingAssignments = (o.jobWorkAssignments || []).filter((a) => a.status === "pending");
-                                      const uniqueNames = Array.from(new Set(pendingAssignments.map((a) => a.jobWorkName).filter(Boolean)));
-                                      return uniqueNames.length > 0 ? (
-                                        uniqueNames.map((name) => (
+                                      const assignmentNames = pendingAssignments.map((a) => a.jobWorkName).filter(Boolean);
+
+                                      const jobWorkIdNames = ((o as any).jobWorkIds || []).map((id: string) => {
+                                        const jw = jobWorks.find((j) => j.id === id);
+                                        return jw?.name;
+                                      }).filter(Boolean);
+
+                                      const allNames = Array.from(new Set([...assignmentNames, ...jobWorkIdNames]));
+
+                                      return allNames.length > 0 ? (
+                                        allNames.map((name) => (
                                           <span
                                             key={name}
                                             className="font-medium text-purple-700 dark:text-purple-300"
