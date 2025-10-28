@@ -334,11 +334,13 @@ export const updateJobWorkAssignmentStatus: RequestHandler = async (
       });
     }
 
+    const completionDateMs = completionDate ? (typeof completionDate === "number" ? completionDate : new Date(completionDate).getTime()) : now;
+
     const updateResult = await query(
       "UPDATE job_work_assignments SET status = $1, completion_date = $2, updated_at = $3 WHERE order_id = $4 AND job_work_id = $5",
       [
         status,
-        status === "completed" ? completionDate || now : null,
+        status === "completed" ? completionDateMs : null,
         now,
         orderId,
         jobWorkId,
