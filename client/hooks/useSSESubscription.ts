@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 
 type DataChangeCallback = (event: {
-  type: "pipeline_updated" | "jobworks_updated" | "machine_types_updated";
+  type:
+    | "pipeline_updated"
+    | "jobworks_updated"
+    | "machine_types_updated"
+    | "restok_updated";
 }) => void;
 
 export function useSSESubscription(onDataChange: DataChangeCallback) {
@@ -33,7 +37,8 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
             if (
               data.type === "pipeline_updated" ||
               data.type === "jobworks_updated" ||
-              data.type === "machine_types_updated"
+              data.type === "machine_types_updated" ||
+              data.type === "restok_updated"
             ) {
               callbackRef.current(data);
             }

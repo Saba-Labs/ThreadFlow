@@ -65,7 +65,7 @@ export async function initializeDatabase() {
 
       CREATE TABLE IF NOT EXISTS path_steps (
         id TEXT PRIMARY KEY,
-        order_id TEXT NOT NULL,
+        order_id TEXT NOT NULL REFERENCES work_orders(id) ON DELETE CASCADE,
         kind TEXT NOT NULL,
         machine_type TEXT,
         external_unit_name TEXT,

@@ -240,7 +240,7 @@ export function useProductionPipeline() {
   const moveToNextStep = useCallback(
     async (orderId: string) => {
       const order = state.orders.find((o) => o.id === orderId);
-      if (!order) return;
+      if (!order) throw new Error("Order not found");
 
       const idx = order.currentStepIndex;
       const steps = order.steps.slice();
@@ -261,7 +261,12 @@ export function useProductionPipeline() {
               steps,
             }),
           });
-          if (!response.ok) throw new Error("Failed to move to next step");
+          if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(
+              `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+            );
+          }
           setStore((s) => ({
             orders: s.orders.map((o) =>
               o.id === orderId
@@ -271,6 +276,7 @@ export function useProductionPipeline() {
           }));
         } catch (error) {
           console.error("Failed to move to next step:", error);
+          throw error;
         }
         return;
       }
@@ -300,7 +306,12 @@ export function useProductionPipeline() {
             steps,
           }),
         });
-        if (!response.ok) throw new Error("Failed to move to next step");
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(
+            `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+          );
+        }
         setStore((s) => ({
           orders: s.orders.map((o) =>
             o.id === orderId ? { ...o, steps, currentStepIndex: nextIndex } : o,
@@ -308,6 +319,7 @@ export function useProductionPipeline() {
         }));
       } catch (error) {
         console.error("Failed to move to next step:", error);
+        throw error;
       }
     },
     [state.orders],
@@ -316,7 +328,7 @@ export function useProductionPipeline() {
   const moveToPrevStep = useCallback(
     async (orderId: string) => {
       const order = state.orders.find((o) => o.id === orderId);
-      if (!order) return;
+      if (!order) throw new Error("Order not found");
 
       const idx = order.currentStepIndex;
 
@@ -332,7 +344,12 @@ export function useProductionPipeline() {
               steps: order.steps,
             }),
           });
-          if (!response.ok) throw new Error("Failed to move to prev step");
+          if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(
+              `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+            );
+          }
           setStore((s) => ({
             orders: s.orders.map((o) =>
               o.id === orderId ? { ...o, currentStepIndex: -1 } : o,
@@ -340,6 +357,7 @@ export function useProductionPipeline() {
           }));
         } catch (error) {
           console.error("Failed to move to prev step:", error);
+          throw error;
         }
         return;
       }
@@ -372,7 +390,12 @@ export function useProductionPipeline() {
             steps,
           }),
         });
-        if (!response.ok) throw new Error("Failed to move to prev step");
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(
+            `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+          );
+        }
         setStore((s) => ({
           orders: s.orders.map((o) =>
             o.id === orderId ? { ...o, steps, currentStepIndex: target } : o,
@@ -380,6 +403,7 @@ export function useProductionPipeline() {
         }));
       } catch (error) {
         console.error("Failed to move to prev step:", error);
+        throw error;
       }
     },
     [state.orders],

@@ -4,9 +4,29 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Layers, Play, Pause, Briefcase } from "lucide-react";
 import MachineBoard from "@/components/pipeline/MachineBoard";
+import { useCallback } from "react";
+import { toast } from "@/hooks/use-toast";
 
 export default function Index() {
   const pipeline = useProductionPipeline();
+
+  const handleMoveNext = useCallback(
+    async (id: string) => {
+      try {
+        await pipeline.moveToNextStep(id);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Failed to move to next step",
+          variant: "destructive",
+        });
+      }
+    },
+    [pipeline],
+  );
 
   const total = pipeline.orders.length;
   const running = pipeline.orders.filter((o) => {
@@ -145,7 +165,7 @@ export default function Index() {
               status: "hold",
             });
           }}
-          onNext={(o) => pipeline.moveToNextStep(o.id)}
+          onNext={(o) => handleMoveNext(o.id)}
         />
       </section>
     </div>
