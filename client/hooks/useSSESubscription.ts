@@ -39,7 +39,8 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
               data.type === "pipeline_updated" ||
               data.type === "jobworks_updated" ||
               data.type === "machine_types_updated" ||
-              data.type === "restok_updated"
+              data.type === "restok_updated" ||
+              data.type === "roadmaps_updated"
             ) {
               callbackRef.current(data);
             }
