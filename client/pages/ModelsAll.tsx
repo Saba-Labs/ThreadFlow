@@ -11,13 +11,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Eye, EyeOff, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSearch } from "@/context/SearchContext";
+import { toast } from "@/hooks/use-toast";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
+
+  const handleMoveNext = useCallback(
+    async (id: string) => {
+      try {
+        await pipeline.moveToNextStep(id);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to move to next step",
+          variant: "destructive",
+        });
+      }
+    },
+    [pipeline],
+  );
+
+  const handleMovePrev = useCallback(
+    async (id: string) => {
+      try {
+        await pipeline.moveToPrevStep(id);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to move to previous step",
+          variant: "destructive",
+        });
+      }
+    },
+    [pipeline],
+  );
   useSwipeNavigation({
     leftPage: "/job-work",
     rightPage: "/job-work",
@@ -179,8 +210,8 @@ export default function ModelsAll() {
         <ModelList
           orders={visible}
           onDelete={pipeline.deleteOrder}
-          onNext={(id) => pipeline.moveToNextStep(id)}
-          onPrev={(id) => pipeline.moveToPrevStep(id)}
+          onNext={handleMoveNext}
+          onPrev={handleMovePrev}
           onEditPath={pipeline.editPath}
           onSplit={pipeline.splitOrder}
           onSetStepStatus={(id, idx, status) =>
