@@ -226,193 +226,195 @@ export default function RoadmapPage() {
 
         {/* Roadmaps Grid */}
         {roadmaps.length > 0 && (
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {roadmaps.map((r) => (
-              <Card
-                key={r.id}
-                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
-                  {editingTitleId === r.id ? (
-                    <div className="flex items-center gap-2 w-full">
-                      <Input
-                        value={titleDraft}
-                        onChange={(e) => setTitleDraft(e.target.value)}
-                        className="bg-white text-black h-10 flex-1"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleSaveTitle(r.id);
-                          }
-                        }}
-                      />
-                      <Button
-                        size="sm"
-                        onClick={() => handleSaveTitle(r.id)}
-                        variant="secondary"
-                        className="h-10"
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditingTitleId(null)}
-                        className="h-10"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
-                          {r.title.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
-                            {r.title}
-                          </CardTitle>
-                          <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
-                            {r.items.length} model
-                            {r.items.length !== 1 ? "s" : ""}
-                          </p>
-                        </div>
-                      </div>
-
-                      {!isShared && (
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => openAddModels(r.id)}
-                            className="h-9 text-xs sm:text-sm"
-                          >
-                            <Plus className="h-3.5 w-3.5 mr-1.5" />
-                            <span className="hidden sm:inline">Add Models</span>
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingTitleId(r.id);
-                              setTitleDraft(r.title);
-                            }}
-                            className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            onClick={() => setDeleteConfirmId(r.id)}
-                            className="h-9 w-9 bg-red-600 hover:bg-red-700"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardHeader>
-
-                <CardContent className="p-4 sm:p-6">
-                  {r.items.length === 0 ? (
-                    <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
-                      <div className="text-sm text-slate-600 mb-3">
-                        No models added yet
-                      </div>
-                      {!isShared && (
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+              {roadmaps.map((r) => (
+                <Card
+                  key={r.id}
+                  className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
+                    {editingTitleId === r.id ? (
+                      <div className="flex items-center gap-2 w-full">
+                        <Input
+                          value={titleDraft}
+                          onChange={(e) => setTitleDraft(e.target.value)}
+                          className="bg-white text-black h-10 flex-1"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSaveTitle(r.id);
+                            }
+                          }}
+                        />
                         <Button
                           size="sm"
-                          onClick={() => openAddModels(r.id)}
-                          className="h-9 bg-blue-600 hover:bg-blue-700"
+                          onClick={() => handleSaveTitle(r.id)}
+                          variant="secondary"
+                          className="h-10"
                         >
-                          <Plus className="h-3.5 w-3.5 mr-2" />
-                          Add Models
+                          <Check className="h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {r.items.map((it, idx) => (
-                        <div
-                          key={`${r.id}-${it.modelId}-${idx}`}
-                          className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingTitleId(null)}
+                          className="h-10"
                         >
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
-                              {it.modelName} ({it.quantity})
-                            </div>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                            {r.title.charAt(0).toUpperCase()}
                           </div>
-
-                          {!isShared && (
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() =>
-                                  moveModelWithinRoadmap(
-                                    r.id,
-                                    it.modelId,
-                                    idx - 1,
-                                  )
-                                }
-                                disabled={idx === 0}
-                                className="h-8 w-8 hover:bg-slate-100"
-                              >
-                                <ChevronUp className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() =>
-                                  moveModelWithinRoadmap(
-                                    r.id,
-                                    it.modelId,
-                                    idx + 1,
-                                  )
-                                }
-                                disabled={idx === r.items.length - 1}
-                                className="h-8 w-8 hover:bg-slate-100"
-                              >
-                                <ChevronDown className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() =>
-                                  setMoveItem({
-                                    fromRoadmapId: r.id,
-                                    modelId: it.modelId,
-                                  })
-                                }
-                                className="h-8 w-8 hover:bg-blue-50 text-blue-600"
-                              >
-                                <ArrowRight className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() =>
-                                  removeModelFromRoadmap(r.id, it.modelId)
-                                }
-                                className="h-8 w-8 hover:bg-red-50 text-red-600"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
+                              {r.title}
+                            </CardTitle>
+                            <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
+                              {r.items.length} model
+                              {r.items.length !== 1 ? "s" : ""}
+                            </p>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+
+                        {!isShared && (
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => openAddModels(r.id)}
+                              className="h-9 text-xs sm:text-sm"
+                            >
+                              <Plus className="h-3.5 w-3.5 mr-1.5" />
+                              <span className="hidden sm:inline">
+                                Add Models
+                              </span>
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingTitleId(r.id);
+                                setTitleDraft(r.title);
+                              }}
+                              className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              onClick={() => setDeleteConfirmId(r.id)}
+                              className="h-9 w-9 bg-red-600 hover:bg-red-700"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardHeader>
+
+                  <CardContent className="p-4 sm:p-6">
+                    {r.items.length === 0 ? (
+                      <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
+                        <div className="text-sm text-slate-600 mb-3">
+                          No models added yet
+                        </div>
+                        {!isShared && (
+                          <Button
+                            size="sm"
+                            onClick={() => openAddModels(r.id)}
+                            className="h-9 bg-blue-600 hover:bg-blue-700"
+                          >
+                            <Plus className="h-3.5 w-3.5 mr-2" />
+                            Add Models
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {r.items.map((it, idx) => (
+                          <div
+                            key={`${r.id}-${it.modelId}-${idx}`}
+                            className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
+                                {it.modelName} ({it.quantity})
+                              </div>
+                            </div>
+
+                            {!isShared && (
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    moveModelWithinRoadmap(
+                                      r.id,
+                                      it.modelId,
+                                      idx - 1,
+                                    )
+                                  }
+                                  disabled={idx === 0}
+                                  className="h-8 w-8 hover:bg-slate-100"
+                                >
+                                  <ChevronUp className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    moveModelWithinRoadmap(
+                                      r.id,
+                                      it.modelId,
+                                      idx + 1,
+                                    )
+                                  }
+                                  disabled={idx === r.items.length - 1}
+                                  className="h-8 w-8 hover:bg-slate-100"
+                                >
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    setMoveItem({
+                                      fromRoadmapId: r.id,
+                                      modelId: it.modelId,
+                                    })
+                                  }
+                                  className="h-8 w-8 hover:bg-blue-50 text-blue-600"
+                                >
+                                  <ArrowRight className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    removeModelFromRoadmap(r.id, it.modelId)
+                                  }
+                                  className="h-8 w-8 hover:bg-red-50 text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
         )}
       </div>
 

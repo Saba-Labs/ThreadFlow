@@ -104,8 +104,14 @@ export function createServer() {
   app.put("/api/pipeline/orders/:id", updateWorkOrder);
   app.delete("/api/pipeline/orders/:id", deleteWorkOrder);
   app.put("/api/pipeline/orders/:orderId/steps/:stepIndex", updateStepStatus);
-  app.put("/api/pipeline/orders/:orderId/job-work-assignments", setJobWorkAssignments);
-  app.put("/api/pipeline/orders/:orderId/job-works/:jobWorkId/status", updateJobWorkAssignmentStatus);
+  app.put(
+    "/api/pipeline/orders/:orderId/job-work-assignments",
+    setJobWorkAssignments,
+  );
+  app.put(
+    "/api/pipeline/orders/:orderId/job-works/:jobWorkId/status",
+    updateJobWorkAssignmentStatus,
+  );
 
   // Roadmap routes
   app.get("/api/roadmaps", getRoadmaps);
@@ -113,7 +119,10 @@ export function createServer() {
   app.put("/api/roadmaps/:id", updateRoadmap);
   app.delete("/api/roadmaps/:id", deleteRoadmap);
   app.post("/api/roadmaps/:roadmapId/models", addModelToRoadmap);
-  app.delete("/api/roadmaps/:roadmapId/models/:modelId", removeModelFromRoadmap);
+  app.delete(
+    "/api/roadmaps/:roadmapId/models/:modelId",
+    removeModelFromRoadmap,
+  );
   app.put("/api/roadmaps/:roadmapId/reorder", reorderRoadmapItems);
   app.post("/api/roadmaps/move-model", moveModelBetweenRoadmaps);
 

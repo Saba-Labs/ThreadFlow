@@ -60,30 +60,27 @@ export function useRoadmaps() {
     }
   });
 
-  const createRoadmap = useCallback(
-    async (title?: string) => {
-      try {
-        const count = STORE.length + 1;
-        const roadmapId = uid("roadmap");
-        const response = await fetch("/api/roadmaps", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: roadmapId,
-            title: (title || `Roadmap ${count}`).trim(),
-          }),
-        });
+  const createRoadmap = useCallback(async (title?: string) => {
+    try {
+      const count = STORE.length + 1;
+      const roadmapId = uid("roadmap");
+      const response = await fetch("/api/roadmaps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: roadmapId,
+          title: (title || `Roadmap ${count}`).trim(),
+        }),
+      });
 
-        if (!response.ok) throw new Error("Failed to create roadmap");
-        await fetchRoadmaps();
-        return roadmapId;
-      } catch (error) {
-        console.error("Error creating roadmap:", error);
-        throw error;
-      }
-    },
-    []
-  );
+      if (!response.ok) throw new Error("Failed to create roadmap");
+      await fetchRoadmaps();
+      return roadmapId;
+    } catch (error) {
+      console.error("Error creating roadmap:", error);
+      throw error;
+    }
+  }, []);
 
   const deleteRoadmap = useCallback(async (roadmapId: string) => {
     try {
@@ -98,27 +95,30 @@ export function useRoadmaps() {
     }
   }, []);
 
-  const renameRoadmap = useCallback(async (roadmapId: string, title: string) => {
-    try {
-      const response = await fetch(`/api/roadmaps/${roadmapId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim() }),
-      });
-      if (!response.ok) throw new Error("Failed to update roadmap");
-      await fetchRoadmaps();
-    } catch (error) {
-      console.error("Error renaming roadmap:", error);
-      throw error;
-    }
-  }, []);
+  const renameRoadmap = useCallback(
+    async (roadmapId: string, title: string) => {
+      try {
+        const response = await fetch(`/api/roadmaps/${roadmapId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: title.trim() }),
+        });
+        if (!response.ok) throw new Error("Failed to update roadmap");
+        await fetchRoadmaps();
+      } catch (error) {
+        console.error("Error renaming roadmap:", error);
+        throw error;
+      }
+    },
+    [],
+  );
 
   const addModelToRoadmap = useCallback(
     async (
       roadmapId: string,
       modelId: string,
       modelName: string,
-      quantity: number
+      quantity: number,
     ) => {
       try {
         const response = await fetch(`/api/roadmaps/${roadmapId}/models`, {
@@ -137,7 +137,7 @@ export function useRoadmaps() {
         throw error;
       }
     },
-    []
+    [],
   );
 
   const removeModelFromRoadmap = useCallback(
@@ -147,16 +147,17 @@ export function useRoadmaps() {
           `/api/roadmaps/${roadmapId}/models/${modelId}`,
           {
             method: "DELETE",
-          }
+          },
         );
-        if (!response.ok) throw new Error("Failed to remove model from roadmap");
+        if (!response.ok)
+          throw new Error("Failed to remove model from roadmap");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error removing model from roadmap:", error);
         throw error;
       }
     },
-    []
+    [],
   );
 
   const moveModelWithinRoadmap = useCallback(
@@ -188,7 +189,7 @@ export function useRoadmaps() {
         throw error;
       }
     },
-    []
+    [],
   );
 
   const moveModelToRoadmap = useCallback(
@@ -196,7 +197,7 @@ export function useRoadmaps() {
       fromRoadmapId: string,
       toRoadmapId: string,
       modelId: string,
-      toIndex?: number
+      toIndex?: number,
     ) => {
       try {
         const response = await fetch("/api/roadmaps/move-model", {
@@ -208,14 +209,15 @@ export function useRoadmaps() {
             modelId,
           }),
         });
-        if (!response.ok) throw new Error("Failed to move model between roadmaps");
+        if (!response.ok)
+          throw new Error("Failed to move model between roadmaps");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error moving model to roadmap:", error);
         throw error;
       }
     },
-    []
+    [],
   );
 
   return {

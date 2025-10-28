@@ -259,9 +259,7 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
     const { assignments } = req.body;
 
     if (!Array.isArray(assignments)) {
-      return res
-        .status(400)
-        .json({ error: "Assignments must be an array" });
+      return res.status(400).json({ error: "Assignments must be an array" });
     }
 
     const now = Date.now();
@@ -318,7 +316,7 @@ export const updateJobWorkAssignmentStatus: RequestHandler = async (
       "UPDATE job_work_assignments SET status = $1, completion_date = $2, updated_at = $3 WHERE order_id = $4 AND job_work_id = $5",
       [
         status,
-        status === "completed" ? (completionDate || now) : null,
+        status === "completed" ? completionDate || now : null,
         now,
         orderId,
         jobWorkId,
