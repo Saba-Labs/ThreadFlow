@@ -1,14 +1,14 @@
 import serverless from "serverless-http";
-import express from "express";
 import { createServer } from "../../server";
 
-const app = createServer();
+let handler: ReturnType<typeof serverless> | null = null;
 
-// Ensure body is parsed before serverless-http processes it
-const bodyParsingMiddleware = express.json({ limit: "10mb" });
-const urlEncodedMiddleware = express.urlencoded({ extended: true, limit: "10mb" });
+export async function apiHandler(event: any, context: any) {
+  if (!handler) {
+    handler = serverless(createServer());
+  }
+  return handler(event, context);
+}
 
-app.use(bodyParsingMiddleware);
-app.use(urlEncodedMiddleware);
-
-export const handler = serverless(app);
+// Export as the default handler
+exports.handler = apiHandler;
