@@ -162,7 +162,7 @@ export default function Index() {
               status: "hold",
             });
           }}
-          onNext={(o) => pipeline.moveToNextStep(o.id)}
+          onNext={(o) => handleMoveNext(o.id)}
         />
       </section>
     </div>
