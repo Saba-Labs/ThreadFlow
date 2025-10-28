@@ -602,11 +602,18 @@ export default function ModelList(props: ModelListProps) {
 
                                     if (hasPendingJW) {
                                       const pendingAssignments = (o.jobWorkAssignments || []).filter((a) => a.status === "pending");
-                                      const uniqueNames = Array.from(new Set(pendingAssignments.map((a) => a.jobWorkName).filter(Boolean)));
+                                      const assignmentNames = pendingAssignments.map((a) => a.jobWorkName).filter(Boolean);
+
+                                      const jobWorkIdNames = ((o as any).jobWorkIds || []).map((id: string) => {
+                                        const jw = jobWorks.find((j) => j.id === id);
+                                        return jw?.name;
+                                      }).filter(Boolean);
+
+                                      const allNames = Array.from(new Set([...assignmentNames, ...jobWorkIdNames]));
 
                                       return (
                                         <div className="flex flex-col gap-0.5">
-                                          {uniqueNames.map((name) => (
+                                          {allNames.map((name) => (
                                             <div
                                               key={name}
                                               className="font-medium text-purple-700 dark:text-purple-300"
