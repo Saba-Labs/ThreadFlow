@@ -577,7 +577,7 @@ export function useProductionPipeline() {
         }),
       }));
     },
-    updateOrder: (
+    updateOrder: async (
       orderId: string,
       data: {
         modelName: string;
@@ -589,35 +589,55 @@ export function useProductionPipeline() {
         )[];
       },
     ) => {
-      setStore((s) => ({
-        orders: s.orders.map((o) => {
-          if (o.id !== orderId) return o;
-          const newSteps = data.path.map((p) => ({
-            id: uid("step"),
-            kind: p.kind as "machine" | "job",
-            machineType:
-              p.kind === "machine" ? (p.machineType as string) : undefined,
-            externalUnitName:
-              p.kind === "job" ? (p.externalUnitName as string) : undefined,
-            status: "hold" as StepStatus,
-            activeMachines: 0,
-            quantityDone: 0,
-          }));
-          const newIndex = Math.max(
-            0,
-            Math.min(o.currentStepIndex, newSteps.length - 1),
-          );
-          return {
-            ...o,
+      const newSteps = data.path.map((p) => ({
+        id: uid("step"),
+        kind: p.kind as "machine" | "job",
+        machineType:
+          p.kind === "machine" ? (p.machineType as string) : undefined,
+        externalUnitName:
+          p.kind === "job" ? (p.externalUnitName as string) : undefined,
+        status: "hold" as StepStatus,
+        activeMachines: 0,
+        quantityDone: 0,
+      }));
+      const newIndex = Math.max(
+        0,
+        Math.min(
+          state.orders.find((o) => o.id === orderId)?.currentStepIndex ?? -1,
+          newSteps.length - 1,
+        ),
+      );
+
+      try {
+        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             modelName: data.modelName,
             quantity: data.quantity,
-            createdAt: data.createdAt,
-            steps: newSteps,
             currentStepIndex: newSteps.length === 0 ? -1 : newIndex,
-            parallelGroups: [],
-          };
-        }),
-      }));
+            steps: newSteps,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to update order");
+        setStore((s) => ({
+          orders: s.orders.map((o) => {
+            if (o.id !== orderId) return o;
+            return {
+              ...o,
+              modelName: data.modelName,
+              quantity: data.quantity,
+              createdAt: data.createdAt,
+              steps: newSteps,
+              currentStepIndex: newSteps.length === 0 ? -1 : newIndex,
+              parallelGroups: [],
+            };
+          }),
+        }));
+      } catch (error) {
+        console.error("Failed to update order:", error);
+        throw error;
+      }
     },
     board,
     progressOf,
