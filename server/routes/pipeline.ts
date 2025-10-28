@@ -197,6 +197,7 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
       }
     }
 
+    broadcastChange({ type: "pipeline_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating work order:", error);
