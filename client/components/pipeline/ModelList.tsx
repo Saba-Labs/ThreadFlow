@@ -601,15 +601,29 @@ export default function ModelList(props: ModelListProps) {
                                       );
 
                                     if (hasPendingJW) {
-                                      const allAssignments = (o.jobWorkAssignments || []);
-                                      const assignmentNames = allAssignments.map((a) => a.jobWorkName).filter(Boolean);
+                                      const allAssignments =
+                                        o.jobWorkAssignments || [];
+                                      const assignmentNames = allAssignments
+                                        .map((a) => a.jobWorkName)
+                                        .filter(Boolean);
 
-                                      const jobWorkIdNames = ((o as any).jobWorkIds || []).map((id: string) => {
-                                        const jw = jobWorks.find((j) => j.id === id);
-                                        return jw?.name;
-                                      }).filter(Boolean);
+                                      const jobWorkIdNames = (
+                                        (o as any).jobWorkIds || []
+                                      )
+                                        .map((id: string) => {
+                                          const jw = jobWorks.find(
+                                            (j) => j.id === id,
+                                          );
+                                          return jw?.name;
+                                        })
+                                        .filter(Boolean);
 
-                                      const allNames = Array.from(new Set([...assignmentNames, ...jobWorkIdNames]));
+                                      const allNames = Array.from(
+                                        new Set([
+                                          ...assignmentNames,
+                                          ...jobWorkIdNames,
+                                        ]),
+                                      );
 
                                       return (
                                         <div className="flex flex-col gap-0.5">
@@ -980,15 +994,29 @@ export default function ModelList(props: ModelListProps) {
                                 ) : hasPendingJW ? (
                                   <div className="flex flex-col items-end gap-0.5 text-sm">
                                     {(() => {
-                                      const allAssignments = (o.jobWorkAssignments || []);
-                                      const assignmentNames = allAssignments.map((a) => a.jobWorkName).filter(Boolean);
+                                      const allAssignments =
+                                        o.jobWorkAssignments || [];
+                                      const assignmentNames = allAssignments
+                                        .map((a) => a.jobWorkName)
+                                        .filter(Boolean);
 
-                                      const jobWorkIdNames = ((o as any).jobWorkIds || []).map((id: string) => {
-                                        const jw = jobWorks.find((j) => j.id === id);
-                                        return jw?.name;
-                                      }).filter(Boolean);
+                                      const jobWorkIdNames = (
+                                        (o as any).jobWorkIds || []
+                                      )
+                                        .map((id: string) => {
+                                          const jw = jobWorks.find(
+                                            (j) => j.id === id,
+                                          );
+                                          return jw?.name;
+                                        })
+                                        .filter(Boolean);
 
-                                      const allNames = Array.from(new Set([...assignmentNames, ...jobWorkIdNames]));
+                                      const allNames = Array.from(
+                                        new Set([
+                                          ...assignmentNames,
+                                          ...jobWorkIdNames,
+                                        ]),
+                                      );
 
                                       return allNames.length > 0 ? (
                                         allNames.map((name) => (
@@ -1078,15 +1106,29 @@ export default function ModelList(props: ModelListProps) {
                               ) : hasPendingJW ? (
                                 <div className="flex flex-col items-end gap-0.5 text-sm">
                                   {(() => {
-                                    const allAssignments = (o.jobWorkAssignments || []);
-                                    const assignmentNames = allAssignments.map((a) => a.jobWorkName).filter(Boolean);
+                                    const allAssignments =
+                                      o.jobWorkAssignments || [];
+                                    const assignmentNames = allAssignments
+                                      .map((a) => a.jobWorkName)
+                                      .filter(Boolean);
 
-                                    const jobWorkIdNames = ((o as any).jobWorkIds || []).map((id: string) => {
-                                      const jw = jobWorks.find((j) => j.id === id);
-                                      return jw?.name;
-                                    }).filter(Boolean);
+                                    const jobWorkIdNames = (
+                                      (o as any).jobWorkIds || []
+                                    )
+                                      .map((id: string) => {
+                                        const jw = jobWorks.find(
+                                          (j) => j.id === id,
+                                        );
+                                        return jw?.name;
+                                      })
+                                      .filter(Boolean);
 
-                                    const allNames = Array.from(new Set([...assignmentNames, ...jobWorkIdNames]));
+                                    const allNames = Array.from(
+                                      new Set([
+                                        ...assignmentNames,
+                                        ...jobWorkIdNames,
+                                      ]),
+                                    );
 
                                     return allNames.length > 0 ? (
                                       allNames.map((name) => (
