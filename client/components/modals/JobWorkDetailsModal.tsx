@@ -160,7 +160,10 @@ export default function JobWorkDetailsModal({
   };
 
   const getJobWorkName = (jwId: string) => {
-    return jobWorks.find((j) => j.id === jwId)?.name || "Unknown";
+    const found = jobWorks.find((j) => j.id === jwId);
+    if (found) return found.name;
+    // If job work not found, show ID as fallback (better than "Unknown")
+    return jwId;
   };
 
   const getAvailableJobWorks = () => {
