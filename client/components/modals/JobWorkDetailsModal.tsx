@@ -82,7 +82,7 @@ export default function JobWorkDetailsModal({
     }
   };
 
-  const handleSaveEditField = () => {
+  const handleSaveEditField = async () => {
     if (!editingField) return;
 
     const updated: JobWorkAssignment[] = assignments.map((a) => {
@@ -91,34 +91,52 @@ export default function JobWorkDetailsModal({
       if (editingField.field === "pickup") {
         const pickupMs = new Date(editValue).getTime();
         return {
-          ...a,
+          jobWorkId: a.jobWorkId,
+          jobWorkName: a.jobWorkName,
+          quantity: a.quantity,
           pickupDate: pickupMs,
+          completionDate: a.completionDate,
+          status: a.status,
         };
       } else if (editingField.field === "delivery") {
         // If delivery date is empty, revert to pending status
         if (!editValue) {
           return {
-            ...a,
+            jobWorkId: a.jobWorkId,
+            jobWorkName: a.jobWorkName,
+            quantity: a.quantity,
+            pickupDate: a.pickupDate,
             completionDate: undefined,
             status: "pending" as const,
           };
         }
         const completionMs = new Date(editValue).getTime();
         return {
-          ...a,
+          jobWorkId: a.jobWorkId,
+          jobWorkName: a.jobWorkName,
+          quantity: a.quantity,
+          pickupDate: a.pickupDate,
           completionDate: completionMs,
           status: "completed" as const,
         };
       } else {
         return {
-          ...a,
+          jobWorkId: a.jobWorkId,
+          jobWorkName: a.jobWorkName,
           quantity: Math.max(0, Math.floor(Number(editValue) || 0)),
+          pickupDate: a.pickupDate,
+          completionDate: a.completionDate,
+          status: a.status,
         };
       }
     });
 
-    onUpdateAssignments(updated);
-    setEditingField(null);
+    try {
+      await onUpdateAssignments(updated);
+      setEditingField(null);
+    } catch (error) {
+      console.error("Failed to update field:", error);
+    }
   };
 
   const handleCompleteAssignment = async (jwId: string) => {
