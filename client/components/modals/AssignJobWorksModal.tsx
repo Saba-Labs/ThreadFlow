@@ -6,6 +6,7 @@ import SimpleModal from "@/components/ui/SimpleModal";
 import { useJobWorks } from "@/lib/jobWorks";
 import type { JobWorkAssignment } from "@/hooks/useProductionPipeline";
 import { Calendar } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface AssignJobWorksModalProps {
   open: boolean;
@@ -63,7 +64,7 @@ export default function AssignJobWorksModal({
     0,
   );
 
-  const handleAssign = () => {
+  const handleAssign = async () => {
     if (selectedIds.length === 0) return;
 
     const assignments: JobWorkAssignment[] = selectedIds.map((jwId) => {
@@ -77,8 +78,21 @@ export default function AssignJobWorksModal({
       };
     });
 
-    onAssign(assignments);
-    handleClose();
+    try {
+      await onAssign(assignments);
+      toast({
+        title: "Success",
+        description: "Job works assigned successfully",
+      });
+      handleClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to assign job works",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleClose = () => {
