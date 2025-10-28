@@ -963,48 +963,61 @@ export default function ModelList(props: ModelListProps) {
 
                             return (
                               <div className="flex flex-col items-end gap-1 text-right">
-                                <div className="text-sm">
-                                  <span className="font-medium text-gray-900 dark:text-gray-100">
-                                    {i < 0
-                                      ? "Out of Path"
-                                      : i >= o.steps.length
-                                        ? "Completed"
-                                        : hasPendingJW
-                                          ? (() => {
-                                              const linkedJwIds =
-                                                new Set<string>([
-                                                  ...(((o as any).jobWorkIds ||
-                                                    []) as string[]),
-                                                  ...(
-                                                    o.jobWorkAssignments || []
-                                                  )
-                                                    .filter(
-                                                      (a) =>
-                                                        a.status === "pending",
-                                                    )
-                                                    .map((a) => a.jobWorkId),
-                                                ]);
-                                              const jwNames = Array.from(
-                                                linkedJwIds,
-                                              )
-                                                .map((id) =>
-                                                  jobWorks.find(
-                                                    (j) => j.id === id,
-                                                  ),
-                                                )
-                                                .filter((j) => j !== undefined)
-                                                .map((j) => j!.name);
-                                              return jwNames.length > 0
-                                                ? jwNames[0]
-                                                : primaryMachine;
-                                            })()
-                                          : step.kind === "machine"
-                                            ? step.machineType
-                                            : "Job Work"}
-                                  </span>
-                                </div>
+                                {i < 0 ? (
+                                  <div className="text-sm">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                      Out of Path
+                                    </span>
+                                  </div>
+                                ) : i >= o.steps.length ? (
+                                  <div className="text-sm">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                      Completed
+                                    </span>
+                                  </div>
+                                ) : hasPendingJW ? (
+                                  <div className="flex flex-col items-end gap-0.5 text-sm">
+                                    {(() => {
+                                      const linkedJwIds = new Set<string>([
+                                        ...(((o as any).jobWorkIds ||
+                                          []) as string[]),
+                                        ...(o.jobWorkAssignments || [])
+                                          .filter((a) => a.status === "pending")
+                                          .map((a) => a.jobWorkId),
+                                      ]);
+                                      const jwNames = Array.from(linkedJwIds)
+                                        .map((id) =>
+                                          jobWorks.find((j) => j.id === id),
+                                        )
+                                        .filter((j) => j !== undefined)
+                                        .map((j) => j!.name);
+                                      return jwNames.length > 0 ? (
+                                        jwNames.map((name) => (
+                                          <span
+                                            key={name}
+                                            className="font-medium text-purple-700 dark:text-purple-300"
+                                          >
+                                            {name}
+                                          </span>
+                                        ))
+                                      ) : (
+                                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                                          {primaryMachine}
+                                        </span>
+                                      );
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                      {step.kind === "machine"
+                                        ? step.machineType
+                                        : "Job Work"}
+                                    </span>
+                                  </div>
+                                )}
 
-                                {/* Only show selected machines, job works and status when the row is expanded */}
+                                {/* Only show selected machines and status when the row is expanded */}
                                 {isExpandedMobile && (
                                   <>
                                     {selectedMachines.length > 0 && (
