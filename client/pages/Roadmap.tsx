@@ -54,6 +54,8 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
 export default function RoadmapPage() {
   const {
     roadmaps,
+    loading,
+    error,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
@@ -80,6 +82,16 @@ export default function RoadmapPage() {
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
