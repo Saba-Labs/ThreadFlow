@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Trash2, Plus, ChevronDown, ChevronUp, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
+import { useSSESubscription } from "@/hooks/useSSESubscription";
 
 interface SubItem {
   id: string;
