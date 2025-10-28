@@ -24,6 +24,16 @@ import {
   deleteWorkOrder,
   updateStepStatus,
 } from "./routes/pipeline";
+import {
+  getRoadmaps,
+  createRoadmap,
+  updateRoadmap,
+  deleteRoadmap,
+  addModelToRoadmap,
+  removeModelFromRoadmap,
+  reorderRoadmapItems,
+  moveModelBetweenRoadmaps,
+} from "./routes/roadmaps";
 
 let dbInitialized = false;
 
