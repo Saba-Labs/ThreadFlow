@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { useSSESubscription } from "@/hooks/useSSESubscription";
 
 export interface JobWork {
@@ -103,7 +103,7 @@ export function useJobWorks() {
     if (event.type === "jobworks_updated") {
       fetchFromServer();
     }
-  });
+  }, []);
 
   return state;
 }
