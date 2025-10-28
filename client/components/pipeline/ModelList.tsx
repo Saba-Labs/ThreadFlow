@@ -1064,47 +1064,61 @@ export default function ModelList(props: ModelListProps) {
                           // cards (compact) default behaviour
                           return (
                             <>
-                              <div className="text-sm text-right">
-                                <span className="font-medium text-gray-900 dark:text-gray-100">
-                                  {i < 0
-                                    ? "Out of Path"
-                                    : i >= o.steps.length
-                                      ? "Completed"
-                                      : hasPendingJW
-                                        ? (() => {
-                                            const linkedJwIds = new Set<string>(
-                                              [
-                                                ...(((o as any).jobWorkIds ||
-                                                  []) as string[]),
-                                                ...(o.jobWorkAssignments || [])
-                                                  .filter(
-                                                    (a) =>
-                                                      a.status === "pending",
-                                                  )
-                                                  .map((a) => a.jobWorkId),
-                                              ],
-                                            );
-                                            const jwNames = Array.from(
-                                              linkedJwIds,
-                                            )
-                                              .map((id) =>
-                                                jobWorks.find(
-                                                  (j) => j.id === id,
-                                                ),
-                                              )
-                                              .filter((j) => j !== undefined)
-                                              .map((j) => j!.name);
-                                            return jwNames.length > 0
-                                              ? jwNames[0]
-                                              : step.kind === "machine"
-                                                ? step.machineType
-                                                : "Job Work";
-                                          })()
-                                        : step.kind === "machine"
+                              {i < 0 ? (
+                                <div className="text-sm text-right">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    Out of Path
+                                  </span>
+                                </div>
+                              ) : i >= o.steps.length ? (
+                                <div className="text-sm text-right">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    Completed
+                                  </span>
+                                </div>
+                              ) : hasPendingJW ? (
+                                <div className="flex flex-col items-end gap-0.5 text-sm">
+                                  {(() => {
+                                    const linkedJwIds = new Set<string>([
+                                      ...(((o as any).jobWorkIds ||
+                                        []) as string[]),
+                                      ...(o.jobWorkAssignments || [])
+                                        .filter((a) => a.status === "pending")
+                                        .map((a) => a.jobWorkId),
+                                    ]);
+                                    const jwNames = Array.from(linkedJwIds)
+                                      .map((id) =>
+                                        jobWorks.find((j) => j.id === id),
+                                      )
+                                      .filter((j) => j !== undefined)
+                                      .map((j) => j!.name);
+                                    return jwNames.length > 0 ? (
+                                      jwNames.map((name) => (
+                                        <span
+                                          key={name}
+                                          className="font-medium text-purple-700 dark:text-purple-300"
+                                        >
+                                          {name}
+                                        </span>
+                                      ))
+                                    ) : (
+                                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                                        {step.kind === "machine"
                                           ? step.machineType
                                           : "Job Work"}
-                                </span>
-                              </div>
+                                      </span>
+                                    );
+                                  })()}
+                                </div>
+                              ) : (
+                                <div className="text-sm text-right">
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    {step.kind === "machine"
+                                      ? step.machineType
+                                      : "Job Work"}
+                                  </span>
+                                </div>
+                              )}
 
                               {(() => {
                                 const parallelGroup = (
