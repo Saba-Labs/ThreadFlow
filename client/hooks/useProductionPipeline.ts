@@ -602,7 +602,10 @@ export function useProductionPipeline() {
       }));
       const newIndex = Math.max(
         0,
-        Math.min(state.orders.find((o) => o.id === orderId)?.currentStepIndex ?? -1, newSteps.length - 1),
+        Math.min(
+          state.orders.find((o) => o.id === orderId)?.currentStepIndex ?? -1,
+          newSteps.length - 1,
+        ),
       );
 
       try {
