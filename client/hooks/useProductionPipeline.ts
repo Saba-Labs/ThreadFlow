@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useSyncExternalStore, useEffect } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
+import { useSSESubscription } from "./useSSESubscription";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
