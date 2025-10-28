@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { query } from "../db";
+import { broadcastChange } from "../events";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
