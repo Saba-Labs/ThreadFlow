@@ -23,6 +23,8 @@ import {
   updateWorkOrder,
   deleteWorkOrder,
   updateStepStatus,
+  setJobWorkAssignments,
+  updateJobWorkAssignmentStatus,
 } from "./routes/pipeline";
 import {
   getRoadmaps,
