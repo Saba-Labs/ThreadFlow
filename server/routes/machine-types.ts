@@ -36,6 +36,7 @@ export const setMachineTypes: RequestHandler = async (req, res) => {
       );
     }
 
+    broadcastChange({ type: "machine_types_updated" });
     res.json({ success: true });
   } catch (error) {
     console.error("Error setting machine types:", error);
