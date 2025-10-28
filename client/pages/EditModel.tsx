@@ -46,7 +46,7 @@ export default function EditModel() {
         initialData={initialData}
         onCreate={async (data) => {
           try {
-            pipeline.updateOrder(order.id, {
+            await pipeline.updateOrder(order.id, {
               modelName: data.modelName,
               quantity: data.quantity,
               createdAt: data.createdAt,
