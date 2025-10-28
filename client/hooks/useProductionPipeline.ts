@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useSyncExternalStore, useEffect } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
 import { useSSESubscription } from "./useSSESubscription";
 
