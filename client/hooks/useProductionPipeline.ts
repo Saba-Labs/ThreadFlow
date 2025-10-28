@@ -571,42 +571,48 @@ export function useProductionPipeline() {
         ),
       }));
     },
-    setJobWorkAssignments: (
+    setJobWorkAssignments: async (
       orderId: string,
       assignments: JobWorkAssignment[],
     ) => {
-      setStore((s) => ({
-        orders: s.orders.map((o) =>
-          o.id === orderId
-            ? { ...o, jobWorkAssignments: assignments.slice() }
-            : o,
-        ),
-      }));
+      try {
+        const response = await fetch(
+          `/api/pipeline/orders/${orderId}/job-work-assignments`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ assignments }),
+          },
+        );
+        if (!response.ok) throw new Error("Failed to set job work assignments");
+        await fetchFromServer();
+      } catch (error) {
+        console.error("Error setting job work assignments:", error);
+        throw error;
+      }
     },
-    updateJobWorkAssignmentStatus: (
+    updateJobWorkAssignmentStatus: async (
       orderId: string,
       jobWorkId: string,
       status: "pending" | "completed",
       completionDate?: number,
     ) => {
-      setStore((s) => ({
-        orders: s.orders.map((o) => {
-          if (o.id !== orderId) return o;
-          const assignments = (o.jobWorkAssignments || []).map((a) =>
-            a.jobWorkId === jobWorkId
-              ? {
-                  ...a,
-                  status,
-                  completionDate:
-                    status === "completed"
-                      ? (completionDate ?? Date.now())
-                      : undefined,
-                }
-              : a,
-          );
-          return { ...o, jobWorkAssignments: assignments };
-        }),
-      }));
+      try {
+        const response = await fetch(
+          `/api/pipeline/orders/${orderId}/job-works/${jobWorkId}/status`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status, completionDate }),
+          },
+        );
+        if (!response.ok)
+          throw new Error("Failed to update job work assignment status");
+        await fetchFromServer();
+      } catch (error) {
+        console.error("Error updating job work assignment status:", error);
+        throw error;
+      }
     },
     updateOrder: async (
       orderId: string,

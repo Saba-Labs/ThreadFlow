@@ -46,17 +46,17 @@ interface ModelListProps {
     stepIndex: number,
     machineIndex: number,
   ) => void;
-  setOrderJobWorks?: (orderId: string, ids: string[]) => void;
+  setOrderJobWorks?: (orderId: string, ids: string[]) => void | Promise<void>;
   setJobWorkAssignments?: (
     orderId: string,
     assignments: JobWorkAssignment[],
-  ) => void;
+  ) => void | Promise<void>;
   updateJobWorkAssignmentStatus?: (
     orderId: string,
     jobWorkId: string,
     status: "pending" | "completed",
     completionDate?: number,
-  ) => void;
+  ) => void | Promise<void>;
   showDetails?: boolean;
   viewMode?: "cards" | "list";
 }
@@ -1259,7 +1259,7 @@ export default function ModelList(props: ModelListProps) {
                 sorted.find((o) => o.id === assignJobWorksModalId)?.quantity ||
                 0
               }
-              onAssign={(assignments) => {
+              onAssign={async (assignments) => {
                 const o = sorted.find((x) => x.id === assignJobWorksModalId);
                 if (o) {
                   let targetIdx = o.currentStepIndex;
@@ -1270,7 +1270,11 @@ export default function ModelList(props: ModelListProps) {
                   if (targetIdx >= 0 && targetIdx < o.steps.length) {
                     props.onSetStepStatus(o.id, targetIdx, "running");
                   }
-                  props.setJobWorkAssignments?.(o.id, assignments);
+                  try {
+                    await props.setJobWorkAssignments?.(o.id, assignments);
+                  } catch (error) {
+                    console.error("Failed to assign job works:", error);
+                  }
                 }
                 setAssignJobWorksModalId(null);
               }}

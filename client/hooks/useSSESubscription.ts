@@ -5,7 +5,8 @@ type DataChangeCallback = (event: {
     | "pipeline_updated"
     | "jobworks_updated"
     | "machine_types_updated"
-    | "restok_updated";
+    | "restok_updated"
+    | "roadmaps_updated";
 }) => void;
 
 export function useSSESubscription(onDataChange: DataChangeCallback) {
@@ -38,7 +39,8 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
               data.type === "pipeline_updated" ||
               data.type === "jobworks_updated" ||
               data.type === "machine_types_updated" ||
-              data.type === "restok_updated"
+              data.type === "restok_updated" ||
+              data.type === "roadmaps_updated"
             ) {
               callbackRef.current(data);
             }

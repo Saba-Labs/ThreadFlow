@@ -114,10 +114,30 @@ export async function initializeDatabase() {
         machine_index INTEGER NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS roadmaps (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        created_at BIGINT NOT NULL,
+        updated_at BIGINT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS roadmap_items (
+        id TEXT PRIMARY KEY,
+        roadmap_id TEXT NOT NULL REFERENCES roadmaps(id) ON DELETE CASCADE,
+        model_id TEXT NOT NULL,
+        model_name TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        added_at BIGINT NOT NULL,
+        item_index INTEGER NOT NULL,
+        created_at BIGINT NOT NULL,
+        updated_at BIGINT NOT NULL
+      );
+
       CREATE INDEX IF NOT EXISTS idx_restok_sub_items_item_id ON restok_sub_items(item_id);
       CREATE INDEX IF NOT EXISTS idx_path_steps_order_id ON path_steps(order_id);
       CREATE INDEX IF NOT EXISTS idx_job_work_assignments_order_id ON job_work_assignments(order_id);
       CREATE INDEX IF NOT EXISTS idx_parallel_machine_groups_order_id ON parallel_machine_groups(order_id);
+      CREATE INDEX IF NOT EXISTS idx_roadmap_items_roadmap_id ON roadmap_items(roadmap_id);
     `);
 
     console.log("Database initialized successfully");
