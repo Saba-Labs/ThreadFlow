@@ -253,8 +253,10 @@ export default function JobWorkDetailsModal({
     }
   };
 
-  const pendingAssignments = assignments.filter((a) => a.status === "pending");
-  const completedAssignments = assignments.filter(
+  // Filter out invalid assignments that don't have jobWorkId
+  const validAssignments = assignments.filter((a) => a.jobWorkId);
+  const pendingAssignments = validAssignments.filter((a) => a.status === "pending");
+  const completedAssignments = validAssignments.filter(
     (a) => a.status === "completed",
   );
   const availableJobWorks = getAvailableJobWorks();
