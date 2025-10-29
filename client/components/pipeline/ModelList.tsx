@@ -444,9 +444,9 @@ export default function ModelList(props: ModelListProps) {
   }, [showDetails, sorted]);
 
   const toggleExpanded = (id: string) => {
-    // Disable toggling only when desktop forces showDetails. On mobile
-    // allow toggling even when showDetails is true (eye open).
-    if (!isMobile && showDetails) return;
+    // Allow toggling in list view mode on desktop, or on mobile
+    // Only disable toggling in card view on desktop when showDetails is true
+    if (!isMobile && showDetails && viewMode === "cards") return;
 
     setToggledIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
