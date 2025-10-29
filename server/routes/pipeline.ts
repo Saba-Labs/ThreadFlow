@@ -75,6 +75,14 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         status: a.status,
       }));
 
+      if (jobWorkAssignments.length > 0) {
+        console.log("[getPipelineOrders] Found assignments for order", {
+          orderId: row.id,
+          assignmentsCount: jobWorkAssignments.length,
+          assignments: jobWorkAssignments,
+        });
+      }
+
       const normalizedSteps = steps.map((s) => ({
         ...s,
         activeMachines:
