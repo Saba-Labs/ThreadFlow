@@ -402,6 +402,7 @@ export default function ModelList(props: ModelListProps) {
   const emptyColSpan = showDetails ? 7 : 2;
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
+  const [selectedOrderForJWModal, setSelectedOrderForJWModal] = useState<WorkOrder | null>(null);
 
   // When 'showDetails' toggles, control which rows are expanded.
   // If details are shown we expand all rows by default, but still allow
