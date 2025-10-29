@@ -105,68 +105,100 @@ export default function Index() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
-            <Layers className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <div className="text-sm text-muted-foreground">Total Models</div>
-            <div className="mt-1 flex items-baseline justify-between gap-4">
-              <div className="text-2xl font-semibold">{total}</div>
-              <Badge variant="secondary">Live</Badge>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-600">
-            <Play className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <div className="text-sm text-muted-foreground">Running</div>
-            <div className="mt-1 flex items-baseline justify-between gap-4">
-              <div className="text-2xl font-semibold text-green-600">
-                {running}
-              </div>
-              <div className="text-xs text-muted-foreground">Active</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-amber-50 text-amber-600">
-            <Pause className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <div className="text-sm text-muted-foreground">On Hold</div>
-            <div className="mt-1 flex items-baseline justify-between gap-4">
-              <div className="text-2xl font-semibold text-amber-600">
-                {hold}
-              </div>
-              <div className="text-xs text-muted-foreground">Blocked</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-700">
-            <Briefcase className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <div className="text-sm text-muted-foreground">Job Work</div>
-            <div className="mt-1 flex items-baseline justify-between gap-4">
-              <div className="text-2xl font-semibold text-green-700">
-                {pipeline.orders.reduce(
-                  (sum, o) => sum + (o.jobWorkIds || []).length,
-                  0,
+      {/* Model Status */}
+      <section>
+        <button
+          onClick={() => setModelStatusExpanded(!modelStatusExpanded)}
+          className="w-full mb-6 group"
+          title={modelStatusExpanded ? "Collapse model status" : "Expand model status"}
+        >
+          <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-200 hover:border-slate-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-slate-100 group-hover:to-slate-200">
+            <Layers className="h-6 w-6 text-slate-600 flex-shrink-0" />
+            <h2 className="text-lg font-semibold text-slate-900 flex-1 text-left">
+              Model Status
+            </h2>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="bg-slate-100 text-slate-700 border-slate-300"
+              >
+                4
+              </Badge>
+              <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
+                {modelStatusExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-slate-600 transition-transform duration-300" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-slate-600 transition-transform duration-300" />
                 )}
               </div>
-              <div className="text-xs text-muted-foreground">Assigned</div>
             </div>
           </div>
-        </div>
+        </button>
+
+        {modelStatusExpanded && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                <Layers className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-muted-foreground">Total Models</div>
+                <div className="mt-1 flex items-baseline justify-between gap-4">
+                  <div className="text-2xl font-semibold">{total}</div>
+                  <Badge variant="secondary">Live</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-600">
+                <Play className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-muted-foreground">Running</div>
+                <div className="mt-1 flex items-baseline justify-between gap-4">
+                  <div className="text-2xl font-semibold text-green-600">
+                    {running}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Active</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-amber-50 text-amber-600">
+                <Pause className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-muted-foreground">On Hold</div>
+                <div className="mt-1 flex items-baseline justify-between gap-4">
+                  <div className="text-2xl font-semibold text-amber-600">
+                    {hold}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Blocked</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-lg bg-white p-4 shadow-md border">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-green-50 text-green-700">
+                <Briefcase className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-muted-foreground">Job Work</div>
+                <div className="mt-1 flex items-baseline justify-between gap-4">
+                  <div className="text-2xl font-semibold text-green-700">
+                    {pipeline.orders.reduce(
+                      (sum, o) => sum + (o.jobWorkIds || []).length,
+                      0,
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Assigned</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Roadmap board */}
