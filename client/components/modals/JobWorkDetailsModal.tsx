@@ -462,17 +462,20 @@ export default function JobWorkDetailsModal({
                   )}
 
                   <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                    {editingCardId === assignment.jobWorkId ? (
-                      <>
-                        <Button
-                          size="sm"
-                          className="flex-1"
-                          onClick={() =>
-                            handleCompleteAssignment(assignment.jobWorkId)
-                          }
-                        >
-                          Complete
-                        </Button>
+                    {assignment.status === "pending" && (
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() =>
+                          handleCompleteAssignment(assignment.jobWorkId)
+                        }
+                      >
+                        Complete
+                      </Button>
+                    )}
+                    {(assignment.status === "completed" ||
+                      editingCardId === assignment.jobWorkId) &&
+                      assignment.status === "completed" && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -483,18 +486,7 @@ export default function JobWorkDetailsModal({
                         >
                           Mark as Pending
                         </Button>
-                      </>
-                    ) : assignment.status === "pending" ? (
-                      <Button
-                        size="sm"
-                        className="flex-1"
-                        onClick={() =>
-                          handleCompleteAssignment(assignment.jobWorkId)
-                        }
-                      >
-                        Complete
-                      </Button>
-                    ) : null}
+                      )}
                     <Button
                       size="icon"
                       variant="ghost"
