@@ -144,9 +144,6 @@ export default function ModelList(props: ModelListProps) {
 
     const sourceRect = rectsBefore.get(parentId) || null;
 
-    // perform split (synchronous state update)
-    props.onSplit(parentId, validQuantities);
-
     // next paint: detect new children, expand them (so they render for animation), then measure after and animate
     requestAnimationFrame(() => {
       const allElsAfter = Array.from(
