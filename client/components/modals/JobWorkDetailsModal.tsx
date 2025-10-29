@@ -71,13 +71,17 @@ export default function JobWorkDetailsModal({
   ) => {
     setEditingField({ jobWorkId: assignment.jobWorkId, field });
     if (field === "pickup") {
-      setEditValue(new Date(assignment.pickupDate).toISOString().split("T")[0]);
+      if (assignment.pickupDate && typeof assignment.pickupDate === "number" && assignment.pickupDate > 0) {
+        setEditValue(new Date(assignment.pickupDate).toISOString().split("T")[0]);
+      } else {
+        setEditValue(new Date().toISOString().split("T")[0]);
+      }
     } else if (field === "delivery") {
-      setEditValue(
-        assignment.completionDate
-          ? new Date(assignment.completionDate).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-      );
+      if (assignment.completionDate && typeof assignment.completionDate === "number" && assignment.completionDate > 0) {
+        setEditValue(new Date(assignment.completionDate).toISOString().split("T")[0]);
+      } else {
+        setEditValue(new Date().toISOString().split("T")[0]);
+      }
     } else {
       setEditValue(String(assignment.quantity));
     }
