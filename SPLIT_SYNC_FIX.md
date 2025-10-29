@@ -1,15 +1,18 @@
 # Split Model Database Sync Issue - FIXED
 
 ## Problem Identified
-The split model functionality in the All Models page was **NOT syncing with Neon database**. 
+
+The split model functionality in the All Models page was **NOT syncing with Neon database**.
 
 ### Symptoms:
+
 - Split models appeared in UI immediately (local state update)
 - Changes were NOT persisted to Neon database
 - Refreshing the page would lose the split models
 - Only the original parent model remained in database
 
 ### Root Cause
+
 The `splitOrder` function in `client/hooks/useProductionPipeline.ts` (lines 472-525) only updated client-side state using `setStore()` but made **NO API calls** to persist the changes to the database.
 
 ## Solution Implemented
@@ -17,6 +20,7 @@ The `splitOrder` function in `client/hooks/useProductionPipeline.ts` (lines 472-
 ### Changes Made:
 
 #### 1. **client/hooks/useProductionPipeline.ts** - Updated `splitOrder` callback
+
 - Made the function `async` to support database operations
 - Maintained optimistic UI updates for immediate user feedback
 - Added API calls to persist changes:
@@ -26,6 +30,7 @@ The `splitOrder` function in `client/hooks/useProductionPipeline.ts` (lines 472-
 - Added error handling with automatic rollback on failure
 
 #### 2. **client/components/pipeline/ModelList.tsx** - Updated split handling
+
 - Updated `handleSplit()` to properly await the async `onSplit` operation
 - Added error handling to prevent UI issues on split failure
 - Updated the `ModelListProps` interface to reflect `onSplit` as `Promise<void>`
@@ -67,10 +72,12 @@ Complete - Split models now persisted to Neon database
 ```
 
 ## Files Modified
+
 1. `client/hooks/useProductionPipeline.ts` - Core fix
 2. `client/components/pipeline/ModelList.tsx` - UI handling update
 
 ## Testing Recommendations
+
 1. Create a model with quantity > 20
 2. Click split button
 3. Enter two quantities (e.g., 10 and 5)
@@ -82,10 +89,12 @@ Complete - Split models now persisted to Neon database
    - Check database to confirm all three orders exist
 
 ## Database Tables Affected
+
 - `work_orders` - Parent quantity updated, child records created
 - `path_steps` - Child orders get new step IDs (as designed)
 
 ## Future Improvements
+
 - Could add transaction support for atomic operations
 - Could implement undo functionality
 - Could add split operation logging/audit trail
