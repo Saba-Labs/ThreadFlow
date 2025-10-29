@@ -1833,6 +1833,7 @@ export default function ModelList(props: ModelListProps) {
                             ),
                           )
                         }
+                        disabled={isSplitting}
                         className="h-10"
                       />
                     </div>
@@ -1841,6 +1842,7 @@ export default function ModelList(props: ModelListProps) {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleRemoveBatch(i)}
+                        disabled={isSplitting}
                         className="h-10 w-10 shrink-0"
                       >
                         <X className="h-4 w-4" />
