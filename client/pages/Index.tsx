@@ -75,11 +75,10 @@ export default function Index() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">
-              Garments Production
+              Venus Garments Production
             </h1>
             <p className="mt-1 text-sm text-muted-foreground max-w-xl">
-              Live overview of models, machines and production flow. Use the
-              search and quick actions to manage the pipeline.
+              
             </p>
           </div>
 
