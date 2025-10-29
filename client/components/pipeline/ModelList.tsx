@@ -769,28 +769,25 @@ export default function ModelList(props: ModelListProps) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={async () => {
+                                  onClick={() => {
                                     const hasAssignments =
                                       (o.jobWorkAssignments || []).length > 0;
                                     if (hasAssignments) {
                                       // Fetch fresh data to ensure we have the latest assignments
-                                      try {
-                                        const response = await fetch(`/api/pipeline/orders`);
-                                        if (response.ok) {
-                                          const orders = await response.json();
-                                          const fresh = orders.find((x: any) => x.id === o.id);
-                                          if (fresh) {
-                                            setSelectedOrderForJWModal(fresh);
+                                      fetch(`/api/pipeline/orders`)
+                                        .then(response => response.ok ? response.json() : null)
+                                        .then(orders => {
+                                          if (orders) {
+                                            const fresh = orders.find((x: any) => x.id === o.id);
+                                            setSelectedOrderForJWModal(fresh || o);
                                           } else {
                                             setSelectedOrderForJWModal(o);
                                           }
-                                        } else {
+                                        })
+                                        .catch(err => {
+                                          console.warn("[ModelList] Could not fetch fresh data, using current:", err);
                                           setSelectedOrderForJWModal(o);
-                                        }
-                                      } catch (err) {
-                                        console.warn("[ModelList] Could not fetch fresh data, using current:", err);
-                                        setSelectedOrderForJWModal(o);
-                                      }
+                                        });
                                       setJobWorkDetailsModalId(o.id);
                                     } else {
                                       setAssignJobWorksModalId(o.id);
