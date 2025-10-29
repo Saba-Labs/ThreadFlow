@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
+import { toast } from "@/hooks/use-toast";
 
 interface SubItem {
   id: string;
