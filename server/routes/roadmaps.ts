@@ -111,7 +111,24 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
     const { roadmapId } = req.params;
     const { modelId, modelName, quantity } = req.body;
 
+    console.log("[addModelToRoadmap] Called with:", {
+      roadmapId,
+      modelId,
+      modelName,
+      quantity,
+    });
+
+    if (!roadmapId) {
+      console.error("[addModelToRoadmap] Missing roadmapId");
+      return res.status(400).json({ error: "Missing roadmapId" });
+    }
+
     if (!modelId || !modelName || !quantity) {
+      console.error("[addModelToRoadmap] Missing required fields:", {
+        modelId,
+        modelName,
+        quantity,
+      });
       return res.status(400).json({
         error: "Missing required fields: modelId, modelName, quantity",
       });
@@ -124,6 +141,11 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
     );
 
     if (existsResult.rows.length > 0) {
+      console.error(
+        "[addModelToRoadmap] Model already exists in roadmap:",
+        roadmapId,
+        modelId,
+      );
       return res.status(400).json({ error: "Model already in roadmap" });
     }
 
@@ -136,6 +158,13 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
 
     const itemId = uid("rit");
     const now = Date.now();
+
+    console.log("[addModelToRoadmap] Inserting item:", {
+      itemId,
+      roadmapId,
+      modelId,
+      nextIndex,
+    });
 
     await query(
       "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
@@ -152,11 +181,14 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
       ],
     );
 
+    console.log("[addModelToRoadmap] Item inserted successfully");
     broadcastChange({ type: "roadmaps_updated" });
     res.json({ success: true });
   } catch (error) {
-    console.error("Error adding model to roadmap:", error);
-    res.status(500).json({ error: "Failed to add model to roadmap" });
+    console.error("[addModelToRoadmap] Error occurred:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to add model to roadmap", details: String(error) });
   }
 };
 
