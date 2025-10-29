@@ -49,6 +49,16 @@ export default function JobWorkDetailsModal({
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Log when assignments change to help with debugging
+  useEffect(() => {
+    if (open && assignments.length === 0) {
+      console.warn(
+        "[JobWorkDetailsModal] Modal opened but no assignments received",
+        { assignments, modelName }
+      );
+    }
+  }, [open, assignments, modelName]);
+
   const formatDate = (timestamp: number | undefined) => {
     if (!timestamp || typeof timestamp !== "number" || timestamp <= 0)
       return "—";
