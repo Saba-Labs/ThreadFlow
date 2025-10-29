@@ -90,8 +90,9 @@ export default function JobWorkDetailsModal({
   const handleSaveEditField = async () => {
     if (!editingField) return;
 
+    const currentEditingField = editingField;
     const updated: JobWorkAssignment[] = assignments.map((a) => {
-      if (a.jobWorkId !== editingField.jobWorkId) return a;
+      if (a.jobWorkId !== currentEditingField.jobWorkId) return a;
 
       if (editingField.field === "pickup") {
         const pickupMs = new Date(editValue).getTime();
