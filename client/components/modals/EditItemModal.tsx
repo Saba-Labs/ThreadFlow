@@ -104,8 +104,18 @@ export default function EditItemModal({
       setNewSubItemName("");
       setNewSubItemLowStock(0);
       setShowAddSubItemForm(false);
+      toast({
+        title: "Success",
+        description: "Sub-item added successfully",
+      });
     } catch (error) {
       console.error("Failed to add sub-item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to add sub-item",
+        variant: "destructive",
+      });
     }
   };
 
