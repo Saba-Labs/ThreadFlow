@@ -1473,14 +1473,13 @@ export default function ModelList(props: ModelListProps) {
                             });
                             setSelectedOrderForJWModal(updated);
                             setJobWorkDetailsModalId(orderId);
-                            return;
+                            break;
                           }
                         }
                       } catch (err) {
                         console.error("[ModelList] Error fetching updated data:", err);
                       }
                     }
-                    console.warn("[ModelList] Failed to get assignments after multiple attempts");
                   } catch (error) {
                     console.error("Failed to assign job works:", error);
                   }
