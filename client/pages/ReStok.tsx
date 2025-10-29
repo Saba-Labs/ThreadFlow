@@ -245,13 +245,19 @@ export default function ReStok() {
         }),
       });
       if (!response.ok) {
-        let errorMsg = "Failed to add sub-item";
+        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
         try {
           const errorData = await response.json();
           errorMsg = errorData.error || errorMsg;
         } catch {
-          // Could not parse error response
+          try {
+            const text = await response.text();
+            if (text) errorMsg = text;
+          } catch {
+            // Could not parse error response
+          }
         }
+        console.error("Server response error:", { status: response.status, body: errorMsg });
         throw new Error(errorMsg);
       }
       setItems(
@@ -263,6 +269,7 @@ export default function ReStok() {
       );
     } catch (error) {
       console.error("Failed to add sub-item:", error);
+      throw error;
     }
   };
 
