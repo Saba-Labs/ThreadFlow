@@ -176,16 +176,43 @@ export function useProductionPipeline() {
   );
 
   const deleteOrder = useCallback(async (orderId: string) => {
-    try {
-      const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete order");
-      setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
-    } catch (error) {
-      console.error("Failed to delete order:", error);
-      throw error;
-    }
+    // Store the deleted order for potential rollback
+    const deletedOrder = STORE.orders.find((o) => o.id === orderId);
+
+    // Optimistic update - remove immediately
+    setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
+
+    // Background sync
+    syncQueue.enqueue(
+      createSyncTask(
+        "deleteOrder",
+        async () => {
+          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) throw new Error("Failed to delete order");
+        },
+        (error) => {
+          // On error, restore the deleted order
+          if (deletedOrder) {
+            setStore((s) => ({
+              orders: [...s.orders, deletedOrder],
+            }));
+          }
+          toast({
+            title: "Error",
+            description: "Failed to delete model. It has been restored.",
+            variant: "destructive",
+          });
+        },
+        () => {
+          toast({
+            title: "Success",
+            description: "Model deleted successfully",
+          });
+        },
+      ),
+    );
   }, []);
 
   const editPath = useCallback(
