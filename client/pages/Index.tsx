@@ -75,10 +75,10 @@ export default function Index() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">
-              Venus Garments Production
+              Venus Garments
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground max-w-xl">
-              
+            <p className="mt-1 text-sl text-muted-foreground max-w-xl">
+              Production Overview
             </p>
           </div>
 
