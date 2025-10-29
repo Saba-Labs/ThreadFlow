@@ -23,12 +23,15 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
     let pollingInterval: NodeJS.Timeout | null = null;
 
     function setupPollingFallback() {
-      console.log("SSE not available, switching to polling");
+      console.log("[SSE Fallback] SSE not available, switching to polling every 2 seconds");
       sseFailedRef.current = true;
 
       pollingInterval = setInterval(() => {
         callbackRef.current({ type: "pipeline_updated" });
         callbackRef.current({ type: "jobworks_updated" });
+        callbackRef.current({ type: "machine_types_updated" });
+        callbackRef.current({ type: "restok_updated" });
+        callbackRef.current({ type: "roadmaps_updated" });
       }, 2000);
     }
 
