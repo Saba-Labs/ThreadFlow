@@ -1442,6 +1442,7 @@ export default function ModelList(props: ModelListProps) {
           {/* Job Work Details Modal */}
           {jobWorkDetailsModalId && (
             <JobWorkDetailsModal
+              key={`job-work-modal-${jobWorkDetailsModalId}-${sorted.find((o) => o.id === jobWorkDetailsModalId)?.jobWorkAssignments?.length || 0}`}
               open={jobWorkDetailsModalId !== null}
               onOpenChange={(v) => !v && setJobWorkDetailsModalId(null)}
               modelName={
