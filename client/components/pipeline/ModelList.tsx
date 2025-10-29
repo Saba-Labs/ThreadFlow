@@ -92,9 +92,12 @@ export default function ModelList(props: ModelListProps) {
     parentId: string;
     at: number;
   } | null>(null);
+  const [isSplitting, setIsSplitting] = useState(false);
 
   const handleSplit = async () => {
     if (!splitForId) return;
+    if (isSplitting) return;
+
     const validQuantities = splitInputs
       .map((q) => Math.max(0, Math.floor(q)))
       .filter((q) => q > 0);
@@ -105,17 +108,20 @@ export default function ModelList(props: ModelListProps) {
     let tempExpanded = false;
     let addedChildIds: string[] = [];
 
+    setIsSplitting(true);
     try {
       // Perform split - this is now async and persists to database
       await props.onSplit(parentId, validQuantities);
     } catch (error) {
       console.error("Failed to split order:", error);
+      setIsSplitting(false);
       return;
     }
 
     // close modal after successful split
     setSplitForId(null);
     setSplitInputs([0]);
+    setIsSplitting(false);
 
     // If global details are hidden and the parent isn't toggled, temporarily expand it
     if (!showDetails && !originalToggled) {
