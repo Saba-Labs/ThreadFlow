@@ -1405,7 +1405,8 @@ export default function ModelList(props: ModelListProps) {
                 0
               }
               onAssign={async (assignments) => {
-                const o = sorted.find((x) => x.id === assignJobWorksModalId);
+                const orderId = assignJobWorksModalId;
+                const o = sorted.find((x) => x.id === orderId);
                 if (o) {
                   let targetIdx = o.currentStepIndex;
                   if (o.steps.length > 0 && targetIdx < 0) {
@@ -1417,11 +1418,15 @@ export default function ModelList(props: ModelListProps) {
                   }
                   try {
                     await props.setJobWorkAssignments?.(o.id, assignments);
+                    // After saving, close the assign modal and open the details modal
+                    setAssignJobWorksModalId(null);
+                    // Give a moment for the data to be refreshed from the server
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    setJobWorkDetailsModalId(orderId);
                   } catch (error) {
                     console.error("Failed to assign job works:", error);
                   }
                 }
-                setAssignJobWorksModalId(null);
               }}
             />
           )}
