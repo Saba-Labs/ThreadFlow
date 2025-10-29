@@ -1319,6 +1319,7 @@ export default function ModelList(props: ModelListProps) {
                             const hasAssignments =
                               (o.jobWorkAssignments || []).length > 0;
                             if (hasAssignments) {
+                              setSelectedOrderForJWModal(o);
                               setJobWorkDetailsModalId(o.id);
                             } else {
                               setAssignJobWorksModalId(o.id);
