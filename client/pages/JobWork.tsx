@@ -108,6 +108,7 @@ export default function JobWork() {
   const getAssignmentsForJobWork = (jwId: string) => {
     const orders = pipeline.orders || [];
     const assignments: Array<{
+      id: string;
       orderId: string;
       modelName: string;
       quantity: number;
@@ -121,6 +122,7 @@ export default function JobWork() {
       for (const assignment of jwAssignments) {
         if (assignment.jobWorkId === jwId) {
           assignments.push({
+            id: assignment.id,
             orderId: o.id,
             modelName: o.modelName,
             quantity: assignment.quantity,
