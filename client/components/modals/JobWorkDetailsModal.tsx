@@ -54,7 +54,7 @@ export default function JobWorkDetailsModal({
     if (open && assignments.length === 0) {
       console.warn(
         "[JobWorkDetailsModal] Modal opened but no assignments received",
-        { assignments, modelName }
+        { assignments, modelName },
       );
     }
   }, [open, assignments, modelName]);
@@ -81,14 +81,26 @@ export default function JobWorkDetailsModal({
   ) => {
     setEditingField({ jobWorkId: assignment.jobWorkId, field });
     if (field === "pickup") {
-      if (assignment.pickupDate && typeof assignment.pickupDate === "number" && assignment.pickupDate > 0) {
-        setEditValue(new Date(assignment.pickupDate).toISOString().split("T")[0]);
+      if (
+        assignment.pickupDate &&
+        typeof assignment.pickupDate === "number" &&
+        assignment.pickupDate > 0
+      ) {
+        setEditValue(
+          new Date(assignment.pickupDate).toISOString().split("T")[0],
+        );
       } else {
         setEditValue(new Date().toISOString().split("T")[0]);
       }
     } else if (field === "delivery") {
-      if (assignment.completionDate && typeof assignment.completionDate === "number" && assignment.completionDate > 0) {
-        setEditValue(new Date(assignment.completionDate).toISOString().split("T")[0]);
+      if (
+        assignment.completionDate &&
+        typeof assignment.completionDate === "number" &&
+        assignment.completionDate > 0
+      ) {
+        setEditValue(
+          new Date(assignment.completionDate).toISOString().split("T")[0],
+        );
       } else {
         setEditValue(new Date().toISOString().split("T")[0]);
       }
@@ -265,7 +277,9 @@ export default function JobWorkDetailsModal({
 
   // Filter out invalid assignments that don't have jobWorkId
   const validAssignments = assignments.filter((a) => a.jobWorkId);
-  const pendingAssignments = validAssignments.filter((a) => a.status === "pending");
+  const pendingAssignments = validAssignments.filter(
+    (a) => a.status === "pending",
+  );
   const completedAssignments = validAssignments.filter(
     (a) => a.status === "completed",
   );

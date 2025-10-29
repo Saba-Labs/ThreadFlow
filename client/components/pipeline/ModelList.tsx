@@ -627,16 +627,16 @@ export default function ModelList(props: ModelListProps) {
 
                                       return (
                                         <div className="flex flex-col gap-0.5">
-                                          {allNames.length > 0 ? (
-                                            allNames.map((name) => (
-                                              <div
-                                                key={name}
-                                                className="font-medium text-purple-700 dark:text-purple-300"
-                                              >
-                                                {name}
-                                              </div>
-                                            ))
-                                          ) : null}
+                                          {allNames.length > 0
+                                            ? allNames.map((name) => (
+                                                <div
+                                                  key={name}
+                                                  className="font-medium text-purple-700 dark:text-purple-300"
+                                                >
+                                                  {name}
+                                                </div>
+                                              ))
+                                            : null}
                                         </div>
                                       );
                                     }
@@ -647,9 +647,10 @@ export default function ModelList(props: ModelListProps) {
                                         : (() => {
                                             const allAssignments =
                                               o.jobWorkAssignments || [];
-                                            const assignmentNames = allAssignments
-                                              .map((a) => a.jobWorkName)
-                                              .filter(Boolean);
+                                            const assignmentNames =
+                                              allAssignments
+                                                .map((a) => a.jobWorkName)
+                                                .filter(Boolean);
 
                                             const jobWorkIdNames = (
                                               (o as any).jobWorkIds || []
@@ -1104,9 +1105,10 @@ export default function ModelList(props: ModelListProps) {
                                             if (hasPendingJW) {
                                               const allAssignments =
                                                 o.jobWorkAssignments || [];
-                                              const assignmentNames = allAssignments
-                                                .map((a) => a.jobWorkName)
-                                                .filter(Boolean);
+                                              const assignmentNames =
+                                                allAssignments
+                                                  .map((a) => a.jobWorkName)
+                                                  .filter(Boolean);
 
                                               const jobWorkIdNames = (
                                                 (o as any).jobWorkIds || []
@@ -1424,8 +1426,13 @@ export default function ModelList(props: ModelListProps) {
                     // Multiple small delays to give the hook time to fetch and subscribers time to update
                     for (let i = 0; i < 5; i++) {
                       await new Promise((resolve) => setTimeout(resolve, 50));
-                      const updated = props.orders.find((x) => x.id === orderId);
-                      if (updated?.jobWorkAssignments && updated.jobWorkAssignments.length > 0) {
+                      const updated = props.orders.find(
+                        (x) => x.id === orderId,
+                      );
+                      if (
+                        updated?.jobWorkAssignments &&
+                        updated.jobWorkAssignments.length > 0
+                      ) {
                         break;
                       }
                     }
