@@ -34,6 +34,23 @@ export default function Index() {
     [pipeline],
   );
 
+  // Fetch ReStok items
+  const fetchRestokItems = useCallback(async () => {
+    try {
+      const response = await fetch("/api/restok/items");
+      if (response.ok) {
+        const data = await response.json();
+        setRestokItems(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch restok items:", error);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchRestokItems();
+  }, [fetchRestokItems]);
+
   const total = pipeline.orders.length;
   const running = pipeline.orders.filter((o) => {
     const idx = o.currentStepIndex;
