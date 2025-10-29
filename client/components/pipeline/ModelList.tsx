@@ -1543,6 +1543,11 @@ export default function ModelList(props: ModelListProps) {
                     selectedOrderForJWModal.id,
                     validAssignments,
                   );
+                  // Update local state immediately for instant UI feedback
+                  setSelectedOrderForJWModal({
+                    ...selectedOrderForJWModal,
+                    jobWorkAssignments: validAssignments,
+                  });
                 }
               }}
               onComplete={(jobWorkId, completionDate) => {
