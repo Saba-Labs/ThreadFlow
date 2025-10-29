@@ -122,12 +122,12 @@ function initializeHandler() {
   // Roadmaps routes
   app.get("/api/roadmaps", getRoadmaps);
   app.post("/api/roadmaps", createRoadmap);
+  app.post("/api/roadmaps/move-model", moveModelBetweenRoadmaps);
   app.put("/api/roadmaps/:id", updateRoadmap);
   app.delete("/api/roadmaps/:id", deleteRoadmap);
   app.post("/api/roadmaps/:roadmapId/models", addModelToRoadmap);
   app.delete("/api/roadmaps/:roadmapId/models/:modelId", removeModelFromRoadmap);
   app.put("/api/roadmaps/:roadmapId/reorder", reorderRoadmapItems);
-  app.post("/api/roadmaps/move-model", moveModelBetweenRoadmaps);
 
   // Machine types routes
   app.get("/api/machine-types", getMachineTypes);
