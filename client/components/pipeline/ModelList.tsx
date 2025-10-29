@@ -35,7 +35,7 @@ interface ModelListProps {
     orderId: string,
     editor: (steps: PathStep[]) => PathStep[],
   ) => void;
-  onSplit: (orderId: string, quantities: number[]) => void;
+  onSplit: (orderId: string, quantities: number[]) => Promise<void>;
   onSetStepStatus: (
     orderId: string,
     stepIndex: number,
