@@ -263,29 +263,57 @@ export function useProductionPipeline() {
         Pick<PathStep, "status" | "activeMachines" | "quantityDone">
       >,
     ) => {
-      try {
-        const response = await fetch(
-          `/api/pipeline/orders/${orderId}/steps/${stepIndex}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(patch),
-          },
-        );
-        if (!response.ok) throw new Error("Failed to update step status");
-        setStore((s) => ({
-          orders: s.orders.map((o) => {
-            if (o.id !== orderId) return o;
-            const steps = o.steps.map((st, i) =>
-              i === stepIndex ? { ...st, ...patch } : st,
+      // Store the previous state for rollback
+      const order = STORE.orders.find((o) => o.id === orderId);
+      const previousStep = order?.steps[stepIndex];
+
+      // Optimistic update - change status immediately
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const steps = o.steps.map((st, i) =>
+            i === stepIndex ? { ...st, ...patch } : st,
+          );
+          return { ...o, steps };
+        }),
+      }));
+
+      // Background sync
+      syncQueue.enqueue(
+        createSyncTask(
+          "updateStepStatus",
+          async () => {
+            const response = await fetch(
+              `/api/pipeline/orders/${orderId}/steps/${stepIndex}`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(patch),
+              },
             );
-            return { ...o, steps };
-          }),
-        }));
-      } catch (error) {
-        console.error("Failed to update step status:", error);
-        throw error;
-      }
+            if (!response.ok) throw new Error("Failed to update step status");
+          },
+          () => {
+            // On error, revert to previous state
+            if (previousStep) {
+              setStore((s) => ({
+                orders: s.orders.map((o) => {
+                  if (o.id !== orderId) return o;
+                  const steps = o.steps.map((st, i) =>
+                    i === stepIndex ? previousStep : st,
+                  );
+                  return { ...o, steps };
+                }),
+              }));
+            }
+            toast({
+              title: "Error",
+              description: "Failed to update step status.",
+              variant: "destructive",
+            });
+          },
+        ),
+      );
     },
     [],
   );
