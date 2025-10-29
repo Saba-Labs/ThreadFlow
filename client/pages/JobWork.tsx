@@ -265,8 +265,13 @@ export default function JobWork() {
             );
           })}
 
+          {displayed.length === 0 && local.length > 0 && (
+            <div key="no-results" className="p-6 text-sm text-muted-foreground">
+              No matching job works found.
+            </div>
+          )}
           {local.length === 0 && (
-            <div className="p-6 text-sm text-muted-foreground">
+            <div key="empty" className="p-6 text-sm text-muted-foreground">
               No job works yet.
             </div>
           )}
