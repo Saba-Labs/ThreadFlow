@@ -158,6 +158,173 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Roadmap board */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-medium">Roadmaps</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setRoadmapExpanded(!roadmapExpanded)}
+              className="p-1 h-auto"
+              title={roadmapExpanded ? "Collapse roadmaps" : "Expand roadmaps"}
+            >
+              {roadmapExpanded ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {roadmapExpanded && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {roadmaps.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card col-span-full">
+                <p>No roadmaps yet</p>
+              </div>
+            ) : (
+              roadmaps.map((r) => (
+                <div
+                  key={r.id}
+                  className="rounded-lg border bg-card/50 shadow-sm overflow-hidden p-4"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                      {r.title.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm truncate">
+                        {r.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {r.items.length} model{r.items.length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  {r.items.length > 0 && (
+                    <div className="space-y-1">
+                      {r.items.slice(0, 3).map((item) => (
+                        <div
+                          key={`${r.id}-${item.modelId}`}
+                          className="text-xs text-muted-foreground truncate"
+                        >
+                          • {item.modelName} ({item.quantity})
+                        </div>
+                      ))}
+                      {r.items.length > 3 && (
+                        <div className="text-xs text-muted-foreground">
+                          +{r.items.length - 3} more
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* ReStok board */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-medium">ReStok</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setRestokExpanded(!restokExpanded)}
+              className="p-1 h-auto"
+              title={restokExpanded ? "Collapse restok" : "Expand restok"}
+            >
+              {restokExpanded ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {restokExpanded && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {restokItems.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card col-span-full">
+                <p>No items yet</p>
+              </div>
+            ) : (
+              restokItems.map((item) => {
+                const getStockStatus = (quantity: number, lowStock: number) => {
+                  if (quantity === 0) return "out-of-stock";
+                  if (quantity < lowStock) return "low-stock";
+                  return "normal";
+                };
+
+                const getItemStockStatus = (item: any): string => {
+                  if (item.subItems && item.subItems.length > 0) {
+                    if (item.subItems.some((sub: any) => sub.quantity === 0))
+                      return "out-of-stock";
+                    if (item.subItems.some((sub: any) => sub.quantity < sub.lowStock))
+                      return "low-stock";
+                    return "normal";
+                  }
+                  return getStockStatus(item.quantity, item.lowStock);
+                };
+
+                const getStatusColor = (status: string) => {
+                  if (status === "out-of-stock") return "bg-red-100 border border-red-300";
+                  if (status === "low-stock") return "bg-yellow-100 border border-yellow-300";
+                  return "bg-green-100 border border-green-300";
+                };
+
+                const getStatusBadge = (status: string) => {
+                  if (status === "out-of-stock")
+                    return <span className="text-xs font-bold text-red-700">OUT OF STOCK</span>;
+                  if (status === "low-stock")
+                    return <span className="text-xs font-bold text-yellow-700">LOW STOCK</span>;
+                  return <span className="text-xs font-bold text-green-700">NORMAL</span>;
+                };
+
+                const status = getItemStockStatus(item);
+                return (
+                  <div
+                    key={item.id}
+                    className={`rounded-lg p-4 ${getStatusColor(status)}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">
+                          {item.name}
+                        </h3>
+                        {item.note && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {item.note}
+                          </p>
+                        )}
+                        {item.subItems && item.subItems.length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {item.subItems.length} sub-item{item.subItems.length !== 1 ? "s" : ""}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        {item.subItems && item.subItems.length === 0 && (
+                          <p className="font-bold text-sm mb-1">{item.quantity}</p>
+                        )}
+                        {getStatusBadge(status)}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </section>
+
       {/* Machine board */}
       <section>
         <div className="flex items-center justify-between mb-4">
