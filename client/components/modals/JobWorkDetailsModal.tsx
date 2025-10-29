@@ -5,6 +5,7 @@ import SimpleModal from "@/components/ui/SimpleModal";
 import { useJobWorks } from "@/lib/jobWorks";
 import type { JobWorkAssignment } from "@/hooks/useProductionPipeline";
 import { Trash2, Edit2, Check, Plus } from "lucide-react";
+import { useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
