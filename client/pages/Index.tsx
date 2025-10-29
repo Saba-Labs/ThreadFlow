@@ -352,32 +352,30 @@ export default function Index() {
 
       {/* Machine board */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-medium">Machines</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMachineListExpanded(!machineListExpanded)}
-              className="p-1 h-auto"
-              title={machineListExpanded ? "Collapse machines list" : "Expand machines list"}
-            >
-              {machineListExpanded ? (
-                <ChevronUp className="h-5 w-5" />
-              ) : (
-                <ChevronDown className="h-5 w-5" />
-              )}
-            </Button>
+        <button
+          onClick={() => setMachineListExpanded(!machineListExpanded)}
+          className="w-full mb-6 group"
+          title={machineListExpanded ? "Collapse machines list" : "Expand machines list"}
+        >
+          <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 hover:border-purple-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-purple-100 group-hover:to-pink-100">
+            <Layers className="h-6 w-6 text-purple-600 flex-shrink-0" />
+            <h2 className="text-lg font-semibold text-slate-900 flex-1 text-left">
+              Machines
+            </h2>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200">
+                {Object.values(pipeline.board).flat().length}
+              </Badge>
+              <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
+                {machineListExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-purple-600 transition-transform duration-300" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-purple-600 transition-transform duration-300" />
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
-              Refresh
-            </Button>
-            <Button variant="ghost" size="sm">
-              Filters
-            </Button>
-          </div>
-        </div>
+        </button>
 
         {machineListExpanded && (
           <MachineBoard
