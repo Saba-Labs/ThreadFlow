@@ -1446,14 +1446,14 @@ export default function ModelList(props: ModelListProps) {
               onUpdateAssignments={async (assignments) => {
                 const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
                 if (o) {
-                  // Validate that all assignments have jobWorkId before sending
-                  const validAssignments = assignments.every(
+                  // Filter out assignments without jobWorkId and validate remaining ones
+                  const validAssignments = assignments.filter(
                     (a) => a.jobWorkId,
                   );
-                  if (!validAssignments) {
+                  if (validAssignments.length === 0 && assignments.length > 0) {
                     throw new Error("Invalid assignments: missing jobWorkId");
                   }
-                  await props.setJobWorkAssignments?.(o.id, assignments);
+                  await props.setJobWorkAssignments?.(o.id, validAssignments);
                 }
               }}
               onComplete={(jobWorkId, completionDate) => {
