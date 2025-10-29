@@ -1759,11 +1759,26 @@ export default function ModelList(props: ModelListProps) {
             title={`Split into Batches ���� ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setSplitForId(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setSplitForId(null)}
+                  disabled={isSplitting}
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleSplit}>
-                  Split into {splitInputs.filter((q) => q > 0).length} Batches
+                <Button
+                  onClick={handleSplit}
+                  disabled={isSplitting}
+                  className={isSplitting ? "opacity-70 cursor-not-allowed" : ""}
+                >
+                  {isSplitting ? (
+                    <>
+                      <span className="inline-block animate-spin mr-2">⏳</span>
+                      Splitting...
+                    </>
+                  ) : (
+                    `Split into ${splitInputs.filter((q) => q > 0).length} Batches`
+                  )}
                 </Button>
               </div>
             }
