@@ -139,7 +139,22 @@ export default function Index() {
       {/* Machine board */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium">Machines</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-medium">Machines</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMachineListExpanded(!machineListExpanded)}
+              className="p-1 h-auto"
+              title={machineListExpanded ? "Collapse machines list" : "Expand machines list"}
+            >
+              {machineListExpanded ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm">
               Refresh
@@ -150,24 +165,26 @@ export default function Index() {
           </div>
         </div>
 
-        <MachineBoard
-          data={pipeline.board}
-          onRun={(o) => {
-            if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
-              return;
-            pipeline.updateStepStatus(o.id, o.currentStepIndex, {
-              status: "running",
-            });
-          }}
-          onHold={(o) => {
-            if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
-              return;
-            pipeline.updateStepStatus(o.id, o.currentStepIndex, {
-              status: "hold",
-            });
-          }}
-          onNext={(o) => handleMoveNext(o.id)}
-        />
+        {machineListExpanded && (
+          <MachineBoard
+            data={pipeline.board}
+            onRun={(o) => {
+              if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
+                return;
+              pipeline.updateStepStatus(o.id, o.currentStepIndex, {
+                status: "running",
+              });
+            }}
+            onHold={(o) => {
+              if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
+                return;
+              pipeline.updateStepStatus(o.id, o.currentStepIndex, {
+                status: "hold",
+              });
+            }}
+            onNext={(o) => handleMoveNext(o.id)}
+          />
+        )}
       </section>
     </div>
   );
