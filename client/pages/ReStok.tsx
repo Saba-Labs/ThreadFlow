@@ -257,7 +257,7 @@ export default function ReStok() {
             // Could not parse error response
           }
         }
-        console.error("Server response error:", { status: response.status, body: errorMsg });
+        console.error(`Server error (${response.status}): ${errorMsg}`);
         throw new Error(errorMsg);
       }
       setItems(
