@@ -878,6 +878,55 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                         </tr>
+                        {viewMode === "list" && toggledIds.includes(o.id) && (
+                          <tr className="bg-muted/10">
+                            <td colSpan={100} className="p-4">
+                              <div className="space-y-3">
+                                {!showDetails && (
+                                  <>
+                                    <div className="text-sm">
+                                      <span className="text-muted-foreground">Date: </span>
+                                      <span className="font-medium">
+                                        {formatDate(o.createdAt)}
+                                      </span>
+                                    </div>
+                                    {o.quantity > 0 && (
+                                      <div className="text-sm">
+                                        <span className="text-muted-foreground">Qty: </span>
+                                        <span className="font-medium">{o.quantity}</span>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
+                                {!showDetails && (
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">Path: </span>
+                                    <div className="flex flex-wrap items-center gap-1 mt-1">
+                                      {getPathLetterPills(o, (orderId, stepIdx) => {
+                                        const stepAtIdx = o.steps[stepIdx];
+                                        if (
+                                          stepAtIdx.kind === "machine" &&
+                                          stepAtIdx.machineType
+                                        ) {
+                                          const machineIndex = machineTypes.findIndex(
+                                            (m) => m.name === stepAtIdx.machineType,
+                                          );
+                                          if (machineIndex >= 0) {
+                                            props.onToggleParallelMachine(
+                                              orderId,
+                                              o.currentStepIndex,
+                                              machineIndex,
+                                            );
+                                          }
+                                        }
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
                         {isMobile && toggledIds.includes(o.id) && (
                           <tr>
                             <td colSpan={emptyColSpan} className="p-2">
