@@ -289,7 +289,16 @@ export default function ReStok() {
           subItems: item.subItems.filter((s) => s.id !== subItemId),
         }),
       });
-      if (!response.ok) throw new Error("Failed to delete sub-item");
+      if (!response.ok) {
+        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch {
+          // Could not parse error response
+        }
+        throw new Error(errorMsg);
+      }
       setItems(
         items.map((i) =>
           i.id === parentItemId
@@ -302,6 +311,7 @@ export default function ReStok() {
       );
     } catch (error) {
       console.error("Failed to delete sub-item:", error);
+      throw error;
     }
   };
 
