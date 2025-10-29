@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
 import { useSSESubscription } from "./useSSESubscription";
+import { syncQueue, createSyncTask } from "@/lib/backgroundSync";
+import { toast } from "./use-toast";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
 
@@ -133,34 +135,84 @@ export function useProductionPipeline() {
         jobWorkAssignments: [],
       };
 
-      try {
-        const response = await fetch("/api/pipeline/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(order),
-        });
-        if (!response.ok) throw new Error("Failed to create order");
-        await fetchFromServer();
-        return order.id;
-      } catch (error) {
-        console.error("Failed to create work order:", error);
-        throw error;
-      }
+      // Optimistic update - show the new order immediately
+      setStore((s) => ({ orders: [...s.orders, order] }));
+
+      // Background sync - send to server without blocking UI
+      syncQueue.enqueue(
+        createSyncTask(
+          "createWorkOrder",
+          async () => {
+            const response = await fetch("/api/pipeline/orders", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(order),
+            });
+            if (!response.ok) throw new Error("Failed to create order");
+          },
+          (error) => {
+            // On error, remove the optimistic order and show toast
+            setStore((s) => ({
+              orders: s.orders.filter((o) => o.id !== order.id),
+            }));
+            toast({
+              title: "Error",
+              description: "Failed to create model. It has been removed.",
+              variant: "destructive",
+            });
+          },
+          () => {
+            toast({
+              title: "Success",
+              description: "Model created successfully",
+            });
+          },
+        ),
+      );
+
+      return order.id;
     },
     [],
   );
 
   const deleteOrder = useCallback(async (orderId: string) => {
-    try {
-      const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete order");
-      setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
-    } catch (error) {
-      console.error("Failed to delete order:", error);
-      throw error;
-    }
+    // Store the deleted order for potential rollback
+    const deletedOrder = STORE.orders.find((o) => o.id === orderId);
+
+    // Optimistic update - remove immediately
+    setStore((s) => ({ orders: s.orders.filter((o) => o.id !== orderId) }));
+
+    // Background sync
+    syncQueue.enqueue(
+      createSyncTask(
+        "deleteOrder",
+        async () => {
+          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) throw new Error("Failed to delete order");
+        },
+        (error) => {
+          // On error, restore the deleted order
+          if (deletedOrder) {
+            setStore((s) => ({
+              orders: [...s.orders, deletedOrder],
+            }));
+          }
+          toast({
+            title: "Error",
+            description: "Failed to delete model. It has been restored.",
+            variant: "destructive",
+          });
+        },
+        () => {
+          toast({
+            title: "Success",
+            description: "Model deleted successfully",
+          });
+        },
+      ),
+    );
   }, []);
 
   const editPath = useCallback(
@@ -211,29 +263,57 @@ export function useProductionPipeline() {
         Pick<PathStep, "status" | "activeMachines" | "quantityDone">
       >,
     ) => {
-      try {
-        const response = await fetch(
-          `/api/pipeline/orders/${orderId}/steps/${stepIndex}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(patch),
-          },
-        );
-        if (!response.ok) throw new Error("Failed to update step status");
-        setStore((s) => ({
-          orders: s.orders.map((o) => {
-            if (o.id !== orderId) return o;
-            const steps = o.steps.map((st, i) =>
-              i === stepIndex ? { ...st, ...patch } : st,
+      // Store the previous state for rollback
+      const order = STORE.orders.find((o) => o.id === orderId);
+      const previousStep = order?.steps[stepIndex];
+
+      // Optimistic update - change status immediately
+      setStore((s) => ({
+        orders: s.orders.map((o) => {
+          if (o.id !== orderId) return o;
+          const steps = o.steps.map((st, i) =>
+            i === stepIndex ? { ...st, ...patch } : st,
+          );
+          return { ...o, steps };
+        }),
+      }));
+
+      // Background sync
+      syncQueue.enqueue(
+        createSyncTask(
+          "updateStepStatus",
+          async () => {
+            const response = await fetch(
+              `/api/pipeline/orders/${orderId}/steps/${stepIndex}`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(patch),
+              },
             );
-            return { ...o, steps };
-          }),
-        }));
-      } catch (error) {
-        console.error("Failed to update step status:", error);
-        throw error;
-      }
+            if (!response.ok) throw new Error("Failed to update step status");
+          },
+          () => {
+            // On error, revert to previous state
+            if (previousStep) {
+              setStore((s) => ({
+                orders: s.orders.map((o) => {
+                  if (o.id !== orderId) return o;
+                  const steps = o.steps.map((st, i) =>
+                    i === stepIndex ? previousStep : st,
+                  );
+                  return { ...o, steps };
+                }),
+              }));
+            }
+            toast({
+              title: "Error",
+              description: "Failed to update step status.",
+              variant: "destructive",
+            });
+          },
+        ),
+      );
     },
     [],
   );
@@ -244,84 +324,73 @@ export function useProductionPipeline() {
       if (!order) throw new Error("Order not found");
 
       const idx = order.currentStepIndex;
+      const previousOrder = order;
       const steps = order.steps.slice();
+      let newIndex: number;
 
       if (idx < 0) {
         if (steps.length > 0 && steps[0]) {
           steps[0] = { ...steps[0], status: "hold", activeMachines: 0 };
         }
-        const newIndex = 0;
-        try {
-          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              modelName: order.modelName,
-              quantity: order.quantity,
-              currentStepIndex: newIndex,
-              steps,
-            }),
-          });
-          if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(
-              `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-            );
-          }
-          setStore((s) => ({
-            orders: s.orders.map((o) =>
-              o.id === orderId
-                ? { ...o, steps, currentStepIndex: newIndex }
-                : o,
-            ),
-          }));
-        } catch (error) {
-          console.error("Failed to move to next step:", error);
-          throw error;
+        newIndex = 0;
+      } else {
+        if (steps[idx]) {
+          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
         }
-        return;
-      }
-
-      if (steps[idx]) {
-        steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
-      }
-
-      const nextIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
-
-      if (nextIndex < steps.length && steps[nextIndex]) {
-        steps[nextIndex] = {
-          ...steps[nextIndex],
-          status: "hold",
-          activeMachines: 0,
-        };
-      }
-
-      try {
-        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            modelName: order.modelName,
-            quantity: order.quantity,
-            currentStepIndex: nextIndex,
-            steps,
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(
-            `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-          );
+        newIndex = idx + 1 < steps.length ? idx + 1 : steps.length;
+        if (newIndex < steps.length && steps[newIndex]) {
+          steps[newIndex] = {
+            ...steps[newIndex],
+            status: "hold",
+            activeMachines: 0,
+          };
         }
-        setStore((s) => ({
-          orders: s.orders.map((o) =>
-            o.id === orderId ? { ...o, steps, currentStepIndex: nextIndex } : o,
-          ),
-        }));
-      } catch (error) {
-        console.error("Failed to move to next step:", error);
-        throw error;
       }
+
+      // Optimistic update - change step immediately
+      setStore((s) => ({
+        orders: s.orders.map((o) =>
+          o.id === orderId ? { ...o, steps, currentStepIndex: newIndex } : o,
+        ),
+      }));
+
+      // Background sync
+      syncQueue.enqueue(
+        createSyncTask(
+          "moveToNextStep",
+          async () => {
+            const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                modelName: order.modelName,
+                quantity: order.quantity,
+                currentStepIndex: newIndex,
+                steps,
+              }),
+            });
+            if (!response.ok) {
+              const errorData = await response.text();
+              throw new Error(
+                `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+              );
+            }
+          },
+          () => {
+            // On error, revert to previous state
+            setStore((s) => ({
+              orders: s.orders.map((o) =>
+                o.id === orderId ? previousOrder : o,
+              ),
+            }));
+            toast({
+              title: "Error",
+              description: "Failed to move to next step.",
+              variant: "destructive",
+            });
+          },
+        ),
+      );
     },
     [state.orders],
   );
@@ -331,81 +400,79 @@ export function useProductionPipeline() {
       const order = state.orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Order not found");
 
+      const previousOrder = order;
       const idx = order.currentStepIndex;
+      let target: number;
+      const steps = order.steps.slice();
 
       if (idx === 0) {
-        try {
-          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              modelName: order.modelName,
-              quantity: order.quantity,
-              currentStepIndex: -1,
-              steps: order.steps,
-            }),
-          });
-          if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(
-              `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-            );
-          }
-          setStore((s) => ({
-            orders: s.orders.map((o) =>
-              o.id === orderId ? { ...o, currentStepIndex: -1 } : o,
-            ),
-          }));
-        } catch (error) {
-          console.error("Failed to move to prev step:", error);
-          throw error;
-        }
+        target = -1;
+      } else if (idx < 0) {
         return;
-      }
-
-      if (idx < 0) return;
-
-      const steps = order.steps.slice();
-      const target = idx - 1;
-
-      if (idx >= 0 && steps[idx]) {
-        steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
-      }
-
-      if (target >= 0 && steps[target]) {
-        steps[target] = {
-          ...steps[target],
-          status: "hold",
-          activeMachines: 0,
-        };
-      }
-
-      try {
-        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            modelName: order.modelName,
-            quantity: order.quantity,
-            currentStepIndex: target,
-            steps,
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(
-            `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-          );
+      } else {
+        target = idx - 1;
+        if (idx >= 0 && steps[idx]) {
+          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
         }
-        setStore((s) => ({
-          orders: s.orders.map((o) =>
-            o.id === orderId ? { ...o, steps, currentStepIndex: target } : o,
-          ),
-        }));
-      } catch (error) {
-        console.error("Failed to move to prev step:", error);
-        throw error;
+        if (target >= 0 && steps[target]) {
+          steps[target] = {
+            ...steps[target],
+            status: "hold",
+            activeMachines: 0,
+          };
+        }
       }
+
+      // Optimistic update
+      setStore((s) => ({
+        orders: s.orders.map((o) =>
+          o.id === orderId
+            ? {
+                ...o,
+                steps: target === -1 ? o.steps : steps,
+                currentStepIndex: target,
+              }
+            : o,
+        ),
+      }));
+
+      // Background sync
+      syncQueue.enqueue(
+        createSyncTask(
+          "moveToPrevStep",
+          async () => {
+            const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                modelName: order.modelName,
+                quantity: order.quantity,
+                currentStepIndex: target,
+                steps: target === -1 ? order.steps : steps,
+              }),
+            });
+            if (!response.ok) {
+              const errorData = await response.text();
+              throw new Error(
+                `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+              );
+            }
+          },
+          () => {
+            // On error, revert
+            setStore((s) => ({
+              orders: s.orders.map((o) =>
+                o.id === orderId ? previousOrder : o,
+              ),
+            }));
+            toast({
+              title: "Error",
+              description: "Failed to move to previous step.",
+              variant: "destructive",
+            });
+          },
+        ),
+      );
     },
     [state.orders],
   );

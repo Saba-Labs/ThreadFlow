@@ -144,9 +144,6 @@ export default function ModelList(props: ModelListProps) {
 
     const sourceRect = rectsBefore.get(parentId) || null;
 
-    // perform split (synchronous state update)
-    props.onSplit(parentId, validQuantities);
-
     // next paint: detect new children, expand them (so they render for animation), then measure after and animate
     requestAnimationFrame(() => {
       const allElsAfter = Array.from(
@@ -447,9 +444,9 @@ export default function ModelList(props: ModelListProps) {
   }, [showDetails, sorted]);
 
   const toggleExpanded = (id: string) => {
-    // Disable toggling only when desktop forces showDetails. On mobile
-    // allow toggling even when showDetails is true (eye open).
-    if (!isMobile && showDetails) return;
+    // Allow toggling in list view mode on desktop, or on mobile
+    // Only disable toggling in card view on desktop when showDetails is true
+    if (!isMobile && showDetails && viewMode === "cards") return;
 
     setToggledIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
@@ -552,7 +549,14 @@ export default function ModelList(props: ModelListProps) {
                             className="p-3 font-medium text-gray-900 dark:text-gray-100"
                             style={{ width: "120px" }}
                           >
-                            <div className="text-left break-words whitespace-normal flex items-start gap-2">
+                            <div
+                              className={`text-left break-words whitespace-normal flex items-start gap-2 ${viewMode === "list" ? "cursor-pointer hover:opacity-70 transition-opacity" : ""}`}
+                              onClick={() => {
+                                if (viewMode === "list") {
+                                  toggleExpanded(o.id);
+                                }
+                              }}
+                            >
                               {!showDetails && (
                                 <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
                                   {formatDateShort(o.createdAt)}
@@ -874,6 +878,69 @@ export default function ModelList(props: ModelListProps) {
                             </td>
                           )}
                         </tr>
+                        {viewMode === "list" && toggledIds.includes(o.id) && (
+                          <tr className="bg-muted/10">
+                            <td colSpan={100} className="p-4">
+                              <div className="space-y-3">
+                                {!showDetails && (
+                                  <>
+                                    <div className="text-sm">
+                                      <span className="text-muted-foreground">
+                                        Date:{" "}
+                                      </span>
+                                      <span className="font-medium">
+                                        {formatDate(o.createdAt)}
+                                      </span>
+                                    </div>
+                                    {o.quantity > 0 && (
+                                      <div className="text-sm">
+                                        <span className="text-muted-foreground">
+                                          Qty:{" "}
+                                        </span>
+                                        <span className="font-medium">
+                                          {o.quantity}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
+                                {!showDetails && (
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">
+                                      Path:{" "}
+                                    </span>
+                                    <div className="flex flex-wrap items-center gap-1 mt-1">
+                                      {getPathLetterPills(
+                                        o,
+                                        (orderId, stepIdx) => {
+                                          const stepAtIdx = o.steps[stepIdx];
+                                          if (
+                                            stepAtIdx.kind === "machine" &&
+                                            stepAtIdx.machineType
+                                          ) {
+                                            const machineIndex =
+                                              machineTypes.findIndex(
+                                                (m) =>
+                                                  m.name ===
+                                                  stepAtIdx.machineType,
+                                              );
+                                            if (machineIndex >= 0) {
+                                              props.onToggleParallelMachine(
+                                                orderId,
+                                                o.currentStepIndex,
+                                                machineIndex,
+                                              );
+                                            }
+                                          }
+                                        },
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
                         {isMobile && toggledIds.includes(o.id) && (
                           <tr>
                             <td colSpan={emptyColSpan} className="p-2">
