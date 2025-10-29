@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 
 export default function Index() {
   const pipeline = useProductionPipeline();
+  const [machineListExpanded, setMachineListExpanded] = useState(true);
 
   const handleMoveNext = useCallback(
     async (id: string) => {
