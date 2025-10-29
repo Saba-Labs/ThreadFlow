@@ -23,7 +23,9 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
     let pollingInterval: NodeJS.Timeout | null = null;
 
     function setupPollingFallback() {
-      console.log("[SSE Fallback] SSE not available, switching to polling every 2 seconds");
+      console.log(
+        "[SSE Fallback] SSE not available, switching to polling every 2 seconds",
+      );
       sseFailedRef.current = true;
 
       pollingInterval = setInterval(() => {
@@ -70,7 +72,10 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         };
 
         eventSource.onerror = () => {
-          console.log("[SSE] Connection error, readyState:", eventSource?.readyState);
+          console.log(
+            "[SSE] Connection error, readyState:",
+            eventSource?.readyState,
+          );
           if (eventSource) {
             eventSource.close();
             eventSource = null;

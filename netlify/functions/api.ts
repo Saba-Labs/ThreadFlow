@@ -132,7 +132,10 @@ function initializeHandler() {
   app.put("/api/roadmaps/:id", updateRoadmap);
   app.delete("/api/roadmaps/:id", deleteRoadmap);
   app.post("/api/roadmaps/:roadmapId/models", addModelToRoadmap);
-  app.delete("/api/roadmaps/:roadmapId/models/:modelId", removeModelFromRoadmap);
+  app.delete(
+    "/api/roadmaps/:roadmapId/models/:modelId",
+    removeModelFromRoadmap,
+  );
   app.put("/api/roadmaps/:roadmapId/reorder", reorderRoadmapItems);
 
   // Machine types routes
