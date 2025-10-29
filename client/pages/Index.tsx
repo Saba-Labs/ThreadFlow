@@ -23,6 +23,7 @@ export default function Index() {
   const pipeline = useProductionPipeline();
   const { roadmaps } = useRoadmaps();
   const [machineListExpanded, setMachineListExpanded] = useState(true);
+  const [modelStatusExpanded, setModelStatusExpanded] = useState(true);
   const [roadmapExpanded, setRoadmapExpanded] = useState(true);
   const [restokExpanded, setRestokExpanded] = useState(true);
   const [restokItems, setRestokItems] = useState<any[]>([]);
