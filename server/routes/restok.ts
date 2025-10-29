@@ -198,6 +198,7 @@ export const deleteRestokItem: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting restok item:", error);
-    res.status(500).json({ error: "Failed to delete item" });
+    const errorMessage = error instanceof Error ? error.message : "Failed to delete item";
+    res.status(500).json({ error: errorMessage });
   }
 };
