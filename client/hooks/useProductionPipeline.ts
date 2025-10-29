@@ -469,47 +469,48 @@ export function useProductionPipeline() {
     [],
   );
 
-  const splitOrder = useCallback((orderId: string, quantities: number[]) => {
+  const splitOrder = useCallback(async (orderId: string, quantities: number[]) => {
+    const src = state.orders.find((o) => o.id === orderId);
+    if (!src) return;
+
+    const valid = quantities
+      .map((q) => Math.max(0, Math.floor(q)))
+      .filter((q) => q > 0);
+    const sum = valid.reduce((a, b) => a + b, 0);
+    if (sum <= 0) return;
+    if (src.quantity > 0 && sum >= src.quantity) return;
+    const remainder = src.quantity - sum;
+
+    const createChild = (q: number): WorkOrder => ({
+      id: uid("order"),
+      modelName: src.modelName,
+      quantity: q,
+      createdAt: Date.now(),
+      steps: src.steps.map((st) => ({
+        ...st,
+        id: uid("step"),
+        status:
+          st.status === "completed"
+            ? ("completed" as StepStatus)
+            : ("hold" as StepStatus),
+        activeMachines: 0,
+        quantityDone: 0,
+      })),
+      currentStepIndex: src.currentStepIndex,
+      parentId: src.id,
+      parallelGroups: (src.parallelGroups || []).map((g) => ({
+        stepIndex: g.stepIndex,
+        machineIndices: g.machineIndices.slice(),
+        status: g.status as StepStatus,
+      })),
+      jobWorkAssignments: [],
+    });
+
+    const children = valid.map((q) => createChild(q));
+
+    // Update local state immediately
     setStore((s) => {
-      const src = s.orders.find((o) => o.id === orderId);
-      if (!src) return s;
-      const valid = quantities
-        .map((q) => Math.max(0, Math.floor(q)))
-        .filter((q) => q > 0);
-      const sum = valid.reduce((a, b) => a + b, 0);
-      if (sum <= 0) return s;
-      if (src.quantity > 0 && sum >= src.quantity) return s;
-      const remainder = src.quantity - sum;
-
-      const createChild = (q: number): WorkOrder => ({
-        id: uid("order"),
-        modelName: src.modelName,
-        quantity: q,
-        createdAt: Date.now(),
-        steps: src.steps.map((st) => ({
-          ...st,
-          id: uid("step"),
-          status:
-            st.status === "completed"
-              ? ("completed" as StepStatus)
-              : ("hold" as StepStatus),
-          activeMachines: 0,
-          quantityDone: 0,
-        })),
-        currentStepIndex: src.currentStepIndex,
-        parentId: src.id,
-        parallelGroups: (src.parallelGroups || []).map((g) => ({
-          stepIndex: g.stepIndex,
-          machineIndices: g.machineIndices.slice(),
-          status: g.status as StepStatus,
-        })),
-        jobWorkAssignments: [],
-      });
-
-      const children = valid.map((q) => createChild(q));
-
       const updatedSrc: WorkOrder = { ...src, quantity: remainder };
-
       const newOrders: WorkOrder[] = [];
       for (const o of s.orders) {
         if (o.id === src.id) {
@@ -519,10 +520,44 @@ export function useProductionPipeline() {
           newOrders.push(o);
         }
       }
-
       return { orders: newOrders };
     });
-  }, []);
+
+    // Persist to database
+    try {
+      // Update parent order with remainder quantity
+      await fetch(`/api/pipeline/orders/${orderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          modelName: src.modelName,
+          quantity: remainder,
+          currentStepIndex: src.currentStepIndex,
+          steps: src.steps,
+        }),
+      });
+
+      // Create child orders
+      for (const child of children) {
+        const response = await fetch("/api/pipeline/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(child),
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to create child order: ${response.statusText}`);
+        }
+      }
+
+      // Fetch updated state from server to ensure sync
+      await fetchFromServer();
+    } catch (error) {
+      console.error("Failed to persist split to database:", error);
+      // Revert local state on error
+      await fetchFromServer();
+      throw error;
+    }
+  }, [state.orders]);
 
   const machineTypes = useMachineTypes();
 
