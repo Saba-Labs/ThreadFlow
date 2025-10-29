@@ -400,81 +400,75 @@ export function useProductionPipeline() {
       const order = state.orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Order not found");
 
+      const previousOrder = order;
       const idx = order.currentStepIndex;
+      let target: number;
+      const steps = order.steps.slice();
 
       if (idx === 0) {
-        try {
-          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              modelName: order.modelName,
-              quantity: order.quantity,
-              currentStepIndex: -1,
-              steps: order.steps,
-            }),
-          });
-          if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(
-              `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-            );
-          }
-          setStore((s) => ({
-            orders: s.orders.map((o) =>
-              o.id === orderId ? { ...o, currentStepIndex: -1 } : o,
-            ),
-          }));
-        } catch (error) {
-          console.error("Failed to move to prev step:", error);
-          throw error;
-        }
+        target = -1;
+      } else if (idx < 0) {
         return;
-      }
-
-      if (idx < 0) return;
-
-      const steps = order.steps.slice();
-      const target = idx - 1;
-
-      if (idx >= 0 && steps[idx]) {
-        steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
-      }
-
-      if (target >= 0 && steps[target]) {
-        steps[target] = {
-          ...steps[target],
-          status: "hold",
-          activeMachines: 0,
-        };
-      }
-
-      try {
-        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            modelName: order.modelName,
-            quantity: order.quantity,
-            currentStepIndex: target,
-            steps,
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(
-            `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-          );
+      } else {
+        target = idx - 1;
+        if (idx >= 0 && steps[idx]) {
+          steps[idx] = { ...steps[idx], status: "hold", activeMachines: 0 };
         }
-        setStore((s) => ({
-          orders: s.orders.map((o) =>
-            o.id === orderId ? { ...o, steps, currentStepIndex: target } : o,
-          ),
-        }));
-      } catch (error) {
-        console.error("Failed to move to prev step:", error);
-        throw error;
+        if (target >= 0 && steps[target]) {
+          steps[target] = {
+            ...steps[target],
+            status: "hold",
+            activeMachines: 0,
+          };
+        }
       }
+
+      // Optimistic update
+      setStore((s) => ({
+        orders: s.orders.map((o) =>
+          o.id === orderId
+            ? { ...o, steps: target === -1 ? o.steps : steps, currentStepIndex: target }
+            : o,
+        ),
+      }));
+
+      // Background sync
+      syncQueue.enqueue(
+        createSyncTask(
+          "moveToPrevStep",
+          async () => {
+            const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                modelName: order.modelName,
+                quantity: order.quantity,
+                currentStepIndex: target,
+                steps: target === -1 ? order.steps : steps,
+              }),
+            });
+            if (!response.ok) {
+              const errorData = await response.text();
+              throw new Error(
+                `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
+              );
+            }
+          },
+          () => {
+            // On error, revert
+            setStore((s) => ({
+              orders: s.orders.map((o) =>
+                o.id === orderId ? previousOrder : o,
+              ),
+            }));
+            toast({
+              title: "Error",
+              description: "Failed to move to previous step.",
+              variant: "destructive",
+            });
+          },
+        ),
+      );
     },
     [state.orders],
   );
