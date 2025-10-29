@@ -4,7 +4,8 @@ export type DataChangeEvent =
   | { type: "pipeline_updated" }
   | { type: "jobworks_updated" }
   | { type: "machine_types_updated" }
-  | { type: "restok_updated" };
+  | { type: "restok_updated" }
+  | { type: "roadmaps_updated" };
 
 interface Client {
   res: Response;
