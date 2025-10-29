@@ -188,7 +188,11 @@ export default function Index() {
                 <div className="text-sm text-muted-foreground">Job Work</div>
                 <div className="mt-1 flex items-baseline justify-between gap-4">
                   <div className="text-2xl font-semibold text-green-700">
-                    {pipeline.orders.filter((o) => (o.jobWorkIds || []).length > 0).length}
+                    {pipeline.orders.filter(
+                      (o) =>
+                        (o.jobWorkAssignments || []).length > 0 ||
+                        ((o as any).jobWorkIds || []).length > 0,
+                    ).length}
                   </div>
                   <div className="text-xs text-muted-foreground">Assigned</div>
                 </div>
