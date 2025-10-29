@@ -697,38 +697,6 @@ export default function ModelList(props: ModelListProps) {
                                     step.status === "pending"
                                       ? "hold"
                                       : step.status;
-
-                                  let statusLabel = cap(displayStatus);
-                                  if (hasPendingJW) {
-                                    const allAssignments =
-                                      o.jobWorkAssignments || [];
-                                    const assignmentNames = allAssignments
-                                      .map((a) => a.jobWorkName)
-                                      .filter(Boolean);
-
-                                    const jobWorkIdNames = (
-                                      (o as any).jobWorkIds || []
-                                    )
-                                      .map((id: string) => {
-                                        const jw = jobWorks.find(
-                                          (j) => j.id === id,
-                                        );
-                                        return jw?.name;
-                                      })
-                                      .filter(Boolean);
-
-                                    const allNames = Array.from(
-                                      new Set([
-                                        ...assignmentNames,
-                                        ...jobWorkIdNames,
-                                      ]),
-                                    );
-
-                                    statusLabel = allNames.length > 0
-                                      ? allNames[0]
-                                      : "Job Work";
-                                  }
-
                                   return (
                                     <>
                                       <button
@@ -747,7 +715,9 @@ export default function ModelList(props: ModelListProps) {
                                           }`}
                                           aria-label={`Set status for ${o.modelName}`}
                                         >
-                                          {statusLabel}
+                                          {hasPendingJW
+                                            ? "Job Work"
+                                            : cap(displayStatus)}
                                         </Badge>
                                       </button>
                                     </>
