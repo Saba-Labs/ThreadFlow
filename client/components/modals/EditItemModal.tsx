@@ -79,8 +79,18 @@ export default function EditItemModal({
     try {
       await onSubmit(editingName, editingLowStock, editingNote);
       onOpenChange(false);
+      toast({
+        title: "Success",
+        description: "Item saved successfully",
+      });
     } catch (error) {
       console.error("Failed to submit:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to save item",
+        variant: "destructive",
+      });
     }
   };
 
@@ -92,8 +102,18 @@ export default function EditItemModal({
     try {
       await onDeleteItem();
       onOpenChange(false);
+      toast({
+        title: "Success",
+        description: "Item deleted successfully",
+      });
     } catch (error) {
       console.error("Failed to delete item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete item",
+        variant: "destructive",
+      });
     }
   };
 
