@@ -338,7 +338,16 @@ export default function ReStok() {
           ),
         }),
       });
-      if (!response.ok) throw new Error("Failed to update sub-item quantity");
+      if (!response.ok) {
+        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch {
+          // Could not parse error response
+        }
+        throw new Error(errorMsg);
+      }
       setItems(
         items.map((i) =>
           i.id === parentItemId
@@ -353,6 +362,7 @@ export default function ReStok() {
       );
     } catch (error) {
       console.error("Failed to update sub-item quantity:", error);
+      throw error;
     }
   };
 
