@@ -627,20 +627,16 @@ export default function ModelList(props: ModelListProps) {
 
                                       return (
                                         <div className="flex flex-col gap-0.5">
-                                          {allNames.length > 0 ? (
-                                            allNames.map((name) => (
-                                              <div
-                                                key={name}
-                                                className="font-medium text-purple-700 dark:text-purple-300"
-                                              >
-                                                {name}
-                                              </div>
-                                            ))
-                                          ) : (
-                                            <div className="font-medium text-purple-700 dark:text-purple-300">
-                                              Job Work
-                                            </div>
-                                          )}
+                                          {allNames.length > 0
+                                            ? allNames.map((name) => (
+                                                <div
+                                                  key={name}
+                                                  className="font-medium text-purple-700 dark:text-purple-300"
+                                                >
+                                                  {name}
+                                                </div>
+                                              ))
+                                            : null}
                                         </div>
                                       );
                                     }
@@ -648,7 +644,36 @@ export default function ModelList(props: ModelListProps) {
                                     const primaryMachine =
                                       step.kind === "machine"
                                         ? step.machineType
-                                        : "Job Work";
+                                        : (() => {
+                                            const allAssignments =
+                                              o.jobWorkAssignments || [];
+                                            const assignmentNames =
+                                              allAssignments
+                                                .map((a) => a.jobWorkName)
+                                                .filter(Boolean);
+
+                                            const jobWorkIdNames = (
+                                              (o as any).jobWorkIds || []
+                                            )
+                                              .map((id: string) => {
+                                                const jw = jobWorks.find(
+                                                  (j) => j.id === id,
+                                                );
+                                                return jw?.name;
+                                              })
+                                              .filter(Boolean);
+
+                                            const allNames = Array.from(
+                                              new Set([
+                                                ...assignmentNames,
+                                                ...jobWorkIdNames,
+                                              ]),
+                                            );
+
+                                            return allNames.length > 0
+                                              ? allNames[0]
+                                              : "Job Work";
+                                          })();
                                     const parallelGroup = (
                                       o.parallelGroups || []
                                     ).find((g) => g.stepIndex === i);
@@ -1076,9 +1101,39 @@ export default function ModelList(props: ModelListProps) {
                                                   : "bg-gray-500 text-white"
                                           }`}
                                         >
-                                          {hasPendingJW
-                                            ? "Job Work"
-                                            : cap(displayStatus)}
+                                          {(() => {
+                                            if (hasPendingJW) {
+                                              const allAssignments =
+                                                o.jobWorkAssignments || [];
+                                              const assignmentNames =
+                                                allAssignments
+                                                  .map((a) => a.jobWorkName)
+                                                  .filter(Boolean);
+
+                                              const jobWorkIdNames = (
+                                                (o as any).jobWorkIds || []
+                                              )
+                                                .map((id: string) => {
+                                                  const jw = jobWorks.find(
+                                                    (j) => j.id === id,
+                                                  );
+                                                  return jw?.name;
+                                                })
+                                                .filter(Boolean);
+
+                                              const allNames = Array.from(
+                                                new Set([
+                                                  ...assignmentNames,
+                                                  ...jobWorkIdNames,
+                                                ]),
+                                              );
+
+                                              return allNames.length > 0
+                                                ? allNames[0]
+                                                : "Job Work";
+                                            }
+                                            return cap(displayStatus);
+                                          })()}
                                         </Badge>
                                       </button>
                                     </div>
@@ -1201,9 +1256,38 @@ export default function ModelList(props: ModelListProps) {
                                               : "bg-gray-500 text-white"
                                       }`}
                                     >
-                                      {hasPendingJW
-                                        ? "Job Work"
-                                        : cap(displayStatus)}
+                                      {(() => {
+                                        if (hasPendingJW) {
+                                          const allAssignments =
+                                            o.jobWorkAssignments || [];
+                                          const assignmentNames = allAssignments
+                                            .map((a) => a.jobWorkName)
+                                            .filter(Boolean);
+
+                                          const jobWorkIdNames = (
+                                            (o as any).jobWorkIds || []
+                                          )
+                                            .map((id: string) => {
+                                              const jw = jobWorks.find(
+                                                (j) => j.id === id,
+                                              );
+                                              return jw?.name;
+                                            })
+                                            .filter(Boolean);
+
+                                          const allNames = Array.from(
+                                            new Set([
+                                              ...assignmentNames,
+                                              ...jobWorkIdNames,
+                                            ]),
+                                          );
+
+                                          return allNames.length > 0
+                                            ? allNames[0]
+                                            : "Job Work";
+                                        }
+                                        return cap(displayStatus);
+                                      })()}
                                     </Badge>
                                   </button>
                                 </>
@@ -1323,7 +1407,8 @@ export default function ModelList(props: ModelListProps) {
                 0
               }
               onAssign={async (assignments) => {
-                const o = sorted.find((x) => x.id === assignJobWorksModalId);
+                const orderId = assignJobWorksModalId;
+                const o = sorted.find((x) => x.id === orderId);
                 if (o) {
                   let targetIdx = o.currentStepIndex;
                   if (o.steps.length > 0 && targetIdx < 0) {
@@ -1335,11 +1420,28 @@ export default function ModelList(props: ModelListProps) {
                   }
                   try {
                     await props.setJobWorkAssignments?.(o.id, assignments);
+                    // After saving, close the assign modal
+                    setAssignJobWorksModalId(null);
+                    // Wait a moment for the data to be refreshed from the server
+                    // Multiple small delays to give the hook time to fetch and subscribers time to update
+                    for (let i = 0; i < 5; i++) {
+                      await new Promise((resolve) => setTimeout(resolve, 50));
+                      const updated = props.orders.find(
+                        (x) => x.id === orderId,
+                      );
+                      if (
+                        updated?.jobWorkAssignments &&
+                        updated.jobWorkAssignments.length > 0
+                      ) {
+                        break;
+                      }
+                    }
+                    // Now open the details modal with the hopefully updated data
+                    setJobWorkDetailsModalId(orderId);
                   } catch (error) {
                     console.error("Failed to assign job works:", error);
                   }
                 }
-                setAssignJobWorksModalId(null);
               }}
             />
           )}
@@ -1347,6 +1449,7 @@ export default function ModelList(props: ModelListProps) {
           {/* Job Work Details Modal */}
           {jobWorkDetailsModalId && (
             <JobWorkDetailsModal
+              key={`job-work-modal-${jobWorkDetailsModalId}-${sorted.find((o) => o.id === jobWorkDetailsModalId)?.jobWorkAssignments?.length || 0}`}
               open={jobWorkDetailsModalId !== null}
               onOpenChange={(v) => !v && setJobWorkDetailsModalId(null)}
               modelName={
@@ -1364,14 +1467,14 @@ export default function ModelList(props: ModelListProps) {
               onUpdateAssignments={async (assignments) => {
                 const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
                 if (o) {
-                  // Validate that all assignments have jobWorkId before sending
-                  const validAssignments = assignments.every(
+                  // Filter out assignments without jobWorkId and validate remaining ones
+                  const validAssignments = assignments.filter(
                     (a) => a.jobWorkId,
                   );
-                  if (!validAssignments) {
+                  if (validAssignments.length === 0 && assignments.length > 0) {
                     throw new Error("Invalid assignments: missing jobWorkId");
                   }
-                  await props.setJobWorkAssignments?.(o.id, assignments);
+                  await props.setJobWorkAssignments?.(o.id, validAssignments);
                 }
               }}
               onComplete={(jobWorkId, completionDate) => {

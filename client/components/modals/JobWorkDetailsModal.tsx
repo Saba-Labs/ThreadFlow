@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
@@ -49,6 +49,16 @@ export default function JobWorkDetailsModal({
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Log when assignments change to help with debugging
+  useEffect(() => {
+    if (open && assignments.length === 0) {
+      console.warn(
+        "[JobWorkDetailsModal] Modal opened but no assignments received",
+        { assignments, modelName },
+      );
+    }
+  }, [open, assignments, modelName]);
+
   const formatDate = (timestamp: number | undefined) => {
     if (!timestamp || typeof timestamp !== "number" || timestamp <= 0)
       return "—";
@@ -71,13 +81,29 @@ export default function JobWorkDetailsModal({
   ) => {
     setEditingField({ jobWorkId: assignment.jobWorkId, field });
     if (field === "pickup") {
-      setEditValue(new Date(assignment.pickupDate).toISOString().split("T")[0]);
+      if (
+        assignment.pickupDate &&
+        typeof assignment.pickupDate === "number" &&
+        assignment.pickupDate > 0
+      ) {
+        setEditValue(
+          new Date(assignment.pickupDate).toISOString().split("T")[0],
+        );
+      } else {
+        setEditValue(new Date().toISOString().split("T")[0]);
+      }
     } else if (field === "delivery") {
-      setEditValue(
-        assignment.completionDate
-          ? new Date(assignment.completionDate).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-      );
+      if (
+        assignment.completionDate &&
+        typeof assignment.completionDate === "number" &&
+        assignment.completionDate > 0
+      ) {
+        setEditValue(
+          new Date(assignment.completionDate).toISOString().split("T")[0],
+        );
+      } else {
+        setEditValue(new Date().toISOString().split("T")[0]);
+      }
     } else {
       setEditValue(String(assignment.quantity));
     }
@@ -86,10 +112,11 @@ export default function JobWorkDetailsModal({
   const handleSaveEditField = async () => {
     if (!editingField) return;
 
+    const currentEditingField = editingField;
     const updated: JobWorkAssignment[] = assignments.map((a) => {
-      if (a.jobWorkId !== editingField.jobWorkId) return a;
+      if (a.jobWorkId !== currentEditingField.jobWorkId) return a;
 
-      if (editingField.field === "pickup") {
+      if (currentEditingField.field === "pickup") {
         const pickupMs = new Date(editValue).getTime();
         return {
           jobWorkId: a.jobWorkId,
@@ -99,7 +126,7 @@ export default function JobWorkDetailsModal({
           completionDate: a.completionDate,
           status: a.status,
         };
-      } else if (editingField.field === "delivery") {
+      } else if (currentEditingField.field === "delivery") {
         // If delivery date is empty, revert to pending status
         if (!editValue) {
           return {
@@ -155,7 +182,6 @@ export default function JobWorkDetailsModal({
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
-        ...a,
         jobWorkId: a.jobWorkId,
         jobWorkName: a.jobWorkName,
         quantity: a.quantity,
@@ -249,8 +275,12 @@ export default function JobWorkDetailsModal({
     }
   };
 
-  const pendingAssignments = assignments.filter((a) => a.status === "pending");
-  const completedAssignments = assignments.filter(
+  // Filter out invalid assignments that don't have jobWorkId
+  const validAssignments = assignments.filter((a) => a.jobWorkId);
+  const pendingAssignments = validAssignments.filter(
+    (a) => a.status === "pending",
+  );
+  const completedAssignments = validAssignments.filter(
     (a) => a.status === "completed",
   );
   const availableJobWorks = getAvailableJobWorks();
@@ -270,12 +300,12 @@ export default function JobWorkDetailsModal({
         }
       >
         <div className="space-y-3">
-          {assignments.length === 0 ? (
+          {validAssignments.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
               No job work assignments yet.
             </div>
           ) : (
-            assignments.map((assignment) => (
+            validAssignments.map((assignment) => (
               <div
                 key={`${assignment.jobWorkId}-${assignment.pickupDate}`}
                 className={`rounded-lg border p-4 ${
@@ -334,7 +364,7 @@ export default function JobWorkDetailsModal({
                       </label>
                       {editingCardId === assignment.jobWorkId &&
                       editingField?.jobWorkId === assignment.jobWorkId &&
-                      editingField.field === "pickup" ? (
+                      editingField?.field === "pickup" ? (
                         <Input
                           type="date"
                           value={editValue}
@@ -367,7 +397,7 @@ export default function JobWorkDetailsModal({
                       </label>
                       {editingCardId === assignment.jobWorkId &&
                       editingField?.jobWorkId === assignment.jobWorkId &&
-                      editingField.field === "delivery" ? (
+                      editingField?.field === "delivery" ? (
                         <Input
                           type="date"
                           value={editValue}
@@ -407,7 +437,7 @@ export default function JobWorkDetailsModal({
                         Quantity
                       </label>
                       {editingField?.jobWorkId === assignment.jobWorkId &&
-                      editingField.field === "quantity" ? (
+                      editingField?.field === "quantity" ? (
                         <Input
                           type="number"
                           value={editValue}
