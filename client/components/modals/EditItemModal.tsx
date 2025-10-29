@@ -138,8 +138,18 @@ export default function EditItemModal({
       );
       setEditingSubItemId(null);
       setEditingSubItem(null);
+      toast({
+        title: "Success",
+        description: "Sub-item updated successfully",
+      });
     } catch (error) {
       console.error("Failed to save sub-item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to update sub-item",
+        variant: "destructive",
+      });
     }
   };
 
@@ -151,8 +161,18 @@ export default function EditItemModal({
   const handleDeleteSubItem = async (subItemId: string) => {
     try {
       await onDeleteSubItem(subItemId);
+      toast({
+        title: "Success",
+        description: "Sub-item deleted successfully",
+      });
     } catch (error) {
       console.error("Failed to delete sub-item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete sub-item",
+        variant: "destructive",
+      });
     }
   };
 
