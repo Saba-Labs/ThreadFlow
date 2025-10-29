@@ -939,8 +939,7 @@ export default function ModelList(props: ModelListProps) {
                         )}
                         <button
                           onClick={() => toggleExpanded(o.id)}
-                          disabled={!isMobile && showDetails}
-                          className={`text-left truncate ${!isMobile && showDetails ? "opacity-60 cursor-default" : ""}`}
+                          className="text-left truncate hover:opacity-70 transition-opacity"
                         >
                           {o.modelName}{" "}
                           {o.quantity > 0 && (
