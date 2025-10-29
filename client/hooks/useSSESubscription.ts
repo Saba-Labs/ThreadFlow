@@ -70,23 +70,26 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         };
 
         eventSource.onerror = () => {
-          console.log("SSE connection error");
+          console.log("[SSE] Connection error, readyState:", eventSource?.readyState);
           if (eventSource) {
             eventSource.close();
             eventSource = null;
           }
 
           if (!sseFailedRef.current) {
+            console.log("[SSE] Retrying connection in 3 seconds...");
             if (!reconnectTimeout) {
               reconnectTimeout = setTimeout(connect, 3000);
             }
           } else {
+            console.log("[SSE] Already failed once, switching to polling");
             setupPollingFallback();
           }
         };
       } catch (error) {
-        console.error("Failed to establish SSE connection:", error);
+        console.error("[SSE] Failed to establish connection:", error);
         if (!sseFailedRef.current) {
+          console.log("[SSE] Will retry in 3 seconds...");
           if (!reconnectTimeout) {
             reconnectTimeout = setTimeout(connect, 3000);
           }
