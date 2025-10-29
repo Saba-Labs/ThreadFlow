@@ -77,7 +77,7 @@ export default function Index() {
             <h1 className="text-3xl font-extrabold tracking-tight">
               Venus Garments
             </h1>
-            <p className="mt-1 text-lg text-muted-foreground max-w-xl">
+            <p className="mt-1 text-sl text-muted-foreground max-w-xl">
               Production Overview
             </p>
           </div>
