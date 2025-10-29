@@ -1454,26 +1454,21 @@ export default function ModelList(props: ModelListProps) {
           )}
 
           {/* Job Work Details Modal */}
-          {jobWorkDetailsModalId && (
+          {jobWorkDetailsModalId && selectedOrderForJWModal && (
             <JobWorkDetailsModal
-              key={`job-work-modal-${jobWorkDetailsModalId}-${sorted.find((o) => o.id === jobWorkDetailsModalId)?.jobWorkAssignments?.length || 0}`}
+              key={`job-work-modal-${jobWorkDetailsModalId}-${selectedOrderForJWModal.jobWorkAssignments?.length || 0}`}
               open={jobWorkDetailsModalId !== null}
-              onOpenChange={(v) => !v && setJobWorkDetailsModalId(null)}
-              modelName={
-                sorted.find((o) => o.id === jobWorkDetailsModalId)?.modelName ||
-                ""
-              }
-              modelQuantity={
-                sorted.find((o) => o.id === jobWorkDetailsModalId)?.quantity ||
-                0
-              }
-              assignments={
-                sorted.find((o) => o.id === jobWorkDetailsModalId)
-                  ?.jobWorkAssignments || []
-              }
+              onOpenChange={(v) => {
+                if (!v) {
+                  setJobWorkDetailsModalId(null);
+                  setSelectedOrderForJWModal(null);
+                }
+              }}
+              modelName={selectedOrderForJWModal.modelName}
+              modelQuantity={selectedOrderForJWModal.quantity}
+              assignments={selectedOrderForJWModal.jobWorkAssignments || []}
               onUpdateAssignments={async (assignments) => {
-                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
-                if (o) {
+                if (selectedOrderForJWModal) {
                   // Filter out assignments without jobWorkId and validate remaining ones
                   const validAssignments = assignments.filter(
                     (a) => a.jobWorkId,
@@ -1481,23 +1476,30 @@ export default function ModelList(props: ModelListProps) {
                   if (validAssignments.length === 0 && assignments.length > 0) {
                     throw new Error("Invalid assignments: missing jobWorkId");
                   }
-                  await props.setJobWorkAssignments?.(o.id, validAssignments);
+                  await props.setJobWorkAssignments?.(
+                    selectedOrderForJWModal.id,
+                    validAssignments,
+                  );
                 }
               }}
               onComplete={(jobWorkId, completionDate) => {
-                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
-                if (o) {
+                if (selectedOrderForJWModal) {
                   props.updateJobWorkAssignmentStatus?.(
-                    o.id,
+                    selectedOrderForJWModal.id,
                     jobWorkId,
                     "completed",
                     completionDate,
                   );
                   if (
-                    o.currentStepIndex >= 0 &&
-                    o.currentStepIndex < o.steps.length
+                    selectedOrderForJWModal.currentStepIndex >= 0 &&
+                    selectedOrderForJWModal.currentStepIndex <
+                      selectedOrderForJWModal.steps.length
                   ) {
-                    props.onSetStepStatus(o.id, o.currentStepIndex, "hold");
+                    props.onSetStepStatus(
+                      selectedOrderForJWModal.id,
+                      selectedOrderForJWModal.currentStepIndex,
+                      "hold",
+                    );
                   }
                 }
               }}
