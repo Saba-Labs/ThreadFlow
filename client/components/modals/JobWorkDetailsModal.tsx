@@ -463,16 +463,27 @@ export default function JobWorkDetailsModal({
 
                   <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                     {editingCardId === assignment.jobWorkId ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() =>
-                          handleNotComplete(assignment.jobWorkId)
-                        }
-                      >
-                        Mark as Pending
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          onClick={() =>
+                            handleCompleteAssignment(assignment.jobWorkId)
+                          }
+                        >
+                          Complete
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() =>
+                            handleNotComplete(assignment.jobWorkId)
+                          }
+                        >
+                          Mark as Pending
+                        </Button>
+                      </>
                     ) : assignment.status === "pending" ? (
                       <Button
                         size="sm"
@@ -483,18 +494,7 @@ export default function JobWorkDetailsModal({
                       >
                         Complete
                       </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() =>
-                          handleNotComplete(assignment.jobWorkId)
-                        }
-                      >
-                        Mark as Pending
-                      </Button>
-                    )}
+                    ) : null}
                     <Button
                       size="icon"
                       variant="ghost"
