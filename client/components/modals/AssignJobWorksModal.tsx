@@ -79,6 +79,12 @@ export default function AssignJobWorksModal({
       };
     });
 
+    console.log("[AssignJobWorksModal] handleAssign called with", {
+      selectedIds,
+      assignmentsCount: assignments.length,
+      assignments,
+    });
+
     try {
       await onAssign(assignments);
       handleClose();
