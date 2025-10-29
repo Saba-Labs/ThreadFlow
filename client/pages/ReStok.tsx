@@ -244,7 +244,16 @@ export default function ReStok() {
           subItems: [...item.subItems, newSubItem],
         }),
       });
-      if (!response.ok) throw new Error("Failed to add sub-item");
+      if (!response.ok) {
+        let errorMsg = "Failed to add sub-item";
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch {
+          // Could not parse error response
+        }
+        throw new Error(errorMsg);
+      }
       setItems(
         items.map((i) =>
           i.id === parentItemId
