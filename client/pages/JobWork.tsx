@@ -373,7 +373,7 @@ export default function JobWork() {
                       ) : (
                         sortedAssignments.map((a) => (
                           <tr
-                            key={`${a.orderId}-${a.status}`}
+                            key={`${a.orderId}-${a.modelName}-${a.status}`}
                             className={`border-t border-gray-200 dark:border-gray-700 ${
                               a.status === "completed"
                                 ? "bg-green-50 dark:bg-green-900/10"
