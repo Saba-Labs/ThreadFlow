@@ -7,51 +7,50 @@ import { SearchProvider, useSearch } from "@/context/SearchContext";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 
-function HeaderSearch({ className }: { className?: string }) {
-  const { query, setQuery } = useSearch();
-  const [open, setOpen] = useState(false);
-  return (
-    <div className={className}>
-      {!open ? (
-        <button
-          aria-label="Open search"
-          onClick={() => setOpen(true)}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
-        >
-          <SearchIcon className="h-5 w-5" />
-        </button>
-      ) : (
-        <div className="flex items-center">
-          <input
-            aria-label="Header search"
-            placeholder="Search..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                setQuery("");
-                setOpen(false);
-              }
-            }}
-            className="w-64 sm:w-64 rounded-md border px-2 py-1 max-w-80"
-            autoFocus
-          />
-          <button
-            aria-label="Close search"
-            onClick={() => {
-              setOpen(false);
-            }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1 ml-2"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function AppLayout() {
+  function HeaderSearch({ className }: { className?: string }) {
+    const { query, setQuery } = useSearch();
+    const [open, setOpen] = useState(false);
+    return (
+      <div className={className}>
+        {!open ? (
+          <button
+            aria-label="Open search"
+            onClick={() => setOpen(true)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
+          >
+            <SearchIcon className="h-5 w-5" />
+          </button>
+        ) : (
+          <div className="flex items-center">
+            <input
+              aria-label="Header search"
+              placeholder="Search..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setQuery("");
+                  setOpen(false);
+                }
+              }}
+              className="w-64 sm:w-64 rounded-md border px-2 py-1 max-w-80"
+              autoFocus
+            />
+            <button
+              aria-label="Close search"
+              onClick={() => {
+                setOpen(false);
+              }}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1 ml-2"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
