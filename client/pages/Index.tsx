@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Layers, Play, Pause, Briefcase, ChevronDown, ChevronUp, Map, Package } from "lucide-react";
 import MachineBoard from "@/components/pipeline/MachineBoard";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useRoadmaps } from "@/context/RoadmapContext";
 
