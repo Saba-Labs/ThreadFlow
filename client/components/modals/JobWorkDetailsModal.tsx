@@ -334,7 +334,7 @@ export default function JobWorkDetailsModal({
                       </label>
                       {editingCardId === assignment.jobWorkId &&
                       editingField?.jobWorkId === assignment.jobWorkId &&
-                      editingField.field === "pickup" ? (
+                      editingField?.field === "pickup" ? (
                         <Input
                           type="date"
                           value={editValue}
@@ -367,7 +367,7 @@ export default function JobWorkDetailsModal({
                       </label>
                       {editingCardId === assignment.jobWorkId &&
                       editingField?.jobWorkId === assignment.jobWorkId &&
-                      editingField.field === "delivery" ? (
+                      editingField?.field === "delivery" ? (
                         <Input
                           type="date"
                           value={editValue}
@@ -407,7 +407,7 @@ export default function JobWorkDetailsModal({
                         Quantity
                       </label>
                       {editingField?.jobWorkId === assignment.jobWorkId &&
-                      editingField.field === "quantity" ? (
+                      editingField?.field === "quantity" ? (
                         <Input
                           type="number"
                           value={editValue}
