@@ -70,8 +70,15 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         jobWorkId: a.job_work_id,
         jobWorkName: a.name,
         quantity: a.quantity,
-        pickupDate: typeof a.pickup_date === "number" ? a.pickup_date : parseInt(a.pickup_date || "0", 10),
-        completionDate: a.completion_date ? (typeof a.completion_date === "number" ? a.completion_date : parseInt(a.completion_date, 10)) : undefined,
+        pickupDate:
+          typeof a.pickup_date === "number"
+            ? a.pickup_date
+            : parseInt(a.pickup_date || "0", 10),
+        completionDate: a.completion_date
+          ? typeof a.completion_date === "number"
+            ? a.completion_date
+            : parseInt(a.completion_date, 10)
+          : undefined,
         status: a.status,
       }));
 
@@ -359,14 +366,14 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
           ],
         );
       } catch (insertError) {
-        console.error(
-          "[setJobWorkAssignments] Failed to insert assignment",
-          {
-            id,
-            jobWorkId: assignment.jobWorkId,
-            error: insertError instanceof Error ? insertError.message : String(insertError),
-          },
-        );
+        console.error("[setJobWorkAssignments] Failed to insert assignment", {
+          id,
+          jobWorkId: assignment.jobWorkId,
+          error:
+            insertError instanceof Error
+              ? insertError.message
+              : String(insertError),
+        });
         throw insertError;
       }
     }

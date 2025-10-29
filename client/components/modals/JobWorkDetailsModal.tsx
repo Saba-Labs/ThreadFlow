@@ -153,7 +153,7 @@ export default function JobWorkDetailsModal({
 
   const handleCompleteAssignment = async (jwId: string) => {
     console.log("Complete button clicked for:", jwId);
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const completionDate = today.getTime();
@@ -180,7 +180,7 @@ export default function JobWorkDetailsModal({
     try {
       await onUpdateAssignments(updated);
       console.log("onUpdateAssignments succeeded");
-      
+
       if (onComplete) {
         await onComplete(jwId, completionDate);
         console.log("onComplete callback succeeded");
@@ -197,7 +197,7 @@ export default function JobWorkDetailsModal({
   const handleConfirmDelete = async () => {
     if (!deletingId) return;
     console.log("Deleting assignment:", deletingId);
-    
+
     const filtered = assignments.filter((a) => a.jobWorkId !== deletingId);
     try {
       await onUpdateAssignments(filtered);
@@ -214,7 +214,7 @@ export default function JobWorkDetailsModal({
 
   const handleNotComplete = async (jwId: string) => {
     console.log("Reverting completion for:", jwId);
-    
+
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
@@ -223,7 +223,7 @@ export default function JobWorkDetailsModal({
         status: "pending" as const,
       };
     });
-    
+
     try {
       await onUpdateAssignments(updated);
       console.log("Revert to pending succeeded");
@@ -372,11 +372,13 @@ export default function JobWorkDetailsModal({
                           onClick={() => handleEditField(assignment, "pickup")}
                           className="w-full text-left px-2 py-1 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded border border-gray-300 dark:border-gray-600"
                         >
-                          {formatDate(assignment.pickupDate) || formatDate(new Date().getTime())}
+                          {formatDate(assignment.pickupDate) ||
+                            formatDate(new Date().getTime())}
                         </button>
                       ) : (
                         <div className="px-2 py-1 text-gray-900 dark:text-gray-100">
-                          {formatDate(assignment.pickupDate) || formatDate(new Date().getTime())}
+                          {formatDate(assignment.pickupDate) ||
+                            formatDate(new Date().getTime())}
                         </div>
                       )}
                     </div>
