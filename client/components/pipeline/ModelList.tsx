@@ -1440,6 +1440,10 @@ export default function ModelList(props: ModelListProps) {
                       }
                     }
                     // Now open the details modal with the hopefully updated data
+                    const updated = props.orders.find((x) => x.id === orderId);
+                    if (updated) {
+                      setSelectedOrderForJWModal(updated);
+                    }
                     setJobWorkDetailsModalId(orderId);
                   } catch (error) {
                     console.error("Failed to assign job works:", error);
