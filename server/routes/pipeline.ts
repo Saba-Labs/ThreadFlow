@@ -70,8 +70,15 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         jobWorkId: a.job_work_id,
         jobWorkName: a.name,
         quantity: a.quantity,
-        pickupDate: a.pickup_date,
-        completionDate: a.completion_date,
+        pickupDate:
+          typeof a.pickup_date === "number"
+            ? a.pickup_date
+            : parseInt(a.pickup_date || "0", 10),
+        completionDate: a.completion_date
+          ? typeof a.completion_date === "number"
+            ? a.completion_date
+            : parseInt(a.completion_date, 10)
+          : undefined,
         status: a.status,
       }));
 
@@ -285,18 +292,53 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
     ]);
 
     for (const assignment of assignments) {
+      if (!assignment.jobWorkId) {
+        return res.status(400).json({
+          error: "Each assignment must have a jobWorkId",
+        });
+      }
+
       const id = `jwa_${Math.random().toString(36).slice(2, 9)}`;
-      const pickupDateMs =
-        typeof assignment.pickupDate === "number"
-          ? assignment.pickupDate
-          : assignment.pickupDate
-            ? new Date(assignment.pickupDate).getTime()
-            : now;
-      const completionDateMs = assignment.completionDate
-        ? typeof assignment.completionDate === "number"
-          ? assignment.completionDate
-          : new Date(assignment.completionDate).getTime()
-        : null;
+
+      // Convert pickupDate to a number (handles both number and string formats)
+      let pickupDateMs: number;
+      if (typeof assignment.pickupDate === "number") {
+        pickupDateMs = assignment.pickupDate;
+      } else if (typeof assignment.pickupDate === "string") {
+        // Try parsing as milliseconds first (if it's a numeric string)
+        const parsed = parseInt(assignment.pickupDate, 10);
+        if (!isNaN(parsed)) {
+          pickupDateMs = parsed;
+        } else {
+          // Otherwise try parsing as a date string
+          pickupDateMs = new Date(assignment.pickupDate).getTime();
+          if (isNaN(pickupDateMs)) {
+            pickupDateMs = now;
+          }
+        }
+      } else {
+        pickupDateMs = now;
+      }
+
+      // Convert completionDate to a number (handles both number and string formats)
+      let completionDateMs: number | null = null;
+      if (assignment.completionDate) {
+        if (typeof assignment.completionDate === "number") {
+          completionDateMs = assignment.completionDate;
+        } else if (typeof assignment.completionDate === "string") {
+          // Try parsing as milliseconds first (if it's a numeric string)
+          const parsed = parseInt(assignment.completionDate, 10);
+          if (!isNaN(parsed)) {
+            completionDateMs = parsed;
+          } else {
+            // Otherwise try parsing as a date string
+            completionDateMs = new Date(assignment.completionDate).getTime();
+            if (isNaN(completionDateMs)) {
+              completionDateMs = null;
+            }
+          }
+        }
+      }
 
       console.log("[setJobWorkAssignments] Inserting assignment", {
         id,
@@ -308,20 +350,32 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
         status: assignment.status,
       });
 
-      await query(
-        "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-        [
+      try {
+        await query(
+          "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+          [
+            id,
+            orderId,
+            assignment.jobWorkId,
+            assignment.quantity || 1,
+            pickupDateMs,
+            completionDateMs,
+            assignment.status || "pending",
+            now,
+            now,
+          ],
+        );
+      } catch (insertError) {
+        console.error("[setJobWorkAssignments] Failed to insert assignment", {
           id,
-          orderId,
-          assignment.jobWorkId,
-          assignment.quantity || 1,
-          pickupDateMs,
-          completionDateMs,
-          assignment.status || "pending",
-          now,
-          now,
-        ],
-      );
+          jobWorkId: assignment.jobWorkId,
+          error:
+            insertError instanceof Error
+              ? insertError.message
+              : String(insertError),
+        });
+        throw insertError;
+      }
     }
 
     broadcastChange({ type: "pipeline_updated" });
