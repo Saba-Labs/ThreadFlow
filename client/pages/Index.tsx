@@ -249,24 +249,30 @@ export default function Index() {
 
       {/* ReStok board */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-medium">ReStok</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setRestokExpanded(!restokExpanded)}
-              className="p-1 h-auto"
-              title={restokExpanded ? "Collapse restok" : "Expand restok"}
-            >
-              {restokExpanded ? (
-                <ChevronUp className="h-5 w-5" />
-              ) : (
-                <ChevronDown className="h-5 w-5" />
-              )}
-            </Button>
+        <button
+          onClick={() => setRestokExpanded(!restokExpanded)}
+          className="w-full mb-6 group"
+          title={restokExpanded ? "Collapse restok" : "Expand restok"}
+        >
+          <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 hover:border-amber-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-amber-100 group-hover:to-orange-100">
+            <Package className="h-6 w-6 text-amber-600 flex-shrink-0" />
+            <h2 className="text-lg font-semibold text-slate-900 flex-1 text-left">
+              ReStok
+            </h2>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-200">
+                {restokItems.length}
+              </Badge>
+              <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
+                {restokExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-amber-600 transition-transform duration-300" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-amber-600 transition-transform duration-300" />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        </button>
 
         {restokExpanded && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
