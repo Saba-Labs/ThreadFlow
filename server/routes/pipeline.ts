@@ -285,6 +285,12 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
     ]);
 
     for (const assignment of assignments) {
+      if (!assignment.jobWorkId) {
+        return res.status(400).json({
+          error: "Each assignment must have a jobWorkId",
+        });
+      }
+
       const id = `jwa_${Math.random().toString(36).slice(2, 9)}`;
 
       // Convert pickupDate to a number (handles both number and string formats)
@@ -337,20 +343,32 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
         status: assignment.status,
       });
 
-      await query(
-        "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-        [
-          id,
-          orderId,
-          assignment.jobWorkId,
-          assignment.quantity || 1,
-          pickupDateMs,
-          completionDateMs,
-          assignment.status || "pending",
-          now,
-          now,
-        ],
-      );
+      try {
+        await query(
+          "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+          [
+            id,
+            orderId,
+            assignment.jobWorkId,
+            assignment.quantity || 1,
+            pickupDateMs,
+            completionDateMs,
+            assignment.status || "pending",
+            now,
+            now,
+          ],
+        );
+      } catch (insertError) {
+        console.error(
+          "[setJobWorkAssignments] Failed to insert assignment",
+          {
+            id,
+            jobWorkId: assignment.jobWorkId,
+            error: insertError instanceof Error ? insertError.message : String(insertError),
+          },
+        );
+        throw insertError;
+      }
     }
 
     broadcastChange({ type: "pipeline_updated" });
