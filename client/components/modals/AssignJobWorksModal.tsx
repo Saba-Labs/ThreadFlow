@@ -74,7 +74,7 @@ export default function AssignJobWorksModal({
         jobWorkId: jwId,
         jobWorkName: jobWork?.name || "",
         quantity: quantitiesAfterSplit[jwId] || 0,
-        pickupDate: pickupDateMs,
+        pickupDate: pickupDateMs > 0 ? pickupDateMs : new Date().getTime(),
         status: "pending",
       };
     });
