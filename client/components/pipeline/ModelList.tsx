@@ -35,7 +35,7 @@ interface ModelListProps {
     orderId: string,
     editor: (steps: PathStep[]) => PathStep[],
   ) => void;
-  onSplit: (orderId: string, quantities: number[]) => void;
+  onSplit: (orderId: string, quantities: number[]) => Promise<void>;
   onSetStepStatus: (
     orderId: string,
     stepIndex: number,
@@ -92,9 +92,12 @@ export default function ModelList(props: ModelListProps) {
     parentId: string;
     at: number;
   } | null>(null);
+  const [isSplitting, setIsSplitting] = useState(false);
 
   const handleSplit = async () => {
     if (!splitForId) return;
+    if (isSplitting) return;
+
     const validQuantities = splitInputs
       .map((q) => Math.max(0, Math.floor(q)))
       .filter((q) => q > 0);
@@ -105,9 +108,20 @@ export default function ModelList(props: ModelListProps) {
     let tempExpanded = false;
     let addedChildIds: string[] = [];
 
-    // close modal immediately
+    setIsSplitting(true);
+    try {
+      // Perform split - this is now async and persists to database
+      await props.onSplit(parentId, validQuantities);
+    } catch (error) {
+      console.error("Failed to split order:", error);
+      setIsSplitting(false);
+      return;
+    }
+
+    // close modal after successful split
     setSplitForId(null);
     setSplitInputs([0]);
+    setIsSplitting(false);
 
     // If global details are hidden and the parent isn't toggled, temporarily expand it
     if (!showDetails && !originalToggled) {
@@ -1745,11 +1759,26 @@ export default function ModelList(props: ModelListProps) {
             title={`Split into Batches ���� ${splitFor?.modelName}`}
             footer={
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setSplitForId(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setSplitForId(null)}
+                  disabled={isSplitting}
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleSplit}>
-                  Split into {splitInputs.filter((q) => q > 0).length} Batches
+                <Button
+                  onClick={handleSplit}
+                  disabled={isSplitting}
+                  className={isSplitting ? "opacity-70 cursor-not-allowed" : ""}
+                >
+                  {isSplitting ? (
+                    <>
+                      <span className="inline-block animate-spin mr-2">⏳</span>
+                      Splitting...
+                    </>
+                  ) : (
+                    `Split into ${splitInputs.filter((q) => q > 0).length} Batches`
+                  )}
                 </Button>
               </div>
             }
@@ -1766,7 +1795,7 @@ export default function ModelList(props: ModelListProps) {
                   const total = splitFor?.quantity || 0;
                   const part = Math.floor(total * f);
                   const remainder = total - part;
-                  const disabled = part < 1 || remainder < 1;
+                  const disabled = part < 1 || remainder < 1 || isSplitting;
                   return (
                     <Button
                       key={f}
@@ -1804,6 +1833,7 @@ export default function ModelList(props: ModelListProps) {
                             ),
                           )
                         }
+                        disabled={isSplitting}
                         className="h-10"
                       />
                     </div>
@@ -1812,6 +1842,7 @@ export default function ModelList(props: ModelListProps) {
                         size="icon"
                         variant="ghost"
                         onClick={() => handleRemoveBatch(i)}
+                        disabled={isSplitting}
                         className="h-10 w-10 shrink-0"
                       >
                         <X className="h-4 w-4" />
