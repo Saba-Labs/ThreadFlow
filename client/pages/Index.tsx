@@ -181,48 +181,60 @@ export default function Index() {
         </div>
 
         {roadmapExpanded && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {roadmaps.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card col-span-full">
+              <div className="col-span-full text-center py-8 text-muted-foreground border rounded-lg bg-card">
                 <p>No roadmaps yet</p>
               </div>
             ) : (
               roadmaps.map((r) => (
-                <div
+                <Card
                   key={r.id}
-                  className="rounded-lg border bg-card/50 shadow-sm overflow-hidden p-4"
+                  className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                      {r.title.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm truncate">
-                        {r.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {r.items.length} model{r.items.length !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                  </div>
-                  {r.items.length > 0 && (
-                    <div className="space-y-1">
-                      {r.items.slice(0, 3).map((item) => (
-                        <div
-                          key={`${r.id}-${item.modelId}`}
-                          className="text-xs text-muted-foreground truncate"
-                        >
-                          • {item.modelName} ({item.quantity})
+                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                          {r.title.charAt(0).toUpperCase()}
                         </div>
-                      ))}
-                      {r.items.length > 3 && (
-                        <div className="text-xs text-muted-foreground">
-                          +{r.items.length - 3} more
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
+                            {r.title}
+                          </CardTitle>
+                          <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
+                            {r.items.length} model{r.items.length !== 1 ? "s" : ""}
+                          </p>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </CardHeader>
+
+                  <CardContent className="p-4 sm:p-6">
+                    {r.items.length === 0 ? (
+                      <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
+                        <div className="text-sm text-slate-600">
+                          No models added yet
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {r.items.map((it, idx) => (
+                          <div
+                            key={`${r.id}-${it.modelId}-${idx}`}
+                            className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
+                                {it.modelName} ({it.quantity})
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))
             )}
           </div>
