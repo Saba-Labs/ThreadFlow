@@ -276,12 +276,12 @@ export default function JobWorkDetailsModal({
         }
       >
         <div className="space-y-3">
-          {assignments.length === 0 ? (
+          {validAssignments.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
               No job work assignments yet.
             </div>
           ) : (
-            assignments.map((assignment) => (
+            validAssignments.map((assignment) => (
               <div
                 key={`${assignment.jobWorkId}-${assignment.pickupDate}`}
                 className={`rounded-lg border p-4 ${
