@@ -549,7 +549,14 @@ export default function ModelList(props: ModelListProps) {
                             className="p-3 font-medium text-gray-900 dark:text-gray-100"
                             style={{ width: "120px" }}
                           >
-                            <div className="text-left break-words whitespace-normal flex items-start gap-2">
+                            <div
+                              className={`text-left break-words whitespace-normal flex items-start gap-2 ${viewMode === "list" ? "cursor-pointer hover:opacity-70 transition-opacity" : ""}`}
+                              onClick={() => {
+                                if (viewMode === "list") {
+                                  toggleExpanded(o.id);
+                                }
+                              }}
+                            >
                               {!showDetails && (
                                 <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
                                   {formatDateShort(o.createdAt)}
