@@ -190,8 +190,9 @@ export default function Index() {
                   <div className="text-2xl font-semibold text-green-700">
                     {pipeline.orders.filter(
                       (o) =>
-                        (o.jobWorkAssignments || []).length > 0 ||
-                        ((o as any).jobWorkIds || []).length > 0,
+                        ((o.jobWorkAssignments || []).length > 0 ||
+                          ((o as any).jobWorkIds || []).length > 0) &&
+                        o.steps[o.currentStepIndex]?.status === "running",
                     ).length}
                   </div>
                   <div className="text-xs text-muted-foreground">Assigned</div>
