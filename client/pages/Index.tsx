@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Layers, Play, Pause, Briefcase } from "lucide-react";
+import { Search, Layers, Play, Pause, Briefcase, ChevronDown, ChevronUp } from "lucide-react";
 import MachineBoard from "@/components/pipeline/MachineBoard";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 
 export default function Index() {
