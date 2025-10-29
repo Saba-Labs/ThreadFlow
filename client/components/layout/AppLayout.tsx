@@ -83,7 +83,7 @@ export default function AppLayout() {
   };
 
   return (
-    <SearchProvider>
+    <>
       <AppUpdateNotification />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 overflow-x-hidden">
         {/* Mobile sidebar backdrop */}
@@ -376,6 +376,6 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
-    </SearchProvider>
+    </>
   );
 }
