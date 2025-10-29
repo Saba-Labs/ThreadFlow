@@ -108,6 +108,11 @@ function initializeHandler() {
 
   app.get("/api/demo", handleDemo);
 
+  // Real-time sync endpoint
+  app.get("/api/subscribe", (_req, res) => {
+    subscribeToChanges(res);
+  });
+
   // Restok routes
   app.get("/api/restok/items", getRestokItems);
   app.post("/api/restok/items", createRestokItem);
