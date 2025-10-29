@@ -12,6 +12,7 @@ type DataChangeCallback = (event: {
 export function useSSESubscription(onDataChange: DataChangeCallback) {
   const callbackRef = useRef(onDataChange);
   const sseFailedRef = useRef(false);
+  const connectAttemptsRef = useRef(0);
 
   useEffect(() => {
     callbackRef.current = onDataChange;
@@ -27,6 +28,7 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         "[SSE Fallback] SSE not available, switching to polling every 2 seconds",
       );
       sseFailedRef.current = true;
+      connectAttemptsRef.current = 0;
 
       pollingInterval = setInterval(() => {
         callbackRef.current({ type: "pipeline_updated" });
@@ -39,11 +41,16 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
 
     function connect() {
       try {
+        connectAttemptsRef.current += 1;
+        console.log(
+          `[SSE] Connection attempt ${connectAttemptsRef.current}`,
+        );
         eventSource = new EventSource("/api/subscribe");
 
         eventSource.onopen = () => {
-          console.log("SSE connection established");
+          console.log("[SSE] Connection established");
           sseFailedRef.current = false;
+          connectAttemptsRef.current = 0;
           if (reconnectTimeout) {
             clearTimeout(reconnectTimeout);
             reconnectTimeout = null;
@@ -73,7 +80,7 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
 
         eventSource.onerror = () => {
           console.log(
-            "[SSE] Connection error, readyState:",
+            `[SSE] Connection error on attempt ${connectAttemptsRef.current}, readyState:`,
             eventSource?.readyState,
           );
           if (eventSource) {
@@ -81,25 +88,34 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
             eventSource = null;
           }
 
-          if (!sseFailedRef.current) {
-            console.log("[SSE] Retrying connection in 3 seconds...");
-            if (!reconnectTimeout) {
-              reconnectTimeout = setTimeout(connect, 3000);
-            }
-          } else {
-            console.log("[SSE] Already failed once, switching to polling");
+          if (connectAttemptsRef.current >= 2) {
+            console.log(
+              "[SSE] Max retry attempts (2) reached, switching to polling permanently",
+            );
             setupPollingFallback();
+          } else {
+            console.log("[SSE] Retrying connection in 2 seconds...");
+            if (!reconnectTimeout) {
+              reconnectTimeout = setTimeout(connect, 2000);
+            }
           }
         };
       } catch (error) {
-        console.error("[SSE] Failed to establish connection:", error);
-        if (!sseFailedRef.current) {
-          console.log("[SSE] Will retry in 3 seconds...");
-          if (!reconnectTimeout) {
-            reconnectTimeout = setTimeout(connect, 3000);
-          }
-        } else {
+        console.error(
+          `[SSE] Failed to establish connection on attempt ${connectAttemptsRef.current}:`,
+          error,
+        );
+
+        if (connectAttemptsRef.current >= 2) {
+          console.log(
+            "[SSE] Max retry attempts (2) reached, switching to polling",
+          );
           setupPollingFallback();
+        } else {
+          console.log("[SSE] Will retry in 2 seconds...");
+          if (!reconnectTimeout) {
+            reconnectTimeout = setTimeout(connect, 2000);
+          }
         }
       }
     }
