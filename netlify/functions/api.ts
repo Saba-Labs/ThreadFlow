@@ -26,8 +26,19 @@ import {
   updateRestokItem,
   deleteRestokItem,
 } from "../../server/routes/restok";
+import {
+  getRoadmaps,
+  createRoadmap,
+  updateRoadmap,
+  deleteRoadmap,
+  addModelToRoadmap,
+  removeModelFromRoadmap,
+  reorderRoadmapItems,
+  moveModelBetweenRoadmaps,
+} from "../../server/routes/roadmaps";
 import { handleDemo } from "../../server/routes/demo";
 import { initializeDatabase } from "../../server/db";
+import { subscribeToChanges } from "../../server/events";
 
 let cachedHandler: any = null;
 let dbInitialized = false;
@@ -97,6 +108,11 @@ function initializeHandler() {
 
   app.get("/api/demo", handleDemo);
 
+  // Real-time sync endpoint
+  app.get("/api/subscribe", (_req, res) => {
+    subscribeToChanges(res);
+  });
+
   // Restok routes
   app.get("/api/restok/items", getRestokItems);
   app.post("/api/restok/items", createRestokItem);
@@ -108,6 +124,19 @@ function initializeHandler() {
   app.post("/api/jobworks", createJobWork);
   app.put("/api/jobworks/:id", updateJobWork);
   app.delete("/api/jobworks/:id", deleteJobWork);
+
+  // Roadmaps routes
+  app.get("/api/roadmaps", getRoadmaps);
+  app.post("/api/roadmaps", createRoadmap);
+  app.post("/api/roadmaps/move-model", moveModelBetweenRoadmaps);
+  app.put("/api/roadmaps/:id", updateRoadmap);
+  app.delete("/api/roadmaps/:id", deleteRoadmap);
+  app.post("/api/roadmaps/:roadmapId/models", addModelToRoadmap);
+  app.delete(
+    "/api/roadmaps/:roadmapId/models/:modelId",
+    removeModelFromRoadmap,
+  );
+  app.put("/api/roadmaps/:roadmapId/reorder", reorderRoadmapItems);
 
   // Machine types routes
   app.get("/api/machine-types", getMachineTypes);

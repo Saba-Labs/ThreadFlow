@@ -108,6 +108,7 @@ export default function JobWork() {
   const getAssignmentsForJobWork = (jwId: string) => {
     const orders = pipeline.orders || [];
     const assignments: Array<{
+      id: string;
       orderId: string;
       modelName: string;
       quantity: number;
@@ -121,6 +122,7 @@ export default function JobWork() {
       for (const assignment of jwAssignments) {
         if (assignment.jobWorkId === jwId) {
           assignments.push({
+            id: assignment.id,
             orderId: o.id,
             modelName: o.modelName,
             quantity: assignment.quantity,
@@ -208,20 +210,14 @@ export default function JobWork() {
                     )}
 
                     {/* Assigned Models */}
-                    {assignments.length > 0 && (
+                    {pendingAssignments.length > 0 && (
                       <div className="space-y-1">
-                        {assignments.map((a) => (
+                        {pendingAssignments.map((a) => (
                           <div
-                            key={`${a.orderId}-${a.status}`}
+                            key={a.id}
                             className="text-sm flex items-center justify-between"
                           >
-                            <span
-                              className={`font-medium ${
-                                a.status === "pending"
-                                  ? "text-red-600 dark:text-red-400"
-                                  : "text-green-600 dark:text-green-400"
-                              }`}
-                            >
+                            <span className="font-medium text-red-600 dark:text-red-400">
                               {a.modelName}
                             </span>
                             <span className="text-xs text-muted-foreground ml-2">
@@ -232,7 +228,7 @@ export default function JobWork() {
                       </div>
                     )}
 
-                    {assignments.length === 0 && (
+                    {pendingAssignments.length === 0 && (
                       <div className="italic text-xs text-gray-400">
                         No models assigned
                       </div>
@@ -269,8 +265,13 @@ export default function JobWork() {
             );
           })}
 
+          {displayed.length === 0 && local.length > 0 && (
+            <div key="no-results" className="p-6 text-sm text-muted-foreground">
+              No matching job works found.
+            </div>
+          )}
           {local.length === 0 && (
-            <div className="p-6 text-sm text-muted-foreground">
+            <div key="empty" className="p-6 text-sm text-muted-foreground">
               No job works yet.
             </div>
           )}
@@ -379,7 +380,7 @@ export default function JobWork() {
                       ) : (
                         sortedAssignments.map((a) => (
                           <tr
-                            key={`${a.orderId}-${a.status}`}
+                            key={a.id}
                             className={`border-t border-gray-200 dark:border-gray-700 ${
                               a.status === "completed"
                                 ? "bg-green-50 dark:bg-green-900/10"

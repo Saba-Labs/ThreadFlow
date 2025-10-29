@@ -23,12 +23,17 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
     let pollingInterval: NodeJS.Timeout | null = null;
 
     function setupPollingFallback() {
-      console.log("SSE not available, switching to polling");
+      console.log(
+        "[SSE Fallback] SSE not available, switching to polling every 2 seconds",
+      );
       sseFailedRef.current = true;
 
       pollingInterval = setInterval(() => {
         callbackRef.current({ type: "pipeline_updated" });
         callbackRef.current({ type: "jobworks_updated" });
+        callbackRef.current({ type: "machine_types_updated" });
+        callbackRef.current({ type: "restok_updated" });
+        callbackRef.current({ type: "roadmaps_updated" });
       }, 2000);
     }
 
@@ -67,23 +72,29 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         };
 
         eventSource.onerror = () => {
-          console.log("SSE connection error");
+          console.log(
+            "[SSE] Connection error, readyState:",
+            eventSource?.readyState,
+          );
           if (eventSource) {
             eventSource.close();
             eventSource = null;
           }
 
           if (!sseFailedRef.current) {
+            console.log("[SSE] Retrying connection in 3 seconds...");
             if (!reconnectTimeout) {
               reconnectTimeout = setTimeout(connect, 3000);
             }
           } else {
+            console.log("[SSE] Already failed once, switching to polling");
             setupPollingFallback();
           }
         };
       } catch (error) {
-        console.error("Failed to establish SSE connection:", error);
+        console.error("[SSE] Failed to establish connection:", error);
         if (!sseFailedRef.current) {
+          console.log("[SSE] Will retry in 3 seconds...");
           if (!reconnectTimeout) {
             reconnectTimeout = setTimeout(connect, 3000);
           }

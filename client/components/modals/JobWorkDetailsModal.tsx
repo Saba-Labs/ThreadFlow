@@ -303,9 +303,9 @@ export default function JobWorkDetailsModal({
               No job work assignments yet.
             </div>
           ) : (
-            validAssignments.map((assignment) => (
+            validAssignments.map((assignment, index) => (
               <div
-                key={`${assignment.jobWorkId}-${assignment.pickupDate}`}
+                key={`${assignment.jobWorkId}-${assignment.pickupDate}-${assignment.completionDate || "pending"}-${index}`}
                 className={`rounded-lg border p-4 ${
                   assignment.status === "completed"
                     ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
