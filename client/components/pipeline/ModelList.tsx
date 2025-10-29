@@ -1106,9 +1106,38 @@ export default function ModelList(props: ModelListProps) {
                                                   : "bg-gray-500 text-white"
                                           }`}
                                         >
-                                          {hasPendingJW
-                                            ? "Job Work"
-                                            : cap(displayStatus)}
+                                          {(() => {
+                                            if (hasPendingJW) {
+                                              const allAssignments =
+                                                o.jobWorkAssignments || [];
+                                              const assignmentNames = allAssignments
+                                                .map((a) => a.jobWorkName)
+                                                .filter(Boolean);
+
+                                              const jobWorkIdNames = (
+                                                (o as any).jobWorkIds || []
+                                              )
+                                                .map((id: string) => {
+                                                  const jw = jobWorks.find(
+                                                    (j) => j.id === id,
+                                                  );
+                                                  return jw?.name;
+                                                })
+                                                .filter(Boolean);
+
+                                              const allNames = Array.from(
+                                                new Set([
+                                                  ...assignmentNames,
+                                                  ...jobWorkIdNames,
+                                                ]),
+                                              );
+
+                                              return allNames.length > 0
+                                                ? allNames[0]
+                                                : "Job Work";
+                                            }
+                                            return cap(displayStatus);
+                                          })()}
                                         </Badge>
                                       </button>
                                     </div>
