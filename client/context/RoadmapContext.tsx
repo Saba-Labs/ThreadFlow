@@ -150,7 +150,8 @@ export function useRoadmaps() {
             errorData,
           );
           throw new Error(
-            errorData.error || `Failed to add model to roadmap (${response.status})`,
+            errorData.error ||
+              `Failed to add model to roadmap (${response.status})`,
           );
         }
 

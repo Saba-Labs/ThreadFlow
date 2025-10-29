@@ -188,7 +188,10 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
     console.error("[addModelToRoadmap] Error occurred:", error);
     res
       .status(500)
-      .json({ error: "Failed to add model to roadmap", details: String(error) });
+      .json({
+        error: "Failed to add model to roadmap",
+        details: String(error),
+      });
   }
 };
 
