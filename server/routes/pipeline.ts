@@ -260,6 +260,12 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
     const { orderId } = req.params;
     const { assignments } = req.body;
 
+    console.log("[setJobWorkAssignments] Received request", {
+      orderId,
+      assignmentsCount: assignments?.length,
+      assignments,
+    });
+
     if (!Array.isArray(assignments)) {
       return res.status(400).json({ error: "Assignments must be an array" });
     }
