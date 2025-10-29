@@ -38,6 +38,7 @@ import {
 } from "../../server/routes/roadmaps";
 import { handleDemo } from "../../server/routes/demo";
 import { initializeDatabase } from "../../server/db";
+import { subscribeToChanges } from "../../server/events";
 
 let cachedHandler: any = null;
 let dbInitialized = false;
