@@ -26,6 +26,16 @@ import {
   updateRestokItem,
   deleteRestokItem,
 } from "../../server/routes/restok";
+import {
+  getRoadmaps,
+  createRoadmap,
+  updateRoadmap,
+  deleteRoadmap,
+  addModelToRoadmap,
+  removeModelFromRoadmap,
+  reorderRoadmapItems,
+  moveModelBetweenRoadmaps,
+} from "../../server/routes/roadmaps";
 import { handleDemo } from "../../server/routes/demo";
 import { initializeDatabase } from "../../server/db";
 
