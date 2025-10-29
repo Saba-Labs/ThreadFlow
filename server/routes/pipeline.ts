@@ -62,16 +62,16 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
 
       // Fetch job work assignments with job work names
       const assignmentsResult = await query(
-        "SELECT jwa.job_work_id as jobWorkId, jw.name as jobWorkName, jwa.quantity, jwa.pickup_date as pickupDate, jwa.completion_date as completionDate, jwa.status FROM job_work_assignments jwa LEFT JOIN job_works jw ON jwa.job_work_id = jw.id WHERE jwa.order_id = $1",
+        "SELECT jwa.job_work_id, jw.name, jwa.quantity, jwa.pickup_date, jwa.completion_date, jwa.status FROM job_work_assignments jwa LEFT JOIN job_works jw ON jwa.job_work_id = jw.id WHERE jwa.order_id = $1",
         [row.id],
       );
 
       const jobWorkAssignments = assignmentsResult.rows.map((a: any) => ({
-        jobWorkId: a.jobWorkId,
-        jobWorkName: a.jobWorkName,
+        jobWorkId: a.job_work_id,
+        jobWorkName: a.name,
         quantity: a.quantity,
-        pickupDate: a.pickupDate,
-        completionDate: a.completionDate,
+        pickupDate: a.pickup_date,
+        completionDate: a.completion_date,
         status: a.status,
       }));
 

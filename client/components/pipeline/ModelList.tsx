@@ -790,6 +790,7 @@ export default function ModelList(props: ModelListProps) {
                                           } else {
                                             setSelectedOrderForJWModal(o);
                                           }
+                                          setJobWorkDetailsModalId(o.id);
                                         })
                                         .catch((err) => {
                                           console.warn(
@@ -797,8 +798,8 @@ export default function ModelList(props: ModelListProps) {
                                             err,
                                           );
                                           setSelectedOrderForJWModal(o);
+                                          setJobWorkDetailsModalId(o.id);
                                         });
-                                      setJobWorkDetailsModalId(o.id);
                                     } else {
                                       setAssignJobWorksModalId(o.id);
                                     }
@@ -1357,6 +1358,7 @@ export default function ModelList(props: ModelListProps) {
                                   } else {
                                     setSelectedOrderForJWModal(o);
                                   }
+                                  setJobWorkDetailsModalId(o.id);
                                 })
                                 .catch((err) => {
                                   console.warn(
@@ -1364,8 +1366,8 @@ export default function ModelList(props: ModelListProps) {
                                     err,
                                   );
                                   setSelectedOrderForJWModal(o);
+                                  setJobWorkDetailsModalId(o.id);
                                 });
-                              setJobWorkDetailsModalId(o.id);
                             } else {
                               setAssignJobWorksModalId(o.id);
                             }
