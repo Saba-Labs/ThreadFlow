@@ -113,7 +113,8 @@ export const createRestokItem: RequestHandler = async (req, res) => {
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating restok item:", error);
-    res.status(500).json({ error: "Failed to create item" });
+    const errorMessage = error instanceof Error ? error.message : "Failed to create item";
+    res.status(500).json({ error: errorMessage });
   }
 };
 
