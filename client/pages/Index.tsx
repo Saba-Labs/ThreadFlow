@@ -63,7 +63,8 @@ export default function Index() {
     fetchRestokItems();
   }, [fetchRestokItems]);
 
-  const isActive = (o: any) => o.currentStepIndex >= 0 && o.currentStepIndex < o.steps.length;
+  const isActive = (o: any) =>
+    o.currentStepIndex >= 0 && o.currentStepIndex < o.steps.length;
   const isNotYetStarted = (o: any) => o.currentStepIndex === -1;
   const hasPendingJobWork = (o: any) =>
     (o.jobWorkAssignments || []).some((a: any) => a.status === "pending");
@@ -88,8 +89,9 @@ export default function Index() {
     }
     return false;
   }).length;
-  const jobWorkCount = pipeline.orders.filter((o) => hasPendingJobWork(o))
-    .length;
+  const jobWorkCount = pipeline.orders.filter((o) =>
+    hasPendingJobWork(o),
+  ).length;
 
   return (
     <div className="space-y-8">
@@ -122,7 +124,11 @@ export default function Index() {
         <button
           onClick={() => setModelStatusExpanded(!modelStatusExpanded)}
           className="w-full mb-6 group"
-          title={modelStatusExpanded ? "Collapse model status" : "Expand model status"}
+          title={
+            modelStatusExpanded
+              ? "Collapse model status"
+              : "Expand model status"
+          }
         >
           <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-200 hover:border-slate-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-slate-100 group-hover:to-slate-200">
             <Layers className="h-6 w-6 text-slate-600 flex-shrink-0" />
@@ -154,7 +160,9 @@ export default function Index() {
                 <Layers className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <div className="text-sm text-muted-foreground">Total Models</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Models
+                </div>
                 <div className="mt-1 flex items-baseline justify-between gap-4">
                   <div className="text-2xl font-semibold">{total}</div>
                   <Badge variant="secondary">Live</Badge>

@@ -113,7 +113,8 @@ export const createRestokItem: RequestHandler = async (req, res) => {
     res.json({ success: true, id });
   } catch (error) {
     console.error("Error creating restok item:", error);
-    const errorMessage = error instanceof Error ? error.message : "Failed to create item";
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to create item";
     res.status(500).json({ error: errorMessage });
   }
 };
@@ -159,20 +160,38 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
 
     if (subItems && Array.isArray(subItems)) {
       for (const sub of subItems) {
-        if (!sub.id || !sub.name || sub.quantity === undefined || sub.lowStock === undefined) {
+        if (
+          !sub.id ||
+          !sub.name ||
+          sub.quantity === undefined ||
+          sub.lowStock === undefined
+        ) {
           return res.status(400).json({
-            error: `Invalid sub-item: missing required fields. Got: ${JSON.stringify(sub)}`
+            error: `Invalid sub-item: missing required fields. Got: ${JSON.stringify(sub)}`,
           });
         }
         try {
           await query(
             "INSERT INTO restok_sub_items (id, item_id, name, quantity, low_stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-            [sub.id, id, sub.name, Number(sub.quantity), Number(sub.lowStock), now, now],
+            [
+              sub.id,
+              id,
+              sub.name,
+              Number(sub.quantity),
+              Number(sub.lowStock),
+              now,
+              now,
+            ],
           );
         } catch (subError) {
-          console.error("Error inserting sub-item:", subError, "Sub-item data:", sub);
+          console.error(
+            "Error inserting sub-item:",
+            subError,
+            "Sub-item data:",
+            sub,
+          );
           return res.status(400).json({
-            error: `Failed to insert sub-item: ${subError instanceof Error ? subError.message : "Unknown error"}`
+            error: `Failed to insert sub-item: ${subError instanceof Error ? subError.message : "Unknown error"}`,
           });
         }
       }
@@ -182,7 +201,8 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating restok item:", error);
-    const errorMessage = error instanceof Error ? error.message : "Failed to update item";
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to update item";
     res.status(500).json({ error: errorMessage });
   }
 };
@@ -198,7 +218,8 @@ export const deleteRestokItem: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting restok item:", error);
-    const errorMessage = error instanceof Error ? error.message : "Failed to delete item";
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to delete item";
     res.status(500).json({ error: errorMessage });
   }
 };
