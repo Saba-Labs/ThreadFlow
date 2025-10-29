@@ -51,10 +51,12 @@ export default function JobWorkDetailsModal({
 
   // Log when assignments change to help with debugging
   useEffect(() => {
-    console.log(
-      "[JobWorkDetailsModal] Modal state",
-      { open, assignmentsLength: assignments.length, modelName, assignments },
-    );
+    console.log("[JobWorkDetailsModal] Modal state", {
+      open,
+      assignmentsLength: assignments.length,
+      modelName,
+      assignments,
+    });
   }, [open, assignments, modelName]);
 
   const formatDate = (timestamp: number | undefined) => {

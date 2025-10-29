@@ -402,7 +402,8 @@ export default function ModelList(props: ModelListProps) {
   const emptyColSpan = showDetails ? 7 : 2;
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
-  const [selectedOrderForJWModal, setSelectedOrderForJWModal] = useState<WorkOrder | null>(null);
+  const [selectedOrderForJWModal, setSelectedOrderForJWModal] =
+    useState<WorkOrder | null>(null);
 
   // When 'showDetails' toggles, control which rows are expanded.
   // If details are shown we expand all rows by default, but still allow
@@ -775,17 +776,26 @@ export default function ModelList(props: ModelListProps) {
                                     if (hasAssignments) {
                                       // Fetch fresh data to ensure we have the latest assignments
                                       fetch(`/api/pipeline/orders`)
-                                        .then(response => response.ok ? response.json() : null)
-                                        .then(orders => {
+                                        .then((response) =>
+                                          response.ok ? response.json() : null,
+                                        )
+                                        .then((orders) => {
                                           if (orders) {
-                                            const fresh = orders.find((x: any) => x.id === o.id);
-                                            setSelectedOrderForJWModal(fresh || o);
+                                            const fresh = orders.find(
+                                              (x: any) => x.id === o.id,
+                                            );
+                                            setSelectedOrderForJWModal(
+                                              fresh || o,
+                                            );
                                           } else {
                                             setSelectedOrderForJWModal(o);
                                           }
                                         })
-                                        .catch(err => {
-                                          console.warn("[ModelList] Could not fetch fresh data, using current:", err);
+                                        .catch((err) => {
+                                          console.warn(
+                                            "[ModelList] Could not fetch fresh data, using current:",
+                                            err,
+                                          );
                                           setSelectedOrderForJWModal(o);
                                         });
                                       setJobWorkDetailsModalId(o.id);
@@ -1335,17 +1345,24 @@ export default function ModelList(props: ModelListProps) {
                             if (hasAssignments) {
                               // Fetch fresh data to ensure we have the latest assignments
                               fetch(`/api/pipeline/orders`)
-                                .then(response => response.ok ? response.json() : null)
-                                .then(orders => {
+                                .then((response) =>
+                                  response.ok ? response.json() : null,
+                                )
+                                .then((orders) => {
                                   if (orders) {
-                                    const fresh = orders.find((x: any) => x.id === o.id);
+                                    const fresh = orders.find(
+                                      (x: any) => x.id === o.id,
+                                    );
                                     setSelectedOrderForJWModal(fresh || o);
                                   } else {
                                     setSelectedOrderForJWModal(o);
                                   }
                                 })
-                                .catch(err => {
-                                  console.warn("[ModelList] Could not fetch fresh data, using current:", err);
+                                .catch((err) => {
+                                  console.warn(
+                                    "[ModelList] Could not fetch fresh data, using current:",
+                                    err,
+                                  );
                                   setSelectedOrderForJWModal(o);
                                 });
                               setJobWorkDetailsModalId(o.id);
@@ -1461,23 +1478,32 @@ export default function ModelList(props: ModelListProps) {
                         const response = await fetch(`/api/pipeline/orders`);
                         if (response.ok) {
                           const orders = await response.json();
-                          const updated = orders.find((x: any) => x.id === orderId);
+                          const updated = orders.find(
+                            (x: any) => x.id === orderId,
+                          );
                           if (
                             updated?.jobWorkAssignments &&
                             updated.jobWorkAssignments.length > 0
                           ) {
-                            console.log("[ModelList] Found updated assignments", {
-                              orderId,
-                              assignmentsCount: updated.jobWorkAssignments.length,
-                              assignments: updated.jobWorkAssignments,
-                            });
+                            console.log(
+                              "[ModelList] Found updated assignments",
+                              {
+                                orderId,
+                                assignmentsCount:
+                                  updated.jobWorkAssignments.length,
+                                assignments: updated.jobWorkAssignments,
+                              },
+                            );
                             setSelectedOrderForJWModal(updated);
                             setJobWorkDetailsModalId(orderId);
                             break;
                           }
                         }
                       } catch (err) {
-                        console.error("[ModelList] Error fetching updated data:", err);
+                        console.error(
+                          "[ModelList] Error fetching updated data:",
+                          err,
+                        );
                       }
                     }
                   } catch (error) {
