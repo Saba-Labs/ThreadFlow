@@ -47,7 +47,7 @@ export default function Index() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchRestokItems();
   }, [fetchRestokItems]);
 
