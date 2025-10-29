@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import { useJobWorks } from "@/lib/jobWorks";
 import type { JobWorkAssignment } from "@/hooks/useProductionPipeline";
 import { Trash2, Edit2, Check, Plus } from "lucide-react";
-import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
