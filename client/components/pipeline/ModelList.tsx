@@ -769,11 +769,28 @@ export default function ModelList(props: ModelListProps) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => {
+                                  onClick={async () => {
                                     const hasAssignments =
                                       (o.jobWorkAssignments || []).length > 0;
                                     if (hasAssignments) {
-                                      setSelectedOrderForJWModal(o);
+                                      // Fetch fresh data to ensure we have the latest assignments
+                                      try {
+                                        const response = await fetch(`/api/pipeline/orders`);
+                                        if (response.ok) {
+                                          const orders = await response.json();
+                                          const fresh = orders.find((x: any) => x.id === o.id);
+                                          if (fresh) {
+                                            setSelectedOrderForJWModal(fresh);
+                                          } else {
+                                            setSelectedOrderForJWModal(o);
+                                          }
+                                        } else {
+                                          setSelectedOrderForJWModal(o);
+                                        }
+                                      } catch (err) {
+                                        console.warn("[ModelList] Could not fetch fresh data, using current:", err);
+                                        setSelectedOrderForJWModal(o);
+                                      }
                                       setJobWorkDetailsModalId(o.id);
                                     } else {
                                       setAssignJobWorksModalId(o.id);
