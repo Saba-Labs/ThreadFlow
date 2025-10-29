@@ -105,7 +105,15 @@ export default function ModelList(props: ModelListProps) {
     let tempExpanded = false;
     let addedChildIds: string[] = [];
 
-    // close modal immediately
+    try {
+      // Perform split - this is now async and persists to database
+      await props.onSplit(parentId, validQuantities);
+    } catch (error) {
+      console.error("Failed to split order:", error);
+      return;
+    }
+
+    // close modal after successful split
     setSplitForId(null);
     setSplitInputs([0]);
 
