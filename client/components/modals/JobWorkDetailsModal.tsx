@@ -160,7 +160,6 @@ export default function JobWorkDetailsModal({
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
-        ...a,
         jobWorkId: a.jobWorkId,
         jobWorkName: a.jobWorkName,
         quantity: a.quantity,
