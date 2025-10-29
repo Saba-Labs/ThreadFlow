@@ -427,7 +427,11 @@ export function useProductionPipeline() {
       setStore((s) => ({
         orders: s.orders.map((o) =>
           o.id === orderId
-            ? { ...o, steps: target === -1 ? o.steps : steps, currentStepIndex: target }
+            ? {
+                ...o,
+                steps: target === -1 ? o.steps : steps,
+                currentStepIndex: target,
+              }
             : o,
         ),
       }));

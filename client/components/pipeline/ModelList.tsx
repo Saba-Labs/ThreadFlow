@@ -885,41 +885,55 @@ export default function ModelList(props: ModelListProps) {
                                 {!showDetails && (
                                   <>
                                     <div className="text-sm">
-                                      <span className="text-muted-foreground">Date: </span>
+                                      <span className="text-muted-foreground">
+                                        Date:{" "}
+                                      </span>
                                       <span className="font-medium">
                                         {formatDate(o.createdAt)}
                                       </span>
                                     </div>
                                     {o.quantity > 0 && (
                                       <div className="text-sm">
-                                        <span className="text-muted-foreground">Qty: </span>
-                                        <span className="font-medium">{o.quantity}</span>
+                                        <span className="text-muted-foreground">
+                                          Qty:{" "}
+                                        </span>
+                                        <span className="font-medium">
+                                          {o.quantity}
+                                        </span>
                                       </div>
                                     )}
                                   </>
                                 )}
                                 {!showDetails && (
                                   <div className="text-sm">
-                                    <span className="text-muted-foreground">Path: </span>
+                                    <span className="text-muted-foreground">
+                                      Path:{" "}
+                                    </span>
                                     <div className="flex flex-wrap items-center gap-1 mt-1">
-                                      {getPathLetterPills(o, (orderId, stepIdx) => {
-                                        const stepAtIdx = o.steps[stepIdx];
-                                        if (
-                                          stepAtIdx.kind === "machine" &&
-                                          stepAtIdx.machineType
-                                        ) {
-                                          const machineIndex = machineTypes.findIndex(
-                                            (m) => m.name === stepAtIdx.machineType,
-                                          );
-                                          if (machineIndex >= 0) {
-                                            props.onToggleParallelMachine(
-                                              orderId,
-                                              o.currentStepIndex,
-                                              machineIndex,
-                                            );
+                                      {getPathLetterPills(
+                                        o,
+                                        (orderId, stepIdx) => {
+                                          const stepAtIdx = o.steps[stepIdx];
+                                          if (
+                                            stepAtIdx.kind === "machine" &&
+                                            stepAtIdx.machineType
+                                          ) {
+                                            const machineIndex =
+                                              machineTypes.findIndex(
+                                                (m) =>
+                                                  m.name ===
+                                                  stepAtIdx.machineType,
+                                              );
+                                            if (machineIndex >= 0) {
+                                              props.onToggleParallelMachine(
+                                                orderId,
+                                                o.currentStepIndex,
+                                                machineIndex,
+                                              );
+                                            }
                                           }
-                                        }
-                                      })}
+                                        },
+                                      )}
                                     </div>
                                   </div>
                                 )}

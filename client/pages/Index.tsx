@@ -3,7 +3,17 @@ import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Layers, Play, Pause, Briefcase, ChevronDown, ChevronUp, Map, Package } from "lucide-react";
+import {
+  Search,
+  Layers,
+  Play,
+  Pause,
+  Briefcase,
+  ChevronDown,
+  ChevronUp,
+  Map,
+  Package,
+} from "lucide-react";
 import MachineBoard from "@/components/pipeline/MachineBoard";
 import { useCallback, useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -171,7 +181,10 @@ export default function Index() {
               Roadmaps
             </h2>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200">
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-700 border-blue-200"
+              >
                 {roadmaps.length}
               </Badge>
               <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
@@ -208,7 +221,8 @@ export default function Index() {
                             {r.title}
                           </CardTitle>
                           <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
-                            {r.items.length} model{r.items.length !== 1 ? "s" : ""}
+                            {r.items.length} model
+                            {r.items.length !== 1 ? "s" : ""}
                           </p>
                         </div>
                       </div>
@@ -259,7 +273,10 @@ export default function Index() {
               ReStok
             </h2>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-200">
+              <Badge
+                variant="secondary"
+                className="bg-amber-100 text-amber-700 border-amber-200"
+              >
                 {restokItems.length}
               </Badge>
               <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
@@ -291,7 +308,11 @@ export default function Index() {
                   if (item.subItems && item.subItems.length > 0) {
                     if (item.subItems.some((sub: any) => sub.quantity === 0))
                       return "out-of-stock";
-                    if (item.subItems.some((sub: any) => sub.quantity < sub.lowStock))
+                    if (
+                      item.subItems.some(
+                        (sub: any) => sub.quantity < sub.lowStock,
+                      )
+                    )
                       return "low-stock";
                     return "normal";
                   }
@@ -299,17 +320,31 @@ export default function Index() {
                 };
 
                 const getStatusColor = (status: string) => {
-                  if (status === "out-of-stock") return "bg-red-100 border border-red-300";
-                  if (status === "low-stock") return "bg-yellow-100 border border-yellow-300";
+                  if (status === "out-of-stock")
+                    return "bg-red-100 border border-red-300";
+                  if (status === "low-stock")
+                    return "bg-yellow-100 border border-yellow-300";
                   return "bg-green-100 border border-green-300";
                 };
 
                 const getStatusBadge = (status: string) => {
                   if (status === "out-of-stock")
-                    return <span className="text-xs font-bold text-red-700">OUT OF STOCK</span>;
+                    return (
+                      <span className="text-xs font-bold text-red-700">
+                        OUT OF STOCK
+                      </span>
+                    );
                   if (status === "low-stock")
-                    return <span className="text-xs font-bold text-yellow-700">LOW STOCK</span>;
-                  return <span className="text-xs font-bold text-green-700">NORMAL</span>;
+                    return (
+                      <span className="text-xs font-bold text-yellow-700">
+                        LOW STOCK
+                      </span>
+                    );
+                  return (
+                    <span className="text-xs font-bold text-green-700">
+                      NORMAL
+                    </span>
+                  );
                 };
 
                 const status = getItemStockStatus(item);
@@ -330,13 +365,16 @@ export default function Index() {
                         )}
                         {item.subItems && item.subItems.length > 0 && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {item.subItems.length} sub-item{item.subItems.length !== 1 ? "s" : ""}
+                            {item.subItems.length} sub-item
+                            {item.subItems.length !== 1 ? "s" : ""}
                           </p>
                         )}
                       </div>
                       <div className="text-right flex-shrink-0">
                         {item.subItems && item.subItems.length === 0 && (
-                          <p className="font-bold text-sm mb-1">{item.quantity}</p>
+                          <p className="font-bold text-sm mb-1">
+                            {item.quantity}
+                          </p>
                         )}
                         {getStatusBadge(status)}
                       </div>
@@ -354,7 +392,11 @@ export default function Index() {
         <button
           onClick={() => setMachineListExpanded(!machineListExpanded)}
           className="w-full mb-6 group"
-          title={machineListExpanded ? "Collapse machines list" : "Expand machines list"}
+          title={
+            machineListExpanded
+              ? "Collapse machines list"
+              : "Expand machines list"
+          }
         >
           <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 hover:border-purple-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-purple-100 group-hover:to-pink-100">
             <Layers className="h-6 w-6 text-purple-600 flex-shrink-0" />
@@ -362,7 +404,10 @@ export default function Index() {
               Machines
             </h2>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200">
+              <Badge
+                variant="secondary"
+                className="bg-purple-100 text-purple-700 border-purple-200"
+              >
                 {Object.values(pipeline.board).flat().length}
               </Badge>
               <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
@@ -380,14 +425,20 @@ export default function Index() {
           <MachineBoard
             data={pipeline.board}
             onRun={(o) => {
-              if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
+              if (
+                o.currentStepIndex < 0 ||
+                o.currentStepIndex >= o.steps.length
+              )
                 return;
               pipeline.updateStepStatus(o.id, o.currentStepIndex, {
                 status: "running",
               });
             }}
             onHold={(o) => {
-              if (o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length)
+              if (
+                o.currentStepIndex < 0 ||
+                o.currentStepIndex >= o.steps.length
+              )
                 return;
               pipeline.updateStepStatus(o.id, o.currentStepIndex, {
                 status: "hold",
