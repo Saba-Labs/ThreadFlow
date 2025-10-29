@@ -372,11 +372,11 @@ export default function JobWorkDetailsModal({
                           onClick={() => handleEditField(assignment, "pickup")}
                           className="w-full text-left px-2 py-1 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded border border-gray-300 dark:border-gray-600"
                         >
-                          {formatDate(assignment.pickupDate)}
+                          {formatDate(assignment.pickupDate) || formatDate(new Date().getTime())}
                         </button>
                       ) : (
                         <div className="px-2 py-1 text-gray-900 dark:text-gray-100">
-                          {formatDate(assignment.pickupDate)}
+                          {formatDate(assignment.pickupDate) || formatDate(new Date().getTime())}
                         </div>
                       )}
                     </div>
