@@ -473,8 +473,7 @@ export default function JobWorkDetailsModal({
                         Complete
                       </Button>
                     )}
-                    {(assignment.status === "completed" ||
-                      editingCardId === assignment.jobWorkId) &&
+                    {editingCardId === assignment.jobWorkId &&
                       assignment.status === "completed" && (
                         <Button
                           size="sm"
