@@ -3,6 +3,7 @@ import { Plus, Trash2, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
+import { toast } from "@/hooks/use-toast";
 
 interface SubItem {
   id: string;
@@ -78,8 +79,18 @@ export default function EditItemModal({
     try {
       await onSubmit(editingName, editingLowStock, editingNote);
       onOpenChange(false);
+      toast({
+        title: "Success",
+        description: "Item saved successfully",
+      });
     } catch (error) {
       console.error("Failed to submit:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to save item",
+        variant: "destructive",
+      });
     }
   };
 
@@ -91,8 +102,18 @@ export default function EditItemModal({
     try {
       await onDeleteItem();
       onOpenChange(false);
+      toast({
+        title: "Success",
+        description: "Item deleted successfully",
+      });
     } catch (error) {
       console.error("Failed to delete item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete item",
+        variant: "destructive",
+      });
     }
   };
 
@@ -103,8 +124,18 @@ export default function EditItemModal({
       setNewSubItemName("");
       setNewSubItemLowStock(0);
       setShowAddSubItemForm(false);
+      toast({
+        title: "Success",
+        description: "Sub-item added successfully",
+      });
     } catch (error) {
       console.error("Failed to add sub-item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to add sub-item",
+        variant: "destructive",
+      });
     }
   };
 
@@ -127,8 +158,18 @@ export default function EditItemModal({
       );
       setEditingSubItemId(null);
       setEditingSubItem(null);
+      toast({
+        title: "Success",
+        description: "Sub-item updated successfully",
+      });
     } catch (error) {
       console.error("Failed to save sub-item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to update sub-item",
+        variant: "destructive",
+      });
     }
   };
 
@@ -140,8 +181,18 @@ export default function EditItemModal({
   const handleDeleteSubItem = async (subItemId: string) => {
     try {
       await onDeleteSubItem(subItemId);
+      toast({
+        title: "Success",
+        description: "Sub-item deleted successfully",
+      });
     } catch (error) {
       console.error("Failed to delete sub-item:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete sub-item",
+        variant: "destructive",
+      });
     }
   };
 

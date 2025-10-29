@@ -122,7 +122,7 @@ export default function JobWork() {
       for (const assignment of jwAssignments) {
         if (assignment.jobWorkId === jwId) {
           assignments.push({
-            id: assignment.id,
+            id: `${o.id}_${assignment.jobWorkId}_${assignment.pickupDate}`,
             orderId: o.id,
             modelName: o.modelName,
             quantity: assignment.quantity,
