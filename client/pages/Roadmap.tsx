@@ -112,16 +112,27 @@ export default function RoadmapPage() {
     );
   };
 
-  const handleAddSelectedToRoadmap = () => {
+  // Replace the handleAddSelectedToRoadmap function in Roadmap.tsx with this:
+
+  const handleAddSelectedToRoadmap = async () => {
     if (!openFor) return;
-    for (const id of selectedModels) {
-      const order = eligibleOrders.find((o) => o.id === id);
-      if (order) {
-        addModelToRoadmap(openFor, id, order.modelName, order.quantity);
+
+    try {
+      // Add models sequentially to avoid race conditions
+      for (const id of selectedModels) {
+        const order = eligibleOrders.find((o) => o.id === id);
+        if (order) {
+          await addModelToRoadmap(openFor, id, order.modelName, order.quantity);
+        }
       }
+
+      // Close modal and reset selection after all models are added
+      setOpenFor(null);
+      setSelectedModels([]);
+    } catch (error) {
+      console.error("Error adding models to roadmap:", error);
+      // Optionally show an error toast here
     }
-    setOpenFor(null);
-    setSelectedModels([]);
   };
 
   const handleSaveTitle = (id: string) => {
