@@ -161,24 +161,30 @@ export default function Index() {
 
       {/* Roadmap board */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-medium">Roadmaps</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setRoadmapExpanded(!roadmapExpanded)}
-              className="p-1 h-auto"
-              title={roadmapExpanded ? "Collapse roadmaps" : "Expand roadmaps"}
-            >
-              {roadmapExpanded ? (
-                <ChevronUp className="h-5 w-5" />
-              ) : (
-                <ChevronDown className="h-5 w-5" />
-              )}
-            </Button>
+        <button
+          onClick={() => setRoadmapExpanded(!roadmapExpanded)}
+          className="w-full mb-6 group"
+          title={roadmapExpanded ? "Collapse roadmaps" : "Expand roadmaps"}
+        >
+          <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 hover:border-blue-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-blue-100 group-hover:to-indigo-100">
+            <Map className="h-6 w-6 text-blue-600 flex-shrink-0" />
+            <h2 className="text-lg font-semibold text-slate-900 flex-1 text-left">
+              Roadmaps
+            </h2>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200">
+                {roadmaps.length}
+              </Badge>
+              <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
+                {roadmapExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-blue-600 transition-transform duration-300" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-blue-600 transition-transform duration-300" />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        </button>
 
         {roadmapExpanded && (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
