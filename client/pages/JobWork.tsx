@@ -214,7 +214,7 @@ export default function JobWork() {
                       <div className="space-y-1">
                         {pendingAssignments.map((a) => (
                           <div
-                            key={`${a.orderId}-${a.status}`}
+                            key={a.id}
                             className="text-sm flex items-center justify-between"
                           >
                             <span className="font-medium text-red-600 dark:text-red-400">
