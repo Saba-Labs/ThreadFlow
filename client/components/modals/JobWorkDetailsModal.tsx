@@ -248,11 +248,12 @@ export default function JobWorkDetailsModal({
     if (!newJobWorkId) return;
 
     const jobWork = jobWorks.find((j) => j.id === newJobWorkId);
+    const pickupDateMs = new Date(newPickupDate).getTime();
     const newAssignment: JobWorkAssignment = {
       jobWorkId: newJobWorkId,
       jobWorkName: jobWork?.name || "",
       quantity: Math.max(1, Math.floor(Number(newQuantity) || 1)),
-      pickupDate: new Date(newPickupDate).getTime(),
+      pickupDate: pickupDateMs > 0 ? pickupDateMs : new Date().getTime(),
       status: "pending",
     };
 
