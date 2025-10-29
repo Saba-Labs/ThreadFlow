@@ -1418,10 +1418,18 @@ export default function ModelList(props: ModelListProps) {
                   }
                   try {
                     await props.setJobWorkAssignments?.(o.id, assignments);
-                    // After saving, close the assign modal and open the details modal
+                    // After saving, close the assign modal
                     setAssignJobWorksModalId(null);
-                    // Give a moment for the data to be refreshed from the server
-                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    // Wait a moment for the data to be refreshed from the server
+                    // Multiple small delays to give the hook time to fetch and subscribers time to update
+                    for (let i = 0; i < 5; i++) {
+                      await new Promise((resolve) => setTimeout(resolve, 50));
+                      const updated = props.orders.find((x) => x.id === orderId);
+                      if (updated?.jobWorkAssignments && updated.jobWorkAssignments.length > 0) {
+                        break;
+                      }
+                    }
+                    // Now open the details modal with the hopefully updated data
                     setJobWorkDetailsModalId(orderId);
                   } catch (error) {
                     console.error("Failed to assign job works:", error);
