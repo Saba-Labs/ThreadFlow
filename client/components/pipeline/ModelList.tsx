@@ -1425,26 +1425,34 @@ export default function ModelList(props: ModelListProps) {
                     await props.setJobWorkAssignments?.(o.id, assignments);
                     // After saving, close the assign modal
                     setAssignJobWorksModalId(null);
-                    // Wait a moment for the data to be refreshed from the server
-                    // Multiple small delays to give the hook time to fetch and subscribers time to update
-                    for (let i = 0; i < 5; i++) {
-                      await new Promise((resolve) => setTimeout(resolve, 50));
-                      const updated = props.orders.find(
-                        (x) => x.id === orderId,
-                      );
-                      if (
-                        updated?.jobWorkAssignments &&
-                        updated.jobWorkAssignments.length > 0
-                      ) {
-                        break;
+
+                    // Directly fetch the updated order data from the server
+                    for (let attempt = 0; attempt < 10; attempt++) {
+                      await new Promise((resolve) => setTimeout(resolve, 100));
+                      try {
+                        const response = await fetch(`/api/pipeline/orders`);
+                        if (response.ok) {
+                          const orders = await response.json();
+                          const updated = orders.find((x: any) => x.id === orderId);
+                          if (
+                            updated?.jobWorkAssignments &&
+                            updated.jobWorkAssignments.length > 0
+                          ) {
+                            console.log("[ModelList] Found updated assignments", {
+                              orderId,
+                              assignmentsCount: updated.jobWorkAssignments.length,
+                              assignments: updated.jobWorkAssignments,
+                            });
+                            setSelectedOrderForJWModal(updated);
+                            setJobWorkDetailsModalId(orderId);
+                            return;
+                          }
+                        }
+                      } catch (err) {
+                        console.error("[ModelList] Error fetching updated data:", err);
                       }
                     }
-                    // Now open the details modal with the hopefully updated data
-                    const updated = props.orders.find((x) => x.id === orderId);
-                    if (updated) {
-                      setSelectedOrderForJWModal(updated);
-                    }
-                    setJobWorkDetailsModalId(orderId);
+                    console.warn("[ModelList] Failed to get assignments after multiple attempts");
                   } catch (error) {
                     console.error("Failed to assign job works:", error);
                   }
