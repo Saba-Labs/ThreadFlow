@@ -70,8 +70,8 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         jobWorkId: a.job_work_id,
         jobWorkName: a.name,
         quantity: a.quantity,
-        pickupDate: a.pickup_date,
-        completionDate: a.completion_date,
+        pickupDate: typeof a.pickup_date === "number" ? a.pickup_date : parseInt(a.pickup_date || "0", 10),
+        completionDate: a.completion_date ? (typeof a.completion_date === "number" ? a.completion_date : parseInt(a.completion_date, 10)) : undefined,
         status: a.status,
       }));
 
