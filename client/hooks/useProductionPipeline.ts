@@ -370,7 +370,12 @@ export function useProductionPipeline() {
               }),
             });
             if (!response.ok) {
-              const errorData = await response.text();
+              let errorData = "";
+              try {
+                errorData = await response.text();
+              } catch {
+                // Body already read or unavailable
+              }
               throw new Error(
                 `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
               );
