@@ -69,7 +69,7 @@ export default function Index() {
     (o.jobWorkAssignments || []).some((a: any) => a.status === "pending");
 
   const total = pipeline.orders.filter(
-    (o) => (isActive(o) || isNotYetStarted(o)) && !hasPendingJobWork(o),
+    (o) => isActive(o) || isNotYetStarted(o),
   ).length;
   const running = pipeline.orders.filter((o) => {
     if (!isActive(o)) return false;
