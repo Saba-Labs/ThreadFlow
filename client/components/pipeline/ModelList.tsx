@@ -1795,7 +1795,7 @@ export default function ModelList(props: ModelListProps) {
                   const total = splitFor?.quantity || 0;
                   const part = Math.floor(total * f);
                   const remainder = total - part;
-                  const disabled = part < 1 || remainder < 1;
+                  const disabled = part < 1 || remainder < 1 || isSplitting;
                   return (
                     <Button
                       key={f}
