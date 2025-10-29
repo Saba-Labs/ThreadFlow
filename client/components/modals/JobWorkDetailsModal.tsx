@@ -94,7 +94,7 @@ export default function JobWorkDetailsModal({
     const updated: JobWorkAssignment[] = assignments.map((a) => {
       if (a.jobWorkId !== currentEditingField.jobWorkId) return a;
 
-      if (editingField.field === "pickup") {
+      if (currentEditingField.field === "pickup") {
         const pickupMs = new Date(editValue).getTime();
         return {
           jobWorkId: a.jobWorkId,
@@ -104,7 +104,7 @@ export default function JobWorkDetailsModal({
           completionDate: a.completionDate,
           status: a.status,
         };
-      } else if (editingField.field === "delivery") {
+      } else if (currentEditingField.field === "delivery") {
         // If delivery date is empty, revert to pending status
         if (!editValue) {
           return {
