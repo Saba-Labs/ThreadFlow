@@ -298,6 +298,16 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
           : new Date(assignment.completionDate).getTime()
         : null;
 
+      console.log("[setJobWorkAssignments] Inserting assignment", {
+        id,
+        orderId,
+        jobWorkId: assignment.jobWorkId,
+        quantity: assignment.quantity,
+        pickupDateMs,
+        completionDateMs,
+        status: assignment.status,
+      });
+
       await query(
         "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
         [
