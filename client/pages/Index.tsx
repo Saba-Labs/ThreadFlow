@@ -64,16 +64,18 @@ export default function Index() {
   }, [fetchRestokItems]);
 
   const total = pipeline.orders.length;
+  const hasJobWork = (o: any) =>
+    (o.jobWorkAssignments || []).length > 0 || ((o as any).jobWorkIds || []).length > 0;
   const running = pipeline.orders.filter((o) => {
     const idx = o.currentStepIndex;
     const s = o.steps[idx]?.status;
-    return s === "running";
+    return s === "running" && !hasJobWork(o);
   }).length;
   const hold = pipeline.orders.filter((o) => {
     const idx = o.currentStepIndex;
     const s =
       o.steps[idx]?.status === "pending" ? "hold" : o.steps[idx]?.status;
-    return s === "hold";
+    return s === "hold" && !hasJobWork(o);
   }).length;
   const completed = pipeline.orders.filter(
     (o) => o.currentStepIndex < 0 || o.currentStepIndex >= o.steps.length,
