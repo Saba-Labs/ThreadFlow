@@ -473,18 +473,19 @@ export default function JobWorkDetailsModal({
                         Complete
                       </Button>
                     )}
-                    {assignment.status === "completed" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() =>
-                          handleNotComplete(assignment.jobWorkId)
-                        }
-                      >
-                        Mark as Pending
-                      </Button>
-                    )}
+                    {editingCardId === assignment.jobWorkId &&
+                      assignment.status === "completed" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() =>
+                            handleNotComplete(assignment.jobWorkId)
+                          }
+                        >
+                          Mark as Pending
+                        </Button>
+                      )}
                     <Button
                       size="icon"
                       variant="ghost"

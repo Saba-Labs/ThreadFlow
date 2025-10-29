@@ -121,6 +121,13 @@ export function useRoadmaps() {
       quantity: number,
     ) => {
       try {
+        console.log("[useRoadmaps.addModelToRoadmap] Called with:", {
+          roadmapId,
+          modelId,
+          modelName,
+          quantity,
+        });
+
         const response = await fetch(`/api/roadmaps/${roadmapId}/models`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -130,7 +137,24 @@ export function useRoadmaps() {
             quantity,
           }),
         });
-        if (!response.ok) throw new Error("Failed to add model to roadmap");
+
+        console.log("[useRoadmaps.addModelToRoadmap] Response status:", {
+          status: response.status,
+          ok: response.ok,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error(
+            "[useRoadmaps.addModelToRoadmap] Error response:",
+            errorData,
+          );
+          throw new Error(
+            errorData.error ||
+              `Failed to add model to roadmap (${response.status})`,
+          );
+        }
+
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error adding model to roadmap:", error);
