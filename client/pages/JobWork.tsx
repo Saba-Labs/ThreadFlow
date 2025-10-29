@@ -208,20 +208,14 @@ export default function JobWork() {
                     )}
 
                     {/* Assigned Models */}
-                    {assignments.length > 0 && (
+                    {pendingAssignments.length > 0 && (
                       <div className="space-y-1">
-                        {assignments.map((a) => (
+                        {pendingAssignments.map((a) => (
                           <div
                             key={`${a.orderId}-${a.status}`}
                             className="text-sm flex items-center justify-between"
                           >
-                            <span
-                              className={`font-medium ${
-                                a.status === "pending"
-                                  ? "text-red-600 dark:text-red-400"
-                                  : "text-green-600 dark:text-green-400"
-                              }`}
-                            >
+                            <span className="font-medium text-red-600 dark:text-red-400">
                               {a.modelName}
                             </span>
                             <span className="text-xs text-muted-foreground ml-2">
@@ -232,7 +226,7 @@ export default function JobWork() {
                       </div>
                     )}
 
-                    {assignments.length === 0 && (
+                    {pendingAssignments.length === 0 && (
                       <div className="italic text-xs text-gray-400">
                         No models assigned
                       </div>
