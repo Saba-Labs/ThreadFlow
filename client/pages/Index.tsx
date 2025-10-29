@@ -64,10 +64,13 @@ export default function Index() {
   }, [fetchRestokItems]);
 
   const isActive = (o: any) => o.currentStepIndex >= 0 && o.currentStepIndex < o.steps.length;
+  const isNotYetStarted = (o: any) => o.currentStepIndex === -1;
   const hasPendingJobWork = (o: any) =>
     (o.jobWorkAssignments || []).some((a: any) => a.status === "pending");
 
-  const total = pipeline.orders.filter((o) => isActive(o)).length;
+  const total = pipeline.orders.filter(
+    (o) => (isActive(o) || isNotYetStarted(o)) && !hasPendingJobWork(o),
+  ).length;
   const running = pipeline.orders.filter((o) => {
     if (!isActive(o)) return false;
     const idx = o.currentStepIndex;
@@ -75,11 +78,15 @@ export default function Index() {
     return s === "running" && !hasPendingJobWork(o);
   }).length;
   const hold = pipeline.orders.filter((o) => {
-    if (!isActive(o)) return false;
-    const idx = o.currentStepIndex;
-    const s =
-      o.steps[idx]?.status === "pending" ? "hold" : o.steps[idx]?.status;
-    return s === "hold" && !hasPendingJobWork(o);
+    if (!hasPendingJobWork(o)) {
+      if (isNotYetStarted(o)) return true;
+      if (!isActive(o)) return false;
+      const idx = o.currentStepIndex;
+      const s =
+        o.steps[idx]?.status === "pending" ? "hold" : o.steps[idx]?.status;
+      return s === "hold";
+    }
+    return false;
   }).length;
   const jobWorkCount = pipeline.orders.filter((o) => hasPendingJobWork(o))
     .length;
