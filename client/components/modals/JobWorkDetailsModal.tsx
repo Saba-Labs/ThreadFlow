@@ -49,7 +49,6 @@ export default function JobWorkDetailsModal({
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Log when assignments change to help with debugging
   useEffect(() => {
     console.log("[JobWorkDetailsModal] Modal state", {
       open,
@@ -119,42 +118,27 @@ export default function JobWorkDetailsModal({
       if (currentEditingField.field === "pickup") {
         const pickupMs = new Date(editValue).getTime();
         return {
-          jobWorkId: a.jobWorkId,
-          jobWorkName: a.jobWorkName,
-          quantity: a.quantity,
+          ...a,
           pickupDate: pickupMs,
-          completionDate: a.completionDate,
-          status: a.status,
         };
       } else if (currentEditingField.field === "delivery") {
-        // If delivery date is empty, revert to pending status
         if (!editValue) {
           return {
-            jobWorkId: a.jobWorkId,
-            jobWorkName: a.jobWorkName,
-            quantity: a.quantity,
-            pickupDate: a.pickupDate,
+            ...a,
             completionDate: undefined,
             status: "pending" as const,
           };
         }
         const completionMs = new Date(editValue).getTime();
         return {
-          jobWorkId: a.jobWorkId,
-          jobWorkName: a.jobWorkName,
-          quantity: a.quantity,
-          pickupDate: a.pickupDate,
+          ...a,
           completionDate: completionMs,
           status: "completed" as const,
         };
       } else {
         return {
-          jobWorkId: a.jobWorkId,
-          jobWorkName: a.jobWorkName,
+          ...a,
           quantity: Math.max(0, Math.floor(Number(editValue) || 0)),
-          pickupDate: a.pickupDate,
-          completionDate: a.completionDate,
-          status: a.status,
         };
       }
     });
@@ -168,32 +152,39 @@ export default function JobWorkDetailsModal({
   };
 
   const handleCompleteAssignment = async (jwId: string) => {
+    console.log("Complete button clicked for:", jwId);
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const completionDate = today.getTime();
 
-    // Find the assignment to validate it exists and has jobWorkId
     const assignment = assignments.find((a) => a.jobWorkId === jwId);
     if (!assignment || !assignment.jobWorkId) {
       console.error("Assignment not found or invalid jobWorkId:", jwId);
       return;
     }
 
+    console.log("Updating assignment to completed:", assignment);
+
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
-        jobWorkId: a.jobWorkId,
-        jobWorkName: a.jobWorkName,
-        quantity: a.quantity,
-        pickupDate: a.pickupDate,
+        ...a,
         completionDate,
         status: "completed" as const,
       };
     });
 
+    console.log("Updated assignments:", updated);
+
     try {
       await onUpdateAssignments(updated);
-      await onComplete(jwId, completionDate);
+      console.log("onUpdateAssignments succeeded");
+      
+      if (onComplete) {
+        await onComplete(jwId, completionDate);
+        console.log("onComplete callback succeeded");
+      }
     } catch (error) {
       console.error("Failed to complete assignment:", error);
     }
@@ -205,10 +196,13 @@ export default function JobWorkDetailsModal({
 
   const handleConfirmDelete = async () => {
     if (!deletingId) return;
+    console.log("Deleting assignment:", deletingId);
+    
     const filtered = assignments.filter((a) => a.jobWorkId !== deletingId);
     try {
       await onUpdateAssignments(filtered);
       setDeletingId(null);
+      console.log("Delete succeeded");
     } catch (error) {
       console.error("Failed to delete assignment:", error);
     }
@@ -219,31 +213,29 @@ export default function JobWorkDetailsModal({
   };
 
   const handleNotComplete = async (jwId: string) => {
+    console.log("Reverting completion for:", jwId);
+    
     const updated = assignments.map((a) => {
       if (a.jobWorkId !== jwId) return a;
       return {
-        jobWorkId: a.jobWorkId,
-        jobWorkName: a.jobWorkName,
-        quantity: a.quantity,
-        pickupDate: a.pickupDate,
+        ...a,
         completionDate: undefined,
         status: "pending" as const,
       };
     });
+    
     try {
       await onUpdateAssignments(updated);
+      console.log("Revert to pending succeeded");
     } catch (error) {
       console.error("Failed to update assignment:", error);
     }
   };
 
   const getJobWorkName = (jwId: string, storedName?: string) => {
-    // First try the stored name from the assignment
     if (storedName) return storedName;
-    // Then try to find it in the job works list
     const found = jobWorks.find((j) => j.id === jwId);
     if (found) return found.name;
-    // Fallback to showing the ID
     return jwId;
   };
 
@@ -275,7 +267,6 @@ export default function JobWorkDetailsModal({
     }
   };
 
-  // Filter out invalid assignments that don't have jobWorkId
   const validAssignments = assignments.filter((a) => a.jobWorkId);
   const pendingAssignments = validAssignments.filter(
     (a) => a.status === "pending",
@@ -335,13 +326,11 @@ export default function JobWorkDetailsModal({
                       variant="ghost"
                       onClick={() => {
                         if (editingCardId === assignment.jobWorkId) {
-                          // Save and exit edit mode
                           if (editingField) {
                             handleSaveEditField();
                           }
                           setEditingCardId(null);
                         } else {
-                          // Enter edit mode
                           setEditingCardId(assignment.jobWorkId);
                         }
                       }}
@@ -464,7 +453,7 @@ export default function JobWorkDetailsModal({
                   )}
 
                   <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                    {assignment.status === "pending" && !editingCardId && (
+                    {assignment.status === "pending" && (
                       <Button
                         size="sm"
                         className="flex-1"
