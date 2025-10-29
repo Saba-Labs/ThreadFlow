@@ -636,11 +636,7 @@ export default function ModelList(props: ModelListProps) {
                                                 {name}
                                               </div>
                                             ))
-                                          ) : (
-                                            <div className="font-medium text-purple-700 dark:text-purple-300">
-                                              Job Work
-                                            </div>
-                                          )}
+                                          ) : null}
                                         </div>
                                       );
                                     }
