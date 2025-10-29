@@ -135,19 +135,42 @@ export function useProductionPipeline() {
         jobWorkAssignments: [],
       };
 
-      try {
-        const response = await fetch("/api/pipeline/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(order),
-        });
-        if (!response.ok) throw new Error("Failed to create order");
-        await fetchFromServer();
-        return order.id;
-      } catch (error) {
-        console.error("Failed to create work order:", error);
-        throw error;
-      }
+      // Optimistic update - show the new order immediately
+      setStore((s) => ({ orders: [...s.orders, order] }));
+
+      // Background sync - send to server without blocking UI
+      syncQueue.enqueue(
+        createSyncTask(
+          "createWorkOrder",
+          async () => {
+            const response = await fetch("/api/pipeline/orders", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(order),
+            });
+            if (!response.ok) throw new Error("Failed to create order");
+          },
+          (error) => {
+            // On error, remove the optimistic order and show toast
+            setStore((s) => ({
+              orders: s.orders.filter((o) => o.id !== order.id),
+            }));
+            toast({
+              title: "Error",
+              description: "Failed to create model. It has been removed.",
+              variant: "destructive",
+            });
+          },
+          () => {
+            toast({
+              title: "Success",
+              description: "Model created successfully",
+            });
+          },
+        ),
+      );
+
+      return order.id;
     },
     [],
   );
