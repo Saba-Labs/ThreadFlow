@@ -123,7 +123,7 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Missing roadmapId" });
     }
 
-    if (!modelId || !modelName || !quantity) {
+    if (!modelId || !modelName || quantity === undefined || quantity === null) {
       console.error("[addModelToRoadmap] Missing required fields:", {
         modelId,
         modelName,
