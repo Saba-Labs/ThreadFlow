@@ -402,6 +402,8 @@ export default function ModelList(props: ModelListProps) {
   const emptyColSpan = showDetails ? 7 : 2;
 
   const [toggledIds, setToggledIds] = useState<string[]>([]);
+  const [selectedOrderForJWModal, setSelectedOrderForJWModal] =
+    useState<WorkOrder | null>(null);
 
   // When 'showDetails' toggles, control which rows are expanded.
   // If details are shown we expand all rows by default, but still allow
@@ -772,6 +774,30 @@ export default function ModelList(props: ModelListProps) {
                                     const hasAssignments =
                                       (o.jobWorkAssignments || []).length > 0;
                                     if (hasAssignments) {
+                                      // Fetch fresh data to ensure we have the latest assignments
+                                      fetch(`/api/pipeline/orders`)
+                                        .then((response) =>
+                                          response.ok ? response.json() : null,
+                                        )
+                                        .then((orders) => {
+                                          if (orders) {
+                                            const fresh = orders.find(
+                                              (x: any) => x.id === o.id,
+                                            );
+                                            setSelectedOrderForJWModal(
+                                              fresh || o,
+                                            );
+                                          } else {
+                                            setSelectedOrderForJWModal(o);
+                                          }
+                                        })
+                                        .catch((err) => {
+                                          console.warn(
+                                            "[ModelList] Could not fetch fresh data, using current:",
+                                            err,
+                                          );
+                                          setSelectedOrderForJWModal(o);
+                                        });
                                       setJobWorkDetailsModalId(o.id);
                                     } else {
                                       setAssignJobWorksModalId(o.id);
@@ -1317,6 +1343,28 @@ export default function ModelList(props: ModelListProps) {
                             const hasAssignments =
                               (o.jobWorkAssignments || []).length > 0;
                             if (hasAssignments) {
+                              // Fetch fresh data to ensure we have the latest assignments
+                              fetch(`/api/pipeline/orders`)
+                                .then((response) =>
+                                  response.ok ? response.json() : null,
+                                )
+                                .then((orders) => {
+                                  if (orders) {
+                                    const fresh = orders.find(
+                                      (x: any) => x.id === o.id,
+                                    );
+                                    setSelectedOrderForJWModal(fresh || o);
+                                  } else {
+                                    setSelectedOrderForJWModal(o);
+                                  }
+                                })
+                                .catch((err) => {
+                                  console.warn(
+                                    "[ModelList] Could not fetch fresh data, using current:",
+                                    err,
+                                  );
+                                  setSelectedOrderForJWModal(o);
+                                });
                               setJobWorkDetailsModalId(o.id);
                             } else {
                               setAssignJobWorksModalId(o.id);
@@ -1422,22 +1470,42 @@ export default function ModelList(props: ModelListProps) {
                     await props.setJobWorkAssignments?.(o.id, assignments);
                     // After saving, close the assign modal
                     setAssignJobWorksModalId(null);
-                    // Wait a moment for the data to be refreshed from the server
-                    // Multiple small delays to give the hook time to fetch and subscribers time to update
-                    for (let i = 0; i < 5; i++) {
-                      await new Promise((resolve) => setTimeout(resolve, 50));
-                      const updated = props.orders.find(
-                        (x) => x.id === orderId,
-                      );
-                      if (
-                        updated?.jobWorkAssignments &&
-                        updated.jobWorkAssignments.length > 0
-                      ) {
-                        break;
+
+                    // Directly fetch the updated order data from the server
+                    for (let attempt = 0; attempt < 10; attempt++) {
+                      await new Promise((resolve) => setTimeout(resolve, 100));
+                      try {
+                        const response = await fetch(`/api/pipeline/orders`);
+                        if (response.ok) {
+                          const orders = await response.json();
+                          const updated = orders.find(
+                            (x: any) => x.id === orderId,
+                          );
+                          if (
+                            updated?.jobWorkAssignments &&
+                            updated.jobWorkAssignments.length > 0
+                          ) {
+                            console.log(
+                              "[ModelList] Found updated assignments",
+                              {
+                                orderId,
+                                assignmentsCount:
+                                  updated.jobWorkAssignments.length,
+                                assignments: updated.jobWorkAssignments,
+                              },
+                            );
+                            setSelectedOrderForJWModal(updated);
+                            setJobWorkDetailsModalId(orderId);
+                            break;
+                          }
+                        }
+                      } catch (err) {
+                        console.error(
+                          "[ModelList] Error fetching updated data:",
+                          err,
+                        );
                       }
                     }
-                    // Now open the details modal with the hopefully updated data
-                    setJobWorkDetailsModalId(orderId);
                   } catch (error) {
                     console.error("Failed to assign job works:", error);
                   }
@@ -1447,26 +1515,21 @@ export default function ModelList(props: ModelListProps) {
           )}
 
           {/* Job Work Details Modal */}
-          {jobWorkDetailsModalId && (
+          {jobWorkDetailsModalId && selectedOrderForJWModal && (
             <JobWorkDetailsModal
-              key={`job-work-modal-${jobWorkDetailsModalId}-${sorted.find((o) => o.id === jobWorkDetailsModalId)?.jobWorkAssignments?.length || 0}`}
+              key={`job-work-modal-${jobWorkDetailsModalId}-${selectedOrderForJWModal.jobWorkAssignments?.length || 0}`}
               open={jobWorkDetailsModalId !== null}
-              onOpenChange={(v) => !v && setJobWorkDetailsModalId(null)}
-              modelName={
-                sorted.find((o) => o.id === jobWorkDetailsModalId)?.modelName ||
-                ""
-              }
-              modelQuantity={
-                sorted.find((o) => o.id === jobWorkDetailsModalId)?.quantity ||
-                0
-              }
-              assignments={
-                sorted.find((o) => o.id === jobWorkDetailsModalId)
-                  ?.jobWorkAssignments || []
-              }
+              onOpenChange={(v) => {
+                if (!v) {
+                  setJobWorkDetailsModalId(null);
+                  setSelectedOrderForJWModal(null);
+                }
+              }}
+              modelName={selectedOrderForJWModal.modelName}
+              modelQuantity={selectedOrderForJWModal.quantity}
+              assignments={selectedOrderForJWModal.jobWorkAssignments || []}
               onUpdateAssignments={async (assignments) => {
-                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
-                if (o) {
+                if (selectedOrderForJWModal) {
                   // Filter out assignments without jobWorkId and validate remaining ones
                   const validAssignments = assignments.filter(
                     (a) => a.jobWorkId,
@@ -1474,23 +1537,30 @@ export default function ModelList(props: ModelListProps) {
                   if (validAssignments.length === 0 && assignments.length > 0) {
                     throw new Error("Invalid assignments: missing jobWorkId");
                   }
-                  await props.setJobWorkAssignments?.(o.id, validAssignments);
+                  await props.setJobWorkAssignments?.(
+                    selectedOrderForJWModal.id,
+                    validAssignments,
+                  );
                 }
               }}
               onComplete={(jobWorkId, completionDate) => {
-                const o = sorted.find((x) => x.id === jobWorkDetailsModalId);
-                if (o) {
+                if (selectedOrderForJWModal) {
                   props.updateJobWorkAssignmentStatus?.(
-                    o.id,
+                    selectedOrderForJWModal.id,
                     jobWorkId,
                     "completed",
                     completionDate,
                   );
                   if (
-                    o.currentStepIndex >= 0 &&
-                    o.currentStepIndex < o.steps.length
+                    selectedOrderForJWModal.currentStepIndex >= 0 &&
+                    selectedOrderForJWModal.currentStepIndex <
+                      selectedOrderForJWModal.steps.length
                   ) {
-                    props.onSetStepStatus(o.id, o.currentStepIndex, "hold");
+                    props.onSetStepStatus(
+                      selectedOrderForJWModal.id,
+                      selectedOrderForJWModal.currentStepIndex,
+                      "hold",
+                    );
                   }
                 }
               }}

@@ -75,6 +75,14 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         status: a.status,
       }));
 
+      if (jobWorkAssignments.length > 0) {
+        console.log("[getPipelineOrders] Found assignments for order", {
+          orderId: row.id,
+          assignmentsCount: jobWorkAssignments.length,
+          assignments: jobWorkAssignments,
+        });
+      }
+
       const normalizedSteps = steps.map((s) => ({
         ...s,
         activeMachines:
@@ -260,6 +268,12 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
     const { orderId } = req.params;
     const { assignments } = req.body;
 
+    console.log("[setJobWorkAssignments] Received request", {
+      orderId,
+      assignmentsCount: assignments?.length,
+      assignments,
+    });
+
     if (!Array.isArray(assignments)) {
       return res.status(400).json({ error: "Assignments must be an array" });
     }
@@ -283,6 +297,16 @@ export const setJobWorkAssignments: RequestHandler = async (req, res) => {
           ? assignment.completionDate
           : new Date(assignment.completionDate).getTime()
         : null;
+
+      console.log("[setJobWorkAssignments] Inserting assignment", {
+        id,
+        orderId,
+        jobWorkId: assignment.jobWorkId,
+        quantity: assignment.quantity,
+        pickupDateMs,
+        completionDateMs,
+        status: assignment.status,
+      });
 
       await query(
         "INSERT INTO job_work_assignments (id, order_id, job_work_id, quantity, pickup_date, completion_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",

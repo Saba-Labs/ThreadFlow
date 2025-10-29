@@ -51,12 +51,12 @@ export default function JobWorkDetailsModal({
 
   // Log when assignments change to help with debugging
   useEffect(() => {
-    if (open && assignments.length === 0) {
-      console.warn(
-        "[JobWorkDetailsModal] Modal opened but no assignments received",
-        { assignments, modelName },
-      );
-    }
+    console.log("[JobWorkDetailsModal] Modal state", {
+      open,
+      assignmentsLength: assignments.length,
+      modelName,
+      assignments,
+    });
   }, [open, assignments, modelName]);
 
   const formatDate = (timestamp: number | undefined) => {
