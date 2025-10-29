@@ -10,7 +10,11 @@ import { useRoadmaps } from "@/context/RoadmapContext";
 
 export default function Index() {
   const pipeline = useProductionPipeline();
+  const { roadmaps } = useRoadmaps();
   const [machineListExpanded, setMachineListExpanded] = useState(true);
+  const [roadmapExpanded, setRoadmapExpanded] = useState(true);
+  const [restokExpanded, setRestokExpanded] = useState(true);
+  const [restokItems, setRestokItems] = useState<any[]>([]);
 
   const handleMoveNext = useCallback(
     async (id: string) => {
