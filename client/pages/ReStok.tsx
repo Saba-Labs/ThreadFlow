@@ -413,6 +413,8 @@ export default function ReStok() {
             : i,
         ),
       );
+      console.log("[updateSubItemQuantity] Quantity updated successfully, refetching to verify Neon sync");
+      await fetchItems();
     } catch (error) {
       console.error("Failed to update sub-item quantity:", error);
       throw error;
