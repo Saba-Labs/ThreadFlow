@@ -21,6 +21,7 @@ export interface Item {
 let STORE: Item[] = [];
 let isLoading = false;
 let isInitialized = false;
+let lastFetchError: Error | null = null;
 
 const subscribers = new Set<() => void>();
 const loadingSubscribers = new Set<() => void>();
@@ -30,8 +31,18 @@ async function fetchItems() {
   isLoading = true;
   for (const s of Array.from(loadingSubscribers)) s();
   try {
-    const response = await fetch("/api/restok/items");
-    if (!response.ok) throw new Error("Failed to fetch items");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    const response = await fetch("/api/restok/items", {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: Failed to fetch items`);
+    }
+
     const data = await response.json();
     const validatedData = data.map((item: Item) => ({
       ...item,
@@ -42,9 +53,15 @@ async function fetchItems() {
     }));
     STORE = validatedData;
     isInitialized = true;
+    lastFetchError = null;
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
-    console.error("Error fetching restok items:", error);
+    lastFetchError = error instanceof Error ? error : new Error(String(error));
+    console.error("Error fetching restok items:", lastFetchError);
+    // If initial load failed and we have no data, keep trying to initialize
+    if (!isInitialized) {
+      console.warn("Initial load failed, will retry on next interaction");
+    }
   } finally {
     isLoading = false;
     for (const s of Array.from(loadingSubscribers)) s();
