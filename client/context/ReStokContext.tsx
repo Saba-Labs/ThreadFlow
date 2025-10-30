@@ -216,18 +216,13 @@ export function useReStok() {
 
       const updatedQuantity = Math.max(0, newQuantity);
       try {
-        const response = await fetch(`/api/restok/items/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: item.name,
-            quantity: updatedQuantity,
-            lowStock: item.lowStock,
-            note: item.note,
-            subItems: item.subItems,
-          }),
+        await apiCall(`/api/restok/items/${itemId}`, "PUT", {
+          name: item.name,
+          quantity: updatedQuantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems,
         });
-        if (!response.ok) throw new Error("Failed to update item");
         await fetchItems();
       } catch (error) {
         console.error("Failed to update item quantity:", error);
@@ -243,18 +238,13 @@ export function useReStok() {
       if (!item) return;
 
       try {
-        const response = await fetch(`/api/restok/items/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            quantity: item.quantity,
-            lowStock,
-            note,
-            subItems: item.subItems,
-          }),
+        await apiCall(`/api/restok/items/${itemId}`, "PUT", {
+          name,
+          quantity: item.quantity,
+          lowStock,
+          note,
+          subItems: item.subItems,
         });
-        if (!response.ok) throw new Error("Failed to update item");
         await fetchItems();
         toast({
           title: "Success",
