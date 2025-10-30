@@ -9,6 +9,7 @@ import {
   createRestokItem,
   updateRestokItem,
   deleteRestokItem,
+  reorderRestokItems,
 } from "./routes/restok";
 import {
   getJobWorks,
