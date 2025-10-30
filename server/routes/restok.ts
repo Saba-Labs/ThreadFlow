@@ -125,8 +125,11 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     const { name, quantity, lowStock, note, subItems } = req.body;
     const now = Date.now();
 
+    console.log("[updateRestokItem] Request body:", { name, quantity, lowStock, note, subItemsCount: subItems?.length || 0 });
+
     // Validate required fields
     if (!name || name.trim() === "") {
+      console.error("[updateRestokItem] Validation failed: Item name is required");
       return res.status(400).json({ error: "Item name is required" });
     }
 
@@ -135,6 +138,7 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
       quantity === null ||
       isNaN(Number(quantity))
     ) {
+      console.error("[updateRestokItem] Validation failed: Invalid quantity", { quantity });
       return res
         .status(400)
         .json({ error: "Item quantity must be a valid number" });
@@ -145,6 +149,7 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
       lowStock === null ||
       isNaN(Number(lowStock))
     ) {
+      console.error("[updateRestokItem] Validation failed: Invalid lowStock", { lowStock });
       return res
         .status(400)
         .json({ error: "Low stock threshold must be a valid number" });
