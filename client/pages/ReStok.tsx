@@ -104,10 +104,17 @@ export default function ReStok() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pb-2">
         <div>
-          <h1 className="text-3xl font-bold">ReStok</h1>
-          <p className="text-muted-foreground">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-2">
+              <Plus className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+              ReStok
+            </h1>
+          </div>
+          <p className="text-gray-600 ml-0">
             Manage your inventory items and stock levels
           </p>
         </div>
