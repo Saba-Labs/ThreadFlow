@@ -333,6 +333,29 @@ export default function JobWork() {
         </div>
       </SimpleModal>
 
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmId !== null} onOpenChange={(open) => {
+        if (!open) setDeleteConfirmId(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Job Work?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{list.find((j) => j.id === deleteConfirmId)?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* History Modal */}
       <SimpleModal
         open={historyOpen && selectedJobWorkId !== null}
