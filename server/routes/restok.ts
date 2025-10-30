@@ -126,6 +126,7 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     const now = Date.now();
 
     console.log("[updateRestokItem] Request body:", { name, quantity, lowStock, note, subItemsCount: subItems?.length || 0 });
+    console.log("[updateRestokItem] Sub-items detail:", JSON.stringify(subItems, null, 2));
 
     // Validate required fields
     if (!name || name.trim() === "") {
