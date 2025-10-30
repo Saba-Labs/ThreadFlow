@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { useSSESubscription } from "@/hooks/useSSESubscription";
+import { fetchWithTimeout } from "./fetchWithTimeout";
 
 export interface JobWork {
   id: string;
@@ -16,9 +17,7 @@ async function fetchFromServer() {
   if (isLoading) return;
   isLoading = true;
   try {
-    const response = await fetch("/api/jobworks");
-    if (!response.ok) throw new Error("Failed to fetch job works");
-    STORE = await response.json();
+    STORE = await fetchWithTimeout<JobWork[]>("/api/jobworks");
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
     console.error("Failed to fetch job works:", error);
