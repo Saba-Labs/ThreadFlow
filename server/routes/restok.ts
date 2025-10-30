@@ -41,7 +41,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
           id: r.id,
           name: r.name,
           quantity: r.quantity,
-          lowStock: r.lowStock,
+          lowStock: r.lowStock ?? 0,
         })),
       });
     }
