@@ -662,7 +662,7 @@ export function useProductionPipeline() {
       assignments: JobWorkAssignment[],
     ) => {
       try {
-        const response = await fetch(
+        await fetchWithTimeout(
           `/api/pipeline/orders/${orderId}/job-work-assignments`,
           {
             method: "PUT",
@@ -670,7 +670,6 @@ export function useProductionPipeline() {
             body: JSON.stringify({ assignments }),
           },
         );
-        if (!response.ok) throw new Error("Failed to set job work assignments");
         await fetchFromServer();
       } catch (error) {
         console.error("Error setting job work assignments:", error);
@@ -684,7 +683,7 @@ export function useProductionPipeline() {
       completionDate?: number,
     ) => {
       try {
-        const response = await fetch(
+        await fetchWithTimeout(
           `/api/pipeline/orders/${orderId}/job-works/${jobWorkId}/status`,
           {
             method: "PUT",
@@ -692,17 +691,6 @@ export function useProductionPipeline() {
             body: JSON.stringify({ status, completionDate }),
           },
         );
-        if (!response.ok) {
-          let errorData = "";
-          try {
-            errorData = await response.text();
-          } catch {
-            // Body already read or unavailable
-          }
-          throw new Error(
-            `Failed to update job work assignment status: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-          );
-        }
         await fetchFromServer();
       } catch (error) {
         console.error(
@@ -744,7 +732,7 @@ export function useProductionPipeline() {
       );
 
       try {
-        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+        await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -754,7 +742,6 @@ export function useProductionPipeline() {
             steps: newSteps,
           }),
         });
-        if (!response.ok) throw new Error("Failed to update order");
         setStore((s) => ({
           orders: s.orders.map((o) => {
             if (o.id !== orderId) return o;
