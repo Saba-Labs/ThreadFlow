@@ -1,32 +1,28 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState } from "react";
 import { Trash2, Plus, ChevronDown, ChevronUp, Edit2, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
-import { useSSESubscription } from "@/hooks/useSSESubscription";
-
-interface SubItem {
-  id: string;
-  name: string;
-  quantity: number;
-  lowStock: number;
-}
-
-interface Item {
-  id: string;
-  name: string;
-  quantity: number;
-  lowStock: number;
-  note?: string;
-  subItems: SubItem[];
-}
+import { useReStok } from "@/context/ReStokContext";
 
 export default function ReStok() {
-  const [items, setItems] = useState<Item[]>([]);
+  const {
+    items,
+    loading,
+    addItem,
+    deleteItem,
+    updateItemQuantity,
+    saveEditItemDetails,
+    addSubItem,
+    deleteSubItem,
+    updateSubItemQuantity,
+    updateSubItem,
+    reorderItems,
+  } = useReStok();
+
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   // Add Item Modal
   const [showAddItemModal, setShowAddItemModal] = useState(false);
@@ -35,67 +31,19 @@ export default function ReStok() {
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
-  // Debounce ref for SSE updates
-  const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Define fetchItems before using it in useEffect and SSE subscription
-  const fetchItems = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/restok/items");
-      if (!response.ok) throw new Error("Failed to fetch items");
-      const data = await response.json();
-      // Ensure all sub-items have valid lowStock values (default to 0 if missing)
-      const validatedData = data.map((item: Item) => ({
-        ...item,
-        subItems: item.subItems.map((sub: SubItem) => ({
-          ...sub,
-          lowStock: typeof sub.lowStock === "number" ? sub.lowStock : 0,
-        })),
-      }));
-      setItems(validatedData);
-    } catch (error) {
-      console.error("Failed to load items:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Load data from API on mount only
-  useEffect(() => {
-    fetchItems();
-    return () => {
-      if (fetchDebounceRef.current) {
-        clearTimeout(fetchDebounceRef.current);
-      }
-    };
-  }, []);
-
-  // Subscribe to real-time updates with debouncing
-  useSSESubscription((event) => {
-    if (event.type === "restok_updated") {
-      if (fetchDebounceRef.current) {
-        clearTimeout(fetchDebounceRef.current);
-      }
-      fetchDebounceRef.current = setTimeout(() => {
-        fetchItems();
-      }, 300);
-    }
-  });
-
   const getStockStatus = (quantity: number, lowStock: number) => {
     if (quantity === 0) return "out-of-stock";
     if (quantity < lowStock) return "low-stock";
     return "normal";
   };
 
-  const getItemStockStatus = (item: Item): string => {
+  const getItemStockStatus = (item: any): string => {
     // If item has sub-items, determine status from sub-items using lowest-priority rule:
     // any out-of-stock => out-of-stock, else any low-stock => low-stock, else normal
     if (item.subItems.length > 0) {
-      if (item.subItems.some((sub) => sub.quantity === 0))
+      if (item.subItems.some((sub: any) => sub.quantity === 0))
         return "out-of-stock";
-      if (item.subItems.some((sub) => sub.quantity < sub.lowStock))
+      if (item.subItems.some((sub: any) => sub.quantity < sub.lowStock))
         return "low-stock";
       return "normal";
     }
@@ -121,50 +69,6 @@ export default function ReStok() {
     return <span className="text-xs font-bold text-green-700">NORMAL</span>;
   };
 
-  const addItem = async (
-    name: string,
-    lowStock: number,
-    subItems: any[] = [],
-    note: string = "",
-  ) => {
-    try {
-      const id = Date.now().toString();
-      const response = await fetch("/api/restok/items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id,
-          name,
-          quantity: 0,
-          lowStock,
-          note,
-          subItems: subItems.map((sub) => ({
-            id: sub.id,
-            name: sub.name,
-            quantity: 0,
-            lowStock: sub.lowStock,
-          })),
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to create item");
-      await fetchItems();
-    } catch (error) {
-      console.error("Failed to create item:", error);
-    }
-  };
-
-  const deleteItem = async (itemId: string) => {
-    try {
-      const response = await fetch(`/api/restok/items/${itemId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete item");
-      setItems(items.filter((i) => i.id !== itemId));
-    } catch (error) {
-      console.error("Failed to delete item:", error);
-    }
-  };
-
   const toggleItemExpanded = (itemId: string) => {
     setExpandedItems((prev) => {
       const newSet = new Set(prev);
@@ -177,400 +81,25 @@ export default function ReStok() {
     });
   };
 
-  const updateItemQuantity = async (itemId: string, newQuantity: number) => {
-    const item = items.find((i) => i.id === itemId);
-    if (!item) return;
-
-    const updatedQuantity = Math.max(0, newQuantity);
-    try {
-      const response = await fetch(`/api/restok/items/${itemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: updatedQuantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: item.subItems,
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to update item");
-      setItems(
-        items.map((i) =>
-          i.id === itemId ? { ...i, quantity: updatedQuantity } : i,
-        ),
-      );
-    } catch (error) {
-      console.error("Failed to update item quantity:", error);
-    }
-  };
-
-  const saveEditItemDetails = async (
-    itemId: string,
-    name: string,
-    lowStock: number,
-    note: string,
-  ) => {
-    const item = items.find((i) => i.id === itemId);
-    if (!item) return;
-
-    try {
-      const response = await fetch(`/api/restok/items/${itemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          quantity: item.quantity,
-          lowStock,
-          note,
-          subItems: item.subItems,
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to update item");
-      setItems(
-        items.map((i) =>
-          i.id === itemId ? { ...i, name, lowStock, note } : i,
-        ),
-      );
-      setEditingItemId(null);
-      setShowEditItemModal(false);
-    } catch (error) {
-      console.error("Failed to update item details:", error);
-    }
-  };
-
-  const addSubItem = async (
-    parentItemId: string,
-    name: string,
-    lowStock: number,
-  ) => {
-    const item = items.find((i) => i.id === parentItemId);
-    if (!item) {
-      console.error("Item not found:", parentItemId);
-      return;
-    }
-
-    const newSubItem: SubItem = {
-      id: Date.now().toString(),
-      name,
-      quantity: 0,
-      lowStock,
-    };
-
-    console.log("Adding sub-item:", {
-      parentItemId,
-      newSubItem,
-      itemLowStock: item.lowStock,
-    });
-
-    const payload = {
-      name: item.name,
-      quantity: item.quantity,
-      lowStock: item.lowStock,
-      note: item.note,
-      subItems: [
-        ...item.subItems.map((s) => ({
-          id: s.id,
-          name: s.name,
-          quantity: s.quantity,
-          lowStock: s.lowStock ?? 0,
-        })),
-        newSubItem,
-      ],
-    };
-
-    console.log("Sending PUT request with payload:", payload);
-
-    try {
-      const response = await fetch(`/api/restok/items/${parentItemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          console.error("Server error response:", errorData);
-          errorMsg = errorData.error || errorMsg;
-        } catch (parseError) {
-          console.error("Could not parse error response as JSON:", parseError);
-          try {
-            const text = await response.text();
-            if (text) {
-              console.error("Server error text:", text);
-              errorMsg = text;
-            }
-          } catch {
-            // Could not parse error response
-          }
-        }
-        console.error(
-          `Failed to add sub-item. Status: ${response.status}, Message: ${errorMsg}`,
-        );
-        throw new Error(errorMsg);
-      }
-      setItems(
-        items.map((i) =>
-          i.id === parentItemId
-            ? { ...i, subItems: [...i.subItems, newSubItem] }
-            : i,
-        ),
-      );
-      console.log(
-        "[addSubItem] Sub-item added successfully, refetching to verify Neon sync",
-      );
-      await fetchItems();
-    } catch (error) {
-      console.error("Failed to add sub-item:", error);
-      throw error;
-    }
-  };
-
-  const deleteSubItem = async (parentItemId: string, subItemId: string) => {
-    const item = items.find((i) => i.id === parentItemId);
-    if (!item) return;
-
-    try {
-      const response = await fetch(`/api/restok/items/${parentItemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: item.subItems
-            .filter((s) => s.id !== subItemId)
-            .map((s) => ({
-              id: s.id,
-              name: s.name,
-              quantity: s.quantity,
-              lowStock: s.lowStock ?? 0,
-            })),
-        }),
-      });
-      if (!response.ok) {
-        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.error || errorMsg;
-        } catch {
-          // Could not parse error response
-        }
-        throw new Error(errorMsg);
-      }
-      setItems(
-        items.map((i) =>
-          i.id === parentItemId
-            ? {
-                ...i,
-                subItems: i.subItems.filter((s) => s.id !== subItemId),
-              }
-            : i,
-        ),
-      );
-      console.log(
-        "[deleteSubItem] Sub-item deleted successfully, refetching to verify Neon sync",
-      );
-      await fetchItems();
-    } catch (error) {
-      console.error("Failed to delete sub-item:", error);
-      throw error;
-    }
-  };
-
-  const updateSubItemQuantity = async (
-    parentItemId: string,
-    subItemId: string,
-    newQuantity: number,
-  ) => {
-    const item = items.find((i) => i.id === parentItemId);
-    if (!item) return;
-
-    const updatedQuantity = Math.max(0, newQuantity);
-    try {
-      const response = await fetch(`/api/restok/items/${parentItemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: item.subItems.map((s) =>
-            s.id === subItemId
-              ? {
-                  id: s.id,
-                  name: s.name,
-                  quantity: updatedQuantity,
-                  lowStock: s.lowStock ?? 0,
-                }
-              : {
-                  id: s.id,
-                  name: s.name,
-                  quantity: s.quantity,
-                  lowStock: s.lowStock ?? 0,
-                },
-          ),
-        }),
-      });
-      if (!response.ok) {
-        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.error || errorMsg;
-        } catch {
-          // Could not parse error response
-        }
-        throw new Error(errorMsg);
-      }
-      setItems(
-        items.map((i) =>
-          i.id === parentItemId
-            ? {
-                ...i,
-                subItems: i.subItems.map((s) =>
-                  s.id === subItemId ? { ...s, quantity: updatedQuantity } : s,
-                ),
-              }
-            : i,
-        ),
-      );
-      console.log(
-        "[updateSubItemQuantity] Quantity updated successfully, refetching to verify Neon sync",
-      );
-      await fetchItems();
-    } catch (error) {
-      console.error("Failed to update sub-item quantity:", error);
-      throw error;
-    }
-  };
-
-  const updateSubItem = async (
-    parentItemId: string,
-    subItemId: string,
-    name: string,
-    lowStock: number,
-  ) => {
-    const item = items.find((i) => i.id === parentItemId);
-    if (!item) return;
-
-    const payload = {
-      name: item.name,
-      quantity: item.quantity,
-      lowStock: item.lowStock,
-      note: item.note,
-      subItems: item.subItems.map((s) =>
-        s.id === subItemId
-          ? {
-              id: s.id,
-              name,
-              quantity: s.quantity,
-              lowStock: typeof lowStock === "number" ? lowStock : 0,
-            }
-          : {
-              id: s.id,
-              name: s.name,
-              quantity: s.quantity,
-              lowStock: s.lowStock ?? 0,
-            },
-      ),
-    };
-
-    console.log("[updateSubItem] Updating sub-item:", {
-      parentItemId,
-      subItemId,
-      newName: name,
-      newLowStock: lowStock,
-    });
-    console.log(
-      "[updateSubItem] Full payload:",
-      JSON.stringify(payload, null, 2),
-    );
-
-    try {
-      const response = await fetch(`/api/restok/items/${parentItemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        let errorMsg = `Server error: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.error || errorMsg;
-        } catch {
-          // Could not parse error response
-        }
-        throw new Error(errorMsg);
-      }
-      console.log(
-        "[updateSubItem] Server response OK, updating local state and fetching fresh data",
-      );
-      setItems(
-        items.map((i) =>
-          i.id === parentItemId
-            ? {
-                ...i,
-                subItems: i.subItems.map((s) => {
-                  if (s.id === subItemId) {
-                    console.log("[updateSubItem] Updated sub-item state:", {
-                      id: s.id,
-                      name,
-                      lowStock,
-                    });
-                    return { ...s, name, lowStock };
-                  }
-                  return s;
-                }),
-              }
-            : i,
-        ),
-      );
-      console.log(
-        "[updateSubItem] Local state updated, refetching from database to verify sync",
-      );
-      // Refetch items to ensure Neon DB changes are reflected
-      await fetchItems();
-    } catch (error) {
-      console.error("Failed to update sub-item:", error);
-      throw error;
-    }
-  };
-
-  const getItem = (id: string) => items.find((item) => item.id === id);
-
   const moveItemUp = (index: number) => {
     if (index === 0) return;
     const newItems = [...items];
     [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
-    setItems(newItems);
+    reorderItems(newItems.map((item) => item.id));
   };
 
   const moveItemDown = (index: number) => {
     if (index === items.length - 1) return;
     const newItems = [...items];
     [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
-    setItems(newItems);
+    reorderItems(newItems.map((item) => item.id));
   };
 
   const saveNewOrder = async () => {
-    try {
-      const response = await fetch("/api/restok/reorder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          itemIds: items.map((item) => item.id),
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to save new order");
-      setReorderMode(false);
-      await fetchItems();
-    } catch (error) {
-      console.error("Failed to save reorder:", error);
-    }
+    setReorderMode(false);
   };
+
+  const getItem = (id: string) => items.find((item) => item.id === id);
 
   return (
     <div className="space-y-6">
@@ -625,7 +154,11 @@ export default function ReStok() {
 
       {/* Items List */}
       <div className="space-y-3">
-        {items.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card">
+            <p>Loading items...</p>
+          </div>
+        ) : items.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card">
             <p>No items yet. Add your first item to get started.</p>
           </div>
