@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { useSSESubscription } from "@/hooks/useSSESubscription";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 export interface RoadmapItem {
   modelId: string;
@@ -28,9 +29,7 @@ async function fetchRoadmaps() {
   if (isLoading) return;
   isLoading = true;
   try {
-    const response = await fetch("/api/roadmaps");
-    if (!response.ok) throw new Error("Failed to fetch roadmaps");
-    STORE = await response.json();
+    STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
