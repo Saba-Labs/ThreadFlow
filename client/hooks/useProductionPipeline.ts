@@ -226,7 +226,7 @@ export function useProductionPipeline() {
           : -1;
 
       try {
-        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+        await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -236,7 +236,6 @@ export function useProductionPipeline() {
             steps: nextSteps,
           }),
         });
-        if (!response.ok) throw new Error("Failed to update path");
         setStore((s) => ({
           orders: s.orders.map((o) =>
             o.id === orderId
