@@ -142,12 +142,11 @@ export function useProductionPipeline() {
         createSyncTask(
           "createWorkOrder",
           async () => {
-            const response = await fetch("/api/pipeline/orders", {
+            await fetchWithTimeout("/api/pipeline/orders", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(order),
             });
-            if (!response.ok) throw new Error("Failed to create order");
           },
           (error) => {
             // On error, remove the optimistic order and show toast
