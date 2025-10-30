@@ -124,7 +124,7 @@ export function useRoadmaps() {
           quantity,
         });
 
-        const response = await fetch(`/api/roadmaps/${roadmapId}/models`, {
+        await fetchWithTimeout(`/api/roadmaps/${roadmapId}/models`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -134,22 +134,7 @@ export function useRoadmaps() {
           }),
         });
 
-        console.log("[useRoadmaps.addModelToRoadmap] Response status:", {
-          status: response.status,
-          ok: response.ok,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error(
-            "[useRoadmaps.addModelToRoadmap] Error response:",
-            errorData,
-          );
-          throw new Error(
-            errorData.error ||
-              `Failed to add model to roadmap (${response.status})`,
-          );
-        }
+        console.log("[useRoadmaps.addModelToRoadmap] Success");
 
         await fetchRoadmaps();
       } catch (error) {
@@ -163,14 +148,12 @@ export function useRoadmaps() {
   const removeModelFromRoadmap = useCallback(
     async (roadmapId: string, modelId: string) => {
       try {
-        const response = await fetch(
+        await fetchWithTimeout(
           `/api/roadmaps/${roadmapId}/models/${modelId}`,
           {
             method: "DELETE",
           },
         );
-        if (!response.ok)
-          throw new Error("Failed to remove model from roadmap");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error removing model from roadmap:", error);
