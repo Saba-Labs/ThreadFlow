@@ -59,6 +59,11 @@ function getIsLoading() {
   return isLoading;
 }
 
+function subscribeToLoading(cb: () => void) {
+  loadingSubscribers.add(cb);
+  return () => loadingSubscribers.delete(cb);
+}
+
 function subscribe(cb: () => void) {
   subscribers.add(cb);
   if (!isInitialized) {
