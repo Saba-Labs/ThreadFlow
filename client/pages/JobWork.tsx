@@ -334,14 +334,19 @@ export default function JobWork() {
       </SimpleModal>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteConfirmId !== null} onOpenChange={(open) => {
-        if (!open) setDeleteConfirmId(null);
-      }}>
+      <AlertDialog
+        open={deleteConfirmId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmId(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Job Work?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{list.find((j) => j.id === deleteConfirmId)?.name}"? This action cannot be undone.
+              Are you sure you want to delete "
+              {list.find((j) => j.id === deleteConfirmId)?.name}"? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-end gap-2">

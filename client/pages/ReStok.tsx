@@ -243,7 +243,11 @@ export default function ReStok() {
       lowStock,
     };
 
-    console.log("Adding sub-item:", { parentItemId, newSubItem, itemLowStock: item.lowStock });
+    console.log("Adding sub-item:", {
+      parentItemId,
+      newSubItem,
+      itemLowStock: item.lowStock,
+    });
 
     const payload = {
       name: item.name,
@@ -287,7 +291,9 @@ export default function ReStok() {
             // Could not parse error response
           }
         }
-        console.error(`Failed to add sub-item. Status: ${response.status}, Message: ${errorMsg}`);
+        console.error(
+          `Failed to add sub-item. Status: ${response.status}, Message: ${errorMsg}`,
+        );
         throw new Error(errorMsg);
       }
       setItems(
@@ -297,7 +303,9 @@ export default function ReStok() {
             : i,
         ),
       );
-      console.log("[addSubItem] Sub-item added successfully, refetching to verify Neon sync");
+      console.log(
+        "[addSubItem] Sub-item added successfully, refetching to verify Neon sync",
+      );
       await fetchItems();
     } catch (error) {
       console.error("Failed to add sub-item:", error);
@@ -348,7 +356,9 @@ export default function ReStok() {
             : i,
         ),
       );
-      console.log("[deleteSubItem] Sub-item deleted successfully, refetching to verify Neon sync");
+      console.log(
+        "[deleteSubItem] Sub-item deleted successfully, refetching to verify Neon sync",
+      );
       await fetchItems();
     } catch (error) {
       console.error("Failed to delete sub-item:", error);
@@ -413,7 +423,9 @@ export default function ReStok() {
             : i,
         ),
       );
-      console.log("[updateSubItemQuantity] Quantity updated successfully, refetching to verify Neon sync");
+      console.log(
+        "[updateSubItemQuantity] Quantity updated successfully, refetching to verify Neon sync",
+      );
       await fetchItems();
     } catch (error) {
       console.error("Failed to update sub-item quantity:", error);
@@ -452,8 +464,16 @@ export default function ReStok() {
       ),
     };
 
-    console.log("[updateSubItem] Updating sub-item:", { parentItemId, subItemId, newName: name, newLowStock: lowStock });
-    console.log("[updateSubItem] Full payload:", JSON.stringify(payload, null, 2));
+    console.log("[updateSubItem] Updating sub-item:", {
+      parentItemId,
+      subItemId,
+      newName: name,
+      newLowStock: lowStock,
+    });
+    console.log(
+      "[updateSubItem] Full payload:",
+      JSON.stringify(payload, null, 2),
+    );
 
     try {
       const response = await fetch(`/api/restok/items/${parentItemId}`, {
@@ -471,7 +491,9 @@ export default function ReStok() {
         }
         throw new Error(errorMsg);
       }
-      console.log("[updateSubItem] Server response OK, updating local state and fetching fresh data");
+      console.log(
+        "[updateSubItem] Server response OK, updating local state and fetching fresh data",
+      );
       setItems(
         items.map((i) =>
           i.id === parentItemId
@@ -479,7 +501,11 @@ export default function ReStok() {
                 ...i,
                 subItems: i.subItems.map((s) => {
                   if (s.id === subItemId) {
-                    console.log("[updateSubItem] Updated sub-item state:", { id: s.id, name, lowStock });
+                    console.log("[updateSubItem] Updated sub-item state:", {
+                      id: s.id,
+                      name,
+                      lowStock,
+                    });
                     return { ...s, name, lowStock };
                   }
                   return s;
@@ -488,7 +514,9 @@ export default function ReStok() {
             : i,
         ),
       );
-      console.log("[updateSubItem] Local state updated, refetching from database to verify sync");
+      console.log(
+        "[updateSubItem] Local state updated, refetching from database to verify sync",
+      );
       // Refetch items to ensure Neon DB changes are reflected
       await fetchItems();
     } catch (error) {
