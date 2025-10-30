@@ -250,7 +250,15 @@ export default function ReStok() {
       quantity: item.quantity,
       lowStock: item.lowStock,
       note: item.note,
-      subItems: [...item.subItems, newSubItem],
+      subItems: [
+        ...item.subItems.map((s) => ({
+          id: s.id,
+          name: s.name,
+          quantity: s.quantity,
+          lowStock: s.lowStock ?? 0,
+        })),
+        newSubItem,
+      ],
     };
 
     console.log("Sending PUT request with payload:", payload);
