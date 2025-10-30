@@ -308,7 +308,14 @@ export default function ReStok() {
           quantity: item.quantity,
           lowStock: item.lowStock,
           note: item.note,
-          subItems: item.subItems.filter((s) => s.id !== subItemId),
+          subItems: item.subItems
+            .filter((s) => s.id !== subItemId)
+            .map((s) => ({
+              id: s.id,
+              name: s.name,
+              quantity: s.quantity,
+              lowStock: s.lowStock ?? 0,
+            })),
         }),
       });
       if (!response.ok) {
