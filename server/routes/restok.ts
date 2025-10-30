@@ -298,3 +298,33 @@ export const deleteRestokItem: RequestHandler = async (req, res) => {
     res.status(500).json({ error: errorMessage });
   }
 };
+
+export const reorderRestokItems: RequestHandler = async (req, res) => {
+  try {
+    const { itemIds } = req.body;
+
+    if (!Array.isArray(itemIds) || itemIds.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "itemIds must be a non-empty array" });
+    }
+
+    const now = Date.now();
+
+    for (let index = 0; index < itemIds.length; index++) {
+      const itemId = itemIds[index];
+      await query(
+        "UPDATE restok_items SET updated_at = $1 WHERE id = $2",
+        [now, itemId],
+      );
+    }
+
+    broadcastChange({ type: "restok_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error reordering restok items:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to reorder items";
+    res.status(500).json({ error: errorMessage });
+  }
+};
