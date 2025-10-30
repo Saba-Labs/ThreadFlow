@@ -185,10 +185,9 @@ export function useProductionPipeline() {
       createSyncTask(
         "deleteOrder",
         async () => {
-          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+          await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
             method: "DELETE",
           });
-          if (!response.ok) throw new Error("Failed to delete order");
         },
         (error) => {
           // On error, restore the deleted order
