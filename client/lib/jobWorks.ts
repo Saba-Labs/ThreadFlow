@@ -38,7 +38,7 @@ export function setJobWorks(list: JobWork[]) {
 export async function addJobWork(input: { name: string; description: string }) {
   const id = `jw_${Math.random().toString(36).slice(2, 9)}`;
   try {
-    const response = await fetch("/api/jobworks", {
+    await fetchWithTimeout("/api/jobworks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -47,7 +47,6 @@ export async function addJobWork(input: { name: string; description: string }) {
         description: input.description.trim(),
       }),
     });
-    if (!response.ok) throw new Error("Failed to create job work");
     await fetchFromServer();
     return id;
   } catch (error) {
@@ -61,12 +60,11 @@ export async function updateJobWork(id: string, patch: Partial<JobWork>) {
     const existing = STORE.find((j) => j.id === id);
     if (!existing) throw new Error("Job work not found");
     const updated = { ...existing, ...patch };
-    const response = await fetch(`/api/jobworks/${id}`, {
+    await fetchWithTimeout(`/api/jobworks/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated),
     });
-    if (!response.ok) throw new Error("Failed to update job work");
     await fetchFromServer();
   } catch (error) {
     console.error("Failed to update job work:", error);
@@ -76,10 +74,9 @@ export async function updateJobWork(id: string, patch: Partial<JobWork>) {
 
 export async function deleteJobWork(id: string) {
   try {
-    const response = await fetch(`/api/jobworks/${id}`, {
+    await fetchWithTimeout(`/api/jobworks/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete job work");
     await fetchFromServer();
   } catch (error) {
     console.error("Failed to delete job work:", error);
