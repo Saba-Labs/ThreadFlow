@@ -21,7 +21,7 @@ interface Item {
 export const getRestokItems: RequestHandler = async (req, res) => {
   try {
     const result = await query(
-      "SELECT * FROM restok_items ORDER BY created_at DESC",
+      "SELECT * FROM restok_items ORDER BY order_index ASC",
     );
 
     const items: Item[] = [];
