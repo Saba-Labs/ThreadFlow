@@ -23,6 +23,7 @@ let isLoading = false;
 let isInitialized = false;
 
 const subscribers = new Set<() => void>();
+const loadingSubscribers = new Set<() => void>();
 
 async function fetchItems() {
   if (isLoading) return;
