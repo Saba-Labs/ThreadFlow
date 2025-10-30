@@ -270,7 +270,7 @@ export default function JobWork() {
                       variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(j.id);
+                        openDeleteConfirm(j.id);
                       }}
                       title="Delete"
                     >
