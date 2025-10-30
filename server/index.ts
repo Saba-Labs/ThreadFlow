@@ -39,6 +39,7 @@ import {
 } from "./routes/roadmaps";
 
 let dbInitialized = false;
+let dbInitializationPromise: Promise<void> | null = null;
 
 export function createServer() {
   const app = express();
@@ -62,13 +63,55 @@ export function createServer() {
     next();
   });
 
-  // Initialize database once
-  if (!dbInitialized) {
-    initializeDatabase().catch((error) => {
-      console.error("Failed to initialize database:", error);
-    });
-    dbInitialized = true;
+  // Initialize database once - ensure it only runs once
+  if (!dbInitialized && !dbInitializationPromise) {
+    dbInitializationPromise = initializeDatabase()
+      .then(() => {
+        dbInitialized = true;
+        console.log("✅ Database initialized successfully");
+      })
+      .catch((error) => {
+        console.error("❌ Failed to initialize database:", error);
+        // Don't set dbInitialized to true, allow retries
+        dbInitializationPromise = null;
+      });
   }
+
+  // Middleware to ensure database is initialized before handling requests
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/") && !req.path.startsWith("/api/health")) {
+      if (dbInitializationPromise) {
+        dbInitializationPromise.then(
+          () => {
+            next();
+          },
+          () => {
+            res.status(503).json({
+              error: "Service unavailable: Database initialization in progress",
+            });
+          },
+        );
+      } else if (!dbInitialized) {
+        res.status(503).json({
+          error: "Service unavailable: Database not initialized",
+        });
+      } else {
+        next();
+      }
+    } else {
+      next();
+    }
+  });
+
+  // Health check endpoint
+  app.get("/api/health", (_req, res) => {
+    const status = {
+      status: dbInitialized ? "healthy" : "initializing",
+      database: dbInitialized ? "connected" : "connecting",
+      timestamp: new Date().toISOString(),
+    };
+    res.status(dbInitialized ? 200 : 503).json(status);
+  });
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
