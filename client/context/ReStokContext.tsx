@@ -451,12 +451,7 @@ export function useReStok() {
 
   const reorderItems = useCallback(async (itemIds: string[]) => {
     try {
-      const response = await fetch("/api/restok/reorder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itemIds }),
-      });
-      if (!response.ok) throw new Error("Failed to save new order");
+      await apiCall("/api/restok/reorder", "POST", { itemIds });
       await fetchItems();
       toast({
         title: "Success",
