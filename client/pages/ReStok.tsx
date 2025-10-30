@@ -114,17 +114,24 @@ export default function ReStok() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-2 flex-wrap">
-        <Button onClick={() => setShowAddItemModal(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
+      <div className="flex gap-3 flex-wrap pt-2">
+        <Button
+          onClick={() => setShowAddItemModal(true)}
+          className="gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold text-white rounded-lg px-6 py-2.5"
+        >
+          <Plus className="h-5 w-5" />
           Add Item
         </Button>
         <Button
           onClick={() => setEditMode(!editMode)}
           variant={editMode ? "default" : "outline"}
-          className="gap-2"
+          className={`gap-2 font-semibold rounded-lg px-6 py-2.5 transition-all duration-200 ${
+            editMode
+              ? "bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-lg hover:shadow-xl text-white"
+              : "border-2 border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50"
+          }`}
         >
-          <Edit2 className="h-4 w-4" />
+          <Edit2 className="h-5 w-5" />
           {editMode ? "Done Editing" : "Edit"}
         </Button>
         {!editMode && (
@@ -132,19 +139,17 @@ export default function ReStok() {
             {!reorderMode ? (
               <Button
                 onClick={() => setReorderMode(true)}
-                variant="outline"
-                className="gap-2"
+                className="gap-2 border-2 border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 font-semibold rounded-lg px-6 py-2.5 transition-all duration-200"
               >
-                <ArrowUp className="h-4 w-4" />
+                <ArrowUp className="h-5 w-5" />
                 Reorder
               </Button>
             ) : (
               <Button
                 onClick={saveNewOrder}
-                variant="default"
-                className="gap-2"
+                className="gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold text-white rounded-lg px-6 py-2.5"
               >
-                <ArrowDown className="h-4 w-4" />
+                <ArrowDown className="h-5 w-5" />
                 Done Reordering
               </Button>
             )}
