@@ -248,16 +248,21 @@ export default function ReStok() {
         let errorMsg = `Server error: ${response.status} ${response.statusText}`;
         try {
           const errorData = await response.json();
+          console.error("Server error response:", errorData);
           errorMsg = errorData.error || errorMsg;
-        } catch {
+        } catch (parseError) {
+          console.error("Could not parse error response as JSON:", parseError);
           try {
             const text = await response.text();
-            if (text) errorMsg = text;
+            if (text) {
+              console.error("Server error text:", text);
+              errorMsg = text;
+            }
           } catch {
             // Could not parse error response
           }
         }
-        console.error(`Server error (${response.status}): ${errorMsg}`);
+        console.error(`Failed to add sub-item. Status: ${response.status}, Message: ${errorMsg}`);
         throw new Error(errorMsg);
       }
       setItems(
