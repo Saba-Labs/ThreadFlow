@@ -297,6 +297,8 @@ export default function ReStok() {
             : i,
         ),
       );
+      console.log("[addSubItem] Sub-item added successfully, refetching to verify Neon sync");
+      await fetchItems();
     } catch (error) {
       console.error("Failed to add sub-item:", error);
       throw error;
