@@ -21,13 +21,13 @@ interface Item {
 export const getRestokItems: RequestHandler = async (req, res) => {
   try {
     const result = await query(
-      "SELECT * FROM restok_items ORDER BY created_at DESC",
+      "SELECT * FROM restok_items ORDER BY order_index ASC",
     );
 
     const items: Item[] = [];
     for (const row of result.rows) {
       const subItemsResult = await query(
-        "SELECT id, name, quantity, low_stock as lowStock FROM restok_sub_items WHERE item_id = $1 ORDER BY created_at ASC",
+        "SELECT id, name, quantity, low_stock FROM restok_sub_items WHERE item_id = $1 ORDER BY created_at ASC",
         [row.id],
       );
 
@@ -41,7 +41,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
           id: r.id,
           name: r.name,
           quantity: r.quantity,
-          lowStock: r.lowStock ?? 0,
+          lowStock: Number(r.low_stock) || 0,
         })),
       });
     }
@@ -87,14 +87,21 @@ export const createRestokItem: RequestHandler = async (req, res) => {
         .json({ error: "Low stock threshold must be a valid number" });
     }
 
+    // Get the next order index
+    const maxOrderResult = await query(
+      "SELECT COALESCE(MAX(order_index), -1) as max_order FROM restok_items",
+    );
+    const nextOrderIndex = (maxOrderResult.rows[0]?.max_order || -1) + 1;
+
     await query(
-      "INSERT INTO restok_items (id, name, quantity, low_stock, note, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      "INSERT INTO restok_items (id, name, quantity, low_stock, note, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
       [
         id.trim(),
         name.trim(),
         Number(quantity),
         Number(lowStock),
         note || null,
+        nextOrderIndex,
         now,
         now,
       ],
@@ -295,6 +302,36 @@ export const deleteRestokItem: RequestHandler = async (req, res) => {
     console.error("Error deleting restok item:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to delete item";
+    res.status(500).json({ error: errorMessage });
+  }
+};
+
+export const reorderRestokItems: RequestHandler = async (req, res) => {
+  try {
+    const { itemIds } = req.body;
+
+    if (!Array.isArray(itemIds) || itemIds.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "itemIds must be a non-empty array" });
+    }
+
+    const now = Date.now();
+
+    for (let index = 0; index < itemIds.length; index++) {
+      const itemId = itemIds[index];
+      await query(
+        "UPDATE restok_items SET order_index = $1, updated_at = $2 WHERE id = $3",
+        [index, now, itemId],
+      );
+    }
+
+    broadcastChange({ type: "restok_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error reordering restok items:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to reorder items";
     res.status(500).json({ error: errorMessage });
   }
 };

@@ -33,6 +33,7 @@ export async function initializeDatabase() {
         quantity INTEGER NOT NULL,
         low_stock INTEGER NOT NULL,
         note TEXT,
+        order_index INTEGER NOT NULL DEFAULT 0,
         created_at BIGINT NOT NULL,
         updated_at BIGINT NOT NULL
       );
@@ -46,6 +47,12 @@ export async function initializeDatabase() {
         created_at BIGINT NOT NULL,
         updated_at BIGINT NOT NULL
       );
+
+      -- Ensure low_stock column exists in restok_sub_items (migration)
+      ALTER TABLE IF EXISTS restok_sub_items ADD COLUMN IF NOT EXISTS low_stock INTEGER NOT NULL DEFAULT 0;
+
+      -- Ensure order_index column exists in restok_items (migration)
+      ALTER TABLE IF EXISTS restok_items ADD COLUMN IF NOT EXISTS order_index INTEGER NOT NULL DEFAULT 0;
 
       CREATE TABLE IF NOT EXISTS job_works (
         id TEXT PRIMARY KEY,

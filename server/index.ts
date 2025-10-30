@@ -9,6 +9,7 @@ import {
   createRestokItem,
   updateRestokItem,
   deleteRestokItem,
+  reorderRestokItems,
 } from "./routes/restok";
 import {
   getJobWorks,
@@ -87,6 +88,7 @@ export function createServer() {
   app.post("/api/restok/items", createRestokItem);
   app.put("/api/restok/items/:id", updateRestokItem);
   app.delete("/api/restok/items/:id", deleteRestokItem);
+  app.post("/api/restok/reorder", reorderRestokItems);
 
   // JobWorks routes
   app.get("/api/jobworks", getJobWorks);
