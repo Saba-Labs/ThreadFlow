@@ -2,6 +2,7 @@ import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
 import { useSSESubscription } from "./useSSESubscription";
 import { syncQueue, createSyncTask } from "@/lib/backgroundSync";
+import { fetchWithTimeout, fetchWithTimeoutText } from "@/lib/fetchWithTimeout";
 import { toast } from "./use-toast";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
