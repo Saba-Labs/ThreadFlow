@@ -430,7 +430,7 @@ export function useProductionPipeline() {
         createSyncTask(
           "moveToPrevStep",
           async () => {
-            const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -440,17 +440,6 @@ export function useProductionPipeline() {
                 steps: target === -1 ? order.steps : steps,
               }),
             });
-            if (!response.ok) {
-              let errorData = "";
-              try {
-                errorData = await response.text();
-              } catch {
-                // Body already read or unavailable
-              }
-              throw new Error(
-                `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-              );
-            }
           },
           () => {
             // On error, revert
