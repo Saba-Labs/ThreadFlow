@@ -28,6 +28,7 @@ const loadingSubscribers = new Set<() => void>();
 async function fetchItems() {
   if (isLoading) return;
   isLoading = true;
+  for (const s of Array.from(loadingSubscribers)) s();
   try {
     const response = await fetch("/api/restok/items");
     if (!response.ok) throw new Error("Failed to fetch items");
@@ -46,6 +47,7 @@ async function fetchItems() {
     console.error("Error fetching restok items:", error);
   } finally {
     isLoading = false;
+    for (const s of Array.from(loadingSubscribers)) s();
   }
 }
 
