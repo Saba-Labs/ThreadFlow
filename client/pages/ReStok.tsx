@@ -528,6 +528,37 @@ export default function ReStok() {
 
   const getItem = (id: string) => items.find((item) => item.id === id);
 
+  const moveItemUp = (index: number) => {
+    if (index === 0) return;
+    const newItems = [...items];
+    [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
+    setItems(newItems);
+  };
+
+  const moveItemDown = (index: number) => {
+    if (index === items.length - 1) return;
+    const newItems = [...items];
+    [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+    setItems(newItems);
+  };
+
+  const saveNewOrder = async () => {
+    try {
+      const response = await fetch("/api/restok/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          itemIds: items.map((item) => item.id),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to save new order");
+      setReorderMode(false);
+      await fetchItems();
+    } catch (error) {
+      console.error("Failed to save reorder:", error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
