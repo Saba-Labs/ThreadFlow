@@ -41,7 +41,15 @@ export default function ReStok() {
       const response = await fetch("/api/restok/items");
       if (!response.ok) throw new Error("Failed to fetch items");
       const data = await response.json();
-      setItems(data);
+      // Ensure all sub-items have valid lowStock values (default to 0 if missing)
+      const validatedData = data.map((item: Item) => ({
+        ...item,
+        subItems: item.subItems.map((sub: SubItem) => ({
+          ...sub,
+          lowStock: typeof sub.lowStock === "number" ? sub.lowStock : 0,
+        })),
+      }));
+      setItems(validatedData);
     } catch (error) {
       console.error("Failed to load items:", error);
     } finally {
