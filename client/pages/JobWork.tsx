@@ -50,6 +50,9 @@ export default function JobWork() {
     null,
   );
 
+  // Confirmation state for deletion
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
   useEffect(() => {
     if (!modalOpen) {
       setEditing(null);
