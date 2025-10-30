@@ -465,7 +465,7 @@ export default function ReStok() {
         }
         throw new Error(errorMsg);
       }
-      console.log("[updateSubItem] Server response OK, updating local state");
+      console.log("[updateSubItem] Server response OK, updating local state and fetching fresh data");
       setItems(
         items.map((i) =>
           i.id === parentItemId
@@ -482,7 +482,9 @@ export default function ReStok() {
             : i,
         ),
       );
-      console.log("[updateSubItem] Local state updated successfully");
+      console.log("[updateSubItem] Local state updated, refetching from database to verify sync");
+      // Refetch items to ensure Neon DB changes are reflected
+      await fetchItems();
     } catch (error) {
       console.error("Failed to update sub-item:", error);
       throw error;
