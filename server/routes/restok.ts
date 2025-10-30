@@ -321,8 +321,8 @@ export const reorderRestokItems: RequestHandler = async (req, res) => {
     for (let index = 0; index < itemIds.length; index++) {
       const itemId = itemIds[index];
       await query(
-        "UPDATE restok_items SET updated_at = $1 WHERE id = $2",
-        [now, itemId],
+        "UPDATE restok_items SET order_index = $1, updated_at = $2 WHERE id = $3",
+        [index, now, itemId],
       );
     }
 
