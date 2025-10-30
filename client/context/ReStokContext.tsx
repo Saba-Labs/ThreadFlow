@@ -364,32 +364,27 @@ export function useReStok() {
 
       const updatedQuantity = Math.max(0, newQuantity);
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: item.name,
-            quantity: item.quantity,
-            lowStock: item.lowStock,
-            note: item.note,
-            subItems: item.subItems.map((s) =>
-              s.id === subItemId
-                ? {
-                    id: s.id,
-                    name: s.name,
-                    quantity: updatedQuantity,
-                    lowStock: s.lowStock ?? 0,
-                  }
-                : {
-                    id: s.id,
-                    name: s.name,
-                    quantity: s.quantity,
-                    lowStock: s.lowStock ?? 0,
-                  },
-            ),
-          }),
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", {
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems.map((s) =>
+            s.id === subItemId
+              ? {
+                  id: s.id,
+                  name: s.name,
+                  quantity: updatedQuantity,
+                  lowStock: s.lowStock ?? 0,
+                }
+              : {
+                  id: s.id,
+                  name: s.name,
+                  quantity: s.quantity,
+                  lowStock: s.lowStock ?? 0,
+                },
+          ),
         });
-        if (!response.ok) throw new Error("Failed to update sub-item");
         await fetchItems();
       } catch (error) {
         console.error("Failed to update sub-item quantity:", error);
@@ -432,12 +427,7 @@ export function useReStok() {
       };
 
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) throw new Error("Failed to update sub-item");
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
         await fetchItems();
         toast({
           title: "Success",
