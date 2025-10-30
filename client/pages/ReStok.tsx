@@ -677,7 +677,7 @@ export default function ReStok() {
                       </div>
                     </div>
 
-                    {editMode ? (
+                    {reorderMode ? null : editMode ? (
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
