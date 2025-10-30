@@ -93,6 +93,47 @@ function subscribe(cb: () => void) {
   return () => subscribers.delete(cb);
 }
 
+async function apiCall<T>(
+  method: string,
+  url: string,
+  body?: any,
+): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+  try {
+    const options: RequestInit = {
+      method,
+      signal: controller.signal,
+    };
+
+    if (body) {
+      options.headers = { "Content-Type": "application/json" };
+      options.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, options);
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `HTTP ${response.status}: ${response.statusText}`,
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new Error(
+        "Network error: Unable to reach the server. Please check your connection.",
+      );
+    }
+    throw error;
+  }
+}
+
 export function useReStok() {
   const state = useSyncExternalStore(subscribe, getItems, getItems);
   const loading = useSyncExternalStore(
@@ -116,24 +157,19 @@ export function useReStok() {
     ) => {
       try {
         const id = Date.now().toString();
-        const response = await fetch("/api/restok/items", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id,
-            name,
+        await apiCall("/api/restok/items", "POST", {
+          id,
+          name,
+          quantity: 0,
+          lowStock,
+          note,
+          subItems: subItems.map((sub) => ({
+            id: sub.id,
+            name: sub.name,
             quantity: 0,
-            lowStock,
-            note,
-            subItems: subItems.map((sub) => ({
-              id: sub.id,
-              name: sub.name,
-              quantity: 0,
-              lowStock: sub.lowStock,
-            })),
-          }),
+            lowStock: sub.lowStock,
+          })),
         });
-        if (!response.ok) throw new Error("Failed to create item");
         await fetchItems();
         toast({
           title: "Success",
@@ -155,10 +191,7 @@ export function useReStok() {
 
   const deleteItem = useCallback(async (itemId: string) => {
     try {
-      const response = await fetch(`/api/restok/items/${itemId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete item");
+      await apiCall(`/api/restok/items/${itemId}`, "DELETE");
       await fetchItems();
       toast({
         title: "Success",
