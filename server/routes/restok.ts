@@ -87,14 +87,21 @@ export const createRestokItem: RequestHandler = async (req, res) => {
         .json({ error: "Low stock threshold must be a valid number" });
     }
 
+    // Get the next order index
+    const maxOrderResult = await query(
+      "SELECT COALESCE(MAX(order_index), -1) as max_order FROM restok_items",
+    );
+    const nextOrderIndex = (maxOrderResult.rows[0]?.max_order || -1) + 1;
+
     await query(
-      "INSERT INTO restok_items (id, name, quantity, low_stock, note, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      "INSERT INTO restok_items (id, name, quantity, low_stock, note, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
       [
         id.trim(),
         name.trim(),
         Number(quantity),
         Number(lowStock),
         note || null,
+        nextOrderIndex,
         now,
         now,
       ],
