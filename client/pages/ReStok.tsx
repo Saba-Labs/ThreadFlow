@@ -348,6 +348,8 @@ export default function ReStok() {
             : i,
         ),
       );
+      console.log("[deleteSubItem] Sub-item deleted successfully, refetching to verify Neon sync");
+      await fetchItems();
     } catch (error) {
       console.error("Failed to delete sub-item:", error);
       throw error;
