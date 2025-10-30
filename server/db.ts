@@ -33,6 +33,7 @@ export async function initializeDatabase() {
         quantity INTEGER NOT NULL,
         low_stock INTEGER NOT NULL,
         note TEXT,
+        order_index INTEGER NOT NULL DEFAULT 0,
         created_at BIGINT NOT NULL,
         updated_at BIGINT NOT NULL
       );
