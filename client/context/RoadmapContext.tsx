@@ -179,13 +179,12 @@ export function useRoadmaps() {
         newItems.splice(dest, 0, item);
 
         const modelIds = newItems.map((it) => it.modelId);
-        const response = await fetch(`/api/roadmaps/${roadmapId}/reorder`, {
+        await fetchWithTimeout(`/api/roadmaps/${roadmapId}/reorder`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ items: modelIds }),
         });
 
-        if (!response.ok) throw new Error("Failed to reorder items");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error moving model within roadmap:", error);
@@ -203,7 +202,7 @@ export function useRoadmaps() {
       toIndex?: number,
     ) => {
       try {
-        const response = await fetch("/api/roadmaps/move-model", {
+        await fetchWithTimeout("/api/roadmaps/move-model", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -212,8 +211,6 @@ export function useRoadmaps() {
             modelId,
           }),
         });
-        if (!response.ok)
-          throw new Error("Failed to move model between roadmaps");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error moving model to roadmap:", error);
