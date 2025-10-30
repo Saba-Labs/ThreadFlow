@@ -83,7 +83,11 @@ function subscribeToLoading(cb: () => void) {
 
 function subscribe(cb: () => void) {
   subscribers.add(cb);
-  if (!isInitialized) {
+  if (!isInitialized && !isLoading) {
+    // If initialization failed, try again
+    if (lastFetchError) {
+      console.log("Retrying initial fetch after previous error");
+    }
     fetchItems();
   }
   return () => subscribers.delete(cb);
