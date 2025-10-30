@@ -296,12 +296,7 @@ export function useReStok() {
       };
 
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) throw new Error("Failed to add sub-item");
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
         await fetchItems();
         toast({
           title: "Success",
@@ -327,25 +322,20 @@ export function useReStok() {
       if (!item) return;
 
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: item.name,
-            quantity: item.quantity,
-            lowStock: item.lowStock,
-            note: item.note,
-            subItems: item.subItems
-              .filter((s) => s.id !== subItemId)
-              .map((s) => ({
-                id: s.id,
-                name: s.name,
-                quantity: s.quantity,
-                lowStock: s.lowStock ?? 0,
-              })),
-          }),
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", {
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems
+            .filter((s) => s.id !== subItemId)
+            .map((s) => ({
+              id: s.id,
+              name: s.name,
+              quantity: s.quantity,
+              lowStock: s.lowStock ?? 0,
+            })),
         });
-        if (!response.ok) throw new Error("Failed to delete sub-item");
         await fetchItems();
         toast({
           title: "Success",
