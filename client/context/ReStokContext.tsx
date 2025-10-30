@@ -74,7 +74,11 @@ function subscribe(cb: () => void) {
 
 export function useReStok() {
   const state = useSyncExternalStore(subscribe, getItems, getItems);
-  const loading = useSyncExternalStore(subscribeToLoading, getIsLoading, () => false);
+  const loading = useSyncExternalStore(
+    subscribeToLoading,
+    getIsLoading,
+    () => false,
+  );
 
   useSSESubscription((event) => {
     if (event.type === "restok_updated") {
@@ -151,38 +155,36 @@ export function useReStok() {
     }
   }, []);
 
-  const updateItemQuantity = useCallback(async (itemId: string, newQuantity: number) => {
-    const item = STORE.find((i) => i.id === itemId);
-    if (!item) return;
+  const updateItemQuantity = useCallback(
+    async (itemId: string, newQuantity: number) => {
+      const item = STORE.find((i) => i.id === itemId);
+      if (!item) return;
 
-    const updatedQuantity = Math.max(0, newQuantity);
-    try {
-      const response = await fetch(`/api/restok/items/${itemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: updatedQuantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: item.subItems,
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to update item");
-      await fetchItems();
-    } catch (error) {
-      console.error("Failed to update item quantity:", error);
-      throw error;
-    }
-  }, []);
+      const updatedQuantity = Math.max(0, newQuantity);
+      try {
+        const response = await fetch(`/api/restok/items/${itemId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: item.name,
+            quantity: updatedQuantity,
+            lowStock: item.lowStock,
+            note: item.note,
+            subItems: item.subItems,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to update item");
+        await fetchItems();
+      } catch (error) {
+        console.error("Failed to update item quantity:", error);
+        throw error;
+      }
+    },
+    [],
+  );
 
   const saveEditItemDetails = useCallback(
-    async (
-      itemId: string,
-      name: string,
-      lowStock: number,
-      note: string,
-    ) => {
+    async (itemId: string, name: string, lowStock: number, note: string) => {
       const item = STORE.find((i) => i.id === itemId);
       if (!item) return;
 
@@ -219,11 +221,7 @@ export function useReStok() {
   );
 
   const addSubItem = useCallback(
-    async (
-      parentItemId: string,
-      name: string,
-      lowStock: number,
-    ) => {
+    async (parentItemId: string, name: string, lowStock: number) => {
       const item = STORE.find((i) => i.id === parentItemId);
       if (!item) {
         console.error("Item not found:", parentItemId);
@@ -314,7 +312,9 @@ export function useReStok() {
         toast({
           title: "Error",
           description:
-            error instanceof Error ? error.message : "Failed to delete sub-item",
+            error instanceof Error
+              ? error.message
+              : "Failed to delete sub-item",
           variant: "destructive",
         });
         throw error;
@@ -324,11 +324,7 @@ export function useReStok() {
   );
 
   const updateSubItemQuantity = useCallback(
-    async (
-      parentItemId: string,
-      subItemId: string,
-      newQuantity: number,
-    ) => {
+    async (parentItemId: string, subItemId: string, newQuantity: number) => {
       const item = STORE.find((i) => i.id === parentItemId);
       if (!item) return;
 
@@ -418,7 +414,9 @@ export function useReStok() {
         toast({
           title: "Error",
           description:
-            error instanceof Error ? error.message : "Failed to update sub-item",
+            error instanceof Error
+              ? error.message
+              : "Failed to update sub-item",
           variant: "destructive",
         });
         throw error;

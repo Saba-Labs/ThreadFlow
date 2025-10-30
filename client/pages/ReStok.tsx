@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Trash2, Plus, ChevronDown, ChevronUp, Edit2, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Edit2,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
@@ -84,14 +92,20 @@ export default function ReStok() {
   const moveItemUp = (index: number) => {
     if (index === 0) return;
     const newItems = [...items];
-    [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
+    [newItems[index - 1], newItems[index]] = [
+      newItems[index],
+      newItems[index - 1],
+    ];
     reorderItems(newItems.map((item) => item.id));
   };
 
   const moveItemDown = (index: number) => {
     if (index === items.length - 1) return;
     const newItems = [...items];
-    [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+    [newItems[index], newItems[index + 1]] = [
+      newItems[index + 1],
+      newItems[index],
+    ];
     reorderItems(newItems.map((item) => item.id));
   };
 
