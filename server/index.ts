@@ -113,6 +113,25 @@ export function createServer() {
     res.status(dbInitialized ? 200 : 503).json(status);
   });
 
+  // Health check with database test
+  app.get("/api/health/db", async (_req, res) => {
+    try {
+      const result = await query("SELECT NOW() as timestamp");
+      res.json({
+        status: "healthy",
+        database: "connected",
+        timestamp: result.rows[0]?.timestamp,
+      });
+    } catch (error) {
+      console.error("Database health check failed:", error);
+      res.status(503).json({
+        status: "unhealthy",
+        database: "disconnected",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
   // Example API routes
   app.get("/api/ping", (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
