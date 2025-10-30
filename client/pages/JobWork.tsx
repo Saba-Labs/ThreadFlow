@@ -3,6 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   useJobWorks,
   getJobWorks,
   addJobWork,
@@ -40,6 +49,9 @@ export default function JobWork() {
   const [selectedJobWorkId, setSelectedJobWorkId] = useState<string | null>(
     null,
   );
+
+  // Confirmation state for deletion
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!modalOpen) {
@@ -84,9 +96,14 @@ export default function JobWork() {
   const handleDelete = async (id: string) => {
     try {
       await deleteJobWork(id);
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Failed to delete job work:", error);
     }
+  };
+
+  const openDeleteConfirm = (id: string) => {
+    setDeleteConfirmId(id);
   };
 
   const saveAll = async () => {
@@ -253,7 +270,7 @@ export default function JobWork() {
                       variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(j.id);
+                        openDeleteConfirm(j.id);
                       }}
                       title="Delete"
                     >
@@ -315,6 +332,34 @@ export default function JobWork() {
           />
         </div>
       </SimpleModal>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteConfirmId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Job Work?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "
+              {list.find((j) => j.id === deleteConfirmId)?.name}"? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* History Modal */}
       <SimpleModal

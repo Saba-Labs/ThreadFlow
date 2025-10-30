@@ -41,7 +41,15 @@ export default function ReStok() {
       const response = await fetch("/api/restok/items");
       if (!response.ok) throw new Error("Failed to fetch items");
       const data = await response.json();
-      setItems(data);
+      // Ensure all sub-items have valid lowStock values (default to 0 if missing)
+      const validatedData = data.map((item: Item) => ({
+        ...item,
+        subItems: item.subItems.map((sub: SubItem) => ({
+          ...sub,
+          lowStock: typeof sub.lowStock === "number" ? sub.lowStock : 0,
+        })),
+      }));
+      setItems(validatedData);
     } catch (error) {
       console.error("Failed to load items:", error);
     } finally {
@@ -223,7 +231,10 @@ export default function ReStok() {
     lowStock: number,
   ) => {
     const item = items.find((i) => i.id === parentItemId);
-    if (!item) return;
+    if (!item) {
+      console.error("Item not found:", parentItemId);
+      return;
+    }
 
     const newSubItem: SubItem = {
       id: Date.now().toString(),
@@ -232,32 +243,57 @@ export default function ReStok() {
       lowStock,
     };
 
+    console.log("Adding sub-item:", {
+      parentItemId,
+      newSubItem,
+      itemLowStock: item.lowStock,
+    });
+
+    const payload = {
+      name: item.name,
+      quantity: item.quantity,
+      lowStock: item.lowStock,
+      note: item.note,
+      subItems: [
+        ...item.subItems.map((s) => ({
+          id: s.id,
+          name: s.name,
+          quantity: s.quantity,
+          lowStock: s.lowStock ?? 0,
+        })),
+        newSubItem,
+      ],
+    };
+
+    console.log("Sending PUT request with payload:", payload);
+
     try {
       const response = await fetch(`/api/restok/items/${parentItemId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: [...item.subItems, newSubItem],
-        }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         let errorMsg = `Server error: ${response.status} ${response.statusText}`;
         try {
           const errorData = await response.json();
+          console.error("Server error response:", errorData);
           errorMsg = errorData.error || errorMsg;
-        } catch {
+        } catch (parseError) {
+          console.error("Could not parse error response as JSON:", parseError);
           try {
             const text = await response.text();
-            if (text) errorMsg = text;
+            if (text) {
+              console.error("Server error text:", text);
+              errorMsg = text;
+            }
           } catch {
             // Could not parse error response
           }
         }
-        console.error(`Server error (${response.status}): ${errorMsg}`);
+        console.error(
+          `Failed to add sub-item. Status: ${response.status}, Message: ${errorMsg}`,
+        );
         throw new Error(errorMsg);
       }
       setItems(
@@ -267,6 +303,10 @@ export default function ReStok() {
             : i,
         ),
       );
+      console.log(
+        "[addSubItem] Sub-item added successfully, refetching to verify Neon sync",
+      );
+      await fetchItems();
     } catch (error) {
       console.error("Failed to add sub-item:", error);
       throw error;
@@ -286,7 +326,14 @@ export default function ReStok() {
           quantity: item.quantity,
           lowStock: item.lowStock,
           note: item.note,
-          subItems: item.subItems.filter((s) => s.id !== subItemId),
+          subItems: item.subItems
+            .filter((s) => s.id !== subItemId)
+            .map((s) => ({
+              id: s.id,
+              name: s.name,
+              quantity: s.quantity,
+              lowStock: s.lowStock ?? 0,
+            })),
         }),
       });
       if (!response.ok) {
@@ -309,6 +356,10 @@ export default function ReStok() {
             : i,
         ),
       );
+      console.log(
+        "[deleteSubItem] Sub-item deleted successfully, refetching to verify Neon sync",
+      );
+      await fetchItems();
     } catch (error) {
       console.error("Failed to delete sub-item:", error);
       throw error;
@@ -334,7 +385,19 @@ export default function ReStok() {
           lowStock: item.lowStock,
           note: item.note,
           subItems: item.subItems.map((s) =>
-            s.id === subItemId ? { ...s, quantity: updatedQuantity } : s,
+            s.id === subItemId
+              ? {
+                  id: s.id,
+                  name: s.name,
+                  quantity: updatedQuantity,
+                  lowStock: s.lowStock ?? 0,
+                }
+              : {
+                  id: s.id,
+                  name: s.name,
+                  quantity: s.quantity,
+                  lowStock: s.lowStock ?? 0,
+                },
           ),
         }),
       });
@@ -360,6 +423,10 @@ export default function ReStok() {
             : i,
         ),
       );
+      console.log(
+        "[updateSubItemQuantity] Quantity updated successfully, refetching to verify Neon sync",
+      );
+      await fetchItems();
     } catch (error) {
       console.error("Failed to update sub-item quantity:", error);
       throw error;
@@ -375,19 +442,44 @@ export default function ReStok() {
     const item = items.find((i) => i.id === parentItemId);
     if (!item) return;
 
+    const payload = {
+      name: item.name,
+      quantity: item.quantity,
+      lowStock: item.lowStock,
+      note: item.note,
+      subItems: item.subItems.map((s) =>
+        s.id === subItemId
+          ? {
+              id: s.id,
+              name,
+              quantity: s.quantity,
+              lowStock: typeof lowStock === "number" ? lowStock : 0,
+            }
+          : {
+              id: s.id,
+              name: s.name,
+              quantity: s.quantity,
+              lowStock: s.lowStock ?? 0,
+            },
+      ),
+    };
+
+    console.log("[updateSubItem] Updating sub-item:", {
+      parentItemId,
+      subItemId,
+      newName: name,
+      newLowStock: lowStock,
+    });
+    console.log(
+      "[updateSubItem] Full payload:",
+      JSON.stringify(payload, null, 2),
+    );
+
     try {
       const response = await fetch(`/api/restok/items/${parentItemId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: item.subItems.map((s) =>
-            s.id === subItemId ? { ...s, name, lowStock } : s,
-          ),
-        }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         let errorMsg = `Server error: ${response.status} ${response.statusText}`;
@@ -399,18 +491,34 @@ export default function ReStok() {
         }
         throw new Error(errorMsg);
       }
+      console.log(
+        "[updateSubItem] Server response OK, updating local state and fetching fresh data",
+      );
       setItems(
         items.map((i) =>
           i.id === parentItemId
             ? {
                 ...i,
-                subItems: i.subItems.map((s) =>
-                  s.id === subItemId ? { ...s, name, lowStock } : s,
-                ),
+                subItems: i.subItems.map((s) => {
+                  if (s.id === subItemId) {
+                    console.log("[updateSubItem] Updated sub-item state:", {
+                      id: s.id,
+                      name,
+                      lowStock,
+                    });
+                    return { ...s, name, lowStock };
+                  }
+                  return s;
+                }),
               }
             : i,
         ),
       );
+      console.log(
+        "[updateSubItem] Local state updated, refetching from database to verify sync",
+      );
+      // Refetch items to ensure Neon DB changes are reflected
+      await fetchItems();
     } catch (error) {
       console.error("Failed to update sub-item:", error);
       throw error;

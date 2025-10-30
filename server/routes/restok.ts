@@ -41,7 +41,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
           id: r.id,
           name: r.name,
           quantity: r.quantity,
-          lowStock: r.lowStock,
+          lowStock: r.lowStock ?? 0,
         })),
       });
     }
@@ -125,8 +125,23 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     const { name, quantity, lowStock, note, subItems } = req.body;
     const now = Date.now();
 
+    console.log("[updateRestokItem] Request body:", {
+      name,
+      quantity,
+      lowStock,
+      note,
+      subItemsCount: subItems?.length || 0,
+    });
+    console.log(
+      "[updateRestokItem] Sub-items detail:",
+      JSON.stringify(subItems, null, 2),
+    );
+
     // Validate required fields
     if (!name || name.trim() === "") {
+      console.error(
+        "[updateRestokItem] Validation failed: Item name is required",
+      );
       return res.status(400).json({ error: "Item name is required" });
     }
 
@@ -135,6 +150,9 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
       quantity === null ||
       isNaN(Number(quantity))
     ) {
+      console.error("[updateRestokItem] Validation failed: Invalid quantity", {
+        quantity,
+      });
       return res
         .status(400)
         .json({ error: "Item quantity must be a valid number" });
@@ -145,6 +163,9 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
       lowStock === null ||
       isNaN(Number(lowStock))
     ) {
+      console.error("[updateRestokItem] Validation failed: Invalid lowStock", {
+        lowStock,
+      });
       return res
         .status(400)
         .json({ error: "Low stock threshold must be a valid number" });
@@ -159,39 +180,93 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     await query("DELETE FROM restok_sub_items WHERE item_id = $1", [id]);
 
     if (subItems && Array.isArray(subItems)) {
-      for (const sub of subItems) {
-        if (
-          !sub.id ||
-          !sub.name ||
-          sub.quantity === undefined ||
-          sub.lowStock === undefined
-        ) {
+      for (let idx = 0; idx < subItems.length; idx++) {
+        const sub = subItems[idx];
+
+        console.log(
+          `[updateRestokItem] Processing sub-item ${idx}:`,
+          JSON.stringify(sub, null, 2),
+        );
+
+        // Validate sub-item fields
+        if (!sub.id || sub.id.toString().trim() === "") {
+          console.error(
+            `[updateRestokItem] Sub-item ${idx} validation failed: id is required`,
+            sub,
+          );
           return res.status(400).json({
-            error: `Invalid sub-item: missing required fields. Got: ${JSON.stringify(sub)}`,
+            error: `Sub-item ${idx}: id is required`,
           });
         }
+
+        if (!sub.name || sub.name.toString().trim() === "") {
+          console.error(
+            `[updateRestokItem] Sub-item ${idx} validation failed: name is required`,
+            sub,
+          );
+          return res.status(400).json({
+            error: `Sub-item ${idx}: name is required`,
+          });
+        }
+
+        if (
+          sub.quantity === undefined ||
+          sub.quantity === null ||
+          isNaN(Number(sub.quantity))
+        ) {
+          console.error(
+            `[updateRestokItem] Sub-item ${idx} validation failed: quantity must be a valid number`,
+            sub,
+          );
+          return res.status(400).json({
+            error: `Sub-item ${idx}: quantity must be a valid number`,
+          });
+        }
+
+        if (
+          sub.lowStock === undefined ||
+          sub.lowStock === null ||
+          isNaN(Number(sub.lowStock))
+        ) {
+          console.error(
+            `[updateRestokItem] Sub-item ${idx} validation failed: lowStock must be a valid number`,
+            sub,
+          );
+          return res.status(400).json({
+            error: `Sub-item ${idx}: lowStock must be a valid number`,
+          });
+        }
+
+        const lowStockValue = Number(sub.lowStock);
+        console.log(
+          `[updateRestokItem] Inserting sub-item ${idx} with lowStock=${lowStockValue}`,
+        );
+
         try {
           await query(
             "INSERT INTO restok_sub_items (id, item_id, name, quantity, low_stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
             [
               sub.id,
               id,
-              sub.name,
+              sub.name.toString().trim(),
               Number(sub.quantity),
-              Number(sub.lowStock),
+              lowStockValue,
               now,
               now,
             ],
           );
+          console.log(
+            `[updateRestokItem] Successfully inserted sub-item ${idx} with lowStock=${lowStockValue}`,
+          );
         } catch (subError) {
           console.error(
-            "Error inserting sub-item:",
+            `[updateRestokItem] Error inserting sub-item ${idx}:`,
             subError,
             "Sub-item data:",
             sub,
           );
           return res.status(400).json({
-            error: `Failed to insert sub-item: ${subError instanceof Error ? subError.message : "Unknown error"}`,
+            error: `Failed to insert sub-item ${idx}: ${subError instanceof Error ? subError.message : "Unknown error"}`,
           });
         }
       }
