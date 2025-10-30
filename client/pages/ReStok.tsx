@@ -54,6 +54,20 @@ export default function ReStok() {
     fetchItems();
   }, [fetchItems]);
 
+  // Ensure all sub-items have valid lowStock values
+  useEffect(() => {
+    const validatedItems = items.map((item) => ({
+      ...item,
+      subItems: item.subItems.map((sub) => ({
+        ...sub,
+        lowStock: sub.lowStock ?? 0,
+      })),
+    }));
+    if (JSON.stringify(validatedItems) !== JSON.stringify(items)) {
+      setItems(validatedItems);
+    }
+  }, []);
+
   // Subscribe to real-time updates
   useSSESubscription((event) => {
     if (event.type === "restok_updated") {
