@@ -63,7 +63,7 @@ export function useRoadmaps() {
     try {
       const count = STORE.length + 1;
       const roadmapId = uid("roadmap");
-      const response = await fetch("/api/roadmaps", {
+      await fetchWithTimeout("/api/roadmaps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -72,7 +72,6 @@ export function useRoadmaps() {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to create roadmap");
       await fetchRoadmaps();
       return roadmapId;
     } catch (error) {
@@ -83,10 +82,9 @@ export function useRoadmaps() {
 
   const deleteRoadmap = useCallback(async (roadmapId: string) => {
     try {
-      const response = await fetch(`/api/roadmaps/${roadmapId}`, {
+      await fetchWithTimeout(`/api/roadmaps/${roadmapId}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Failed to delete roadmap");
       await fetchRoadmaps();
     } catch (error) {
       console.error("Error deleting roadmap:", error);
@@ -97,12 +95,11 @@ export function useRoadmaps() {
   const renameRoadmap = useCallback(
     async (roadmapId: string, title: string) => {
       try {
-        const response = await fetch(`/api/roadmaps/${roadmapId}`, {
+        await fetchWithTimeout(`/api/roadmaps/${roadmapId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title: title.trim() }),
         });
-        if (!response.ok) throw new Error("Failed to update roadmap");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error renaming roadmap:", error);
