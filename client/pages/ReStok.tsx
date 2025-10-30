@@ -434,7 +434,19 @@ export default function ReStok() {
           lowStock: item.lowStock,
           note: item.note,
           subItems: item.subItems.map((s) =>
-            s.id === subItemId ? { ...s, name, lowStock } : s,
+            s.id === subItemId
+              ? {
+                  id: s.id,
+                  name,
+                  quantity: s.quantity,
+                  lowStock: typeof lowStock === "number" ? lowStock : 0,
+                }
+              : {
+                  id: s.id,
+                  name: s.name,
+                  quantity: s.quantity,
+                  lowStock: s.lowStock ?? 0,
+                },
           ),
         }),
       });
