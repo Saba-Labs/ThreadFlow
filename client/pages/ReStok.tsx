@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Trash2, Plus, ChevronDown, ChevronUp, Edit2, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
