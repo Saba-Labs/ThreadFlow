@@ -168,6 +168,8 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
       for (let idx = 0; idx < subItems.length; idx++) {
         const sub = subItems[idx];
 
+        console.log(`[updateRestokItem] Processing sub-item ${idx}:`, JSON.stringify(sub, null, 2));
+
         // Validate sub-item fields
         if (!sub.id || sub.id.toString().trim() === "") {
           console.error(`[updateRestokItem] Sub-item ${idx} validation failed: id is required`, sub);
@@ -197,6 +199,9 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
           });
         }
 
+        const lowStockValue = Number(sub.lowStock);
+        console.log(`[updateRestokItem] Inserting sub-item ${idx} with lowStock=${lowStockValue}`);
+
         try {
           await query(
             "INSERT INTO restok_sub_items (id, item_id, name, quantity, low_stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
@@ -205,11 +210,12 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
               id,
               sub.name.toString().trim(),
               Number(sub.quantity),
-              Number(sub.lowStock),
+              lowStockValue,
               now,
               now,
             ],
           );
+          console.log(`[updateRestokItem] Successfully inserted sub-item ${idx} with lowStock=${lowStockValue}`);
         } catch (subError) {
           console.error(
             `[updateRestokItem] Error inserting sub-item ${idx}:`,
