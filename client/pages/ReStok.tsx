@@ -424,31 +424,36 @@ export default function ReStok() {
     const item = items.find((i) => i.id === parentItemId);
     if (!item) return;
 
+    const payload = {
+      name: item.name,
+      quantity: item.quantity,
+      lowStock: item.lowStock,
+      note: item.note,
+      subItems: item.subItems.map((s) =>
+        s.id === subItemId
+          ? {
+              id: s.id,
+              name,
+              quantity: s.quantity,
+              lowStock: typeof lowStock === "number" ? lowStock : 0,
+            }
+          : {
+              id: s.id,
+              name: s.name,
+              quantity: s.quantity,
+              lowStock: s.lowStock ?? 0,
+            },
+      ),
+    };
+
+    console.log("[updateSubItem] Updating sub-item:", { parentItemId, subItemId, newName: name, newLowStock: lowStock });
+    console.log("[updateSubItem] Full payload:", JSON.stringify(payload, null, 2));
+
     try {
       const response = await fetch(`/api/restok/items/${parentItemId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: item.subItems.map((s) =>
-            s.id === subItemId
-              ? {
-                  id: s.id,
-                  name,
-                  quantity: s.quantity,
-                  lowStock: typeof lowStock === "number" ? lowStock : 0,
-                }
-              : {
-                  id: s.id,
-                  name: s.name,
-                  quantity: s.quantity,
-                  lowStock: s.lowStock ?? 0,
-                },
-          ),
-        }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         let errorMsg = `Server error: ${response.status} ${response.statusText}`;
