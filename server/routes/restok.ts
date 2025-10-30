@@ -164,24 +164,45 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     await query("DELETE FROM restok_sub_items WHERE item_id = $1", [id]);
 
     if (subItems && Array.isArray(subItems)) {
-      for (const sub of subItems) {
-        if (
-          !sub.id ||
-          !sub.name ||
-          sub.quantity === undefined ||
-          sub.lowStock === undefined
-        ) {
+      for (let idx = 0; idx < subItems.length; idx++) {
+        const sub = subItems[idx];
+
+        // Validate sub-item fields
+        if (!sub.id || sub.id.toString().trim() === "") {
+          console.error(`[updateRestokItem] Sub-item ${idx} validation failed: id is required`, sub);
           return res.status(400).json({
-            error: `Invalid sub-item: missing required fields. Got: ${JSON.stringify(sub)}`,
+            error: `Sub-item ${idx}: id is required`,
           });
         }
+
+        if (!sub.name || sub.name.toString().trim() === "") {
+          console.error(`[updateRestokItem] Sub-item ${idx} validation failed: name is required`, sub);
+          return res.status(400).json({
+            error: `Sub-item ${idx}: name is required`,
+          });
+        }
+
+        if (sub.quantity === undefined || sub.quantity === null || isNaN(Number(sub.quantity))) {
+          console.error(`[updateRestokItem] Sub-item ${idx} validation failed: quantity must be a valid number`, sub);
+          return res.status(400).json({
+            error: `Sub-item ${idx}: quantity must be a valid number`,
+          });
+        }
+
+        if (sub.lowStock === undefined || sub.lowStock === null || isNaN(Number(sub.lowStock))) {
+          console.error(`[updateRestokItem] Sub-item ${idx} validation failed: lowStock must be a valid number`, sub);
+          return res.status(400).json({
+            error: `Sub-item ${idx}: lowStock must be a valid number`,
+          });
+        }
+
         try {
           await query(
             "INSERT INTO restok_sub_items (id, item_id, name, quantity, low_stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
             [
               sub.id,
               id,
-              sub.name,
+              sub.name.toString().trim(),
               Number(sub.quantity),
               Number(sub.lowStock),
               now,
@@ -190,13 +211,13 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
           );
         } catch (subError) {
           console.error(
-            "Error inserting sub-item:",
+            `[updateRestokItem] Error inserting sub-item ${idx}:`,
             subError,
             "Sub-item data:",
             sub,
           );
           return res.status(400).json({
-            error: `Failed to insert sub-item: ${subError instanceof Error ? subError.message : "Unknown error"}`,
+            error: `Failed to insert sub-item ${idx}: ${subError instanceof Error ? subError.message : "Unknown error"}`,
           });
         }
       }
