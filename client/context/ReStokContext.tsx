@@ -74,14 +74,7 @@ function subscribe(cb: () => void) {
 
 export function useReStok() {
   const state = useSyncExternalStore(subscribe, getItems, getItems);
-  const loading = useSyncExternalStore(
-    (cb) => {
-      const interval = setInterval(cb, 100);
-      return () => clearInterval(interval);
-    },
-    getIsLoading,
-    () => true,
-  );
+  const loading = useSyncExternalStore(subscribeToLoading, getIsLoading, () => false);
 
   useSSESubscription((event) => {
     if (event.type === "restok_updated") {
