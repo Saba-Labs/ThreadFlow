@@ -577,7 +577,7 @@ export function useProductionPipeline() {
       // Persist to database
       try {
         // Update parent order with remainder quantity
-        await fetch(`/api/pipeline/orders/${orderId}`, {
+        await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -590,16 +590,11 @@ export function useProductionPipeline() {
 
         // Create child orders
         for (const child of children) {
-          const response = await fetch("/api/pipeline/orders", {
+          await fetchWithTimeout("/api/pipeline/orders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(child),
           });
-          if (!response.ok) {
-            throw new Error(
-              `Failed to create child order: ${response.statusText}`,
-            );
-          }
         }
 
         // Fetch updated state from server to ensure sync
