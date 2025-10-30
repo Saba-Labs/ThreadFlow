@@ -223,7 +223,10 @@ export default function ReStok() {
     lowStock: number,
   ) => {
     const item = items.find((i) => i.id === parentItemId);
-    if (!item) return;
+    if (!item) {
+      console.error("Item not found:", parentItemId);
+      return;
+    }
 
     const newSubItem: SubItem = {
       id: Date.now().toString(),
@@ -232,17 +235,23 @@ export default function ReStok() {
       lowStock,
     };
 
+    console.log("Adding sub-item:", { parentItemId, newSubItem, itemLowStock: item.lowStock });
+
+    const payload = {
+      name: item.name,
+      quantity: item.quantity,
+      lowStock: item.lowStock,
+      note: item.note,
+      subItems: [...item.subItems, newSubItem],
+    };
+
+    console.log("Sending PUT request with payload:", payload);
+
     try {
       const response = await fetch(`/api/restok/items/${parentItemId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          lowStock: item.lowStock,
-          note: item.note,
-          subItems: [...item.subItems, newSubItem],
-        }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         let errorMsg = `Server error: ${response.status} ${response.statusText}`;
