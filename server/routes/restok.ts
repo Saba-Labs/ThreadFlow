@@ -27,7 +27,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
     const items: Item[] = [];
     for (const row of result.rows) {
       const subItemsResult = await query(
-        "SELECT id, name, quantity, low_stock as lowStock FROM restok_sub_items WHERE item_id = $1 ORDER BY created_at ASC",
+        "SELECT id, name, quantity, low_stock FROM restok_sub_items WHERE item_id = $1 ORDER BY created_at ASC",
         [row.id],
       );
 
@@ -41,7 +41,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
           id: r.id,
           name: r.name,
           quantity: r.quantity,
-          lowStock: r.lowStock ?? 0,
+          lowStock: Number(r.low_stock) || 0,
         })),
       });
     }
