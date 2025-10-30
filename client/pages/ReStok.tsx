@@ -35,6 +35,9 @@ export default function ReStok() {
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
+  // Debounce ref for SSE updates
+  const fetchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
   // Define fetchItems before using it in useEffect and SSE subscription
   const fetchItems = useCallback(async () => {
     try {
@@ -58,15 +61,25 @@ export default function ReStok() {
     }
   }, []);
 
-  // Load data from API on mount
+  // Load data from API on mount only
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]);
+    return () => {
+      if (fetchDebounceRef.current) {
+        clearTimeout(fetchDebounceRef.current);
+      }
+    };
+  }, []);
 
-  // Subscribe to real-time updates
+  // Subscribe to real-time updates with debouncing
   useSSESubscription((event) => {
     if (event.type === "restok_updated") {
-      fetchItems();
+      if (fetchDebounceRef.current) {
+        clearTimeout(fetchDebounceRef.current);
+      }
+      fetchDebounceRef.current = setTimeout(() => {
+        fetchItems();
+      }, 300);
     }
   });
 
