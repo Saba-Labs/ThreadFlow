@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Trash2, Plus, ChevronDown, ChevronUp, Edit2 } from "lucide-react";
+import { Trash2, Plus, ChevronDown, ChevronUp, Edit2, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
@@ -25,6 +25,7 @@ export default function ReStok() {
   const [items, setItems] = useState<Item[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
+  const [reorderMode, setReorderMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Add Item Modal
