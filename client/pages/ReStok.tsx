@@ -585,6 +585,29 @@ export default function ReStok() {
           <Edit2 className="h-4 w-4" />
           {editMode ? "Done Editing" : "Edit"}
         </Button>
+        {!editMode && (
+          <>
+            {!reorderMode ? (
+              <Button
+                onClick={() => setReorderMode(true)}
+                variant="outline"
+                className="gap-2"
+              >
+                <ArrowUp className="h-4 w-4" />
+                Reorder
+              </Button>
+            ) : (
+              <Button
+                onClick={saveNewOrder}
+                variant="default"
+                className="gap-2"
+              >
+                <ArrowDown className="h-4 w-4" />
+                Done Reordering
+              </Button>
+            )}
+          </>
+        )}
       </div>
 
       {/* Items List */}
