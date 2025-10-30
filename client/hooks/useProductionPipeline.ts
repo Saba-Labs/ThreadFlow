@@ -65,9 +65,7 @@ async function fetchFromServer() {
   if (isLoading) return;
   isLoading = true;
   try {
-    const response = await fetch("/api/pipeline/orders");
-    if (!response.ok) throw new Error("Failed to fetch orders");
-    const orders = await response.json();
+    const orders = await fetchWithTimeout<WorkOrder[]>("/api/pipeline/orders");
     STORE = { orders };
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
