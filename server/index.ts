@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { initializeDatabase } from "./db";
+import { initializeDatabase, query } from "./db";
 import { subscribeToChanges } from "./events";
 import {
   getRestokItems,
