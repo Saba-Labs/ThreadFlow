@@ -354,7 +354,7 @@ export function useProductionPipeline() {
         createSyncTask(
           "moveToNextStep",
           async () => {
-            const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -364,17 +364,6 @@ export function useProductionPipeline() {
                 steps,
               }),
             });
-            if (!response.ok) {
-              let errorData = "";
-              try {
-                errorData = await response.text();
-              } catch {
-                // Body already read or unavailable
-              }
-              throw new Error(
-                `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-              );
-            }
           },
           () => {
             // On error, revert to previous state
