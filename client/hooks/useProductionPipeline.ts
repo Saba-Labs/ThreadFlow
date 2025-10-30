@@ -279,7 +279,7 @@ export function useProductionPipeline() {
         createSyncTask(
           "updateStepStatus",
           async () => {
-            const response = await fetch(
+            await fetchWithTimeout(
               `/api/pipeline/orders/${orderId}/steps/${stepIndex}`,
               {
                 method: "PUT",
@@ -287,7 +287,6 @@ export function useProductionPipeline() {
                 body: JSON.stringify(patch),
               },
             );
-            if (!response.ok) throw new Error("Failed to update step status");
           },
           () => {
             // On error, revert to previous state
