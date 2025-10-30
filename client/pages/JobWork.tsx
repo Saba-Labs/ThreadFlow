@@ -96,9 +96,14 @@ export default function JobWork() {
   const handleDelete = async (id: string) => {
     try {
       await deleteJobWork(id);
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error("Failed to delete job work:", error);
     }
+  };
+
+  const openDeleteConfirm = (id: string) => {
+    setDeleteConfirmId(id);
   };
 
   const saveAll = async () => {
