@@ -465,18 +465,24 @@ export default function ReStok() {
         }
         throw new Error(errorMsg);
       }
+      console.log("[updateSubItem] Server response OK, updating local state");
       setItems(
         items.map((i) =>
           i.id === parentItemId
             ? {
                 ...i,
-                subItems: i.subItems.map((s) =>
-                  s.id === subItemId ? { ...s, name, lowStock } : s,
-                ),
+                subItems: i.subItems.map((s) => {
+                  if (s.id === subItemId) {
+                    console.log("[updateSubItem] Updated sub-item state:", { id: s.id, name, lowStock });
+                    return { ...s, name, lowStock };
+                  }
+                  return s;
+                }),
               }
             : i,
         ),
       );
+      console.log("[updateSubItem] Local state updated successfully");
     } catch (error) {
       console.error("Failed to update sub-item:", error);
       throw error;
