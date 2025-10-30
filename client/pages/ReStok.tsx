@@ -617,7 +617,7 @@ export default function ReStok() {
             <p>No items yet. Add your first item to get started.</p>
           </div>
         ) : (
-          items.map((item) => {
+          items.map((item, index) => {
             const status = getItemStockStatus(item);
             const isExpanded = expandedItems.has(item.id);
 
@@ -632,17 +632,40 @@ export default function ReStok() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1">
-                      {item.subItems.length > 0 && (
-                        <button
-                          onClick={() => toggleItemExpanded(item.id)}
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </button>
+                      {reorderMode ? (
+                        <div className="flex flex-col gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => moveItemUp(index)}
+                            disabled={index === 0}
+                            className="h-6 w-6 p-0"
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => moveItemDown(index)}
+                            disabled={index === items.length - 1}
+                            className="h-6 w-6 p-0"
+                          >
+                            <ArrowDown className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        item.subItems.length > 0 && (
+                          <button
+                            onClick={() => toggleItemExpanded(item.id)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </button>
+                        )
                       )}
                       <div className="flex-1">
                         <p className="font-medium text-sm">{item.name}</p>
