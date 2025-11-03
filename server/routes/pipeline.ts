@@ -178,15 +178,17 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
 export const updateWorkOrder: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modelName, quantity, currentStepIndex, steps } = req.body;
+    const { modelName, quantity, currentStepIndex, createdAt, steps } =
+      req.body;
     const now = Date.now();
 
     await query(
-      "UPDATE work_orders SET model_name = COALESCE($1, model_name), quantity = COALESCE($2, quantity), current_step_index = COALESCE($3, current_step_index), updated_at = $4 WHERE id = $5",
+      "UPDATE work_orders SET model_name = COALESCE($1, model_name), quantity = COALESCE($2, quantity), current_step_index = COALESCE($3, current_step_index), created_at = COALESCE($4, created_at), updated_at = $5 WHERE id = $6",
       [
         modelName || null,
         quantity || null,
         currentStepIndex !== undefined ? currentStepIndex : null,
+        typeof createdAt === "number" ? createdAt : null,
         now,
         id,
       ],

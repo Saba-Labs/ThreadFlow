@@ -23,6 +23,13 @@ import { Trash2, Save, Plus, Pencil, Calendar } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useSearch } from "@/context/SearchContext";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function JobWork() {
   const list = useJobWorks();
@@ -169,29 +176,70 @@ export default function JobWork() {
   };
 
   const { query } = useSearch();
+  const [sortBy, setSortBy] = useState<"pending" | "linked" | "az">("az");
+
   const displayed = ((): typeof local => {
     const q = (query || "").trim().toLowerCase();
-    if (!q) return local;
-    return local.filter((j) => {
-      if (j.name.toLowerCase().includes(q)) return true;
-      const linked = linkedModelsFor(j.id);
-      if (linked.some((m) => m.toLowerCase().includes(q))) return true;
-      // search model names in pipeline orders linked to this job work
-      return pipeline.orders.some(
-        (o) =>
-          (o.jobWorkIds || []).includes(j.id) &&
-          o.modelName.toLowerCase().includes(q),
-      );
-    });
+    const filtered = q
+      ? local.filter((j) => {
+          if (j.name.toLowerCase().includes(q)) return true;
+          const linked = linkedModelsFor(j.id);
+          if (linked.some((m) => m.toLowerCase().includes(q))) return true;
+          return pipeline.orders.some(
+            (o) =>
+              (o.jobWorkIds || []).includes(j.id) &&
+              o.modelName.toLowerCase().includes(q),
+          );
+        })
+      : local.slice();
+
+    // Apply sorting
+    const sorted = filtered.slice();
+    if (sortBy === "pending") {
+      sorted.sort((a, b) => {
+        const pa = getAssignmentsForJobWork(a.id).filter(
+          (x) => x.status === "pending",
+        ).length;
+        const pb = getAssignmentsForJobWork(b.id).filter(
+          (x) => x.status === "pending",
+        ).length;
+        return pb - pa; // descending
+      });
+    } else if (sortBy === "linked") {
+      sorted.sort((a, b) => {
+        const la = linkedModelsFor(a.id).length;
+        const lb = linkedModelsFor(b.id).length;
+        return lb - la; // descending
+      });
+    } else if (sortBy === "az") {
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return sorted;
   })();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Job Work</h1>
-        <p className="text-muted-foreground max-w-prose">
-          Create, edit, and delete Job Work items.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Job Work</h1>
+          <p className="text-muted-foreground max-w-prose">
+            Create, edit, and delete Job Work items.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-muted-foreground">Sort</label>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">High Running</SelectItem>
+              <SelectItem value="linked">High Linked</SelectItem>
+              <SelectItem value="az">A - Z</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* All Job Works list (card-style) */}

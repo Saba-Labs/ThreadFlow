@@ -140,7 +140,7 @@ export default function Index() {
                 variant="secondary"
                 className="bg-slate-100 text-slate-700 border-slate-300"
               >
-                4
+                {total}
               </Badge>
               <div className="p-2 rounded-lg bg-white/60 group-hover:bg-white transition-colors duration-300">
                 {modelStatusExpanded ? (
