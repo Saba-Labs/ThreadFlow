@@ -224,8 +224,8 @@ export default function JobWork() {
               <SelectValue placeholder="Sort" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="pending">More pending models</SelectItem>
-              <SelectItem value="linked">More models linked</SelectItem>
+              <SelectItem value="pending">High Running</SelectItem>
+              <SelectItem value="linked">High Linked</SelectItem>
               <SelectItem value="az">A - Z</SelectItem>
             </SelectContent>
           </Select>
