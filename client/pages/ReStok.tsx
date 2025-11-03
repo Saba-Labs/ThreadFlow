@@ -339,9 +339,19 @@ export default function ReStok() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                updateItemQuantity(item.id, item.quantity - 1)
-                              }
+                              onClick={() => {
+                                if (editMode && draftItems) {
+                                  setDraftItems((prev) =>
+                                    (prev || []).map((it) =>
+                                      it.id === item.id
+                                        ? { ...it, quantity: Math.max(0, it.quantity - 1) }
+                                        : it,
+                                    ),
+                                  );
+                                } else {
+                                  updateItemQuantity(item.id, item.quantity - 1);
+                                }
+                              }}
                               className="h-8 w-8 p-0 text-lg font-bold"
                             >
                               −
@@ -354,9 +364,19 @@ export default function ReStok() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                updateItemQuantity(item.id, item.quantity + 1)
-                              }
+                              onClick={() => {
+                                if (editMode && draftItems) {
+                                  setDraftItems((prev) =>
+                                    (prev || []).map((it) =>
+                                      it.id === item.id
+                                        ? { ...it, quantity: it.quantity + 1 }
+                                        : it,
+                                    ),
+                                  );
+                                } else {
+                                  updateItemQuantity(item.id, item.quantity + 1);
+                                }
+                              }}
                               className="h-8 w-8 p-0 text-lg font-bold"
                             >
                               +
@@ -413,13 +433,30 @@ export default function ReStok() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                      updateSubItemQuantity(
-                                        item.id,
-                                        subItem.id,
-                                        subItem.quantity - 1,
-                                      )
-                                    }
+                                    onClick={() => {
+                                      if (editMode && draftItems) {
+                                        setDraftItems((prev) =>
+                                          (prev || []).map((it) =>
+                                            it.id === item.id
+                                              ? {
+                                                  ...it,
+                                                  subItems: it.subItems.map((s: any) =>
+                                                    s.id === subItem.id
+                                                      ? { ...s, quantity: Math.max(0, s.quantity - 1) }
+                                                      : s,
+                                                  ),
+                                                }
+                                              : it,
+                                          ),
+                                        );
+                                      } else {
+                                        updateSubItemQuantity(
+                                          item.id,
+                                          subItem.id,
+                                          subItem.quantity - 1,
+                                        );
+                                      }
+                                    }}
                                     className="h-7 w-7 p-0 text-sm font-bold"
                                   >
                                     −
@@ -432,13 +469,30 @@ export default function ReStok() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                      updateSubItemQuantity(
-                                        item.id,
-                                        subItem.id,
-                                        subItem.quantity + 1,
-                                      )
-                                    }
+                                    onClick={() => {
+                                      if (editMode && draftItems) {
+                                        setDraftItems((prev) =>
+                                          (prev || []).map((it) =>
+                                            it.id === item.id
+                                              ? {
+                                                  ...it,
+                                                  subItems: it.subItems.map((s: any) =>
+                                                    s.id === subItem.id
+                                                      ? { ...s, quantity: s.quantity + 1 }
+                                                      : s,
+                                                  ),
+                                                }
+                                              : it,
+                                          ),
+                                        );
+                                      } else {
+                                        updateSubItemQuantity(
+                                          item.id,
+                                          subItem.id,
+                                          subItem.quantity + 1,
+                                        );
+                                      }
+                                    }}
                                     className="h-7 w-7 p-0 text-sm font-bold"
                                   >
                                     +
