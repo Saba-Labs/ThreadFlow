@@ -110,7 +110,8 @@ export default function ReStok() {
   };
 
   const moveItemDown = (index: number) => {
-    const currentLength = reorderMode && reorderDraftIds ? reorderDraftIds.length : items.length;
+    const currentLength =
+      reorderMode && reorderDraftIds ? reorderDraftIds.length : items.length;
     if (index === currentLength - 1) return;
 
     if (reorderMode && reorderDraftIds) {
@@ -143,7 +144,10 @@ export default function ReStok() {
   const toggleEditMode = async () => {
     if (!editMode) {
       const deep = (arr: any[]) =>
-        arr.map((it) => ({ ...it, subItems: it.subItems.map((s: any) => ({ ...s })) }));
+        arr.map((it) => ({
+          ...it,
+          subItems: it.subItems.map((s: any) => ({ ...s })),
+        }));
       setOriginalItems(deep(items));
       setDraftItems(deep(items));
       setEditMode(true);
@@ -204,7 +208,10 @@ export default function ReStok() {
     }
   };
 
-  const getItem = (id: string) => (editMode && draftItems ? draftItems : items).find((item) => item.id === id);
+  const getItem = (id: string) =>
+    (editMode && draftItems ? draftItems : items).find(
+      (item) => item.id === id,
+    );
 
   return (
     <div className="space-y-6">
@@ -283,12 +290,11 @@ export default function ReStok() {
             <p>No items yet. Add your first item to get started.</p>
           </div>
         ) : (
-          (
-            reorderMode && reorderDraftIds
-              ? reorderDraftIds
-                  .map((id) => items.find((i) => i.id === id))
-                  .filter(Boolean) as typeof items
-              : editMode && draftItems
+          (reorderMode && reorderDraftIds
+            ? (reorderDraftIds
+                .map((id) => items.find((i) => i.id === id))
+                .filter(Boolean) as typeof items)
+            : editMode && draftItems
               ? (draftItems as typeof items)
               : items
           ).map((item, index, arr) => {
@@ -347,7 +353,7 @@ export default function ReStok() {
                           size="sm"
                           variant="outline"
                           onClick={() => moveItemDown(index)}
-                          disabled={index === (arr.length - 1)}
+                          disabled={index === arr.length - 1}
                           className="h-8 w-8 p-0 rounded-full shadow-sm"
                           aria-label="Move down"
                           title="Move down"
@@ -378,12 +384,21 @@ export default function ReStok() {
                                   setDraftItems((prev) =>
                                     (prev || []).map((it) =>
                                       it.id === item.id
-                                        ? { ...it, quantity: Math.max(0, it.quantity - 1) }
+                                        ? {
+                                            ...it,
+                                            quantity: Math.max(
+                                              0,
+                                              it.quantity - 1,
+                                            ),
+                                          }
                                         : it,
                                     ),
                                   );
                                 } else {
-                                  updateItemQuantity(item.id, item.quantity - 1);
+                                  updateItemQuantity(
+                                    item.id,
+                                    item.quantity - 1,
+                                  );
                                 }
                               }}
                               className="h-8 w-8 p-0 text-lg font-bold"
@@ -408,7 +423,10 @@ export default function ReStok() {
                                     ),
                                   );
                                 } else {
-                                  updateItemQuantity(item.id, item.quantity + 1);
+                                  updateItemQuantity(
+                                    item.id,
+                                    item.quantity + 1,
+                                  );
                                 }
                               }}
                               className="h-8 w-8 p-0 text-lg font-bold"
@@ -474,10 +492,17 @@ export default function ReStok() {
                                             it.id === item.id
                                               ? {
                                                   ...it,
-                                                  subItems: it.subItems.map((s: any) =>
-                                                    s.id === subItem.id
-                                                      ? { ...s, quantity: Math.max(0, s.quantity - 1) }
-                                                      : s,
+                                                  subItems: it.subItems.map(
+                                                    (s: any) =>
+                                                      s.id === subItem.id
+                                                        ? {
+                                                            ...s,
+                                                            quantity: Math.max(
+                                                              0,
+                                                              s.quantity - 1,
+                                                            ),
+                                                          }
+                                                        : s,
                                                   ),
                                                 }
                                               : it,
@@ -510,10 +535,15 @@ export default function ReStok() {
                                             it.id === item.id
                                               ? {
                                                   ...it,
-                                                  subItems: it.subItems.map((s: any) =>
-                                                    s.id === subItem.id
-                                                      ? { ...s, quantity: s.quantity + 1 }
-                                                      : s,
+                                                  subItems: it.subItems.map(
+                                                    (s: any) =>
+                                                      s.id === subItem.id
+                                                        ? {
+                                                            ...s,
+                                                            quantity:
+                                                              s.quantity + 1,
+                                                          }
+                                                        : s,
                                                   ),
                                                 }
                                               : it,
@@ -572,7 +602,9 @@ export default function ReStok() {
             if (editMode && draftItems) {
               setDraftItems((prev) =>
                 (prev || []).map((it) =>
-                  it.id === editingItemId ? { ...it, name, lowStock, note } : it,
+                  it.id === editingItemId
+                    ? { ...it, name, lowStock, note }
+                    : it,
                 ),
               );
             } else {
@@ -628,7 +660,9 @@ export default function ReStok() {
                   it.id === editingItemId
                     ? {
                         ...it,
-                        subItems: it.subItems.filter((s: any) => s.id !== subItemId),
+                        subItems: it.subItems.filter(
+                          (s: any) => s.id !== subItemId,
+                        ),
                       }
                     : it,
                 ),
@@ -639,7 +673,9 @@ export default function ReStok() {
           }}
           onDeleteItem={async () => {
             if (editMode && draftItems) {
-              setDraftItems((prev) => (prev || []).filter((it) => it.id !== editingItemId));
+              setDraftItems((prev) =>
+                (prev || []).filter((it) => it.id !== editingItemId),
+              );
             } else {
               await deleteItem(editingItemId);
             }
