@@ -230,7 +230,32 @@ export default function ReStok() {
                       </div>
                     </div>
 
-                    {reorderMode ? null : editMode ? (
+                    {reorderMode ? (
+                      <div className="flex items-center gap-2 ml-auto">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => moveItemUp(index)}
+                          disabled={index === 0}
+                          className="h-8 w-8 p-0 rounded-full shadow-sm"
+                          aria-label="Move up"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => moveItemDown(index)}
+                          disabled={index === items.length - 1}
+                          className="h-8 w-8 p-0 rounded-full shadow-sm"
+                          aria-label="Move down"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : editMode ? (
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
