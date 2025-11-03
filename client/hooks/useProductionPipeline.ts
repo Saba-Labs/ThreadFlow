@@ -739,6 +739,7 @@ export function useProductionPipeline() {
             modelName: data.modelName,
             quantity: data.quantity,
             currentStepIndex: newSteps.length === 0 ? -1 : newIndex,
+            createdAt: data.createdAt,
             steps: newSteps,
           }),
         });
