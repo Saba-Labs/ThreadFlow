@@ -23,7 +23,13 @@ import { Trash2, Save, Plus, Pencil, Calendar } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useSearch } from "@/context/SearchContext";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function JobWork() {
   const list = useJobWorks();
@@ -191,8 +197,12 @@ export default function JobWork() {
     const sorted = filtered.slice();
     if (sortBy === "pending") {
       sorted.sort((a, b) => {
-        const pa = getAssignmentsForJobWork(a.id).filter((x) => x.status === "pending").length;
-        const pb = getAssignmentsForJobWork(b.id).filter((x) => x.status === "pending").length;
+        const pa = getAssignmentsForJobWork(a.id).filter(
+          (x) => x.status === "pending",
+        ).length;
+        const pb = getAssignmentsForJobWork(b.id).filter(
+          (x) => x.status === "pending",
+        ).length;
         return pb - pa; // descending
       });
     } else if (sortBy === "linked") {

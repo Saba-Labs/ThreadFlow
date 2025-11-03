@@ -723,7 +723,8 @@ export function useProductionPipeline() {
         activeMachines: 0,
         quantityDone: 0,
       }));
-      const prevIndex = state.orders.find((o) => o.id === orderId)?.currentStepIndex ?? -1;
+      const prevIndex =
+        state.orders.find((o) => o.id === orderId)?.currentStepIndex ?? -1;
       let newIndex: number;
       if (newSteps.length === 0) {
         newIndex = -1;

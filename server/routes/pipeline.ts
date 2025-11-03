@@ -178,7 +178,8 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
 export const updateWorkOrder: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modelName, quantity, currentStepIndex, createdAt, steps } = req.body;
+    const { modelName, quantity, currentStepIndex, createdAt, steps } =
+      req.body;
     const now = Date.now();
 
     await query(
