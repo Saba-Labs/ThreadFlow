@@ -23,6 +23,7 @@ import { Trash2, Save, Plus, Pencil, Calendar } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useSearch } from "@/context/SearchContext";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 export default function JobWork() {
   const list = useJobWorks();
