@@ -723,13 +723,16 @@ export function useProductionPipeline() {
         activeMachines: 0,
         quantityDone: 0,
       }));
-      const newIndex = Math.max(
-        0,
-        Math.min(
-          state.orders.find((o) => o.id === orderId)?.currentStepIndex ?? -1,
-          newSteps.length - 1,
-        ),
-      );
+      const prevIndex = state.orders.find((o) => o.id === orderId)?.currentStepIndex ?? -1;
+      let newIndex: number;
+      if (newSteps.length === 0) {
+        newIndex = -1;
+      } else if (prevIndex < 0) {
+        // preserve out-of-path (-1) state
+        newIndex = -1;
+      } else {
+        newIndex = Math.max(0, Math.min(prevIndex, newSteps.length - 1));
+      }
 
       try {
         await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
@@ -738,7 +741,7 @@ export function useProductionPipeline() {
           body: JSON.stringify({
             modelName: data.modelName,
             quantity: data.quantity,
-            currentStepIndex: newSteps.length === 0 ? -1 : newIndex,
+            currentStepIndex: newIndex,
             createdAt: data.createdAt,
             steps: newSteps,
           }),
@@ -752,7 +755,7 @@ export function useProductionPipeline() {
               quantity: data.quantity,
               createdAt: data.createdAt,
               steps: newSteps,
-              currentStepIndex: newSteps.length === 0 ? -1 : newIndex,
+              currentStepIndex: newIndex,
               parallelGroups: [],
             };
           }),
