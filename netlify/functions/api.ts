@@ -25,6 +25,7 @@ import {
   createRestokItem,
   updateRestokItem,
   deleteRestokItem,
+  reorderRestokItems,
 } from "../../server/routes/restok";
 import {
   getRoadmaps,
