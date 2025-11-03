@@ -170,20 +170,42 @@ export default function JobWork() {
   };
 
   const { query } = useSearch();
+  const [sortBy, setSortBy] = useState<"pending" | "linked" | "az">("az");
+
   const displayed = ((): typeof local => {
     const q = (query || "").trim().toLowerCase();
-    if (!q) return local;
-    return local.filter((j) => {
-      if (j.name.toLowerCase().includes(q)) return true;
-      const linked = linkedModelsFor(j.id);
-      if (linked.some((m) => m.toLowerCase().includes(q))) return true;
-      // search model names in pipeline orders linked to this job work
-      return pipeline.orders.some(
-        (o) =>
-          (o.jobWorkIds || []).includes(j.id) &&
-          o.modelName.toLowerCase().includes(q),
-      );
-    });
+    const filtered = q
+      ? local.filter((j) => {
+          if (j.name.toLowerCase().includes(q)) return true;
+          const linked = linkedModelsFor(j.id);
+          if (linked.some((m) => m.toLowerCase().includes(q))) return true;
+          return pipeline.orders.some(
+            (o) =>
+              (o.jobWorkIds || []).includes(j.id) &&
+              o.modelName.toLowerCase().includes(q),
+          );
+        })
+      : local.slice();
+
+    // Apply sorting
+    const sorted = filtered.slice();
+    if (sortBy === "pending") {
+      sorted.sort((a, b) => {
+        const pa = getAssignmentsForJobWork(a.id).filter((x) => x.status === "pending").length;
+        const pb = getAssignmentsForJobWork(b.id).filter((x) => x.status === "pending").length;
+        return pb - pa; // descending
+      });
+    } else if (sortBy === "linked") {
+      sorted.sort((a, b) => {
+        const la = linkedModelsFor(a.id).length;
+        const lb = linkedModelsFor(b.id).length;
+        return lb - la; // descending
+      });
+    } else if (sortBy === "az") {
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return sorted;
   })();
 
   return (
