@@ -54,6 +54,8 @@ export default function AppLayout() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const checkPrompt = () => {
