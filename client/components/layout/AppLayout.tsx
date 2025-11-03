@@ -85,6 +85,38 @@ export default function AppLayout() {
     }
   };
 
+  const handleRefreshClick = async () => {
+    setIsRefreshing(true);
+    try {
+      // Clear React Query cache
+      await queryClient.invalidateQueries();
+      queryClient.clear();
+
+      // Clear localStorage
+      localStorage.clear();
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      // Clear service worker caches
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          const cacheNames = await caches.keys();
+          for (const cacheName of cacheNames) {
+            await caches.delete(cacheName);
+          }
+        }
+      }
+
+      // Reload the page
+      window.location.reload();
+    } catch (err) {
+      console.error("Refresh failed:", err);
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <>
       <AppUpdateNotification />
