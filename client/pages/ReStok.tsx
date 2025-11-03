@@ -228,7 +228,10 @@ export default function ReStok() {
           <>
             {!reorderMode ? (
               <Button
-                onClick={() => setReorderMode(true)}
+                onClick={() => {
+                  setReorderDraftIds(items.map((i) => i.id));
+                  setReorderMode(true);
+                }}
                 className="gap-2 border-2 border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-lg px-6 py-2.5 transition-all duration-200"
               >
                 <ArrowUp className="h-5 w-5" />
