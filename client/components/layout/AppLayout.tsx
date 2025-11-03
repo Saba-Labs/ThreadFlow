@@ -148,13 +148,24 @@ export default function AppLayout() {
                 </span>
                 <span className="tracking-tight">ThreadFlow</span>
               </div>
-              <button
-                aria-label="Close menu"
-                onClick={() => setMenuOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  aria-label="Refresh and clear cache"
+                  onClick={handleRefreshClick}
+                  disabled={isRefreshing}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
+                  title="Refresh and clear all caches"
+                >
+                  <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                </button>
+                <button
+                  aria-label="Close menu"
+                  onClick={() => setMenuOpen(false)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Sidebar navigation */}
