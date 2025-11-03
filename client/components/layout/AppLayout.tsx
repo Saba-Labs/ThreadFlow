@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
-import { Settings, Menu, X, Search as SearchIcon, Package } from "lucide-react";
+import { Settings, Menu, X, Search as SearchIcon, Package, RotateCw } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function AppLayout() {
   function HeaderSearch({ className }: { className?: string }) {
