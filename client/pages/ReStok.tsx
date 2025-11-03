@@ -26,6 +26,7 @@ export default function ReStok() {
     updateSubItemQuantity,
     updateSubItem,
     reorderItems,
+    saveBulkEdits,
   } = useReStok();
 
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
