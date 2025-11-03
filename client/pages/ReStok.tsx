@@ -31,6 +31,8 @@ export default function ReStok() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
+  const [draftItems, setDraftItems] = useState<any[] | null>(null);
+  const [originalItems, setOriginalItems] = useState<any[] | null>(null);
 
   // Add Item Modal
   const [showAddItemModal, setShowAddItemModal] = useState(false);
