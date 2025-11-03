@@ -93,11 +93,7 @@ function subscribe(cb: () => void) {
   return () => subscribers.delete(cb);
 }
 
-async function apiCall<T>(
-  method: string,
-  url: string,
-  body?: any,
-): Promise<T> {
+async function apiCall<T>(method: string, url: string, body?: any): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 

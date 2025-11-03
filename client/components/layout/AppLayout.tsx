@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
-import { Settings, Menu, X, Search as SearchIcon, Package, RotateCw } from "lucide-react";
+import {
+  Settings,
+  Menu,
+  X,
+  Search as SearchIcon,
+  Package,
+  RotateCw,
+} from "lucide-react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 import { useQueryClient } from "@tanstack/react-query";
@@ -156,7 +163,9 @@ export default function AppLayout() {
                   className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
                   title="Refresh and clear all caches"
                 >
-                  <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                  <RotateCw
+                    className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                  />
                 </button>
                 <button
                   aria-label="Close menu"
@@ -298,7 +307,9 @@ export default function AppLayout() {
                 className="inline-flex h-8 w-8 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
                 title="Refresh and clear all caches"
               >
-                <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                <RotateCw
+                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
 
