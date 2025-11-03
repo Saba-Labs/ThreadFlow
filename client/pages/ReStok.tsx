@@ -204,22 +204,20 @@ export default function ReStok() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1">
-                      {reorderMode ? (
-                        null
-                      ) : (
-                        item.subItems.length > 0 && (
-                          <button
-                            onClick={() => toggleItemExpanded(item.id)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            {isExpanded ? (
-                              <ChevronUp className="h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4" />
-                            )}
-                          </button>
-                        )
-                      )}
+                      {reorderMode
+                        ? null
+                        : item.subItems.length > 0 && (
+                            <button
+                              onClick={() => toggleItemExpanded(item.id)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
                       <div className="flex-1">
                         <p className="font-medium text-sm">{item.name}</p>
                         {item.note && (

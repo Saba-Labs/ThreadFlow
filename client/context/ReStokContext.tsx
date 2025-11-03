@@ -123,7 +123,8 @@ async function apiCall<T>(url: string, method: string, body?: any): Promise<T> {
     clearTimeout(timeoutId);
     if (
       error instanceof TypeError &&
-      (error.message.includes("fetch") || error.message.includes("NetworkError"))
+      (error.message.includes("fetch") ||
+        error.message.includes("NetworkError"))
     ) {
       throw new Error(
         "Network error: Unable to reach the server. Please check your connection.",
