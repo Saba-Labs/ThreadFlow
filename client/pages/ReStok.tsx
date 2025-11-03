@@ -110,7 +110,16 @@ export default function ReStok() {
   };
 
   const moveItemDown = (index: number) => {
-    if (index === items.length - 1) return;
+    const currentLength = reorderMode && reorderDraftIds ? reorderDraftIds.length : items.length;
+    if (index === currentLength - 1) return;
+
+    if (reorderMode && reorderDraftIds) {
+      const ids = [...reorderDraftIds];
+      [ids[index], ids[index + 1]] = [ids[index + 1], ids[index]];
+      setReorderDraftIds(ids);
+      return;
+    }
+
     const newItems = [...items];
     [newItems[index], newItems[index + 1]] = [
       newItems[index + 1],
