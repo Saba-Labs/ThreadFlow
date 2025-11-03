@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { initializeDatabase } from "./db";
+import { initializeDatabase, query } from "./db";
 import { subscribeToChanges } from "./events";
 import {
   getRestokItems,
@@ -39,6 +39,7 @@ import {
 } from "./routes/roadmaps";
 
 let dbInitialized = false;
+let dbInitializationPromise: Promise<void> | null = null;
 
 export function createServer() {
   const app = express();
@@ -62,13 +63,74 @@ export function createServer() {
     next();
   });
 
-  // Initialize database once
-  if (!dbInitialized) {
-    initializeDatabase().catch((error) => {
-      console.error("Failed to initialize database:", error);
-    });
-    dbInitialized = true;
+  // Initialize database once - ensure it only runs once
+  if (!dbInitialized && !dbInitializationPromise) {
+    dbInitializationPromise = initializeDatabase()
+      .then(() => {
+        dbInitialized = true;
+        console.log("✅ Database initialized successfully");
+      })
+      .catch((error) => {
+        console.error("❌ Failed to initialize database:", error);
+        // Don't set dbInitialized to true, allow retries
+        dbInitializationPromise = null;
+      });
   }
+
+  // Middleware to ensure database is initialized before handling requests
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/") && !req.path.startsWith("/api/health")) {
+      if (dbInitializationPromise) {
+        dbInitializationPromise.then(
+          () => {
+            next();
+          },
+          () => {
+            res.status(503).json({
+              error: "Service unavailable: Database initialization in progress",
+            });
+          },
+        );
+      } else if (!dbInitialized) {
+        res.status(503).json({
+          error: "Service unavailable: Database not initialized",
+        });
+      } else {
+        next();
+      }
+    } else {
+      next();
+    }
+  });
+
+  // Health check endpoint
+  app.get("/api/health", (_req, res) => {
+    const status = {
+      status: dbInitialized ? "healthy" : "initializing",
+      database: dbInitialized ? "connected" : "connecting",
+      timestamp: new Date().toISOString(),
+    };
+    res.status(dbInitialized ? 200 : 503).json(status);
+  });
+
+  // Health check with database test
+  app.get("/api/health/db", async (_req, res) => {
+    try {
+      const result = await query("SELECT NOW() as timestamp");
+      res.json({
+        status: "healthy",
+        database: "connected",
+        timestamp: result.rows[0]?.timestamp,
+      });
+    } catch (error) {
+      console.error("Database health check failed:", error);
+      res.status(503).json({
+        status: "unhealthy",
+        database: "disconnected",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {

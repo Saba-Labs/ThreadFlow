@@ -33,7 +33,7 @@ function applyScale(option: FontSizeOption) {
 
 const DEFAULT_VALUE: FontSizeOption = "medium";
 
-export function FontSizeProvider({ children }: { children: React.ReactNode }) {
+export function FontSizeProvider({ children }: { children: ReactNode }) {
   const [value, setValue] = useState<FontSizeOption>(() => {
     try {
       const saved =

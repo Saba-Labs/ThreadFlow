@@ -20,8 +20,12 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <SearchProvider> {/* ADD THIS */}
-      <FontSizeProvider> {/* WRAP FontSizeProvider if you use it */}
+    <SearchProvider>
+      {" "}
+      {/* ADD THIS */}
+      <FontSizeProvider>
+        {" "}
+        {/* WRAP FontSizeProvider if you use it */}
         <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
@@ -43,7 +47,8 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </FontSizeProvider>
-    </SearchProvider> {/* ADD THIS */}
+    </SearchProvider>{" "}
+    {/* ADD THIS */}
   </QueryClientProvider>
 );
 

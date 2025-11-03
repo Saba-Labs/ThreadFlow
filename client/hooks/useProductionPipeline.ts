@@ -2,6 +2,7 @@ import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
 import { useSSESubscription } from "./useSSESubscription";
 import { syncQueue, createSyncTask } from "@/lib/backgroundSync";
+import { fetchWithTimeout, fetchWithTimeoutText } from "@/lib/fetchWithTimeout";
 import { toast } from "./use-toast";
 
 export type StepStatus = "pending" | "running" | "hold" | "completed";
@@ -64,9 +65,7 @@ async function fetchFromServer() {
   if (isLoading) return;
   isLoading = true;
   try {
-    const response = await fetch("/api/pipeline/orders");
-    if (!response.ok) throw new Error("Failed to fetch orders");
-    const orders = await response.json();
+    const orders = await fetchWithTimeout<WorkOrder[]>("/api/pipeline/orders");
     STORE = { orders };
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
@@ -143,12 +142,11 @@ export function useProductionPipeline() {
         createSyncTask(
           "createWorkOrder",
           async () => {
-            const response = await fetch("/api/pipeline/orders", {
+            await fetchWithTimeout("/api/pipeline/orders", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(order),
             });
-            if (!response.ok) throw new Error("Failed to create order");
           },
           (error) => {
             // On error, remove the optimistic order and show toast
@@ -187,10 +185,9 @@ export function useProductionPipeline() {
       createSyncTask(
         "deleteOrder",
         async () => {
-          const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+          await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
             method: "DELETE",
           });
-          if (!response.ok) throw new Error("Failed to delete order");
         },
         (error) => {
           // On error, restore the deleted order
@@ -229,7 +226,7 @@ export function useProductionPipeline() {
           : -1;
 
       try {
-        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+        await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -239,7 +236,6 @@ export function useProductionPipeline() {
             steps: nextSteps,
           }),
         });
-        if (!response.ok) throw new Error("Failed to update path");
         setStore((s) => ({
           orders: s.orders.map((o) =>
             o.id === orderId
@@ -283,7 +279,7 @@ export function useProductionPipeline() {
         createSyncTask(
           "updateStepStatus",
           async () => {
-            const response = await fetch(
+            await fetchWithTimeout(
               `/api/pipeline/orders/${orderId}/steps/${stepIndex}`,
               {
                 method: "PUT",
@@ -291,7 +287,6 @@ export function useProductionPipeline() {
                 body: JSON.stringify(patch),
               },
             );
-            if (!response.ok) throw new Error("Failed to update step status");
           },
           () => {
             // On error, revert to previous state
@@ -359,7 +354,7 @@ export function useProductionPipeline() {
         createSyncTask(
           "moveToNextStep",
           async () => {
-            const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -369,17 +364,6 @@ export function useProductionPipeline() {
                 steps,
               }),
             });
-            if (!response.ok) {
-              let errorData = "";
-              try {
-                errorData = await response.text();
-              } catch {
-                // Body already read or unavailable
-              }
-              throw new Error(
-                `Failed to move to next step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-              );
-            }
           },
           () => {
             // On error, revert to previous state
@@ -446,7 +430,7 @@ export function useProductionPipeline() {
         createSyncTask(
           "moveToPrevStep",
           async () => {
-            const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+            await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -456,17 +440,6 @@ export function useProductionPipeline() {
                 steps: target === -1 ? order.steps : steps,
               }),
             });
-            if (!response.ok) {
-              let errorData = "";
-              try {
-                errorData = await response.text();
-              } catch {
-                // Body already read or unavailable
-              }
-              throw new Error(
-                `Failed to move to prev step: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-              );
-            }
           },
           () => {
             // On error, revert
@@ -604,7 +577,7 @@ export function useProductionPipeline() {
       // Persist to database
       try {
         // Update parent order with remainder quantity
-        await fetch(`/api/pipeline/orders/${orderId}`, {
+        await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -617,16 +590,11 @@ export function useProductionPipeline() {
 
         // Create child orders
         for (const child of children) {
-          const response = await fetch("/api/pipeline/orders", {
+          await fetchWithTimeout("/api/pipeline/orders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(child),
           });
-          if (!response.ok) {
-            throw new Error(
-              `Failed to create child order: ${response.statusText}`,
-            );
-          }
         }
 
         // Fetch updated state from server to ensure sync
@@ -694,7 +662,7 @@ export function useProductionPipeline() {
       assignments: JobWorkAssignment[],
     ) => {
       try {
-        const response = await fetch(
+        await fetchWithTimeout(
           `/api/pipeline/orders/${orderId}/job-work-assignments`,
           {
             method: "PUT",
@@ -702,7 +670,6 @@ export function useProductionPipeline() {
             body: JSON.stringify({ assignments }),
           },
         );
-        if (!response.ok) throw new Error("Failed to set job work assignments");
         await fetchFromServer();
       } catch (error) {
         console.error("Error setting job work assignments:", error);
@@ -716,7 +683,7 @@ export function useProductionPipeline() {
       completionDate?: number,
     ) => {
       try {
-        const response = await fetch(
+        await fetchWithTimeout(
           `/api/pipeline/orders/${orderId}/job-works/${jobWorkId}/status`,
           {
             method: "PUT",
@@ -724,17 +691,6 @@ export function useProductionPipeline() {
             body: JSON.stringify({ status, completionDate }),
           },
         );
-        if (!response.ok) {
-          let errorData = "";
-          try {
-            errorData = await response.text();
-          } catch {
-            // Body already read or unavailable
-          }
-          throw new Error(
-            `Failed to update job work assignment status: ${response.statusText}${errorData ? ` - ${errorData}` : ""}`,
-          );
-        }
         await fetchFromServer();
       } catch (error) {
         console.error(
@@ -776,7 +732,7 @@ export function useProductionPipeline() {
       );
 
       try {
-        const response = await fetch(`/api/pipeline/orders/${orderId}`, {
+        await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -786,7 +742,6 @@ export function useProductionPipeline() {
             steps: newSteps,
           }),
         });
-        if (!response.ok) throw new Error("Failed to update order");
         setStore((s) => ({
           orders: s.orders.map((o) => {
             if (o.id !== orderId) return o;

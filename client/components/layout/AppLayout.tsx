@@ -2,9 +2,17 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
-import { Settings, Menu, X, Search as SearchIcon, Package } from "lucide-react";
+import {
+  Settings,
+  Menu,
+  X,
+  Search as SearchIcon,
+  Package,
+  RotateCw,
+} from "lucide-react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function AppLayout() {
   function HeaderSearch({ className }: { className?: string }) {
@@ -53,6 +61,8 @@ export default function AppLayout() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const checkPrompt = () => {
@@ -79,6 +89,38 @@ export default function AppLayout() {
       console.log("PWA install choice", choice);
     } catch (err) {
       console.warn("Install prompt failed", err);
+    }
+  };
+
+  const handleRefreshClick = async () => {
+    setIsRefreshing(true);
+    try {
+      // Clear React Query cache
+      await queryClient.invalidateQueries();
+      queryClient.clear();
+
+      // Clear localStorage
+      localStorage.clear();
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      // Clear service worker caches
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          const cacheNames = await caches.keys();
+          for (const cacheName of cacheNames) {
+            await caches.delete(cacheName);
+          }
+        }
+      }
+
+      // Reload the page
+      window.location.reload();
+    } catch (err) {
+      console.error("Refresh failed:", err);
+      setIsRefreshing(false);
     }
   };
 
@@ -113,13 +155,26 @@ export default function AppLayout() {
                 </span>
                 <span className="tracking-tight">ThreadFlow</span>
               </div>
-              <button
-                aria-label="Close menu"
-                onClick={() => setMenuOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  aria-label="Refresh and clear cache"
+                  onClick={handleRefreshClick}
+                  disabled={isRefreshing}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
+                  title="Refresh and clear all caches"
+                >
+                  <RotateCw
+                    className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                  />
+                </button>
+                <button
+                  aria-label="Close menu"
+                  onClick={() => setMenuOpen(false)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Sidebar navigation */}
@@ -235,15 +290,28 @@ export default function AppLayout() {
 
         <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur overflow-x-hidden">
           <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
-            <Link to="/" className="flex items-center gap-2 font-semibold">
-              <span
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
-                aria-hidden
+            <div className="flex items-center gap-2">
+              <Link to="/" className="flex items-center gap-2 font-semibold">
+                <span
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
+                  aria-hidden
+                >
+                  <ThreadFlowLogo className="h-6 w-6" />
+                </span>
+                <span className="tracking-tight">ThreadFlow</span>
+              </Link>
+              <button
+                aria-label="Refresh and clear cache"
+                onClick={handleRefreshClick}
+                disabled={isRefreshing}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
+                title="Refresh and clear all caches"
               >
-                <ThreadFlowLogo className="h-6 w-6" />
-              </span>
-              <span className="tracking-tight">ThreadFlow</span>
-            </Link>
+                <RotateCw
+                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+              </button>
+            </div>
 
             <nav className="flex items-center gap-1">
               {/* Desktop links */}

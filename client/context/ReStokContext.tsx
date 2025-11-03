@@ -21,6 +21,7 @@ export interface Item {
 let STORE: Item[] = [];
 let isLoading = false;
 let isInitialized = false;
+let lastFetchError: Error | null = null;
 
 const subscribers = new Set<() => void>();
 const loadingSubscribers = new Set<() => void>();
@@ -30,8 +31,18 @@ async function fetchItems() {
   isLoading = true;
   for (const s of Array.from(loadingSubscribers)) s();
   try {
-    const response = await fetch("/api/restok/items");
-    if (!response.ok) throw new Error("Failed to fetch items");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    const response = await fetch("/api/restok/items", {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: Failed to fetch items`);
+    }
+
     const data = await response.json();
     const validatedData = data.map((item: Item) => ({
       ...item,
@@ -42,9 +53,15 @@ async function fetchItems() {
     }));
     STORE = validatedData;
     isInitialized = true;
+    lastFetchError = null;
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
-    console.error("Error fetching restok items:", error);
+    lastFetchError = error instanceof Error ? error : new Error(String(error));
+    console.error("Error fetching restok items:", lastFetchError);
+    // If initial load failed and we have no data, keep trying to initialize
+    if (!isInitialized) {
+      console.warn("Initial load failed, will retry on next interaction");
+    }
   } finally {
     isLoading = false;
     for (const s of Array.from(loadingSubscribers)) s();
@@ -66,10 +83,51 @@ function subscribeToLoading(cb: () => void) {
 
 function subscribe(cb: () => void) {
   subscribers.add(cb);
-  if (!isInitialized) {
+  if (!isInitialized && !isLoading) {
+    // If initialization failed, try again
+    if (lastFetchError) {
+      console.log("Retrying initial fetch after previous error");
+    }
     fetchItems();
   }
   return () => subscribers.delete(cb);
+}
+
+async function apiCall<T>(method: string, url: string, body?: any): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+  try {
+    const options: RequestInit = {
+      method,
+      signal: controller.signal,
+    };
+
+    if (body) {
+      options.headers = { "Content-Type": "application/json" };
+      options.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, options);
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `HTTP ${response.status}: ${response.statusText}`,
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new Error(
+        "Network error: Unable to reach the server. Please check your connection.",
+      );
+    }
+    throw error;
+  }
 }
 
 export function useReStok() {
@@ -95,24 +153,19 @@ export function useReStok() {
     ) => {
       try {
         const id = Date.now().toString();
-        const response = await fetch("/api/restok/items", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id,
-            name,
+        await apiCall("/api/restok/items", "POST", {
+          id,
+          name,
+          quantity: 0,
+          lowStock,
+          note,
+          subItems: subItems.map((sub) => ({
+            id: sub.id,
+            name: sub.name,
             quantity: 0,
-            lowStock,
-            note,
-            subItems: subItems.map((sub) => ({
-              id: sub.id,
-              name: sub.name,
-              quantity: 0,
-              lowStock: sub.lowStock,
-            })),
-          }),
+            lowStock: sub.lowStock,
+          })),
         });
-        if (!response.ok) throw new Error("Failed to create item");
         await fetchItems();
         toast({
           title: "Success",
@@ -134,10 +187,7 @@ export function useReStok() {
 
   const deleteItem = useCallback(async (itemId: string) => {
     try {
-      const response = await fetch(`/api/restok/items/${itemId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete item");
+      await apiCall(`/api/restok/items/${itemId}`, "DELETE");
       await fetchItems();
       toast({
         title: "Success",
@@ -162,18 +212,13 @@ export function useReStok() {
 
       const updatedQuantity = Math.max(0, newQuantity);
       try {
-        const response = await fetch(`/api/restok/items/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: item.name,
-            quantity: updatedQuantity,
-            lowStock: item.lowStock,
-            note: item.note,
-            subItems: item.subItems,
-          }),
+        await apiCall(`/api/restok/items/${itemId}`, "PUT", {
+          name: item.name,
+          quantity: updatedQuantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems,
         });
-        if (!response.ok) throw new Error("Failed to update item");
         await fetchItems();
       } catch (error) {
         console.error("Failed to update item quantity:", error);
@@ -189,18 +234,13 @@ export function useReStok() {
       if (!item) return;
 
       try {
-        const response = await fetch(`/api/restok/items/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            quantity: item.quantity,
-            lowStock,
-            note,
-            subItems: item.subItems,
-          }),
+        await apiCall(`/api/restok/items/${itemId}`, "PUT", {
+          name,
+          quantity: item.quantity,
+          lowStock,
+          note,
+          subItems: item.subItems,
         });
-        if (!response.ok) throw new Error("Failed to update item");
         await fetchItems();
         toast({
           title: "Success",
@@ -252,12 +292,7 @@ export function useReStok() {
       };
 
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) throw new Error("Failed to add sub-item");
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
         await fetchItems();
         toast({
           title: "Success",
@@ -283,25 +318,20 @@ export function useReStok() {
       if (!item) return;
 
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: item.name,
-            quantity: item.quantity,
-            lowStock: item.lowStock,
-            note: item.note,
-            subItems: item.subItems
-              .filter((s) => s.id !== subItemId)
-              .map((s) => ({
-                id: s.id,
-                name: s.name,
-                quantity: s.quantity,
-                lowStock: s.lowStock ?? 0,
-              })),
-          }),
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", {
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems
+            .filter((s) => s.id !== subItemId)
+            .map((s) => ({
+              id: s.id,
+              name: s.name,
+              quantity: s.quantity,
+              lowStock: s.lowStock ?? 0,
+            })),
         });
-        if (!response.ok) throw new Error("Failed to delete sub-item");
         await fetchItems();
         toast({
           title: "Success",
@@ -330,32 +360,27 @@ export function useReStok() {
 
       const updatedQuantity = Math.max(0, newQuantity);
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: item.name,
-            quantity: item.quantity,
-            lowStock: item.lowStock,
-            note: item.note,
-            subItems: item.subItems.map((s) =>
-              s.id === subItemId
-                ? {
-                    id: s.id,
-                    name: s.name,
-                    quantity: updatedQuantity,
-                    lowStock: s.lowStock ?? 0,
-                  }
-                : {
-                    id: s.id,
-                    name: s.name,
-                    quantity: s.quantity,
-                    lowStock: s.lowStock ?? 0,
-                  },
-            ),
-          }),
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", {
+          name: item.name,
+          quantity: item.quantity,
+          lowStock: item.lowStock,
+          note: item.note,
+          subItems: item.subItems.map((s) =>
+            s.id === subItemId
+              ? {
+                  id: s.id,
+                  name: s.name,
+                  quantity: updatedQuantity,
+                  lowStock: s.lowStock ?? 0,
+                }
+              : {
+                  id: s.id,
+                  name: s.name,
+                  quantity: s.quantity,
+                  lowStock: s.lowStock ?? 0,
+                },
+          ),
         });
-        if (!response.ok) throw new Error("Failed to update sub-item");
         await fetchItems();
       } catch (error) {
         console.error("Failed to update sub-item quantity:", error);
@@ -398,12 +423,7 @@ export function useReStok() {
       };
 
       try {
-        const response = await fetch(`/api/restok/items/${parentItemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) throw new Error("Failed to update sub-item");
+        await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
         await fetchItems();
         toast({
           title: "Success",
@@ -427,12 +447,7 @@ export function useReStok() {
 
   const reorderItems = useCallback(async (itemIds: string[]) => {
     try {
-      const response = await fetch("/api/restok/reorder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itemIds }),
-      });
-      if (!response.ok) throw new Error("Failed to save new order");
+      await apiCall("/api/restok/reorder", "POST", { itemIds });
       await fetchItems();
       toast({
         title: "Success",

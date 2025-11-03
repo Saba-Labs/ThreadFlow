@@ -1,10 +1,37 @@
 import { Pool } from "pg";
 
+// Validate DATABASE_URL is configured
+if (!process.env.DATABASE_URL) {
+  console.error(
+    "❌ ERROR: DATABASE_URL environment variable is not set. Cannot connect to database.",
+  );
+  console.error(
+    "Please ensure DATABASE_URL is configured in your environment variables.",
+  );
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
   },
+  // Connection pool settings for better reliability
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+
+// Handle pool errors
+pool.on("error", (err) => {
+  console.error("❌ Unexpected error on idle client", err);
+});
+
+pool.on("connect", () => {
+  console.log("✅ New database connection established");
+});
+
+pool.on("remove", () => {
+  console.log("📊 Database connection removed from pool");
 });
 
 export async function query(text: string, params?: any[]) {
@@ -15,7 +42,12 @@ export async function query(text: string, params?: any[]) {
     console.log("Executed query", { text, duration, rows: result.rowCount });
     return result;
   } catch (error) {
-    console.error("Database query error", { text, error });
+    const duration = Date.now() - start;
+    console.error("❌ Database query error", {
+      text,
+      error: error instanceof Error ? error.message : String(error),
+      duration,
+    });
     throw error;
   }
 }

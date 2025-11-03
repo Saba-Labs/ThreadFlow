@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { useSSESubscription } from "@/hooks/useSSESubscription";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 
 export interface RoadmapItem {
   modelId: string;
@@ -28,9 +29,7 @@ async function fetchRoadmaps() {
   if (isLoading) return;
   isLoading = true;
   try {
-    const response = await fetch("/api/roadmaps");
-    if (!response.ok) throw new Error("Failed to fetch roadmaps");
-    STORE = await response.json();
+    STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
     for (const s of Array.from(subscribers)) s();
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
@@ -64,7 +63,7 @@ export function useRoadmaps() {
     try {
       const count = STORE.length + 1;
       const roadmapId = uid("roadmap");
-      const response = await fetch("/api/roadmaps", {
+      await fetchWithTimeout("/api/roadmaps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,7 +72,6 @@ export function useRoadmaps() {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to create roadmap");
       await fetchRoadmaps();
       return roadmapId;
     } catch (error) {
@@ -84,10 +82,9 @@ export function useRoadmaps() {
 
   const deleteRoadmap = useCallback(async (roadmapId: string) => {
     try {
-      const response = await fetch(`/api/roadmaps/${roadmapId}`, {
+      await fetchWithTimeout(`/api/roadmaps/${roadmapId}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Failed to delete roadmap");
       await fetchRoadmaps();
     } catch (error) {
       console.error("Error deleting roadmap:", error);
@@ -98,12 +95,11 @@ export function useRoadmaps() {
   const renameRoadmap = useCallback(
     async (roadmapId: string, title: string) => {
       try {
-        const response = await fetch(`/api/roadmaps/${roadmapId}`, {
+        await fetchWithTimeout(`/api/roadmaps/${roadmapId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title: title.trim() }),
         });
-        if (!response.ok) throw new Error("Failed to update roadmap");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error renaming roadmap:", error);
@@ -128,7 +124,7 @@ export function useRoadmaps() {
           quantity,
         });
 
-        const response = await fetch(`/api/roadmaps/${roadmapId}/models`, {
+        await fetchWithTimeout(`/api/roadmaps/${roadmapId}/models`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -138,22 +134,7 @@ export function useRoadmaps() {
           }),
         });
 
-        console.log("[useRoadmaps.addModelToRoadmap] Response status:", {
-          status: response.status,
-          ok: response.ok,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error(
-            "[useRoadmaps.addModelToRoadmap] Error response:",
-            errorData,
-          );
-          throw new Error(
-            errorData.error ||
-              `Failed to add model to roadmap (${response.status})`,
-          );
-        }
+        console.log("[useRoadmaps.addModelToRoadmap] Success");
 
         await fetchRoadmaps();
       } catch (error) {
@@ -167,14 +148,12 @@ export function useRoadmaps() {
   const removeModelFromRoadmap = useCallback(
     async (roadmapId: string, modelId: string) => {
       try {
-        const response = await fetch(
+        await fetchWithTimeout(
           `/api/roadmaps/${roadmapId}/models/${modelId}`,
           {
             method: "DELETE",
           },
         );
-        if (!response.ok)
-          throw new Error("Failed to remove model from roadmap");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error removing model from roadmap:", error);
@@ -200,13 +179,12 @@ export function useRoadmaps() {
         newItems.splice(dest, 0, item);
 
         const modelIds = newItems.map((it) => it.modelId);
-        const response = await fetch(`/api/roadmaps/${roadmapId}/reorder`, {
+        await fetchWithTimeout(`/api/roadmaps/${roadmapId}/reorder`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ items: modelIds }),
         });
 
-        if (!response.ok) throw new Error("Failed to reorder items");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error moving model within roadmap:", error);
@@ -224,7 +202,7 @@ export function useRoadmaps() {
       toIndex?: number,
     ) => {
       try {
-        const response = await fetch("/api/roadmaps/move-model", {
+        await fetchWithTimeout("/api/roadmaps/move-model", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -233,8 +211,6 @@ export function useRoadmaps() {
             modelId,
           }),
         });
-        if (!response.ok)
-          throw new Error("Failed to move model between roadmaps");
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error moving model to roadmap:", error);

@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { useSSESubscription } from "@/hooks/useSSESubscription";
+import { fetchWithTimeout } from "./fetchWithTimeout";
 
 export interface MachineTypeConfig {
   name: string;
@@ -33,13 +34,12 @@ async function fetchFromServer() {
   if (isLoading) return;
   isLoading = true;
   try {
-    const response = await fetch("/api/machine-types");
-    if (!response.ok) throw new Error("Failed to fetch machine types");
-    const data = await response.json();
+    const data = await fetchWithTimeout<MachineTypeConfig[]>(
+      "/api/machine-types",
+    );
     if (data.length > 0) {
       STORE = data;
     } else {
-      // If no machine types in DB, save defaults
       await saveToServer(DEFAULT_MACHINE_TYPES);
       STORE = DEFAULT_MACHINE_TYPES.slice();
     }
@@ -53,12 +53,11 @@ async function fetchFromServer() {
 
 async function saveToServer(types: MachineTypeConfig[]) {
   try {
-    const response = await fetch("/api/machine-types", {
+    await fetchWithTimeout("/api/machine-types", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(types),
     });
-    if (!response.ok) throw new Error("Failed to save machine types");
   } catch (error) {
     console.error("Failed to save machine types:", error);
     throw error;
