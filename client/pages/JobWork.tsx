@@ -210,11 +210,26 @@ export default function JobWork() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Job Work</h1>
-        <p className="text-muted-foreground max-w-prose">
-          Create, edit, and delete Job Work items.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Job Work</h1>
+          <p className="text-muted-foreground max-w-prose">
+            Create, edit, and delete Job Work items.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-muted-foreground">Sort</label>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">More pending models</SelectItem>
+              <SelectItem value="linked">More models linked</SelectItem>
+              <SelectItem value="az">A - Z</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* All Job Works list (card-style) */}
