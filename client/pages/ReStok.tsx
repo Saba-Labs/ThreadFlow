@@ -116,7 +116,72 @@ export default function ReStok() {
     setReorderMode(false);
   };
 
-  const getItem = (id: string) => items.find((item) => item.id === id);
+  // Toggle edit mode and manage local drafts
+  const toggleEditMode = async () => {
+    if (!editMode) {
+      const deep = (arr: any[]) =>
+        arr.map((it) => ({ ...it, subItems: it.subItems.map((s: any) => ({ ...s })) }));
+      setOriginalItems(deep(items));
+      setDraftItems(deep(items));
+      setEditMode(true);
+      return;
+    }
+
+    if (!draftItems || !originalItems) {
+      setEditMode(false);
+      setDraftItems(null);
+      setOriginalItems(null);
+      return;
+    }
+
+    const origMap = new Map(originalItems.map((i) => [i.id, i]));
+    const draftMap = new Map(draftItems.map((i) => [i.id, i]));
+
+    const deletedIds = originalItems
+      .filter((i) => !draftMap.has(i.id))
+      .map((i) => i.id);
+
+    const isEqual = (a: any, b: any) => {
+      if (!a || !b) return false;
+      if (
+        a.name !== b.name ||
+        String(a.note || "") !== String(b.note || "") ||
+        Number(a.quantity) !== Number(b.quantity) ||
+        Number(a.lowStock) !== Number(b.lowStock)
+      )
+        return false;
+      if ((a.subItems?.length || 0) !== (b.subItems?.length || 0)) return false;
+      for (let idx = 0; idx < (a.subItems?.length || 0); idx++) {
+        const sa = a.subItems[idx];
+        const sb = b.subItems[idx];
+        if (
+          sa.id !== sb.id ||
+          sa.name !== sb.name ||
+          Number(sa.quantity) !== Number(sb.quantity) ||
+          Number(sa.lowStock ?? 0) !== Number(sb.lowStock ?? 0)
+        )
+          return false;
+      }
+      return true;
+    };
+
+    const editedItems = draftItems.filter((d) => {
+      const o = origMap.get(d.id);
+      return !o || !isEqual(d, o);
+    });
+
+    try {
+      if (editedItems.length > 0 || deletedIds.length > 0) {
+        await saveBulkEdits(editedItems as any, deletedIds);
+      }
+    } finally {
+      setEditMode(false);
+      setDraftItems(null);
+      setOriginalItems(null);
+    }
+  };
+
+  const getItem = (id: string) => (editMode && draftItems ? draftItems : items).find((item) => item.id === id);
 
   return (
     <div className="space-y-6">
