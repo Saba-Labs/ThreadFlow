@@ -270,15 +270,26 @@ export default function AppLayout() {
 
         <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur overflow-x-hidden">
           <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
-            <Link to="/" className="flex items-center gap-2 font-semibold">
-              <span
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
-                aria-hidden
+            <div className="flex items-center gap-2">
+              <Link to="/" className="flex items-center gap-2 font-semibold">
+                <span
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
+                  aria-hidden
+                >
+                  <ThreadFlowLogo className="h-6 w-6" />
+                </span>
+                <span className="tracking-tight">ThreadFlow</span>
+              </Link>
+              <button
+                aria-label="Refresh and clear cache"
+                onClick={handleRefreshClick}
+                disabled={isRefreshing}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
+                title="Refresh and clear all caches"
               >
-                <ThreadFlowLogo className="h-6 w-6" />
-              </span>
-              <span className="tracking-tight">ThreadFlow</span>
-            </Link>
+                <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              </button>
+            </div>
 
             <nav className="flex items-center gap-1">
               {/* Desktop links */}
