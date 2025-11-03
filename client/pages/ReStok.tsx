@@ -534,20 +534,81 @@ export default function ReStok() {
           note={getItem(editingItemId)?.note || ""}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={(getItem(editingItemId)?.subItems.length || 0) > 0}
-          onSubmit={(name, lowStock, note) =>
-            saveEditItemDetails(editingItemId, name, lowStock, note)
-          }
-          onAddSubItem={async (name, lowStock) =>
-            await addSubItem(editingItemId, name, lowStock)
-          }
-          onUpdateSubItem={async (subItemId, name, lowStock) =>
-            await updateSubItem(editingItemId, subItemId, name, lowStock)
-          }
-          onDeleteSubItem={async (subItemId) =>
-            await deleteSubItem(editingItemId, subItemId)
-          }
+          onSubmit={(name, lowStock, note) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId ? { ...it, name, lowStock, note } : it,
+                ),
+              );
+            } else {
+              return saveEditItemDetails(editingItemId, name, lowStock, note);
+            }
+          }}
+          onAddSubItem={async (name, lowStock) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId
+                    ? {
+                        ...it,
+                        subItems: [
+                          ...it.subItems,
+                          {
+                            id: Date.now().toString(),
+                            name,
+                            quantity: 0,
+                            lowStock,
+                          },
+                        ],
+                      }
+                    : it,
+                ),
+              );
+              return;
+            }
+            await addSubItem(editingItemId, name, lowStock);
+          }}
+          onUpdateSubItem={async (subItemId, name, lowStock) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId
+                    ? {
+                        ...it,
+                        subItems: it.subItems.map((s: any) =>
+                          s.id === subItemId ? { ...s, name, lowStock } : s,
+                        ),
+                      }
+                    : it,
+                ),
+              );
+              return;
+            }
+            await updateSubItem(editingItemId, subItemId, name, lowStock);
+          }}
+          onDeleteSubItem={async (subItemId) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId
+                    ? {
+                        ...it,
+                        subItems: it.subItems.filter((s: any) => s.id !== subItemId),
+                      }
+                    : it,
+                ),
+              );
+              return;
+            }
+            await deleteSubItem(editingItemId, subItemId);
+          }}
           onDeleteItem={async () => {
-            await deleteItem(editingItemId);
+            if (editMode && draftItems) {
+              setDraftItems((prev) => (prev || []).filter((it) => it.id !== editingItemId));
+            } else {
+              await deleteItem(editingItemId);
+            }
             setShowEditItemModal(false);
             setEditingItemId(null);
           }}
