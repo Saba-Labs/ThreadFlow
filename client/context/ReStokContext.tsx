@@ -469,6 +469,46 @@ export function useReStok() {
     }
   }, []);
 
+  const saveBulkEdits = useCallback(
+    async (editedItems: Item[], deletedItemIds: string[]) => {
+      try {
+        // Delete removed items first
+        for (const id of deletedItemIds) {
+          await apiCall(`/api/restok/items/${id}`, "DELETE");
+        }
+
+        // Upsert edited items
+        for (const item of editedItems) {
+          await apiCall(`/api/restok/items/${item.id}`, "PUT", {
+            name: item.name,
+            quantity: Math.max(0, Number(item.quantity) || 0),
+            lowStock: Math.max(0, Number(item.lowStock) || 0),
+            note: item.note ?? "",
+            subItems: item.subItems.map((s) => ({
+              id: s.id,
+              name: s.name,
+              quantity: Math.max(0, Number(s.quantity) || 0),
+              lowStock: Math.max(0, Number(s.lowStock) || 0),
+            })),
+          });
+        }
+
+        await fetchItems();
+        toast({ title: "Success", description: "Changes saved" });
+      } catch (error) {
+        console.error("Failed to save bulk edits:", error);
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to save changes",
+          variant: "destructive",
+        });
+        throw error;
+      }
+    },
+    [],
+  );
+
   return {
     items: state,
     loading,
@@ -481,5 +521,6 @@ export function useReStok() {
     updateSubItemQuantity,
     updateSubItem,
     reorderItems,
+    saveBulkEdits,
   };
 }

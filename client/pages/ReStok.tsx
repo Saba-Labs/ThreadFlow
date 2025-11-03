@@ -26,11 +26,15 @@ export default function ReStok() {
     updateSubItemQuantity,
     updateSubItem,
     reorderItems,
+    saveBulkEdits,
   } = useReStok();
 
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
+  const [reorderDraftIds, setReorderDraftIds] = useState<string[] | null>(null);
+  const [draftItems, setDraftItems] = useState<any[] | null>(null);
+  const [originalItems, setOriginalItems] = useState<any[] | null>(null);
 
   // Add Item Modal
   const [showAddItemModal, setShowAddItemModal] = useState(false);
@@ -91,6 +95,12 @@ export default function ReStok() {
 
   const moveItemUp = (index: number) => {
     if (index === 0) return;
+    if (reorderMode && reorderDraftIds) {
+      const ids = [...reorderDraftIds];
+      [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
+      setReorderDraftIds(ids);
+      return;
+    }
     const newItems = [...items];
     [newItems[index - 1], newItems[index]] = [
       newItems[index],
@@ -100,7 +110,17 @@ export default function ReStok() {
   };
 
   const moveItemDown = (index: number) => {
-    if (index === items.length - 1) return;
+    const currentLength =
+      reorderMode && reorderDraftIds ? reorderDraftIds.length : items.length;
+    if (index === currentLength - 1) return;
+
+    if (reorderMode && reorderDraftIds) {
+      const ids = [...reorderDraftIds];
+      [ids[index], ids[index + 1]] = [ids[index + 1], ids[index]];
+      setReorderDraftIds(ids);
+      return;
+    }
+
     const newItems = [...items];
     [newItems[index], newItems[index + 1]] = [
       newItems[index + 1],
@@ -110,10 +130,88 @@ export default function ReStok() {
   };
 
   const saveNewOrder = async () => {
-    setReorderMode(false);
+    try {
+      if (reorderDraftIds && reorderDraftIds.length > 0) {
+        await reorderItems(reorderDraftIds);
+      }
+    } finally {
+      setReorderMode(false);
+      setReorderDraftIds(null);
+    }
   };
 
-  const getItem = (id: string) => items.find((item) => item.id === id);
+  // Toggle edit mode and manage local drafts
+  const toggleEditMode = async () => {
+    if (!editMode) {
+      const deep = (arr: any[]) =>
+        arr.map((it) => ({
+          ...it,
+          subItems: it.subItems.map((s: any) => ({ ...s })),
+        }));
+      setOriginalItems(deep(items));
+      setDraftItems(deep(items));
+      setEditMode(true);
+      return;
+    }
+
+    if (!draftItems || !originalItems) {
+      setEditMode(false);
+      setDraftItems(null);
+      setOriginalItems(null);
+      return;
+    }
+
+    const origMap = new Map(originalItems.map((i) => [i.id, i]));
+    const draftMap = new Map(draftItems.map((i) => [i.id, i]));
+
+    const deletedIds = originalItems
+      .filter((i) => !draftMap.has(i.id))
+      .map((i) => i.id);
+
+    const isEqual = (a: any, b: any) => {
+      if (!a || !b) return false;
+      if (
+        a.name !== b.name ||
+        String(a.note || "") !== String(b.note || "") ||
+        Number(a.quantity) !== Number(b.quantity) ||
+        Number(a.lowStock) !== Number(b.lowStock)
+      )
+        return false;
+      if ((a.subItems?.length || 0) !== (b.subItems?.length || 0)) return false;
+      for (let idx = 0; idx < (a.subItems?.length || 0); idx++) {
+        const sa = a.subItems[idx];
+        const sb = b.subItems[idx];
+        if (
+          sa.id !== sb.id ||
+          sa.name !== sb.name ||
+          Number(sa.quantity) !== Number(sb.quantity) ||
+          Number(sa.lowStock ?? 0) !== Number(sb.lowStock ?? 0)
+        )
+          return false;
+      }
+      return true;
+    };
+
+    const editedItems = draftItems.filter((d) => {
+      const o = origMap.get(d.id);
+      return !o || !isEqual(d, o);
+    });
+
+    try {
+      if (editedItems.length > 0 || deletedIds.length > 0) {
+        await saveBulkEdits(editedItems as any, deletedIds);
+      }
+    } finally {
+      setEditMode(false);
+      setDraftItems(null);
+      setOriginalItems(null);
+    }
+  };
+
+  const getItem = (id: string) =>
+    (editMode && draftItems ? draftItems : items).find(
+      (item) => item.id === id,
+    );
 
   return (
     <div className="space-y-6">
@@ -144,7 +242,7 @@ export default function ReStok() {
           Add Item
         </Button>
         <Button
-          onClick={() => setEditMode(!editMode)}
+          onClick={toggleEditMode}
           variant={editMode ? "default" : "outline"}
           className={`gap-2 font-semibold rounded-lg px-6 py-2.5 transition-all duration-200 ${
             editMode
@@ -159,7 +257,10 @@ export default function ReStok() {
           <>
             {!reorderMode ? (
               <Button
-                onClick={() => setReorderMode(true)}
+                onClick={() => {
+                  setReorderDraftIds(items.map((i) => i.id));
+                  setReorderMode(true);
+                }}
                 className="gap-2 border-2 border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-lg px-6 py-2.5 transition-all duration-200"
               >
                 <ArrowUp className="h-5 w-5" />
@@ -189,7 +290,14 @@ export default function ReStok() {
             <p>No items yet. Add your first item to get started.</p>
           </div>
         ) : (
-          items.map((item, index) => {
+          (reorderMode && reorderDraftIds
+            ? (reorderDraftIds
+                .map((id) => items.find((i) => i.id === id))
+                .filter(Boolean) as typeof items)
+            : editMode && draftItems
+              ? (draftItems as typeof items)
+              : items
+          ).map((item, index, arr) => {
             const status = getItemStockStatus(item);
             const isExpanded = expandedItems.has(item.id);
 
@@ -245,7 +353,7 @@ export default function ReStok() {
                           size="sm"
                           variant="outline"
                           onClick={() => moveItemDown(index)}
-                          disabled={index === items.length - 1}
+                          disabled={index === arr.length - 1}
                           className="h-8 w-8 p-0 rounded-full shadow-sm"
                           aria-label="Move down"
                           title="Move down"
@@ -271,9 +379,28 @@ export default function ReStok() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                updateItemQuantity(item.id, item.quantity - 1)
-                              }
+                              onClick={() => {
+                                if (editMode && draftItems) {
+                                  setDraftItems((prev) =>
+                                    (prev || []).map((it) =>
+                                      it.id === item.id
+                                        ? {
+                                            ...it,
+                                            quantity: Math.max(
+                                              0,
+                                              it.quantity - 1,
+                                            ),
+                                          }
+                                        : it,
+                                    ),
+                                  );
+                                } else {
+                                  updateItemQuantity(
+                                    item.id,
+                                    item.quantity - 1,
+                                  );
+                                }
+                              }}
                               className="h-8 w-8 p-0 text-lg font-bold"
                             >
                               −
@@ -286,9 +413,22 @@ export default function ReStok() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                updateItemQuantity(item.id, item.quantity + 1)
-                              }
+                              onClick={() => {
+                                if (editMode && draftItems) {
+                                  setDraftItems((prev) =>
+                                    (prev || []).map((it) =>
+                                      it.id === item.id
+                                        ? { ...it, quantity: it.quantity + 1 }
+                                        : it,
+                                    ),
+                                  );
+                                } else {
+                                  updateItemQuantity(
+                                    item.id,
+                                    item.quantity + 1,
+                                  );
+                                }
+                              }}
                               className="h-8 w-8 p-0 text-lg font-bold"
                             >
                               +
@@ -345,13 +485,37 @@ export default function ReStok() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                      updateSubItemQuantity(
-                                        item.id,
-                                        subItem.id,
-                                        subItem.quantity - 1,
-                                      )
-                                    }
+                                    onClick={() => {
+                                      if (editMode && draftItems) {
+                                        setDraftItems((prev) =>
+                                          (prev || []).map((it) =>
+                                            it.id === item.id
+                                              ? {
+                                                  ...it,
+                                                  subItems: it.subItems.map(
+                                                    (s: any) =>
+                                                      s.id === subItem.id
+                                                        ? {
+                                                            ...s,
+                                                            quantity: Math.max(
+                                                              0,
+                                                              s.quantity - 1,
+                                                            ),
+                                                          }
+                                                        : s,
+                                                  ),
+                                                }
+                                              : it,
+                                          ),
+                                        );
+                                      } else {
+                                        updateSubItemQuantity(
+                                          item.id,
+                                          subItem.id,
+                                          subItem.quantity - 1,
+                                        );
+                                      }
+                                    }}
                                     className="h-7 w-7 p-0 text-sm font-bold"
                                   >
                                     −
@@ -364,13 +528,35 @@ export default function ReStok() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() =>
-                                      updateSubItemQuantity(
-                                        item.id,
-                                        subItem.id,
-                                        subItem.quantity + 1,
-                                      )
-                                    }
+                                    onClick={() => {
+                                      if (editMode && draftItems) {
+                                        setDraftItems((prev) =>
+                                          (prev || []).map((it) =>
+                                            it.id === item.id
+                                              ? {
+                                                  ...it,
+                                                  subItems: it.subItems.map(
+                                                    (s: any) =>
+                                                      s.id === subItem.id
+                                                        ? {
+                                                            ...s,
+                                                            quantity:
+                                                              s.quantity + 1,
+                                                          }
+                                                        : s,
+                                                  ),
+                                                }
+                                              : it,
+                                          ),
+                                        );
+                                      } else {
+                                        updateSubItemQuantity(
+                                          item.id,
+                                          subItem.id,
+                                          subItem.quantity + 1,
+                                        );
+                                      }
+                                    }}
                                     className="h-7 w-7 p-0 text-sm font-bold"
                                   >
                                     +
@@ -412,20 +598,87 @@ export default function ReStok() {
           note={getItem(editingItemId)?.note || ""}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={(getItem(editingItemId)?.subItems.length || 0) > 0}
-          onSubmit={(name, lowStock, note) =>
-            saveEditItemDetails(editingItemId, name, lowStock, note)
-          }
-          onAddSubItem={async (name, lowStock) =>
-            await addSubItem(editingItemId, name, lowStock)
-          }
-          onUpdateSubItem={async (subItemId, name, lowStock) =>
-            await updateSubItem(editingItemId, subItemId, name, lowStock)
-          }
-          onDeleteSubItem={async (subItemId) =>
-            await deleteSubItem(editingItemId, subItemId)
-          }
+          onSubmit={(name, lowStock, note) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId
+                    ? { ...it, name, lowStock, note }
+                    : it,
+                ),
+              );
+            } else {
+              return saveEditItemDetails(editingItemId, name, lowStock, note);
+            }
+          }}
+          onAddSubItem={async (name, lowStock) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId
+                    ? {
+                        ...it,
+                        subItems: [
+                          ...it.subItems,
+                          {
+                            id: Date.now().toString(),
+                            name,
+                            quantity: 0,
+                            lowStock,
+                          },
+                        ],
+                      }
+                    : it,
+                ),
+              );
+              return;
+            }
+            await addSubItem(editingItemId, name, lowStock);
+          }}
+          onUpdateSubItem={async (subItemId, name, lowStock) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId
+                    ? {
+                        ...it,
+                        subItems: it.subItems.map((s: any) =>
+                          s.id === subItemId ? { ...s, name, lowStock } : s,
+                        ),
+                      }
+                    : it,
+                ),
+              );
+              return;
+            }
+            await updateSubItem(editingItemId, subItemId, name, lowStock);
+          }}
+          onDeleteSubItem={async (subItemId) => {
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).map((it) =>
+                  it.id === editingItemId
+                    ? {
+                        ...it,
+                        subItems: it.subItems.filter(
+                          (s: any) => s.id !== subItemId,
+                        ),
+                      }
+                    : it,
+                ),
+              );
+              return;
+            }
+            await deleteSubItem(editingItemId, subItemId);
+          }}
           onDeleteItem={async () => {
-            await deleteItem(editingItemId);
+            if (editMode && draftItems) {
+              setDraftItems((prev) =>
+                (prev || []).filter((it) => it.id !== editingItemId),
+              );
+            } else {
+              await deleteItem(editingItemId);
+            }
             setShowEditItemModal(false);
             setEditingItemId(null);
           }}

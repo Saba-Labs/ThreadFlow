@@ -94,7 +94,7 @@ export default function Index() {
   ).length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Hero */}
       <div className="rounded-lg bg-gradient-to-r from-white/60 to-muted/40 p-6 shadow-sm border">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -123,7 +123,7 @@ export default function Index() {
       <section>
         <button
           onClick={() => setModelStatusExpanded(!modelStatusExpanded)}
-          className="w-full mb-6 group"
+          className="w-full mb-3 group"
           title={
             modelStatusExpanded
               ? "Collapse model status"
@@ -222,7 +222,7 @@ export default function Index() {
       <section>
         <button
           onClick={() => setRoadmapExpanded(!roadmapExpanded)}
-          className="w-full mb-6 group"
+          className="w-full mb-3 group"
           title={roadmapExpanded ? "Collapse roadmaps" : "Expand roadmaps"}
         >
           <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 hover:border-blue-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-blue-100 group-hover:to-indigo-100">
@@ -314,7 +314,7 @@ export default function Index() {
       <section>
         <button
           onClick={() => setRestokExpanded(!restokExpanded)}
-          className="w-full mb-6 group"
+          className="w-full mb-3 group"
           title={restokExpanded ? "Collapse restok" : "Expand restok"}
         >
           <div className="flex items-center gap-4 px-6 py-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 hover:border-amber-300 transition-all duration-300 group-hover:shadow-lg group-hover:from-amber-100 group-hover:to-orange-100">
@@ -441,7 +441,7 @@ export default function Index() {
       <section>
         <button
           onClick={() => setMachineListExpanded(!machineListExpanded)}
-          className="w-full mb-6 group"
+          className="w-full mb-3 group"
           title={
             machineListExpanded
               ? "Collapse machines list"

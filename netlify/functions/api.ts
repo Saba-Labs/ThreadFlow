@@ -25,6 +25,7 @@ import {
   createRestokItem,
   updateRestokItem,
   deleteRestokItem,
+  reorderRestokItems,
 } from "../../server/routes/restok";
 import {
   getRoadmaps,
@@ -118,6 +119,7 @@ function initializeHandler() {
   app.post("/api/restok/items", createRestokItem);
   app.put("/api/restok/items/:id", updateRestokItem);
   app.delete("/api/restok/items/:id", deleteRestokItem);
+  app.post("/api/restok/reorder", reorderRestokItems);
 
   // Job works routes
   app.get("/api/jobworks", getJobWorks);
