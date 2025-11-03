@@ -22,12 +22,20 @@ let STORE: Item[] = [];
 let isLoading = false;
 let isInitialized = false;
 let lastFetchError: Error | null = null;
+let lastFetchTs = 0; // timestamp of last successful or attempted fetch
 
 const subscribers = new Set<() => void>();
 const loadingSubscribers = new Set<() => void>();
 
 async function fetchItems() {
+  const now = Date.now();
+  // Debounce: avoid fetching more than once per second to prevent tight polling loops
+  if (now - lastFetchTs < 1000) {
+    return;
+  }
   if (isLoading) return;
+  lastFetchTs = now;
+
   isLoading = true;
   for (const s of Array.from(loadingSubscribers)) s();
   try {
