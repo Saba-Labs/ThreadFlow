@@ -129,7 +129,14 @@ export default function ReStok() {
   };
 
   const saveNewOrder = async () => {
-    setReorderMode(false);
+    try {
+      if (reorderDraftIds && reorderDraftIds.length > 0) {
+        await reorderItems(reorderDraftIds);
+      }
+    } finally {
+      setReorderMode(false);
+      setReorderDraftIds(null);
+    }
   };
 
   // Toggle edit mode and manage local drafts
