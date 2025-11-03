@@ -347,7 +347,7 @@ export default function ReStok() {
                           size="sm"
                           variant="outline"
                           onClick={() => moveItemDown(index)}
-                          disabled={index === items.length - 1}
+                          disabled={index === (arr.length - 1)}
                           className="h-8 w-8 p-0 rounded-full shadow-sm"
                           aria-label="Move down"
                           title="Move down"
