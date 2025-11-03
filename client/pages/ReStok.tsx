@@ -283,7 +283,15 @@ export default function ReStok() {
             <p>No items yet. Add your first item to get started.</p>
           </div>
         ) : (
-          (editMode && draftItems ? draftItems : items).map((item, index) => {
+          (
+            reorderMode && reorderDraftIds
+              ? reorderDraftIds
+                  .map((id) => items.find((i) => i.id === id))
+                  .filter(Boolean) as typeof items
+              : editMode && draftItems
+              ? (draftItems as typeof items)
+              : items
+          ).map((item, index, arr) => {
             const status = getItemStockStatus(item);
             const isExpanded = expandedItems.has(item.id);
 
