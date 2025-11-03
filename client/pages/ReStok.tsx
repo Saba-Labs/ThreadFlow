@@ -204,41 +204,20 @@ export default function ReStok() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 flex-1">
-                      {reorderMode ? (
-                        <div className="flex flex-col gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => moveItemUp(index)}
-                            disabled={index === 0}
-                            className="h-6 w-6 p-0"
-                          >
-                            <ArrowUp className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => moveItemDown(index)}
-                            disabled={index === items.length - 1}
-                            className="h-6 w-6 p-0"
-                          >
-                            <ArrowDown className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        item.subItems.length > 0 && (
-                          <button
-                            onClick={() => toggleItemExpanded(item.id)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            {isExpanded ? (
-                              <ChevronUp className="h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4" />
-                            )}
-                          </button>
-                        )
-                      )}
+                      {reorderMode
+                        ? null
+                        : item.subItems.length > 0 && (
+                            <button
+                              onClick={() => toggleItemExpanded(item.id)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
                       <div className="flex-1">
                         <p className="font-medium text-sm">{item.name}</p>
                         {item.note && (
@@ -249,7 +228,32 @@ export default function ReStok() {
                       </div>
                     </div>
 
-                    {reorderMode ? null : editMode ? (
+                    {reorderMode ? (
+                      <div className="flex items-center gap-2 ml-auto">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => moveItemUp(index)}
+                          disabled={index === 0}
+                          className="h-8 w-8 p-0 rounded-full shadow-sm"
+                          aria-label="Move up"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => moveItemDown(index)}
+                          disabled={index === items.length - 1}
+                          className="h-8 w-8 p-0 rounded-full shadow-sm"
+                          aria-label="Move down"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : editMode ? (
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"

@@ -76,14 +76,17 @@ export default function EditItemModal({
 
   const handleSubmitItem = async () => {
     if (!editingName.trim()) return;
-    try {
-      await onSubmit(editingName, editingLowStock, editingNote);
-      onOpenChange(false);
+    // Close immediately and sync in background
+    onOpenChange(false);
+    const p = Promise.resolve(
+      onSubmit(editingName, editingLowStock, editingNote),
+    );
+    p.then(() => {
       toast({
         title: "Success",
         description: "Item saved successfully",
       });
-    } catch (error) {
+    }).catch((error) => {
       console.error("Failed to submit:", error);
       toast({
         title: "Error",
@@ -91,7 +94,7 @@ export default function EditItemModal({
           error instanceof Error ? error.message : "Failed to save item",
         variant: "destructive",
       });
-    }
+    });
   };
 
   const handleDeleteItem = async () => {

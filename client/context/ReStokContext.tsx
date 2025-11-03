@@ -93,7 +93,7 @@ function subscribe(cb: () => void) {
   return () => subscribers.delete(cb);
 }
 
-async function apiCall<T>(method: string, url: string, body?: any): Promise<T> {
+async function apiCall<T>(url: string, method: string, body?: any): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
@@ -103,7 +103,7 @@ async function apiCall<T>(method: string, url: string, body?: any): Promise<T> {
       signal: controller.signal,
     };
 
-    if (body) {
+    if (body !== undefined) {
       options.headers = { "Content-Type": "application/json" };
       options.body = JSON.stringify(body);
     }
@@ -121,12 +121,16 @@ async function apiCall<T>(method: string, url: string, body?: any): Promise<T> {
     return await response.json();
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error instanceof TypeError && error.message.includes("fetch")) {
+    if (
+      error instanceof TypeError &&
+      (error.message.includes("fetch") ||
+        error.message.includes("NetworkError"))
+    ) {
       throw new Error(
         "Network error: Unable to reach the server. Please check your connection.",
       );
     }
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
