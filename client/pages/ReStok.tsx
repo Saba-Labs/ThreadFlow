@@ -147,7 +147,7 @@ export default function ReStok() {
           Add Item
         </Button>
         <Button
-          onClick={() => setEditMode(!editMode)}
+          onClick={toggleEditMode}
           variant={editMode ? "default" : "outline"}
           className={`gap-2 font-semibold rounded-lg px-6 py-2.5 transition-all duration-200 ${
             editMode
