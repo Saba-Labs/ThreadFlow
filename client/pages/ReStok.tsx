@@ -192,7 +192,7 @@ export default function ReStok() {
             <p>No items yet. Add your first item to get started.</p>
           </div>
         ) : (
-          items.map((item, index) => {
+          (editMode && draftItems ? draftItems : items).map((item, index) => {
             const status = getItemStockStatus(item);
             const isExpanded = expandedItems.has(item.id);
 
