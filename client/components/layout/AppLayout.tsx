@@ -18,16 +18,23 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export default function AppLayout() {
   function HeaderSearch({ className }: { className?: string }) {
-    const { query, setQuery } = useSearch();
     const [open, setOpen] = useState(false);
+    const [localQuery, setLocalQuery] = useState("");
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
       if (open) {
-        // focus the input when opening
         requestAnimationFrame(() => inputRef.current?.focus());
       }
     }, [open]);
+
+    const dispatch = (q: string) => {
+      try {
+        window.dispatchEvent(new CustomEvent("global-search", { detail: q }));
+      } catch (e) {
+        // ignore
+      }
+    };
 
     return (
       <div className={className}>
@@ -45,11 +52,15 @@ export default function AppLayout() {
               ref={inputRef}
               aria-label="Header search"
               placeholder="Search..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={localQuery}
+              onChange={(e) => {
+                setLocalQuery(e.target.value);
+                dispatch(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
-                  setQuery("");
+                  setLocalQuery("");
+                  dispatch("");
                   setOpen(false);
                 }
               }}
