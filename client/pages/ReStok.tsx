@@ -217,6 +217,23 @@ export default function ReStok() {
       (item) => item.id === id,
     );
 
+  const filteredItems = useMemo(() => {
+    const currentItems = editMode && draftItems ? draftItems : items;
+    const q = localQuery.trim().toLowerCase();
+    if (!q) return currentItems;
+    return currentItems.filter((item) =>
+      item.name.toLowerCase().includes(q),
+    );
+  }, [items, draftItems, editMode, localQuery]);
+
+  const displayItems = useMemo(() => {
+    return reorderMode && reorderDraftIds
+      ? (reorderDraftIds
+          .map((id) => filteredItems.find((i) => i.id === id))
+          .filter(Boolean) as typeof filteredItems)
+      : filteredItems;
+  }, [filteredItems, reorderMode, reorderDraftIds]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
