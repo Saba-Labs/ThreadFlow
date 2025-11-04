@@ -14,10 +14,21 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { useSearch } from "@/context/SearchContext";
+
 export default function AppLayout() {
   function HeaderSearch({ className }: { className?: string }) {
+    const { query, setQuery } = useSearch();
     const [open, setOpen] = useState(false);
-    const [query, setQuery] = useState("");
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    useEffect(() => {
+      if (open) {
+        // focus the input when opening
+        requestAnimationFrame(() => inputRef.current?.focus());
+      }
+    }, [open]);
+
     return (
       <div className={className}>
         {!open ? (
@@ -31,6 +42,7 @@ export default function AppLayout() {
         ) : (
           <div className="flex items-center">
             <input
+              ref={inputRef}
               aria-label="Header search"
               placeholder="Search..."
               value={query}
@@ -42,7 +54,6 @@ export default function AppLayout() {
                 }
               }}
               className="w-64 sm:w-64 rounded-md border px-2 py-1 max-w-80"
-              autoFocus
             />
             <button
               aria-label="Close search"
