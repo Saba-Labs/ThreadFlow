@@ -343,7 +343,7 @@ export default function RoadmapPage() {
 
                   <CardContent className="p-3 sm:p-6">
                     {r.items.length === 0 ? (
-                      <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
+                      <div className="rounded-xl border-2 border-dashed border-slate-200 p-4 sm:p-8 text-center bg-slate-50/50">
                         <div className="text-sm text-slate-600 mb-3">
                           No models added yet
                         </div>
