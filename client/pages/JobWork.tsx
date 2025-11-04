@@ -280,13 +280,10 @@ export default function JobWork() {
                         {pendingAssignments.map((a) => (
                           <div
                             key={a.id}
-                            className="text-sm flex items-center justify-between"
+                            className="text-sm"
                           >
                             <span className="font-medium text-red-600 dark:text-red-400">
-                              {a.modelName}
-                            </span>
-                            <span className="text-xs text-muted-foreground ml-2">
-                              ({a.quantity})
+                              {a.modelName} <span className="text-xs text-muted-foreground">({a.quantity})</span>
                             </span>
                           </div>
                         ))}
