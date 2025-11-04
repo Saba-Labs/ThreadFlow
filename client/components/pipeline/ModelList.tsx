@@ -19,7 +19,7 @@ import {
   CalendarDays,
   Plus,
   Check,
-  Edit2,
+  Route,
 } from "lucide-react";
 import type {
   PathStep,
@@ -956,7 +956,7 @@ export default function ModelList(props: ModelListProps) {
                                   {pathEditId === o.id ? (
                                     <Check className="h-4 w-4" />
                                   ) : (
-                                    <Edit2 className="h-4 w-4" />
+                                    <Route className="h-4 w-4" />
                                   )}
                                 </Button>
                                 <Button
@@ -1660,7 +1660,7 @@ export default function ModelList(props: ModelListProps) {
                           {pathEditId === o.id ? (
                             <Check className="h-5 w-5" />
                           ) : (
-                            <Edit2 className="h-5 w-5" />
+                            <Route className="h-5 w-5" />
                           )}
                         </Button>
                         <Button
