@@ -9,6 +9,8 @@ type DataChangeCallback = (event: {
     | "roadmaps_updated";
 }) => void;
 
+import { useRef, useEffect } from "react";
+
 export function useSSESubscription(onDataChange: DataChangeCallback) {
   const callbackRef = useRef(onDataChange);
   const sseFailedRef = useRef(false);
