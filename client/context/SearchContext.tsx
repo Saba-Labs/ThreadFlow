@@ -1,6 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type SearchContextValue = {
   query: string;
@@ -15,7 +13,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   // Listen to global-search events dispatched from the header without importing useSearch in AppLayout
   useEffect(() => {
     const handler = (e: any) => {
-      const q = (e && e.detail) || "";
+      const q = (e && (e as CustomEvent).detail) || "";
       setQuery(String(q));
     };
     window.addEventListener("global-search", handler as EventListener);
