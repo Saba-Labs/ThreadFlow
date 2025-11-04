@@ -60,6 +60,9 @@ export default function JobWork() {
   // Confirmation state for deletion
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+  // Local search state
+  const [localQuery, setLocalQuery] = useState("");
+
   useEffect(() => {
     if (!modalOpen) {
       setEditing(null);
