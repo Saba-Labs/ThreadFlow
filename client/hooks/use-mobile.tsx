@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+import { useState, useEffect } from "react";
+
 const MOBILE_BREAKPOINT = 768;
 
 export function useIsMobile() {
@@ -10,9 +12,20 @@ export function useIsMobile() {
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
-    mql.addEventListener("change", onChange);
+    // Use addEventListener for modern browsers, fallback to addListener if not available
+    if (typeof mql.addEventListener === "function") {
+      mql.addEventListener("change", onChange);
+    } else if (typeof (mql as any).addListener === "function") {
+      (mql as any).addListener(onChange);
+    }
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    return () => mql.removeEventListener("change", onChange);
+    return () => {
+      if (typeof mql.removeEventListener === "function") {
+        mql.removeEventListener("change", onChange);
+      } else if (typeof (mql as any).removeListener === "function") {
+        (mql as any).removeListener(onChange);
+      }
+    };
   }, []);
 
   return !!isMobile;
