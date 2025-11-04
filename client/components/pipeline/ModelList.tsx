@@ -303,8 +303,10 @@ export default function ModelList(props: ModelListProps) {
     o: WorkOrder,
     onPillClick?: (orderId: string, stepIndex: number) => void,
   ) => {
-    const currentIdx = o.currentStepIndex;
-    const currentStep = o.steps[currentIdx];
+    const overrideIdx = pendingIndex[o.id];
+    const oo = typeof overrideIdx === "number" ? { ...o, currentStepIndex: overrideIdx } : o;
+    const currentIdx = oo.currentStepIndex;
+    const currentStep = oo.steps[currentIdx];
     const isCurrentRunning =
       currentIdx >= 0 &&
       currentIdx < o.steps.length &&
