@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 
+import { useState, useRef, useEffect } from "react";
+
 export function useAppUpdaterHook() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
