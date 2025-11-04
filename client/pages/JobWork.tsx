@@ -178,11 +178,10 @@ export default function JobWork() {
     return Array.from(set);
   };
 
-  const { query } = useSearch();
   const [sortBy, setSortBy] = useState<"pending" | "linked" | "az">("az");
 
   const displayed = ((): typeof local => {
-    const q = (query || "").trim().toLowerCase();
+    const q = localQuery.trim().toLowerCase();
     const filtered = q
       ? local.filter((j) => {
           if (j.name.toLowerCase().includes(q)) return true;
