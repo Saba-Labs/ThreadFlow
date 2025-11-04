@@ -102,6 +102,7 @@ export default function ModelList(props: ModelListProps) {
     at: number;
   } | null>(null);
   const [isSplitting, setIsSplitting] = useState(false);
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({});
 
   const handleSplit = async () => {
     if (!splitForId) return;
@@ -913,6 +914,7 @@ export default function ModelList(props: ModelListProps) {
                                   variant="ghost"
                                   onClick={async () => {
                                     if (pathEditId === o.id) {
+                                      setSavingIds((s) => ({ ...s, [o.id]: true }));
                                       try {
                                         const idx =
                                           typeof pendingIndex[o.id] === "number"
@@ -924,6 +926,10 @@ export default function ModelList(props: ModelListProps) {
                                           idx,
                                         );
                                       } finally {
+                                        setSavingIds((s) => {
+                                          const { [o.id]: _drop, ...rest } = s;
+                                          return rest;
+                                        });
                                         setPathEditId(null);
                                         setPendingIndex((m) => {
                                           const { [o.id]: _drop, ...rest } = m;
@@ -949,7 +955,12 @@ export default function ModelList(props: ModelListProps) {
                                       : "Edit path"
                                   }
                                 >
-                                  {pathEditId === o.id ? (
+                                  {savingIds[o.id] ? (
+                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                  ) : pathEditId === o.id ? (
                                     <Check className="h-4 w-4" />
                                   ) : (
                                     <Route className="h-4 w-4" />
@@ -1613,6 +1624,7 @@ export default function ModelList(props: ModelListProps) {
                           variant="ghost"
                           onClick={async () => {
                             if (pathEditId === o.id) {
+                              setSavingIds((s) => ({ ...s, [o.id]: true }));
                               try {
                                 const idx =
                                   typeof pendingIndex[o.id] === "number"
@@ -1624,6 +1636,10 @@ export default function ModelList(props: ModelListProps) {
                                   idx,
                                 );
                               } finally {
+                                setSavingIds((s) => {
+                                  const { [o.id]: _drop, ...rest } = s;
+                                  return rest;
+                                });
                                 setPathEditId(null);
                                 setPendingIndex((m) => {
                                   const { [o.id]: _drop, ...rest } = m;
@@ -1649,7 +1665,12 @@ export default function ModelList(props: ModelListProps) {
                               : "Edit path"
                           }
                         >
-                          {pathEditId === o.id ? (
+                          {savingIds[o.id] ? (
+                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                          ) : pathEditId === o.id ? (
                             <Check className="h-5 w-5" />
                           ) : (
                             <Route className="h-5 w-5" />
