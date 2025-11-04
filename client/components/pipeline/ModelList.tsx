@@ -867,7 +867,14 @@ export default function ModelList(props: ModelListProps) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => props.onPrev(o.id)}
+                                  onClick={() => {
+                                    if (pathEditId === o.id) {
+                                      const nextIdx = computePrevIndex(o);
+                                      setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                                    } else {
+                                      props.onPrev(o.id);
+                                    }
+                                  }}
                                   title="Previous step"
                                   aria-label="Previous step"
                                 >
@@ -876,11 +883,50 @@ export default function ModelList(props: ModelListProps) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => props.onNext(o.id)}
+                                  onClick={() => {
+                                    if (pathEditId === o.id) {
+                                      const nextIdx = computeNextIndex(o);
+                                      setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                                    } else {
+                                      props.onNext(o.id);
+                                    }
+                                  }}
                                   title="Next step"
                                   aria-label="Next step"
                                 >
                                   <SkipForward className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={async () => {
+                                    if (pathEditId === o.id) {
+                                      try {
+                                        const idx =
+                                          typeof pendingIndex[o.id] === "number"
+                                            ? pendingIndex[o.id]
+                                            : o.currentStepIndex;
+                                        await props.onSaveProgress?.(o.id, o.steps, idx);
+                                      } finally {
+                                        setPathEditId(null);
+                                        setPendingIndex((m) => {
+                                          const { [o.id]: _drop, ...rest } = m;
+                                          return rest;
+                                        });
+                                      }
+                                    } else {
+                                      setPathEditId(o.id);
+                                      setPendingIndex((m) => ({ ...m, [o.id]: o.currentStepIndex }));
+                                    }
+                                  }}
+                                  title={pathEditId === o.id ? "Save path changes" : "Edit path"}
+                                  aria-label={pathEditId === o.id ? "Save path changes" : "Edit path"}
+                                >
+                                  {pathEditId === o.id ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Edit2 className="h-4 w-4" />
+                                  )}
                                 </Button>
                                 <Button
                                   size="icon"
