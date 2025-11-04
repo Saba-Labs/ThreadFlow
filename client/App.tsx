@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FontSizeProvider } from "./hooks/use-font-size";
-import { SearchProvider } from "./context/SearchContext"; // ADD THIS
+// SearchProvider temporarily disabled to isolate a runtime error
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
