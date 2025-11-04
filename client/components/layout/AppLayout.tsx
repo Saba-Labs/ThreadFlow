@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ThreadFlowLogo from "@/components/ui/ThreadFlowLogo";
@@ -12,12 +12,30 @@ import {
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
+import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+// Header search dispatches a global event to avoid circular imports with SearchProvider
 
 export default function AppLayout() {
   function HeaderSearch({ className }: { className?: string }) {
     const [open, setOpen] = useState(false);
-    const [query, setQuery] = useState("");
+    const [localQuery, setLocalQuery] = useState("");
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    useEffect(() => {
+      if (open) {
+        requestAnimationFrame(() => inputRef.current?.focus());
+      }
+    }, [open]);
+
+    const dispatch = (q: string) => {
+      try {
+        window.dispatchEvent(new CustomEvent("global-search", { detail: q }));
+      } catch (e) {
+        // ignore
+      }
+    };
+
     return (
       <div className={className}>
         {!open ? (
@@ -31,18 +49,22 @@ export default function AppLayout() {
         ) : (
           <div className="flex items-center">
             <input
+              ref={inputRef}
               aria-label="Header search"
               placeholder="Search..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={localQuery}
+              onChange={(e) => {
+                setLocalQuery(e.target.value);
+                dispatch(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
-                  setQuery("");
+                  setLocalQuery("");
+                  dispatch("");
                   setOpen(false);
                 }
               }}
               className="w-64 sm:w-64 rounded-md border px-2 py-1 max-w-80"
-              autoFocus
             />
             <button
               aria-label="Close search"

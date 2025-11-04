@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FontSizeProvider } from "./hooks/use-font-size";
-import { SearchProvider } from "./context/SearchContext"; // ADD THIS
+import { SearchProvider } from "./context/SearchContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
@@ -21,11 +21,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <SearchProvider>
-      {" "}
-      {/* ADD THIS */}
       <FontSizeProvider>
-        {" "}
-        {/* WRAP FontSizeProvider if you use it */}
         <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
@@ -42,13 +38,11 @@ const App = () => (
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/restok" element={<ReStok />} />
             </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </FontSizeProvider>
-    </SearchProvider>{" "}
-    {/* ADD THIS */}
+    </SearchProvider>
   </QueryClientProvider>
 );
 

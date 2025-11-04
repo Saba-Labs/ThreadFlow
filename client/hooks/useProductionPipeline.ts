@@ -64,15 +64,40 @@ const subscribers = new Set<() => void>();
 async function fetchFromServer() {
   if (isLoading) return;
   isLoading = true;
-  try {
-    const orders = await fetchWithTimeout<WorkOrder[]>("/api/pipeline/orders");
-    STORE = { orders };
-    for (const s of Array.from(subscribers)) s();
-  } catch (error) {
-    console.error("Failed to fetch pipeline orders:", error);
-  } finally {
-    isLoading = false;
+  const MAX_RETRIES = 2;
+  const RETRY_DELAY_MS = 1000;
+  let attempt = 0;
+  while (attempt <= MAX_RETRIES) {
+    try {
+      // pipeline orders can be large in some environments; allow longer timeout
+      const orders = await fetchWithTimeout<WorkOrder[]>(
+        "/api/pipeline/orders",
+        undefined,
+        30000,
+      );
+      STORE = { orders };
+      for (const s of Array.from(subscribers)) s();
+      break;
+    } catch (error) {
+      attempt += 1;
+      console.error(
+        "Failed to fetch pipeline orders (attempt",
+        attempt,
+        "):",
+        error,
+      );
+      if (attempt > MAX_RETRIES) {
+        // Final failure: show friendly message and stop
+        console.error("Failed to fetch pipeline orders after retries:", error);
+        break;
+      }
+      // Wait before retrying
+      await new Promise((res) => setTimeout(res, RETRY_DELAY_MS * attempt));
+    } finally {
+      if (attempt > MAX_RETRIES) isLoading = false;
+    }
   }
+  isLoading = false;
 }
 
 function setStore(updater: (s: PipelineState) => PipelineState) {
@@ -564,10 +589,12 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: src.modelName,
         quantity: q,
-        createdAt: Date.now(),
+        createdAt: src.createdAt,
         steps: src.steps.map((st) => ({
-          ...st,
           id: uid("step"),
+          kind: st.kind,
+          machineType: st.machineType,
+          externalUnitName: (st as any).externalUnitName,
           status:
             st.status === "completed"
               ? ("completed" as StepStatus)

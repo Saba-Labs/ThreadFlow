@@ -19,7 +19,7 @@ import {
   CalendarDays,
   Plus,
   Check,
-  Edit2,
+  Route,
 } from "lucide-react";
 import type {
   PathStep,
@@ -102,6 +102,10 @@ export default function ModelList(props: ModelListProps) {
     at: number;
   } | null>(null);
   const [isSplitting, setIsSplitting] = useState(false);
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({});
+  const [pendingStepsMap, setPendingStepsMap] = useState<
+    Record<string, PathStep[]>
+  >({});
 
   const handleSplit = async () => {
     if (!splitForId) return;
@@ -415,11 +419,22 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const toggleCardStatus = (o: WorkOrder) => {
-    const i = o.currentStepIndex;
-    if (i < 0 || i >= o.steps.length) return;
-    const st = o.steps[i];
-    const newStatus = st.status === "running" ? "hold" : "running";
-    props.onSetStepStatus(o.id, i, newStatus);
+    // Only allow toggling status while editing the path for this order
+    if (pathEditId !== o.id) return;
+    const override =
+      typeof pendingIndex[o.id] === "number"
+        ? pendingIndex[o.id]
+        : o.currentStepIndex;
+    if (override < 0) return;
+    // Mutate pendingStepsMap while editing
+    setPendingStepsMap((m) => {
+      const steps = (m[o.id] ?? o.steps).map((s) => ({ ...s }));
+      if (override < 0 || override >= steps.length) return m;
+      const st = steps[override];
+      const newStatus = st.status === "running" ? "hold" : "running";
+      steps[override] = { ...st, status: newStatus };
+      return { ...m, [o.id]: steps };
+    });
   };
 
   const isMobile = useIsMobile();
@@ -565,9 +580,14 @@ export default function ModelList(props: ModelListProps) {
                       typeof overrideIdx === "number"
                         ? { ...o, currentStepIndex: overrideIdx }
                         : o;
-                    const i = ov.currentStepIndex;
-                    const step = ov.steps[i];
-                    const bg = statusBgClass(ov);
+                    const i =
+                      typeof pendingIndex[o.id] === "number"
+                        ? pendingIndex[o.id]
+                        : ov.currentStepIndex;
+                    const stepsArr = pendingStepsMap[o.id] ?? ov.steps;
+                    const step = stepsArr[i];
+                    const renderOrder = { ...ov, steps: stepsArr } as WorkOrder;
+                    const bg = statusBgClass(renderOrder);
                     const isExpanded = toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
@@ -729,9 +749,7 @@ export default function ModelList(props: ModelListProps) {
                                               ]),
                                             );
 
-                                            return allNames.length > 0
-                                              ? allNames[0]
-                                              : "Job Work";
+                                            return "Job Work";
                                           })();
                                     const parallelGroup = (
                                       o.parallelGroups || []
@@ -784,11 +802,15 @@ export default function ModelList(props: ModelListProps) {
                                   return (
                                     <>
                                       <button
-                                        onClick={() => toggleCardStatus(o)}
+                                        onClick={
+                                          pathEditId === o.id
+                                            ? () => toggleCardStatus(o)
+                                            : undefined
+                                        }
                                       >
                                         <Badge
                                           variant={"default"}
-                                          className={`cursor-pointer whitespace-nowrap ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                          className={`${pathEditId === o.id ? "cursor-pointer" : ""} whitespace-nowrap ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                             hasPendingJW
                                               ? "bg-purple-700 dark:bg-purple-600 text-white"
                                               : displayStatus === "running"
@@ -874,62 +896,72 @@ export default function ModelList(props: ModelListProps) {
                                     JW
                                   </span>
                                 </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    if (pathEditId === o.id) {
+                                {pathEditId === o.id && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => {
                                       const nextIdx = computePrevIndex(o);
                                       setPendingIndex((m) => ({
                                         ...m,
                                         [o.id]: nextIdx,
                                       }));
-                                    } else {
-                                      props.onPrev(o.id);
-                                    }
-                                  }}
-                                  title="Previous step"
-                                  aria-label="Previous step"
-                                >
-                                  <SkipBack className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    if (pathEditId === o.id) {
+                                    }}
+                                    title="Previous step"
+                                    aria-label="Previous step"
+                                  >
+                                    <SkipBack className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                {pathEditId === o.id && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => {
                                       const nextIdx = computeNextIndex(o);
                                       setPendingIndex((m) => ({
                                         ...m,
                                         [o.id]: nextIdx,
                                       }));
-                                    } else {
-                                      props.onNext(o.id);
-                                    }
-                                  }}
-                                  title="Next step"
-                                  aria-label="Next step"
-                                >
-                                  <SkipForward className="h-4 w-4" />
-                                </Button>
+                                    }}
+                                    title="Next step"
+                                    aria-label="Next step"
+                                  >
+                                    <SkipForward className="h-4 w-4" />
+                                  </Button>
+                                )}
                                 <Button
                                   size="icon"
                                   variant="ghost"
                                   onClick={async () => {
                                     if (pathEditId === o.id) {
+                                      setSavingIds((s) => ({
+                                        ...s,
+                                        [o.id]: true,
+                                      }));
                                       try {
                                         const idx =
                                           typeof pendingIndex[o.id] === "number"
                                             ? pendingIndex[o.id]
                                             : o.currentStepIndex;
+                                        const stepsToSave =
+                                          pendingStepsMap[o.id] ?? o.steps;
                                         await props.onSaveProgress?.(
                                           o.id,
-                                          o.steps,
+                                          stepsToSave,
                                           idx,
                                         );
                                       } finally {
+                                        setSavingIds((s) => {
+                                          const { [o.id]: _drop, ...rest } = s;
+                                          return rest;
+                                        });
                                         setPathEditId(null);
                                         setPendingIndex((m) => {
+                                          const { [o.id]: _drop, ...rest } = m;
+                                          return rest;
+                                        });
+                                        setPendingStepsMap((m) => {
                                           const { [o.id]: _drop, ...rest } = m;
                                           return rest;
                                         });
@@ -939,6 +971,10 @@ export default function ModelList(props: ModelListProps) {
                                       setPendingIndex((m) => ({
                                         ...m,
                                         [o.id]: o.currentStepIndex,
+                                      }));
+                                      setPendingStepsMap((m) => ({
+                                        ...m,
+                                        [o.id]: o.steps.map((s) => ({ ...s })),
                                       }));
                                     }
                                   }}
@@ -953,10 +989,30 @@ export default function ModelList(props: ModelListProps) {
                                       : "Edit path"
                                   }
                                 >
-                                  {pathEditId === o.id ? (
+                                  {savingIds[o.id] ? (
+                                    <svg
+                                      className="animate-spin h-4 w-4"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                        fill="none"
+                                      />
+                                      <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                      ></path>
+                                    </svg>
+                                  ) : pathEditId === o.id ? (
                                     <Check className="h-4 w-4" />
                                   ) : (
-                                    <Edit2 className="h-4 w-4" />
+                                    <Route className="h-4 w-4" />
                                   )}
                                 </Button>
                                 <Button
@@ -1305,11 +1361,15 @@ export default function ModelList(props: ModelListProps) {
 
                                     <div>
                                       <button
-                                        onClick={() => toggleCardStatus(o)}
+                                        onClick={
+                                          pathEditId === o.id
+                                            ? () => toggleCardStatus(o)
+                                            : undefined
+                                        }
                                       >
                                         <Badge
                                           variant={"default"}
-                                          className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                          className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                             hasPendingJW
                                               ? "bg-purple-700 dark:bg-purple-600 text-white"
                                               : displayStatus === "running"
@@ -1346,9 +1406,7 @@ export default function ModelList(props: ModelListProps) {
                                                 ]),
                                               );
 
-                                              return allNames.length > 0
-                                                ? allNames[0]
-                                                : "Job Work";
+                                              return "Job Work";
                                             }
                                             return cap(displayStatus);
                                           })()}
@@ -1461,10 +1519,16 @@ export default function ModelList(props: ModelListProps) {
 
                               {isExpandedMobile && (
                                 <>
-                                  <button onClick={() => toggleCardStatus(o)}>
+                                  <button
+                                    onClick={
+                                      pathEditId === o.id
+                                        ? () => toggleCardStatus(o)
+                                        : undefined
+                                    }
+                                  >
                                     <Badge
                                       variant={"default"}
-                                      className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                      className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                         hasPendingJW
                                           ? "bg-purple-700 dark:bg-purple-600 text-white"
                                           : displayStatus === "running"
@@ -1500,9 +1564,7 @@ export default function ModelList(props: ModelListProps) {
                                             ]),
                                           );
 
-                                          return allNames.length > 0
-                                            ? allNames[0]
-                                            : "Job Work";
+                                          return "Job Work";
                                         }
                                         return cap(displayStatus);
                                       })()}
@@ -1576,44 +1638,40 @@ export default function ModelList(props: ModelListProps) {
                             JW
                           </span>
                         </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => {
-                            if (pathEditId === o.id) {
+                        {pathEditId === o.id && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
                               const nextIdx = computePrevIndex(o);
                               setPendingIndex((m) => ({
                                 ...m,
                                 [o.id]: nextIdx,
                               }));
-                            } else {
-                              props.onPrev(o.id);
-                            }
-                          }}
-                          title="Previous step"
-                          aria-label="Previous step"
-                        >
-                          <SkipBack className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => {
-                            if (pathEditId === o.id) {
+                            }}
+                            title="Previous step"
+                            aria-label="Previous step"
+                          >
+                            <SkipBack className="h-5 w-5" />
+                          </Button>
+                        )}
+                        {pathEditId === o.id && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
                               const nextIdx = computeNextIndex(o);
                               setPendingIndex((m) => ({
                                 ...m,
                                 [o.id]: nextIdx,
                               }));
-                            } else {
-                              props.onNext(o.id);
-                            }
-                          }}
-                          title="Next step"
-                          aria-label="Next step"
-                        >
-                          <SkipForward className="h-5 w-5" />
-                        </Button>
+                            }}
+                            title="Next step"
+                            aria-label="Next step"
+                          >
+                            <SkipForward className="h-5 w-5" />
+                          </Button>
+                        )}
                       </div>
                       <div className="flex gap-1">
                         <Button
@@ -1621,19 +1679,30 @@ export default function ModelList(props: ModelListProps) {
                           variant="ghost"
                           onClick={async () => {
                             if (pathEditId === o.id) {
+                              setSavingIds((s) => ({ ...s, [o.id]: true }));
                               try {
                                 const idx =
                                   typeof pendingIndex[o.id] === "number"
                                     ? pendingIndex[o.id]
                                     : o.currentStepIndex;
+                                const stepsToSave =
+                                  pendingStepsMap[o.id] ?? o.steps;
                                 await props.onSaveProgress?.(
                                   o.id,
-                                  o.steps,
+                                  stepsToSave,
                                   idx,
                                 );
                               } finally {
+                                setSavingIds((s) => {
+                                  const { [o.id]: _drop, ...rest } = s;
+                                  return rest;
+                                });
                                 setPathEditId(null);
                                 setPendingIndex((m) => {
+                                  const { [o.id]: _drop, ...rest } = m;
+                                  return rest;
+                                });
+                                setPendingStepsMap((m) => {
                                   const { [o.id]: _drop, ...rest } = m;
                                   return rest;
                                 });
@@ -1643,6 +1712,10 @@ export default function ModelList(props: ModelListProps) {
                               setPendingIndex((m) => ({
                                 ...m,
                                 [o.id]: o.currentStepIndex,
+                              }));
+                              setPendingStepsMap((m) => ({
+                                ...m,
+                                [o.id]: o.steps.map((s) => ({ ...s })),
                               }));
                             }
                           }}
@@ -1657,10 +1730,30 @@ export default function ModelList(props: ModelListProps) {
                               : "Edit path"
                           }
                         >
-                          {pathEditId === o.id ? (
+                          {savingIds[o.id] ? (
+                            <svg
+                              className="animate-spin h-5 w-5"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                              ></path>
+                            </svg>
+                          ) : pathEditId === o.id ? (
                             <Check className="h-5 w-5" />
                           ) : (
-                            <Edit2 className="h-5 w-5" />
+                            <Route className="h-5 w-5" />
                           )}
                         </Button>
                         <Button
