@@ -567,9 +567,11 @@ export default function ModelList(props: ModelListProps) {
                       typeof overrideIdx === "number"
                         ? { ...o, currentStepIndex: overrideIdx }
                         : o;
-                    const i = ov.currentStepIndex;
-                    const step = ov.steps[i];
-                    const bg = statusBgClass(ov);
+                    const i = typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : ov.currentStepIndex;
+                    const stepsArr = pendingStepsMap[o.id] ?? ov.steps;
+                    const step = stepsArr[i];
+                    const renderOrder = { ...ov, steps: stepsArr } as WorkOrder;
+                    const bg = statusBgClass(renderOrder);
                     const isExpanded = toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
