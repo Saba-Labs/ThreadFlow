@@ -1489,10 +1489,10 @@ export default function ModelList(props: ModelListProps) {
 
                               {isExpandedMobile && (
                                 <>
-                                  <button onClick={() => toggleCardStatus(o)}>
+                                  <button onClick={pathEditId === o.id ? () => toggleCardStatus(o) : undefined}>
                                     <Badge
                                       variant={"default"}
-                                      className={`shrink-0 cursor-pointer ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                      className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                         hasPendingJW
                                           ? "bg-purple-700 dark:bg-purple-600 text-white"
                                           : displayStatus === "running"
