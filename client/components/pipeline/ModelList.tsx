@@ -103,6 +103,7 @@ export default function ModelList(props: ModelListProps) {
   } | null>(null);
   const [isSplitting, setIsSplitting] = useState(false);
   const [savingIds, setSavingIds] = useState<Record<string, boolean>>({});
+  const [pendingStepsMap, setPendingStepsMap] = useState<Record<string, PathStep[]>>({});
 
   const handleSplit = async () => {
     if (!splitForId) return;
