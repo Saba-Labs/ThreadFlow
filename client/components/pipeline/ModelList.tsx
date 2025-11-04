@@ -18,6 +18,8 @@ import {
   Pencil,
   CalendarDays,
   Plus,
+  Check,
+  Edit2,
 } from "lucide-react";
 import type {
   PathStep,
