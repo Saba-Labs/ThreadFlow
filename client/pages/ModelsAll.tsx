@@ -14,8 +14,8 @@ import {
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Eye, EyeOff, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSearch } from "@/context/SearchContext";
 import { toast } from "@/hooks/use-toast";
+import PageSearchHeader from "@/components/ui/PageSearchHeader";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
