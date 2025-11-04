@@ -438,11 +438,6 @@ export default function AppLayout() {
                 </div>
               )}
 
-              {/* Header search icon */}
-              <div className="mr-2 hidden sm:block">
-                <HeaderSearch />
-              </div>
-
               {/* Mobile menu button */}
               <div className="sm:hidden">
                 <button
