@@ -874,44 +874,40 @@ export default function ModelList(props: ModelListProps) {
                                     JW
                                   </span>
                                 </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    if (pathEditId === o.id) {
+                                {pathEditId === o.id && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => {
                                       const nextIdx = computePrevIndex(o);
                                       setPendingIndex((m) => ({
                                         ...m,
                                         [o.id]: nextIdx,
                                       }));
-                                    } else {
-                                      props.onPrev(o.id);
-                                    }
-                                  }}
-                                  title="Previous step"
-                                  aria-label="Previous step"
-                                >
-                                  <SkipBack className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    if (pathEditId === o.id) {
+                                    }}
+                                    title="Previous step"
+                                    aria-label="Previous step"
+                                  >
+                                    <SkipBack className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                {pathEditId === o.id && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => {
                                       const nextIdx = computeNextIndex(o);
                                       setPendingIndex((m) => ({
                                         ...m,
                                         [o.id]: nextIdx,
                                       }));
-                                    } else {
-                                      props.onNext(o.id);
-                                    }
-                                  }}
-                                  title="Next step"
-                                  aria-label="Next step"
-                                >
-                                  <SkipForward className="h-4 w-4" />
-                                </Button>
+                                    }}
+                                    title="Next step"
+                                    aria-label="Next step"
+                                  >
+                                    <SkipForward className="h-4 w-4" />
+                                  </Button>
+                                )}
                                 <Button
                                   size="icon"
                                   variant="ghost"
@@ -1576,44 +1572,40 @@ export default function ModelList(props: ModelListProps) {
                             JW
                           </span>
                         </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => {
-                            if (pathEditId === o.id) {
+                        {pathEditId === o.id && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
                               const nextIdx = computePrevIndex(o);
                               setPendingIndex((m) => ({
                                 ...m,
                                 [o.id]: nextIdx,
                               }));
-                            } else {
-                              props.onPrev(o.id);
-                            }
-                          }}
-                          title="Previous step"
-                          aria-label="Previous step"
-                        >
-                          <SkipBack className="h-5 w-5" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => {
-                            if (pathEditId === o.id) {
+                            }}
+                            title="Previous step"
+                            aria-label="Previous step"
+                          >
+                            <SkipBack className="h-5 w-5" />
+                          </Button>
+                        )}
+                        {pathEditId === o.id && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
                               const nextIdx = computeNextIndex(o);
                               setPendingIndex((m) => ({
                                 ...m,
                                 [o.id]: nextIdx,
                               }));
-                            } else {
-                              props.onNext(o.id);
-                            }
-                          }}
-                          title="Next step"
-                          aria-label="Next step"
-                        >
-                          <SkipForward className="h-5 w-5" />
-                        </Button>
+                            }}
+                            title="Next step"
+                            aria-label="Next step"
+                          >
+                            <SkipForward className="h-5 w-5" />
+                          </Button>
+                        )}
                       </div>
                       <div className="flex gap-1">
                         <Button
