@@ -1,6 +1,18 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 type SearchContextValue = {
   query: string;
@@ -19,7 +31,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       setQuery(String(q));
     };
     window.addEventListener("global-search", handler as EventListener);
-    return () => window.removeEventListener("global-search", handler as EventListener);
+    return () =>
+      window.removeEventListener("global-search", handler as EventListener);
   }, []);
 
   return (

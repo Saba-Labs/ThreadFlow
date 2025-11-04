@@ -70,13 +70,22 @@ async function fetchFromServer() {
   while (attempt <= MAX_RETRIES) {
     try {
       // pipeline orders can be large in some environments; allow longer timeout
-      const orders = await fetchWithTimeout<WorkOrder[]>("/api/pipeline/orders", undefined, 30000);
+      const orders = await fetchWithTimeout<WorkOrder[]>(
+        "/api/pipeline/orders",
+        undefined,
+        30000,
+      );
       STORE = { orders };
       for (const s of Array.from(subscribers)) s();
       break;
     } catch (error) {
       attempt += 1;
-      console.error("Failed to fetch pipeline orders (attempt", attempt, "):", error);
+      console.error(
+        "Failed to fetch pipeline orders (attempt",
+        attempt,
+        "):",
+        error,
+      );
       if (attempt > MAX_RETRIES) {
         // Final failure: show friendly message and stop
         console.error("Failed to fetch pipeline orders after retries:", error);

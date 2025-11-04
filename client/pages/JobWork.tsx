@@ -278,12 +278,12 @@ export default function JobWork() {
                     {pendingAssignments.length > 0 && (
                       <div className="space-y-1">
                         {pendingAssignments.map((a) => (
-                          <div
-                            key={a.id}
-                            className="text-sm"
-                          >
+                          <div key={a.id} className="text-sm">
                             <span className="font-medium text-red-600 dark:text-red-400">
-                              {a.modelName} <span className="text-xs text-muted-foreground">({a.quantity})</span>
+                              {a.modelName}{" "}
+                              <span className="text-xs text-muted-foreground">
+                                ({a.quantity})
+                              </span>
                             </span>
                           </div>
                         ))}

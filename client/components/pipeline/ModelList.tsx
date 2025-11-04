@@ -103,7 +103,9 @@ export default function ModelList(props: ModelListProps) {
   } | null>(null);
   const [isSplitting, setIsSplitting] = useState(false);
   const [savingIds, setSavingIds] = useState<Record<string, boolean>>({});
-  const [pendingStepsMap, setPendingStepsMap] = useState<Record<string, PathStep[]>>({});
+  const [pendingStepsMap, setPendingStepsMap] = useState<
+    Record<string, PathStep[]>
+  >({});
 
   const handleSplit = async () => {
     if (!splitForId) return;
@@ -419,7 +421,10 @@ export default function ModelList(props: ModelListProps) {
   const toggleCardStatus = (o: WorkOrder) => {
     // Only allow toggling status while editing the path for this order
     if (pathEditId !== o.id) return;
-    const override = typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : o.currentStepIndex;
+    const override =
+      typeof pendingIndex[o.id] === "number"
+        ? pendingIndex[o.id]
+        : o.currentStepIndex;
     if (override < 0) return;
     // Mutate pendingStepsMap while editing
     setPendingStepsMap((m) => {
@@ -575,7 +580,10 @@ export default function ModelList(props: ModelListProps) {
                       typeof overrideIdx === "number"
                         ? { ...o, currentStepIndex: overrideIdx }
                         : o;
-                    const i = typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : ov.currentStepIndex;
+                    const i =
+                      typeof pendingIndex[o.id] === "number"
+                        ? pendingIndex[o.id]
+                        : ov.currentStepIndex;
                     const stepsArr = pendingStepsMap[o.id] ?? ov.steps;
                     const step = stepsArr[i];
                     const renderOrder = { ...ov, steps: stepsArr } as WorkOrder;
@@ -794,7 +802,11 @@ export default function ModelList(props: ModelListProps) {
                                   return (
                                     <>
                                       <button
-                                        onClick={pathEditId === o.id ? () => toggleCardStatus(o) : undefined}
+                                        onClick={
+                                          pathEditId === o.id
+                                            ? () => toggleCardStatus(o)
+                                            : undefined
+                                        }
                                       >
                                         <Badge
                                           variant={"default"}
@@ -923,13 +935,17 @@ export default function ModelList(props: ModelListProps) {
                                   variant="ghost"
                                   onClick={async () => {
                                     if (pathEditId === o.id) {
-                                      setSavingIds((s) => ({ ...s, [o.id]: true }));
+                                      setSavingIds((s) => ({
+                                        ...s,
+                                        [o.id]: true,
+                                      }));
                                       try {
                                         const idx =
                                           typeof pendingIndex[o.id] === "number"
                                             ? pendingIndex[o.id]
                                             : o.currentStepIndex;
-                                        const stepsToSave = pendingStepsMap[o.id] ?? o.steps;
+                                        const stepsToSave =
+                                          pendingStepsMap[o.id] ?? o.steps;
                                         await props.onSaveProgress?.(
                                           o.id,
                                           stepsToSave,
@@ -974,9 +990,24 @@ export default function ModelList(props: ModelListProps) {
                                   }
                                 >
                                   {savingIds[o.id] ? (
-                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    <svg
+                                      className="animate-spin h-4 w-4"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                        fill="none"
+                                      />
+                                      <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                      ></path>
                                     </svg>
                                   ) : pathEditId === o.id ? (
                                     <Check className="h-4 w-4" />
@@ -1330,20 +1361,24 @@ export default function ModelList(props: ModelListProps) {
 
                                     <div>
                                       <button
-  onClick={pathEditId === o.id ? () => toggleCardStatus(o) : undefined}
-  >
-    <Badge
-      variant={"default"}
-      className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-        hasPendingJW
-          ? "bg-purple-700 dark:bg-purple-600 text-white"
-          : displayStatus === "running"
-            ? "bg-green-600 text-white"
-            : displayStatus === "hold"
-              ? "bg-red-600 text-white"
-              : "bg-gray-500 text-white"
-      }`}
-    >
+                                        onClick={
+                                          pathEditId === o.id
+                                            ? () => toggleCardStatus(o)
+                                            : undefined
+                                        }
+                                      >
+                                        <Badge
+                                          variant={"default"}
+                                          className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                            hasPendingJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
+                                        >
                                           {(() => {
                                             if (hasPendingJW) {
                                               const allAssignments =
@@ -1484,7 +1519,13 @@ export default function ModelList(props: ModelListProps) {
 
                               {isExpandedMobile && (
                                 <>
-                                  <button onClick={pathEditId === o.id ? () => toggleCardStatus(o) : undefined}>
+                                  <button
+                                    onClick={
+                                      pathEditId === o.id
+                                        ? () => toggleCardStatus(o)
+                                        : undefined
+                                    }
+                                  >
                                     <Badge
                                       variant={"default"}
                                       className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
@@ -1644,7 +1685,8 @@ export default function ModelList(props: ModelListProps) {
                                   typeof pendingIndex[o.id] === "number"
                                     ? pendingIndex[o.id]
                                     : o.currentStepIndex;
-                                const stepsToSave = pendingStepsMap[o.id] ?? o.steps;
+                                const stepsToSave =
+                                  pendingStepsMap[o.id] ?? o.steps;
                                 await props.onSaveProgress?.(
                                   o.id,
                                   stepsToSave,
@@ -1689,9 +1731,24 @@ export default function ModelList(props: ModelListProps) {
                           }
                         >
                           {savingIds[o.id] ? (
-                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            <svg
+                              className="animate-spin h-5 w-5"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                              ></path>
                             </svg>
                           ) : pathEditId === o.id ? (
                             <Check className="h-5 w-5" />
