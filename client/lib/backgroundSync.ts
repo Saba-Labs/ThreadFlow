@@ -48,9 +48,14 @@ class BackgroundSyncQueue {
       await task.execute();
       task.onSuccess?.();
     } catch (error) {
-      console.error(`Sync task failed: ${task.type}`, error);
-      task.onError?.(error instanceof Error ? error : new Error(String(error)));
-      // Optionally add to retry queue or show error toast
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`Sync task failed: ${task.type} - ${err.message}`, err);
+      // Provide more context for debugging when available
+      if ((err as any).status) {
+        console.error(`HTTP status: ${(err as any).status}`, (err as any).body ?? null);
+      }
+      task.onError?.(err);
+      // Optionally we could implement retries here (exponential backoff)
     } finally {
       this.activeCount--;
       if (this.queue.length > 0) {
