@@ -417,11 +417,24 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const toggleCardStatus = (o: WorkOrder) => {
-    const i = o.currentStepIndex;
-    if (i < 0 || i >= o.steps.length) return;
-    const st = o.steps[i];
-    const newStatus = st.status === "running" ? "hold" : "running";
-    props.onSetStepStatus(o.id, i, newStatus);
+    const override = typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : o.currentStepIndex;
+    if (override < 0) return;
+    // If editing path for this order, mutate pendingStepsMap instead of saving immediately
+    if (pathEditId === o.id) {
+      setPendingStepsMap((m) => {
+        const steps = (m[o.id] ?? o.steps).map((s) => ({ ...s }));
+        if (override < 0 || override >= steps.length) return m;
+        const st = steps[override];
+        const newStatus = st.status === "running" ? "hold" : "running";
+        steps[override] = { ...st, status: newStatus };
+        return { ...m, [o.id]: steps };
+      });
+    } else {
+      if (override < 0 || override >= o.steps.length) return;
+      const st = o.steps[override];
+      const newStatus = st.status === "running" ? "hold" : "running";
+      props.onSetStepStatus(o.id, override, newStatus);
+    }
   };
 
   const isMobile = useIsMobile();
