@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import React, { useContext, useState, ReactNode } from "react";
 
 type SearchContextValue = {
   query: string;
