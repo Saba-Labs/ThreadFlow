@@ -934,9 +934,10 @@ export default function ModelList(props: ModelListProps) {
                                           typeof pendingIndex[o.id] === "number"
                                             ? pendingIndex[o.id]
                                             : o.currentStepIndex;
+                                        const stepsToSave = pendingStepsMap[o.id] ?? o.steps;
                                         await props.onSaveProgress?.(
                                           o.id,
-                                          o.steps,
+                                          stepsToSave,
                                           idx,
                                         );
                                       } finally {
@@ -949,12 +950,20 @@ export default function ModelList(props: ModelListProps) {
                                           const { [o.id]: _drop, ...rest } = m;
                                           return rest;
                                         });
+                                        setPendingStepsMap((m) => {
+                                          const { [o.id]: _drop, ...rest } = m;
+                                          return rest;
+                                        });
                                       }
                                     } else {
                                       setPathEditId(o.id);
                                       setPendingIndex((m) => ({
                                         ...m,
                                         [o.id]: o.currentStepIndex,
+                                      }));
+                                      setPendingStepsMap((m) => ({
+                                        ...m,
+                                        [o.id]: o.steps.map((s) => ({ ...s })),
                                       }));
                                     }
                                   }}
