@@ -564,7 +564,7 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: src.modelName,
         quantity: q,
-        createdAt: Date.now(),
+        createdAt: src.createdAt,
         steps: src.steps.map((st) => ({
           ...st,
           id: uid("step"),
