@@ -304,7 +304,10 @@ export default function ModelList(props: ModelListProps) {
     onPillClick?: (orderId: string, stepIndex: number) => void,
   ) => {
     const overrideIdx = pendingIndex[o.id];
-    const oo = typeof overrideIdx === "number" ? { ...o, currentStepIndex: overrideIdx } : o;
+    const oo =
+      typeof overrideIdx === "number"
+        ? { ...o, currentStepIndex: overrideIdx }
+        : o;
     const currentIdx = oo.currentStepIndex;
     const currentStep = oo.steps[currentIdx];
     const isCurrentRunning =
@@ -425,7 +428,9 @@ export default function ModelList(props: ModelListProps) {
 
   const computeNextIndex = (o: WorkOrder): number => {
     const current =
-      typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : o.currentStepIndex;
+      typeof pendingIndex[o.id] === "number"
+        ? pendingIndex[o.id]
+        : o.currentStepIndex;
     if (current < 0) return o.steps.length > 0 ? 0 : -1;
     const next = current + 1;
     return next <= o.steps.length ? next : o.steps.length;
@@ -433,7 +438,9 @@ export default function ModelList(props: ModelListProps) {
 
   const computePrevIndex = (o: WorkOrder): number => {
     const current =
-      typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : o.currentStepIndex;
+      typeof pendingIndex[o.id] === "number"
+        ? pendingIndex[o.id]
+        : o.currentStepIndex;
     if (current === 0) return -1;
     if (current < 0) return -1;
     return current - 1;
@@ -554,7 +561,10 @@ export default function ModelList(props: ModelListProps) {
                 <tbody>
                   {sorted.map((o) => {
                     const overrideIdx = pendingIndex[o.id];
-                    const ov = typeof overrideIdx === "number" ? { ...o, currentStepIndex: overrideIdx } : o;
+                    const ov =
+                      typeof overrideIdx === "number"
+                        ? { ...o, currentStepIndex: overrideIdx }
+                        : o;
                     const i = ov.currentStepIndex;
                     const step = ov.steps[i];
                     const bg = statusBgClass(ov);
@@ -870,7 +880,10 @@ export default function ModelList(props: ModelListProps) {
                                   onClick={() => {
                                     if (pathEditId === o.id) {
                                       const nextIdx = computePrevIndex(o);
-                                      setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                                      setPendingIndex((m) => ({
+                                        ...m,
+                                        [o.id]: nextIdx,
+                                      }));
                                     } else {
                                       props.onPrev(o.id);
                                     }
@@ -886,7 +899,10 @@ export default function ModelList(props: ModelListProps) {
                                   onClick={() => {
                                     if (pathEditId === o.id) {
                                       const nextIdx = computeNextIndex(o);
-                                      setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                                      setPendingIndex((m) => ({
+                                        ...m,
+                                        [o.id]: nextIdx,
+                                      }));
                                     } else {
                                       props.onNext(o.id);
                                     }
@@ -906,7 +922,11 @@ export default function ModelList(props: ModelListProps) {
                                           typeof pendingIndex[o.id] === "number"
                                             ? pendingIndex[o.id]
                                             : o.currentStepIndex;
-                                        await props.onSaveProgress?.(o.id, o.steps, idx);
+                                        await props.onSaveProgress?.(
+                                          o.id,
+                                          o.steps,
+                                          idx,
+                                        );
                                       } finally {
                                         setPathEditId(null);
                                         setPendingIndex((m) => {
@@ -916,11 +936,22 @@ export default function ModelList(props: ModelListProps) {
                                       }
                                     } else {
                                       setPathEditId(o.id);
-                                      setPendingIndex((m) => ({ ...m, [o.id]: o.currentStepIndex }));
+                                      setPendingIndex((m) => ({
+                                        ...m,
+                                        [o.id]: o.currentStepIndex,
+                                      }));
                                     }
                                   }}
-                                  title={pathEditId === o.id ? "Save path changes" : "Edit path"}
-                                  aria-label={pathEditId === o.id ? "Save path changes" : "Edit path"}
+                                  title={
+                                    pathEditId === o.id
+                                      ? "Save path changes"
+                                      : "Edit path"
+                                  }
+                                  aria-label={
+                                    pathEditId === o.id
+                                      ? "Save path changes"
+                                      : "Edit path"
+                                  }
                                 >
                                   {pathEditId === o.id ? (
                                     <Check className="h-4 w-4" />
@@ -1075,7 +1106,10 @@ export default function ModelList(props: ModelListProps) {
           >
             {sorted.map((o) => {
               const overrideIdx = pendingIndex[o.id];
-              const ov = typeof overrideIdx === "number" ? { ...o, currentStepIndex: overrideIdx } : o;
+              const ov =
+                typeof overrideIdx === "number"
+                  ? { ...o, currentStepIndex: overrideIdx }
+                  : o;
               const i = ov.currentStepIndex;
               const step = ov.steps[i];
               const bg = statusBgClass(ov);
@@ -1548,7 +1582,10 @@ export default function ModelList(props: ModelListProps) {
                           onClick={() => {
                             if (pathEditId === o.id) {
                               const nextIdx = computePrevIndex(o);
-                              setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                              setPendingIndex((m) => ({
+                                ...m,
+                                [o.id]: nextIdx,
+                              }));
                             } else {
                               props.onPrev(o.id);
                             }
@@ -1564,7 +1601,10 @@ export default function ModelList(props: ModelListProps) {
                           onClick={() => {
                             if (pathEditId === o.id) {
                               const nextIdx = computeNextIndex(o);
-                              setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                              setPendingIndex((m) => ({
+                                ...m,
+                                [o.id]: nextIdx,
+                              }));
                             } else {
                               props.onNext(o.id);
                             }
@@ -1586,7 +1626,11 @@ export default function ModelList(props: ModelListProps) {
                                   typeof pendingIndex[o.id] === "number"
                                     ? pendingIndex[o.id]
                                     : o.currentStepIndex;
-                                await props.onSaveProgress?.(o.id, o.steps, idx);
+                                await props.onSaveProgress?.(
+                                  o.id,
+                                  o.steps,
+                                  idx,
+                                );
                               } finally {
                                 setPathEditId(null);
                                 setPendingIndex((m) => {
@@ -1596,11 +1640,22 @@ export default function ModelList(props: ModelListProps) {
                               }
                             } else {
                               setPathEditId(o.id);
-                              setPendingIndex((m) => ({ ...m, [o.id]: o.currentStepIndex }));
+                              setPendingIndex((m) => ({
+                                ...m,
+                                [o.id]: o.currentStepIndex,
+                              }));
                             }
                           }}
-                          title={pathEditId === o.id ? "Save path changes" : "Edit path"}
-                          aria-label={pathEditId === o.id ? "Save path changes" : "Edit path"}
+                          title={
+                            pathEditId === o.id
+                              ? "Save path changes"
+                              : "Edit path"
+                          }
+                          aria-label={
+                            pathEditId === o.id
+                              ? "Save path changes"
+                              : "Edit path"
+                          }
                         >
                           {pathEditId === o.id ? (
                             <Check className="h-5 w-5" />
