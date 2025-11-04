@@ -66,6 +66,7 @@ export default function ModelsRunning() {
           pipeline.updateStepStatus(id, idx, { status })
         }
         onToggleParallelMachine={pipeline.toggleParallelMachine}
+        onSaveProgress={pipeline.saveOrderProgress}
       />
     </div>
   );

@@ -224,6 +224,7 @@ export default function ModelsAll() {
             pipeline.updateStepStatus(id, idx, { status })
           }
           onToggleParallelMachine={pipeline.toggleParallelMachine}
+          onSaveProgress={pipeline.saveOrderProgress}
           setOrderJobWorks={pipeline.setOrderJobWorks}
           setJobWorkAssignments={pipeline.setJobWorkAssignments}
           updateJobWorkAssignmentStatus={pipeline.updateJobWorkAssignmentStatus}

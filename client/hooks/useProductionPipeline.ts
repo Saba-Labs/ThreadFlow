@@ -519,6 +519,34 @@ export function useProductionPipeline() {
     [],
   );
 
+  const saveOrderProgress = useCallback(
+    async (orderId: string, steps: PathStep[], currentStepIndex: number) => {
+      const order = state.orders.find((o) => o.id === orderId);
+      if (!order) return;
+      try {
+        await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modelName: order.modelName,
+            quantity: order.quantity,
+            currentStepIndex,
+            steps,
+          }),
+        });
+        setStore((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === orderId ? { ...o, steps, currentStepIndex } : o,
+          ),
+        }));
+      } catch (error) {
+        console.error("Failed to save order progress:", error);
+        throw error;
+      }
+    },
+    [state.orders],
+  );
+
   const splitOrder = useCallback(
     async (orderId: string, quantities: number[]) => {
       const src = state.orders.find((o) => o.id === orderId);
@@ -650,6 +678,7 @@ export function useProductionPipeline() {
     setCurrentStep,
     splitOrder,
     toggleParallelMachine,
+    saveOrderProgress,
     setOrderJobWorks: (orderId: string, ids: string[]) => {
       setStore((s) => ({
         orders: s.orders.map((o) =>
