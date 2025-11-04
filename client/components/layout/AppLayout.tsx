@@ -13,7 +13,6 @@ import {
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
 import { useSearch } from "@/context/SearchContext";
 
 export default function AppLayout() {
