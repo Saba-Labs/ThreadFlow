@@ -315,15 +315,12 @@ export default function ReStok() {
           <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card">
             <p>No items yet. Add your first item to get started.</p>
           </div>
+        ) : displayItems.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card">
+            <p>No items match your search.</p>
+          </div>
         ) : (
-          (reorderMode && reorderDraftIds
-            ? (reorderDraftIds
-                .map((id) => items.find((i) => i.id === id))
-                .filter(Boolean) as typeof items)
-            : editMode && draftItems
-              ? (draftItems as typeof items)
-              : items
-          ).map((item, index, arr) => {
+          displayItems.map((item, index, arr) => {
             const status = getItemStockStatus(item);
             const isExpanded = expandedItems.has(item.id);
 
