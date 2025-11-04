@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Trash2,
   Plus,
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
 import { useReStok } from "@/context/ReStokContext";
+import PageSearchHeader from "@/components/ui/PageSearchHeader";
 
 export default function ReStok() {
   const {
