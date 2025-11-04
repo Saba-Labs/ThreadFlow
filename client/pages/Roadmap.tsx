@@ -113,6 +113,7 @@ export default function RoadmapPage() {
 
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
+    setAddModelsSearch("");
     setOpenFor(roadmapId);
   };
 
