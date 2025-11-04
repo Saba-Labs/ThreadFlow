@@ -62,6 +62,7 @@ export default function ModelsAll() {
   const [filter, setFilter] = useState<
     "all" | "hold" | "running" | "completed" | "job" | "onboard"
   >("all");
+  const [localQuery, setLocalQuery] = useState("");
 
   const filtered = useMemo(() => {
     const hasPendingJobWork = (
