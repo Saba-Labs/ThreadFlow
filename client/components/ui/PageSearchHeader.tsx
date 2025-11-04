@@ -22,12 +22,12 @@ export default function PageSearchHeader({
   }, [open]);
 
   const handleClose = () => {
+    onChange("");
     setOpen(false);
   };
 
   const handleEscape = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
-      onChange("");
       handleClose();
     }
   };
@@ -44,35 +44,29 @@ export default function PageSearchHeader({
       </button>
 
       {open && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/50"
-            onClick={handleClose}
-          />
-          <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-4 pt-20">
-            <div className="w-full max-w-md">
-              <div className="flex items-center gap-2 bg-white rounded-lg shadow-lg">
-                <input
-                  ref={inputRef}
-                  aria-label="Search input"
-                  placeholder={placeholder}
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  onKeyDown={handleEscape}
-                  className="flex-1 px-4 py-3 text-sm focus:outline-none"
-                />
-                <button
-                  aria-label="Close search"
-                  onClick={handleClose}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-md p-1 hover:bg-gray-100 transition-colors mr-1"
-                  title="Close search"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-4 pt-20 pointer-events-none">
+          <div className="w-full max-w-md pointer-events-auto">
+            <div className="flex items-center gap-2 bg-white rounded-lg shadow-lg border">
+              <input
+                ref={inputRef}
+                aria-label="Search input"
+                placeholder={placeholder}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onKeyDown={handleEscape}
+                className="flex-1 px-4 py-3 text-sm focus:outline-none"
+              />
+              <button
+                aria-label="Close search"
+                onClick={handleClose}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md p-1 hover:bg-gray-100 transition-colors mr-1"
+                title="Close search"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );
