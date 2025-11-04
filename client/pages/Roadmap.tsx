@@ -443,13 +443,21 @@ export default function RoadmapPage() {
       {/* Add Models Modal */}
       <SimpleModal
         open={openFor !== null && !isShared}
-        onOpenChange={(v: boolean) => !v && setOpenFor(null)}
+        onOpenChange={(v: boolean) => {
+          if (!v) {
+            setOpenFor(null);
+            setAddModelsSearch("");
+          }
+        }}
         title="Add Models"
         footer={
           <div className="flex items-center gap-3 justify-end">
             <Button
               variant="outline"
-              onClick={() => setOpenFor(null)}
+              onClick={() => {
+                setOpenFor(null);
+                setAddModelsSearch("");
+              }}
               className="flex-1 sm:flex-none"
             >
               Cancel
@@ -463,32 +471,44 @@ export default function RoadmapPage() {
           </div>
         }
       >
-        <div className="space-y-2">
-          {eligibleOrders.length === 0 ? (
-            <div className="text-center py-8 text-sm text-slate-600">
-              No models available to add
-            </div>
-          ) : (
-            eligibleOrders.map((o) => (
-              <label
-                key={o.id}
-                className="flex items-center gap-3 p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
-              >
-                <Checkbox
-                  checked={selectedModels.includes(o.id)}
-                  onCheckedChange={() => toggleModelSelection(o.id)}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm sm:text-base text-slate-900 truncate">
-                    {o.modelName}
+        <div className="space-y-4">
+          <Input
+            placeholder="Search models..."
+            value={addModelsSearch}
+            onChange={(e) => setAddModelsSearch(e.target.value)}
+            className="h-10"
+          />
+          <div className="space-y-2">
+            {eligibleOrders.length === 0 ? (
+              <div className="text-center py-8 text-sm text-slate-600">
+                No models available to add
+              </div>
+            ) : filteredEligibleOrders.length === 0 ? (
+              <div className="text-center py-8 text-sm text-slate-600">
+                No models match your search
+              </div>
+            ) : (
+              filteredEligibleOrders.map((o) => (
+                <label
+                  key={o.id}
+                  className="flex items-center gap-3 p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+                >
+                  <Checkbox
+                    checked={selectedModels.includes(o.id)}
+                    onCheckedChange={() => toggleModelSelection(o.id)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm sm:text-base text-slate-900 truncate">
+                      {o.modelName}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-0.5">
+                      Qty: {o.quantity}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-600 mt-0.5">
-                    Qty: {o.quantity}
-                  </div>
-                </div>
-              </label>
-            ))
-          )}
+                </label>
+              ))
+            )}
+          </div>
         </div>
       </SimpleModal>
 
