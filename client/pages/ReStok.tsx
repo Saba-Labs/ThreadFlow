@@ -251,6 +251,11 @@ export default function ReStok() {
             Manage your inventory items and stock levels
           </p>
         </div>
+        <PageSearchHeader
+          value={localQuery}
+          onChange={setLocalQuery}
+          placeholder="Search items..."
+        />
       </div>
 
       {/* Action Buttons */}
