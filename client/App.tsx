@@ -20,30 +20,29 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    {/* SearchProvider temporarily disabled */}
-    <FontSizeProvider>
-      {/* WRAP FontSizeProvider if you use it */}
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route
-              path="/settings/production-path"
-              element={<SettingsProductionPath />}
-            />
-            <Route path="/models/all" element={<ModelsAll />} />
-            <Route path="/job-work" element={<JobWork />} />
-            <Route path="/models/new" element={<NewModel />} />
-            <Route path="/models/:id/edit" element={<EditModel />} />
-            <Route path="/roadmap" element={<Roadmap />} />
-            <Route path="/restok" element={<ReStok />} />
-          </Route>
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </FontSizeProvider>
+    <SearchProvider>
+      <FontSizeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route
+                path="/settings/production-path"
+                element={<SettingsProductionPath />}
+              />
+              <Route path="/models/all" element={<ModelsAll />} />
+              <Route path="/job-work" element={<JobWork />} />
+              <Route path="/models/new" element={<NewModel />} />
+              <Route path="/models/:id/edit" element={<EditModel />} />
+              <Route path="/roadmap" element={<Roadmap />} />
+              <Route path="/restok" element={<ReStok />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </FontSizeProvider>
+    </SearchProvider>
   </QueryClientProvider>
 );
 
