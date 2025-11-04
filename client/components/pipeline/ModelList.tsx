@@ -1579,6 +1579,38 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
+                          onClick={async () => {
+                            if (pathEditId === o.id) {
+                              try {
+                                const idx =
+                                  typeof pendingIndex[o.id] === "number"
+                                    ? pendingIndex[o.id]
+                                    : o.currentStepIndex;
+                                await props.onSaveProgress?.(o.id, o.steps, idx);
+                              } finally {
+                                setPathEditId(null);
+                                setPendingIndex((m) => {
+                                  const { [o.id]: _drop, ...rest } = m;
+                                  return rest;
+                                });
+                              }
+                            } else {
+                              setPathEditId(o.id);
+                              setPendingIndex((m) => ({ ...m, [o.id]: o.currentStepIndex }));
+                            }
+                          }}
+                          title={pathEditId === o.id ? "Save path changes" : "Edit path"}
+                          aria-label={pathEditId === o.id ? "Save path changes" : "Edit path"}
+                        >
+                          {pathEditId === o.id ? (
+                            <Check className="h-5 w-5" />
+                          ) : (
+                            <Edit2 className="h-5 w-5" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           onClick={() => {
                             setSplitForId(o.id);
                             setSplitInputs([0]);
