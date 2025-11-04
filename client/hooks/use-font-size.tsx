@@ -1,5 +1,3 @@
-import React, { createContext, useState, useEffect, useMemo, useContext, ReactNode } from "react";
-
 import { createContext, useState, useEffect, useMemo, useContext, ReactNode } from "react";
 
 export type FontSizeOption = "small" | "medium" | "large" | "extra-large";
