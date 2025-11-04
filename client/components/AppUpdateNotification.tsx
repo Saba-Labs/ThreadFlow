@@ -7,6 +7,8 @@ import { AlertCircle, RefreshCw } from "lucide-react";
  * Displays a notification when a new app version is available
  * Must be rendered inside BrowserRouter context
  */
+import { useAppUpdater } from "@/hooks/useAppUpdater";
+
 export function AppUpdateNotification() {
   const { updateAvailable, refreshing, handleRefresh } = useAppUpdater();
 
