@@ -417,24 +417,19 @@ export default function ModelList(props: ModelListProps) {
   };
 
   const toggleCardStatus = (o: WorkOrder) => {
+    // Only allow toggling status while editing the path for this order
+    if (pathEditId !== o.id) return;
     const override = typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : o.currentStepIndex;
     if (override < 0) return;
-    // If editing path for this order, mutate pendingStepsMap instead of saving immediately
-    if (pathEditId === o.id) {
-      setPendingStepsMap((m) => {
-        const steps = (m[o.id] ?? o.steps).map((s) => ({ ...s }));
-        if (override < 0 || override >= steps.length) return m;
-        const st = steps[override];
-        const newStatus = st.status === "running" ? "hold" : "running";
-        steps[override] = { ...st, status: newStatus };
-        return { ...m, [o.id]: steps };
-      });
-    } else {
-      if (override < 0 || override >= o.steps.length) return;
-      const st = o.steps[override];
+    // Mutate pendingStepsMap while editing
+    setPendingStepsMap((m) => {
+      const steps = (m[o.id] ?? o.steps).map((s) => ({ ...s }));
+      if (override < 0 || override >= steps.length) return m;
+      const st = steps[override];
       const newStatus = st.status === "running" ? "hold" : "running";
-      props.onSetStepStatus(o.id, override, newStatus);
-    }
+      steps[override] = { ...st, status: newStatus };
+      return { ...m, [o.id]: steps };
+    });
   };
 
   const isMobile = useIsMobile();
