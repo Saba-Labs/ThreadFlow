@@ -210,6 +210,11 @@ export default function ModelsAll() {
             </SelectContent>
           </Select>
         </div>
+        <PageSearchHeader
+          value={localQuery}
+          onChange={setLocalQuery}
+          placeholder="Search models..."
+        />
       </div>
 
       <div className={viewMode === "list" ? "-mx-4 px-0" : "-mx-8 px-4"}>
