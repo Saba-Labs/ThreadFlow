@@ -75,6 +75,8 @@ export default function ModelList(props: ModelListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0]);
+  const [pathEditId, setPathEditId] = useState<string | null>(null);
+  const [pendingIndex, setPendingIndex] = useState<Record<string, number>>({});
   const jobWorks = useJobWorks();
   const [jwForId, setJwForId] = useState<string | null>(null);
   const [jwSelected, setJwSelected] = useState<string[]>([]);
