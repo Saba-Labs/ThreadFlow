@@ -221,9 +221,7 @@ export default function ReStok() {
     const currentItems = editMode && draftItems ? draftItems : items;
     const q = localQuery.trim().toLowerCase();
     if (!q) return currentItems;
-    return currentItems.filter((item) =>
-      item.name.toLowerCase().includes(q),
-    );
+    return currentItems.filter((item) => item.name.toLowerCase().includes(q));
   }, [items, draftItems, editMode, localQuery]);
 
   const displayItems = useMemo(() => {

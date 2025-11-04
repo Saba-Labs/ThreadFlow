@@ -100,9 +100,9 @@ export default function RoadmapPage() {
   const filteredEligibleOrders = useMemo(() => {
     const q = addModelsSearch.trim().toLowerCase();
     if (!q) return eligibleOrders;
-    return eligibleOrders.filter((o) =>
-      o.modelName.toLowerCase().includes(q) ||
-      String(o.quantity).includes(q)
+    return eligibleOrders.filter(
+      (o) =>
+        o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
     );
   }, [eligibleOrders, addModelsSearch]);
 
