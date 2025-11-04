@@ -287,16 +287,16 @@ export default function RoadmapPage() {
                         </Button>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                      <div className="flex items-center justify-between gap-2 sm:gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                          <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-sm sm:text-lg flex-shrink-0">
                             {r.title.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
+                            <CardTitle className="text-white text-sm sm:text-lg font-semibold truncate">
                               {r.title}
                             </CardTitle>
-                            <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
+                            <p className="text-blue-100 text-xs mt-0.5">
                               {r.items.length} model
                               {r.items.length !== 1 ? "s" : ""}
                             </p>
@@ -304,7 +304,7 @@ export default function RoadmapPage() {
                         </div>
 
                         {!isShared && (
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                             <Button
                               size="sm"
                               variant="secondary"
