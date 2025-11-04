@@ -166,7 +166,7 @@ export default function RoadmapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+    
       <div className="w-full">
         {/* Header */}
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8">
@@ -654,6 +654,6 @@ export default function RoadmapPage() {
           )}
         </div>
       </SimpleModal>
-    </div>
+    
   );
 }
