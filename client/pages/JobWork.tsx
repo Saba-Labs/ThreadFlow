@@ -229,18 +229,25 @@ export default function JobWork() {
             Create, edit, and delete Job Work items.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-muted-foreground">Sort</label>
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">High Running</SelectItem>
-              <SelectItem value="linked">High Linked</SelectItem>
-              <SelectItem value="az">A - Z</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-muted-foreground">Sort</label>
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">High Running</SelectItem>
+                <SelectItem value="linked">High Linked</SelectItem>
+                <SelectItem value="az">A - Z</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <PageSearchHeader
+            value={localQuery}
+            onChange={setLocalQuery}
+            placeholder="Search job works..."
+          />
         </div>
       </div>
 
