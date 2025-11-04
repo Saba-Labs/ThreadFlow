@@ -1503,9 +1503,7 @@ export default function ModelList(props: ModelListProps) {
                                             ]),
                                           );
 
-                                          return allNames.length > 0
-                                            ? allNames[0]
-                                            : "Job Work";
+                                          return "Job Work";
                                         }
                                         return cap(displayStatus);
                                       })()}
