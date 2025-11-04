@@ -166,8 +166,8 @@ export default function RoadmapPage() {
   };
 
   return (
-    
-      <div className="w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+      
         {/* Header */}
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8">
           <div className="flex items-center justify-between gap-4 mb-3">
@@ -438,7 +438,7 @@ export default function RoadmapPage() {
             </div>
           </div>
         )}
-      </div>
+      
 
       {/* Add Models Modal */}
       <SimpleModal
@@ -654,6 +654,6 @@ export default function RoadmapPage() {
           )}
         </div>
       </SimpleModal>
-    
+    </div>
   );
 }
