@@ -186,7 +186,7 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
       "UPDATE work_orders SET model_name = COALESCE($1, model_name), quantity = COALESCE($2, quantity), current_step_index = COALESCE($3, current_step_index), created_at = COALESCE($4, created_at), updated_at = $5 WHERE id = $6",
       [
         modelName || null,
-        quantity || null,
+        quantity !== undefined && quantity !== null ? quantity : null,
         currentStepIndex !== undefined ? currentStepIndex : null,
         typeof createdAt === "number" ? createdAt : null,
         now,
@@ -195,7 +195,32 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
     );
 
     // Update steps only if provided
-    if (steps && steps.length > 0) {
+    if (steps !== undefined) {
+      if (!Array.isArray(steps)) {
+        return res.status(400).json({ error: "Steps must be an array" });
+      }
+
+      // Validate steps to avoid inserting malformed rows that cause DB errors
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        if (!step || !step.id || !step.kind || !step.status) {
+          return res.status(400).json({
+            error: `Invalid step at index ${i}: id, kind and status are required`,
+          });
+        }
+
+        // Ensure numeric fields are numbers
+        step.activeMachines =
+          typeof step.activeMachines === "number"
+            ? step.activeMachines
+            : parseInt(step.activeMachines || "0", 10);
+        step.quantityDone =
+          typeof step.quantityDone === "number"
+            ? step.quantityDone
+            : parseInt(step.quantityDone || "0", 10);
+      }
+
+      // Replace all steps for the order
       await query("DELETE FROM path_steps WHERE order_id = $1", [id]);
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
@@ -210,8 +235,8 @@ export const updateWorkOrder: RequestHandler = async (req, res) => {
             step.machineType || null,
             step.externalUnitName || null,
             step.status,
-            step.activeMachines,
-            step.quantityDone,
+            step.activeMachines || 0,
+            step.quantityDone || 0,
             i,
             now,
             now,
