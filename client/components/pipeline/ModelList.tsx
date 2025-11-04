@@ -48,6 +48,11 @@ interface ModelListProps {
     stepIndex: number,
     machineIndex: number,
   ) => void;
+  onSaveProgress?: (
+    orderId: string,
+    steps: PathStep[],
+    currentStepIndex: number,
+  ) => Promise<void> | void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void | Promise<void>;
   setJobWorkAssignments?: (
     orderId: string,
