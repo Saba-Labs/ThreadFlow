@@ -44,6 +44,9 @@ export default function ReStok() {
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
+  // Local search state
+  const [localQuery, setLocalQuery] = useState("");
+
   const getStockStatus = (quantity: number, lowStock: number) => {
     if (quantity === 0) return "out-of-stock";
     if (quantity < lowStock) return "low-stock";
