@@ -799,11 +799,11 @@ export default function ModelList(props: ModelListProps) {
                                   return (
                                     <>
                                       <button
-                                        onClick={() => toggleCardStatus(o)}
+                                        onClick={pathEditId === o.id ? () => toggleCardStatus(o) : undefined}
                                       >
                                         <Badge
                                           variant={"default"}
-                                          className={`cursor-pointer whitespace-nowrap ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                          className={`${pathEditId === o.id ? "cursor-pointer" : ""} whitespace-nowrap ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
                                             hasPendingJW
                                               ? "bg-purple-700 dark:bg-purple-600 text-white"
                                               : displayStatus === "running"
