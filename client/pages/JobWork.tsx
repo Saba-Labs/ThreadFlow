@@ -22,7 +22,6 @@ import {
 import { Trash2, Save, Plus, Pencil, Calendar } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
-import { useSearch } from "@/context/SearchContext";
 import {
   Select,
   SelectTrigger,
@@ -30,6 +29,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import PageSearchHeader from "@/components/ui/PageSearchHeader";
 
 export default function JobWork() {
   const list = useJobWorks();
