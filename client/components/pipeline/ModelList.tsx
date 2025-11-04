@@ -423,6 +423,22 @@ export default function ModelList(props: ModelListProps) {
   const showDetails = isMobile ? (props.showDetails ?? true) : true;
   const emptyColSpan = showDetails ? 7 : 2;
 
+  const computeNextIndex = (o: WorkOrder): number => {
+    const current =
+      typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : o.currentStepIndex;
+    if (current < 0) return o.steps.length > 0 ? 0 : -1;
+    const next = current + 1;
+    return next <= o.steps.length ? next : o.steps.length;
+  };
+
+  const computePrevIndex = (o: WorkOrder): number => {
+    const current =
+      typeof pendingIndex[o.id] === "number" ? pendingIndex[o.id] : o.currentStepIndex;
+    if (current === 0) return -1;
+    if (current < 0) return -1;
+    return current - 1;
+  };
+
   const [toggledIds, setToggledIds] = useState<string[]>([]);
   const [selectedOrderForJWModal, setSelectedOrderForJWModal] =
     useState<WorkOrder | null>(null);
