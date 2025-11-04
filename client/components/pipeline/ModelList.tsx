@@ -1545,7 +1545,14 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => props.onPrev(o.id)}
+                          onClick={() => {
+                            if (pathEditId === o.id) {
+                              const nextIdx = computePrevIndex(o);
+                              setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                            } else {
+                              props.onPrev(o.id);
+                            }
+                          }}
                           title="Previous step"
                           aria-label="Previous step"
                         >
@@ -1554,7 +1561,14 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => props.onNext(o.id)}
+                          onClick={() => {
+                            if (pathEditId === o.id) {
+                              const nextIdx = computeNextIndex(o);
+                              setPendingIndex((m) => ({ ...m, [o.id]: nextIdx }));
+                            } else {
+                              props.onNext(o.id);
+                            }
+                          }}
                           title="Next step"
                           aria-label="Next step"
                         >
