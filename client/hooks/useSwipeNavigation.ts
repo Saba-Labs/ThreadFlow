@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "./use-mobile";
 
@@ -37,8 +36,8 @@ export function useSwipeNavigation(config: SwipeNavigationConfig) {
       const touchEndX = e.changedTouches[0].clientX;
       const touchEndY = e.changedTouches[0].clientY;
 
-      const deltaX = touchEndX - touchStartX.current;
-      const deltaY = touchEndY - touchStartY.current;
+      const deltaX = touchEndX - touchStartX.current!;
+      const deltaY = touchEndY - touchStartY.current!;
 
       // Only consider swipe if horizontal movement is greater than vertical
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
