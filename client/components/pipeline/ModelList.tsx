@@ -18,6 +18,8 @@ import {
   Pencil,
   CalendarDays,
   Plus,
+  Check,
+  Edit2,
 } from "lucide-react";
 import type {
   PathStep,
@@ -46,6 +48,11 @@ interface ModelListProps {
     stepIndex: number,
     machineIndex: number,
   ) => void;
+  onSaveProgress?: (
+    orderId: string,
+    steps: PathStep[],
+    currentStepIndex: number,
+  ) => Promise<void> | void;
   setOrderJobWorks?: (orderId: string, ids: string[]) => void | Promise<void>;
   setJobWorkAssignments?: (
     orderId: string,
@@ -68,6 +75,8 @@ export default function ModelList(props: ModelListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [splitForId, setSplitForId] = useState<string | null>(null);
   const [splitInputs, setSplitInputs] = useState<number[]>([0]);
+  const [pathEditId, setPathEditId] = useState<string | null>(null);
+  const [pendingIndex, setPendingIndex] = useState<Record<string, number>>({});
   const jobWorks = useJobWorks();
   const [jwForId, setJwForId] = useState<string | null>(null);
   const [jwSelected, setJwSelected] = useState<string[]>([]);
@@ -294,8 +303,13 @@ export default function ModelList(props: ModelListProps) {
     o: WorkOrder,
     onPillClick?: (orderId: string, stepIndex: number) => void,
   ) => {
-    const currentIdx = o.currentStepIndex;
-    const currentStep = o.steps[currentIdx];
+    const overrideIdx = pendingIndex[o.id];
+    const oo =
+      typeof overrideIdx === "number"
+        ? { ...o, currentStepIndex: overrideIdx }
+        : o;
+    const currentIdx = oo.currentStepIndex;
+    const currentStep = oo.steps[currentIdx];
     const isCurrentRunning =
       currentIdx >= 0 &&
       currentIdx < o.steps.length &&
@@ -412,6 +426,26 @@ export default function ModelList(props: ModelListProps) {
   const showDetails = isMobile ? (props.showDetails ?? true) : true;
   const emptyColSpan = showDetails ? 7 : 2;
 
+  const computeNextIndex = (o: WorkOrder): number => {
+    const current =
+      typeof pendingIndex[o.id] === "number"
+        ? pendingIndex[o.id]
+        : o.currentStepIndex;
+    if (current < 0) return o.steps.length > 0 ? 0 : -1;
+    const next = current + 1;
+    return next <= o.steps.length ? next : o.steps.length;
+  };
+
+  const computePrevIndex = (o: WorkOrder): number => {
+    const current =
+      typeof pendingIndex[o.id] === "number"
+        ? pendingIndex[o.id]
+        : o.currentStepIndex;
+    if (current === 0) return -1;
+    if (current < 0) return -1;
+    return current - 1;
+  };
+
   const [toggledIds, setToggledIds] = useState<string[]>([]);
   const [selectedOrderForJWModal, setSelectedOrderForJWModal] =
     useState<WorkOrder | null>(null);
@@ -526,9 +560,14 @@ export default function ModelList(props: ModelListProps) {
                 </thead>
                 <tbody>
                   {sorted.map((o) => {
-                    const i = o.currentStepIndex;
-                    const step = o.steps[i];
-                    const bg = statusBgClass(o);
+                    const overrideIdx = pendingIndex[o.id];
+                    const ov =
+                      typeof overrideIdx === "number"
+                        ? { ...o, currentStepIndex: overrideIdx }
+                        : o;
+                    const i = ov.currentStepIndex;
+                    const step = ov.steps[i];
+                    const bg = statusBgClass(ov);
                     const isExpanded = toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
@@ -583,8 +622,8 @@ export default function ModelList(props: ModelListProps) {
                           {showDetails && (
                             <td className="p-3" style={{ width: "240px" }}>
                               <div className="flex flex-wrap items-center gap-1">
-                                {getPathLetterPills(o, (orderId, stepIdx) => {
-                                  const stepAtIdx = o.steps[stepIdx];
+                                {getPathLetterPills(ov, (orderId, stepIdx) => {
+                                  const stepAtIdx = ov.steps[stepIdx];
                                   if (
                                     stepAtIdx.kind === "machine" &&
                                     stepAtIdx.machineType
@@ -595,7 +634,7 @@ export default function ModelList(props: ModelListProps) {
                                     if (machineIndex >= 0) {
                                       props.onToggleParallelMachine(
                                         orderId,
-                                        o.currentStepIndex,
+                                        i,
                                         machineIndex,
                                       );
                                     }
@@ -838,7 +877,17 @@ export default function ModelList(props: ModelListProps) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => props.onPrev(o.id)}
+                                  onClick={() => {
+                                    if (pathEditId === o.id) {
+                                      const nextIdx = computePrevIndex(o);
+                                      setPendingIndex((m) => ({
+                                        ...m,
+                                        [o.id]: nextIdx,
+                                      }));
+                                    } else {
+                                      props.onPrev(o.id);
+                                    }
+                                  }}
                                   title="Previous step"
                                   aria-label="Previous step"
                                 >
@@ -847,11 +896,68 @@ export default function ModelList(props: ModelListProps) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => props.onNext(o.id)}
+                                  onClick={() => {
+                                    if (pathEditId === o.id) {
+                                      const nextIdx = computeNextIndex(o);
+                                      setPendingIndex((m) => ({
+                                        ...m,
+                                        [o.id]: nextIdx,
+                                      }));
+                                    } else {
+                                      props.onNext(o.id);
+                                    }
+                                  }}
                                   title="Next step"
                                   aria-label="Next step"
                                 >
                                   <SkipForward className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={async () => {
+                                    if (pathEditId === o.id) {
+                                      try {
+                                        const idx =
+                                          typeof pendingIndex[o.id] === "number"
+                                            ? pendingIndex[o.id]
+                                            : o.currentStepIndex;
+                                        await props.onSaveProgress?.(
+                                          o.id,
+                                          o.steps,
+                                          idx,
+                                        );
+                                      } finally {
+                                        setPathEditId(null);
+                                        setPendingIndex((m) => {
+                                          const { [o.id]: _drop, ...rest } = m;
+                                          return rest;
+                                        });
+                                      }
+                                    } else {
+                                      setPathEditId(o.id);
+                                      setPendingIndex((m) => ({
+                                        ...m,
+                                        [o.id]: o.currentStepIndex,
+                                      }));
+                                    }
+                                  }}
+                                  title={
+                                    pathEditId === o.id
+                                      ? "Save path changes"
+                                      : "Edit path"
+                                  }
+                                  aria-label={
+                                    pathEditId === o.id
+                                      ? "Save path changes"
+                                      : "Edit path"
+                                  }
+                                >
+                                  {pathEditId === o.id ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Edit2 className="h-4 w-4" />
+                                  )}
                                 </Button>
                                 <Button
                                   size="icon"
@@ -911,9 +1017,9 @@ export default function ModelList(props: ModelListProps) {
                                     </span>
                                     <div className="flex flex-wrap items-center gap-1 mt-1">
                                       {getPathLetterPills(
-                                        o,
+                                        ov,
                                         (orderId, stepIdx) => {
-                                          const stepAtIdx = o.steps[stepIdx];
+                                          const stepAtIdx = ov.steps[stepIdx];
                                           if (
                                             stepAtIdx.kind === "machine" &&
                                             stepAtIdx.machineType
@@ -927,7 +1033,7 @@ export default function ModelList(props: ModelListProps) {
                                             if (machineIndex >= 0) {
                                               props.onToggleParallelMachine(
                                                 orderId,
-                                                o.currentStepIndex,
+                                                i,
                                                 machineIndex,
                                               );
                                             }
@@ -999,9 +1105,14 @@ export default function ModelList(props: ModelListProps) {
             }
           >
             {sorted.map((o) => {
-              const i = o.currentStepIndex;
-              const step = o.steps[i];
-              const bg = statusBgClass(o);
+              const overrideIdx = pendingIndex[o.id];
+              const ov =
+                typeof overrideIdx === "number"
+                  ? { ...o, currentStepIndex: overrideIdx }
+                  : o;
+              const i = ov.currentStepIndex;
+              const step = ov.steps[i];
+              const bg = statusBgClass(ov);
               const isExpandedMobile = toggledIds.includes(o.id);
               return (
                 <div
@@ -1052,8 +1163,8 @@ export default function ModelList(props: ModelListProps) {
                               : "flex flex-wrap items-center gap-1 mt-1"
                           }
                         >
-                          {getPathLetterPills(o, (orderId, stepIdx) => {
-                            const stepAtIdx = o.steps[stepIdx];
+                          {getPathLetterPills(ov, (orderId, stepIdx) => {
+                            const stepAtIdx = ov.steps[stepIdx];
                             if (
                               stepAtIdx.kind === "machine" &&
                               stepAtIdx.machineType
@@ -1064,7 +1175,7 @@ export default function ModelList(props: ModelListProps) {
                               if (machineIndex >= 0) {
                                 props.onToggleParallelMachine(
                                   orderId,
-                                  o.currentStepIndex,
+                                  i,
                                   machineIndex,
                                 );
                               }
@@ -1468,7 +1579,17 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => props.onPrev(o.id)}
+                          onClick={() => {
+                            if (pathEditId === o.id) {
+                              const nextIdx = computePrevIndex(o);
+                              setPendingIndex((m) => ({
+                                ...m,
+                                [o.id]: nextIdx,
+                              }));
+                            } else {
+                              props.onPrev(o.id);
+                            }
+                          }}
                           title="Previous step"
                           aria-label="Previous step"
                         >
@@ -1477,7 +1598,17 @@ export default function ModelList(props: ModelListProps) {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => props.onNext(o.id)}
+                          onClick={() => {
+                            if (pathEditId === o.id) {
+                              const nextIdx = computeNextIndex(o);
+                              setPendingIndex((m) => ({
+                                ...m,
+                                [o.id]: nextIdx,
+                              }));
+                            } else {
+                              props.onNext(o.id);
+                            }
+                          }}
                           title="Next step"
                           aria-label="Next step"
                         >
@@ -1485,6 +1616,53 @@ export default function ModelList(props: ModelListProps) {
                         </Button>
                       </div>
                       <div className="flex gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={async () => {
+                            if (pathEditId === o.id) {
+                              try {
+                                const idx =
+                                  typeof pendingIndex[o.id] === "number"
+                                    ? pendingIndex[o.id]
+                                    : o.currentStepIndex;
+                                await props.onSaveProgress?.(
+                                  o.id,
+                                  o.steps,
+                                  idx,
+                                );
+                              } finally {
+                                setPathEditId(null);
+                                setPendingIndex((m) => {
+                                  const { [o.id]: _drop, ...rest } = m;
+                                  return rest;
+                                });
+                              }
+                            } else {
+                              setPathEditId(o.id);
+                              setPendingIndex((m) => ({
+                                ...m,
+                                [o.id]: o.currentStepIndex,
+                              }));
+                            }
+                          }}
+                          title={
+                            pathEditId === o.id
+                              ? "Save path changes"
+                              : "Edit path"
+                          }
+                          aria-label={
+                            pathEditId === o.id
+                              ? "Save path changes"
+                              : "Edit path"
+                          }
+                        >
+                          {pathEditId === o.id ? (
+                            <Check className="h-5 w-5" />
+                          ) : (
+                            <Edit2 className="h-5 w-5" />
+                          )}
+                        </Button>
                         <Button
                           size="icon"
                           variant="ghost"

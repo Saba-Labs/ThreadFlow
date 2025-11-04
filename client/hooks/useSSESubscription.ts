@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 
 type DataChangeCallback = (event: {
   type:
@@ -8,8 +8,6 @@ type DataChangeCallback = (event: {
     | "restok_updated"
     | "roadmaps_updated";
 }) => void;
-
-import { useRef, useEffect } from "react";
 
 export function useSSESubscription(onDataChange: DataChangeCallback) {
   const callbackRef = useRef(onDataChange);
