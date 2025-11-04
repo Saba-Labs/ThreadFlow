@@ -99,15 +99,14 @@ export default function ModelsAll() {
     );
   }, [pipeline.orders, filter]);
 
-  const { query } = useSearch();
   const visible = useMemo(() => {
-    const q = (query || "").trim().toLowerCase();
+    const q = localQuery.trim().toLowerCase();
     if (!q) return filtered;
     return filtered.filter(
       (o) =>
         o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
     );
-  }, [filtered, query]);
+  }, [filtered, localQuery]);
 
   const [showDetails, setShowDetails] = useState(false);
   const isMobile = useIsMobile();
