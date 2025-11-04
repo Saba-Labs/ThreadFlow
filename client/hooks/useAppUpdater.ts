@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import React, { useState, useRef, useEffect } from "react";
+
 export function useAppUpdater() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
