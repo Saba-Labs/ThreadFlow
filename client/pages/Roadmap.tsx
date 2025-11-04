@@ -255,7 +255,7 @@ export default function RoadmapPage() {
                   key={r.id}
                   className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
                 >
-                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 sm:p-6 border-0">
+                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
                     {editingTitleId === r.id ? (
                       <div className="flex items-center gap-2 w-full">
                         <Input
@@ -341,9 +341,9 @@ export default function RoadmapPage() {
                     )}
                   </CardHeader>
 
-                  <CardContent className="p-3 sm:p-6">
+                  <CardContent className="p-4 sm:p-6">
                     {r.items.length === 0 ? (
-                      <div className="rounded-xl border-2 border-dashed border-slate-200 p-4 sm:p-8 text-center bg-slate-50/50">
+                      <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 sm:p-8 text-center bg-slate-50/50">
                         <div className="text-sm text-slate-600 mb-3">
                           No models added yet
                         </div>
