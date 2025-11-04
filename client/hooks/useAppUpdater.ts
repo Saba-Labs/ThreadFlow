@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from "react";
-
 import React, { useState, useRef, useEffect } from "react";
 
 export function useAppUpdater() {
