@@ -79,6 +79,7 @@ export default function RoadmapPage() {
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
+  const [addModelsSearch, setAddModelsSearch] = useState("");
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -96,6 +97,15 @@ export default function RoadmapPage() {
     });
   }, [pipeline.orders]);
 
+  const filteredEligibleOrders = useMemo(() => {
+    const q = addModelsSearch.trim().toLowerCase();
+    if (!q) return eligibleOrders;
+    return eligibleOrders.filter(
+      (o) =>
+        o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
+    );
+  }, [eligibleOrders, addModelsSearch]);
+
   const handleAddRoadmap = () => {
     setNewRoadmapTitle("");
     setShowCreateModal(true);
@@ -103,6 +113,7 @@ export default function RoadmapPage() {
 
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
+    setAddModelsSearch("");
     setOpenFor(roadmapId);
   };
 
@@ -237,8 +248,8 @@ export default function RoadmapPage() {
 
         {/* Roadmaps Grid */}
         {roadmaps.length > 0 && (
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <div className="px-0 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-0 sm:gap-6 px-2 sm:px-0">
               {roadmaps.map((r) => (
                 <Card
                   key={r.id}
@@ -276,16 +287,16 @@ export default function RoadmapPage() {
                         </Button>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                      <div className="flex items-center justify-between gap-2 sm:gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                          <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-sm sm:text-lg flex-shrink-0">
                             {r.title.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <CardTitle className="text-white text-base sm:text-lg font-semibold truncate">
+                            <CardTitle className="text-white text-sm sm:text-lg font-semibold truncate">
                               {r.title}
                             </CardTitle>
-                            <p className="text-blue-100 text-xs sm:text-sm mt-0.5">
+                            <p className="text-blue-100 text-xs mt-0.5">
                               {r.items.length} model
                               {r.items.length !== 1 ? "s" : ""}
                             </p>
@@ -293,7 +304,7 @@ export default function RoadmapPage() {
                         </div>
 
                         {!isShared && (
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                             <Button
                               size="sm"
                               variant="secondary"
@@ -355,13 +366,13 @@ export default function RoadmapPage() {
                             className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
                           >
                             <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-sm sm:text-base text-slate-900 truncate">
+                              <div className="font-semibold text-xs sm:text-base text-slate-900 truncate">
                                 {it.modelName} ({it.quantity})
                               </div>
                             </div>
 
                             {!isShared && (
-                              <div className="flex items-center gap-1 flex-shrink-0">
+                              <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                                 <Button
                                   size="icon"
                                   variant="ghost"
@@ -432,13 +443,21 @@ export default function RoadmapPage() {
       {/* Add Models Modal */}
       <SimpleModal
         open={openFor !== null && !isShared}
-        onOpenChange={(v: boolean) => !v && setOpenFor(null)}
+        onOpenChange={(v: boolean) => {
+          if (!v) {
+            setOpenFor(null);
+            setAddModelsSearch("");
+          }
+        }}
         title="Add Models"
         footer={
           <div className="flex items-center gap-3 justify-end">
             <Button
               variant="outline"
-              onClick={() => setOpenFor(null)}
+              onClick={() => {
+                setOpenFor(null);
+                setAddModelsSearch("");
+              }}
               className="flex-1 sm:flex-none"
             >
               Cancel
@@ -452,32 +471,44 @@ export default function RoadmapPage() {
           </div>
         }
       >
-        <div className="space-y-2">
-          {eligibleOrders.length === 0 ? (
-            <div className="text-center py-8 text-sm text-slate-600">
-              No models available to add
-            </div>
-          ) : (
-            eligibleOrders.map((o) => (
-              <label
-                key={o.id}
-                className="flex items-center gap-3 p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
-              >
-                <Checkbox
-                  checked={selectedModels.includes(o.id)}
-                  onCheckedChange={() => toggleModelSelection(o.id)}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm sm:text-base text-slate-900 truncate">
-                    {o.modelName}
+        <div className="space-y-4">
+          <Input
+            placeholder="Search models..."
+            value={addModelsSearch}
+            onChange={(e) => setAddModelsSearch(e.target.value)}
+            className="h-10"
+          />
+          <div className="space-y-2">
+            {eligibleOrders.length === 0 ? (
+              <div className="text-center py-8 text-sm text-slate-600">
+                No models available to add
+              </div>
+            ) : filteredEligibleOrders.length === 0 ? (
+              <div className="text-center py-8 text-sm text-slate-600">
+                No models match your search
+              </div>
+            ) : (
+              filteredEligibleOrders.map((o) => (
+                <label
+                  key={o.id}
+                  className="flex items-center gap-3 p-3 sm:p-4 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+                >
+                  <Checkbox
+                    checked={selectedModels.includes(o.id)}
+                    onCheckedChange={() => toggleModelSelection(o.id)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm sm:text-base text-slate-900 truncate">
+                      {o.modelName}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-0.5">
+                      Qty: {o.quantity}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-600 mt-0.5">
-                    Qty: {o.quantity}
-                  </div>
-                </div>
-              </label>
-            ))
-          )}
+                </label>
+              ))
+            )}
+          </div>
         </div>
       </SimpleModal>
 

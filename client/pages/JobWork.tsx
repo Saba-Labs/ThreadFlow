@@ -22,7 +22,6 @@ import {
 import { Trash2, Save, Plus, Pencil, Calendar } from "lucide-react";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
-import { useSearch } from "@/context/SearchContext";
 import {
   Select,
   SelectTrigger,
@@ -30,6 +29,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import PageSearchHeader from "@/components/ui/PageSearchHeader";
 
 export default function JobWork() {
   const list = useJobWorks();
@@ -59,6 +59,9 @@ export default function JobWork() {
 
   // Confirmation state for deletion
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Local search state
+  const [localQuery, setLocalQuery] = useState("");
 
   useEffect(() => {
     if (!modalOpen) {
@@ -175,11 +178,10 @@ export default function JobWork() {
     return Array.from(set);
   };
 
-  const { query } = useSearch();
   const [sortBy, setSortBy] = useState<"pending" | "linked" | "az">("az");
 
   const displayed = ((): typeof local => {
-    const q = (query || "").trim().toLowerCase();
+    const q = localQuery.trim().toLowerCase();
     const filtered = q
       ? local.filter((j) => {
           if (j.name.toLowerCase().includes(q)) return true;
@@ -227,18 +229,25 @@ export default function JobWork() {
             Create, edit, and delete Job Work items.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-muted-foreground">Sort</label>
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">High Running</SelectItem>
-              <SelectItem value="linked">High Linked</SelectItem>
-              <SelectItem value="az">A - Z</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-muted-foreground">Sort</label>
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">High Running</SelectItem>
+                <SelectItem value="linked">High Linked</SelectItem>
+                <SelectItem value="az">A - Z</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <PageSearchHeader
+            value={localQuery}
+            onChange={setLocalQuery}
+            placeholder="Search job works..."
+          />
         </div>
       </div>
 

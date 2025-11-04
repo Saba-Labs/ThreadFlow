@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AppUpdateNotification } from "@/components/AppUpdateNotification";
-import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 // Header search dispatches a global event to avoid circular imports with SearchProvider
 
@@ -438,11 +437,6 @@ export default function AppLayout() {
                   </Button>
                 </div>
               )}
-
-              {/* Header search icon */}
-              <div className="mr-2 hidden sm:block">
-                <HeaderSearch />
-              </div>
 
               {/* Mobile menu button */}
               <div className="sm:hidden">

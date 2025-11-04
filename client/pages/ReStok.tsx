@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Trash2,
   Plus,
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
 import { useReStok } from "@/context/ReStokContext";
+import PageSearchHeader from "@/components/ui/PageSearchHeader";
 
 export default function ReStok() {
   const {
@@ -42,6 +43,9 @@ export default function ReStok() {
   // Edit Item Modal
   const [showEditItemModal, setShowEditItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+
+  // Local search state
+  const [localQuery, setLocalQuery] = useState("");
 
   const getStockStatus = (quantity: number, lowStock: number) => {
     if (quantity === 0) return "out-of-stock";
@@ -213,6 +217,21 @@ export default function ReStok() {
       (item) => item.id === id,
     );
 
+  const filteredItems = useMemo(() => {
+    const currentItems = editMode && draftItems ? draftItems : items;
+    const q = localQuery.trim().toLowerCase();
+    if (!q) return currentItems;
+    return currentItems.filter((item) => item.name.toLowerCase().includes(q));
+  }, [items, draftItems, editMode, localQuery]);
+
+  const displayItems = useMemo(() => {
+    return reorderMode && reorderDraftIds
+      ? (reorderDraftIds
+          .map((id) => filteredItems.find((i) => i.id === id))
+          .filter(Boolean) as typeof filteredItems)
+      : filteredItems;
+  }, [filteredItems, reorderMode, reorderDraftIds]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -230,6 +249,11 @@ export default function ReStok() {
             Manage your inventory items and stock levels
           </p>
         </div>
+        <PageSearchHeader
+          value={localQuery}
+          onChange={setLocalQuery}
+          placeholder="Search items..."
+        />
       </div>
 
       {/* Action Buttons */}
@@ -289,15 +313,12 @@ export default function ReStok() {
           <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card">
             <p>No items yet. Add your first item to get started.</p>
           </div>
+        ) : displayItems.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground border rounded-lg bg-card">
+            <p>No items match your search.</p>
+          </div>
         ) : (
-          (reorderMode && reorderDraftIds
-            ? (reorderDraftIds
-                .map((id) => items.find((i) => i.id === id))
-                .filter(Boolean) as typeof items)
-            : editMode && draftItems
-              ? (draftItems as typeof items)
-              : items
-          ).map((item, index, arr) => {
+          displayItems.map((item, index, arr) => {
             const status = getItemStockStatus(item);
             const isExpanded = expandedItems.has(item.id);
 

@@ -14,8 +14,8 @@ import {
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Eye, EyeOff, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSearch } from "@/context/SearchContext";
 import { toast } from "@/hooks/use-toast";
+import PageSearchHeader from "@/components/ui/PageSearchHeader";
 
 export default function ModelsAll() {
   const pipeline = useProductionPipeline();
@@ -62,6 +62,7 @@ export default function ModelsAll() {
   const [filter, setFilter] = useState<
     "all" | "hold" | "running" | "completed" | "job" | "onboard"
   >("all");
+  const [localQuery, setLocalQuery] = useState("");
 
   const filtered = useMemo(() => {
     const hasPendingJobWork = (
@@ -98,15 +99,14 @@ export default function ModelsAll() {
     );
   }, [pipeline.orders, filter]);
 
-  const { query } = useSearch();
   const visible = useMemo(() => {
-    const q = (query || "").trim().toLowerCase();
+    const q = localQuery.trim().toLowerCase();
     if (!q) return filtered;
     return filtered.filter(
       (o) =>
         o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
     );
-  }, [filtered, query]);
+  }, [filtered, localQuery]);
 
   const [showDetails, setShowDetails] = useState(false);
   const isMobile = useIsMobile();
@@ -210,6 +210,11 @@ export default function ModelsAll() {
             </SelectContent>
           </Select>
         </div>
+        <PageSearchHeader
+          value={localQuery}
+          onChange={setLocalQuery}
+          placeholder="Search models..."
+        />
       </div>
 
       <div className={viewMode === "list" ? "-mx-4 px-0" : "-mx-8 px-4"}>
