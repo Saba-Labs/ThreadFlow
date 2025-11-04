@@ -566,8 +566,10 @@ export function useProductionPipeline() {
         quantity: q,
         createdAt: src.createdAt,
         steps: src.steps.map((st) => ({
-          ...st,
           id: uid("step"),
+          kind: st.kind,
+          machineType: st.machineType,
+          externalUnitName: (st as any).externalUnitName,
           status:
             st.status === "completed"
               ? ("completed" as StepStatus)
