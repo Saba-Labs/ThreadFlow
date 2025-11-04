@@ -553,8 +553,10 @@ export default function ModelList(props: ModelListProps) {
                 </thead>
                 <tbody>
                   {sorted.map((o) => {
-                    const i = o.currentStepIndex;
-                    const step = o.steps[i];
+                    const overrideIdx = pendingIndex[o.id];
+                    const ov = typeof overrideIdx === "number" ? { ...o, currentStepIndex: overrideIdx } : o;
+                    const i = ov.currentStepIndex;
+                    const step = ov.steps[i];
                     const bg = statusBgClass(o);
                     const isExpanded = toggledIds.includes(o.id);
                     return (
