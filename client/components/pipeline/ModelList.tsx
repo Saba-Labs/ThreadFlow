@@ -557,7 +557,7 @@ export default function ModelList(props: ModelListProps) {
                     const ov = typeof overrideIdx === "number" ? { ...o, currentStepIndex: overrideIdx } : o;
                     const i = ov.currentStepIndex;
                     const step = ov.steps[i];
-                    const bg = statusBgClass(o);
+                    const bg = statusBgClass(ov);
                     const isExpanded = toggledIds.includes(o.id);
                     return (
                       <Fragment key={o.id}>
