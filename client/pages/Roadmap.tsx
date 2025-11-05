@@ -462,6 +462,7 @@ export default function RoadmapPage() {
           if (!v) {
             setOpenFor(null);
             setAddModelsSearch("");
+            setCustomModelInput("");
           }
         }}
         title="Add Models"
