@@ -473,6 +473,7 @@ export default function RoadmapPage() {
               onClick={() => {
                 setOpenFor(null);
                 setAddModelsSearch("");
+                setCustomModelInput("");
               }}
               className="flex-1 sm:flex-none"
             >
