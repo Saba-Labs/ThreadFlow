@@ -115,6 +115,7 @@ export default function RoadmapPage() {
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
     setAddModelsSearch("");
+    setCustomModelInput("");
     setOpenFor(roadmapId);
   };
 
