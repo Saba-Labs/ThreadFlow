@@ -80,6 +80,7 @@ export default function RoadmapPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
+  const [customModelInput, setCustomModelInput] = useState("");
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
