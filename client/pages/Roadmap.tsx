@@ -492,6 +492,40 @@ export default function RoadmapPage() {
             onChange={(e) => setAddModelsSearch(e.target.value)}
             className="h-10"
           />
+
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add custom model name..."
+              value={customModelInput}
+              onChange={(e) => setCustomModelInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddCustomModel();
+                }
+              }}
+              className="h-10 flex-1"
+            />
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={handleAddCustomModel}
+              disabled={!customModelInput.trim()}
+              className="h-10 w-10 border-green-300 hover:bg-green-50 text-green-600"
+              title="Add custom model"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => setCustomModelInput("")}
+              className="h-10 w-10 border-red-300 hover:bg-red-50 text-red-600"
+              title="Clear input"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
           <div className="space-y-2">
             {eligibleOrders.length === 0 ? (
               <div className="text-center py-8 text-sm text-slate-600">
