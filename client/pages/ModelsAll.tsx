@@ -197,7 +197,7 @@ export default function ModelsAll() {
             )}
           </Button>
           <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-24">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>

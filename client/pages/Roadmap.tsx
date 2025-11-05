@@ -80,6 +80,7 @@ export default function RoadmapPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
+  const [customModelInput, setCustomModelInput] = useState("");
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -114,6 +115,7 @@ export default function RoadmapPage() {
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
     setAddModelsSearch("");
+    setCustomModelInput("");
     setOpenFor(roadmapId);
   };
 
@@ -146,6 +148,19 @@ export default function RoadmapPage() {
     }
   };
 
+  const handleAddCustomModel = async () => {
+    if (!openFor || !customModelInput.trim()) return;
+
+    try {
+      const modelName = customModelInput.trim();
+      const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      await addModelToRoadmap(openFor, customModelId, modelName, 1);
+      setCustomModelInput("");
+    } catch (error) {
+      console.error("Error adding custom model to roadmap:", error);
+    }
+  };
+
   const handleSaveTitle = (id: string) => {
     renameRoadmap(
       id,
@@ -166,7 +181,7 @@ export default function RoadmapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 -ml-[calc((100vw-100%)/2)] w-screen">
       <div className="w-full">
         {/* Header */}
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8">
@@ -248,8 +263,8 @@ export default function RoadmapPage() {
 
         {/* Roadmaps Grid */}
         {roadmaps.length > 0 && (
-          <div className="px-0 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-0 sm:gap-6 px-2 sm:px-0">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {roadmaps.map((r) => (
                 <Card
                   key={r.id}
@@ -367,7 +382,10 @@ export default function RoadmapPage() {
                           >
                             <div className="flex-1 min-w-0">
                               <div className="font-semibold text-xs sm:text-base text-slate-900 truncate">
-                                {it.modelName} ({it.quantity})
+                                {it.modelName}{" "}
+                                <span className="text-slate-400 font-normal">
+                                  ({it.quantity})
+                                </span>
                               </div>
                             </div>
 
@@ -447,6 +465,7 @@ export default function RoadmapPage() {
           if (!v) {
             setOpenFor(null);
             setAddModelsSearch("");
+            setCustomModelInput("");
           }
         }}
         title="Add Models"
@@ -457,6 +476,7 @@ export default function RoadmapPage() {
               onClick={() => {
                 setOpenFor(null);
                 setAddModelsSearch("");
+                setCustomModelInput("");
               }}
               className="flex-1 sm:flex-none"
             >
@@ -478,6 +498,40 @@ export default function RoadmapPage() {
             onChange={(e) => setAddModelsSearch(e.target.value)}
             className="h-10"
           />
+
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add custom model name..."
+              value={customModelInput}
+              onChange={(e) => setCustomModelInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddCustomModel();
+                }
+              }}
+              className="h-10 flex-1"
+            />
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={handleAddCustomModel}
+              disabled={!customModelInput.trim()}
+              className="h-10 w-10 border-green-300 hover:bg-green-50 text-green-600"
+              title="Add custom model"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => setCustomModelInput("")}
+              className="h-10 w-10 border-red-300 hover:bg-red-50 text-red-600"
+              title="Clear input"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
           <div className="space-y-2">
             {eligibleOrders.length === 0 ? (
               <div className="text-center py-8 text-sm text-slate-600">

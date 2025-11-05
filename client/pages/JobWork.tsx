@@ -222,27 +222,24 @@ export default function JobWork() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Job Work</h1>
           <p className="text-muted-foreground max-w-prose">
             Create, edit, and delete Job Work items.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-muted-foreground">Sort</label>
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">High Running</SelectItem>
-                <SelectItem value="linked">High Linked</SelectItem>
-                <SelectItem value="az">A - Z</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">High Running</SelectItem>
+              <SelectItem value="linked">High Linked</SelectItem>
+              <SelectItem value="az">A - Z</SelectItem>
+            </SelectContent>
+          </Select>
           <PageSearchHeader
             value={localQuery}
             onChange={setLocalQuery}
