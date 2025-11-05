@@ -405,7 +405,7 @@ export default function ModelList(props: ModelListProps) {
     }
     if (i >= o.steps.length) {
       // completed
-      return "bg-green-50 dark:bg-green-900/20";
+      return "bg-gray-50 dark:bg-gray-900/20";
     }
     const st = o.steps[i];
     if (hasPendingJW) {
