@@ -382,7 +382,7 @@ export default function RoadmapPage() {
                           >
                             <div className="flex-1 min-w-0">
                               <div className="font-semibold text-xs sm:text-base text-slate-900 truncate">
-                                {it.modelName} ({it.quantity})
+                                {it.modelName} <span className="text-slate-400 font-normal">({it.quantity})</span>
                               </div>
                             </div>
 
