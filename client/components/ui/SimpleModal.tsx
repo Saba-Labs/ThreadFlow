@@ -28,7 +28,7 @@ export default function SimpleModal(props: {
         className="absolute inset-0 bg-black/40"
         onClick={() => onOpenChange?.(false)}
       />
-      <div className="relative z-10 w-full max-w-2xl mx-4 max-h-[90vh] rounded-lg bg-background shadow-lg flex flex-col">
+      <div className="relative z-10 w-full max-w-2xl mx-4 rounded-lg bg-background shadow-lg flex flex-col">
         <div className="flex items-center justify-between border-b p-4 flex-shrink-0">
           <h3 className="text-lg font-semibold">{title}</h3>
           <button
