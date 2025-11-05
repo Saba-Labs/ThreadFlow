@@ -64,16 +64,17 @@ const subscribers = new Set<() => void>();
 async function fetchFromServer() {
   if (isLoading) return;
   isLoading = true;
-  const MAX_RETRIES = 2;
-  const RETRY_DELAY_MS = 1000;
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 2000;
   let attempt = 0;
   while (attempt <= MAX_RETRIES) {
     try {
       // pipeline orders can be large in some environments; allow longer timeout
+      // Increased from 30s to 60s for slow production deployments
       const orders = await fetchWithTimeout<WorkOrder[]>(
         "/api/pipeline/orders",
         undefined,
-        30000,
+        60000,
       );
       STORE = { orders };
       for (const s of Array.from(subscribers)) s();
@@ -91,8 +92,9 @@ async function fetchFromServer() {
         console.error("Failed to fetch pipeline orders after retries:", error);
         break;
       }
-      // Wait before retrying
-      await new Promise((res) => setTimeout(res, RETRY_DELAY_MS * attempt));
+      // Wait before retrying with exponential backoff
+      const delayMs = RETRY_DELAY_MS * Math.pow(1.5, attempt - 1);
+      await new Promise((res) => setTimeout(res, delayMs));
     } finally {
       if (attempt > MAX_RETRIES) isLoading = false;
     }
