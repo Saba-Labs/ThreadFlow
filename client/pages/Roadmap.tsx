@@ -147,6 +147,19 @@ export default function RoadmapPage() {
     }
   };
 
+  const handleAddCustomModel = async () => {
+    if (!openFor || !customModelInput.trim()) return;
+
+    try {
+      const modelName = customModelInput.trim();
+      const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      await addModelToRoadmap(openFor, customModelId, modelName, 1);
+      setCustomModelInput("");
+    } catch (error) {
+      console.error("Error adding custom model to roadmap:", error);
+    }
+  };
+
   const handleSaveTitle = (id: string) => {
     renameRoadmap(
       id,
