@@ -113,7 +113,12 @@ export default function SettingsPage() {
                         value={fontSize}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (value === "small" || value === "medium" || value === "large" || value === "extra-large") {
+                          if (
+                            value === "small" ||
+                            value === "medium" ||
+                            value === "large" ||
+                            value === "extra-large"
+                          ) {
                             setFontSize(value);
                           }
                         }}
