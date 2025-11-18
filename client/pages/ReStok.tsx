@@ -33,7 +33,7 @@ export default function ReStok() {
 
   useSwipeNavigation({
     leftPage: "/job-work",
-    rightPage: null,
+    rightPage: "/roadmap",
   });
 
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
