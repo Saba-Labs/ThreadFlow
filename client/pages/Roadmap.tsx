@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useRoadmaps } from "@/context/RoadmapContext";
