@@ -30,7 +30,7 @@ export default function Index() {
   const [restokItems, setRestokItems] = useState<any[]>([]);
 
   useSwipeNavigation({
-    leftPage: null,
+    leftPage: "/roadmap",
     rightPage: "/models/all",
   });
 
