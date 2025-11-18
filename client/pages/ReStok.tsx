@@ -31,6 +31,11 @@ export default function ReStok() {
     saveBulkEdits,
   } = useReStok();
 
+  useSwipeNavigation({
+    leftPage: "/job-work",
+    rightPage: null,
+  });
+
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [editMode, setEditMode] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
