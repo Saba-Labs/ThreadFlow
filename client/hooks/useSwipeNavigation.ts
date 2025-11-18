@@ -64,5 +64,5 @@ export function useSwipeNavigation(config: SwipeNavigationConfig) {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isMobile, navigate, config.leftPage, config.rightPage, config.disabled]);
+  }, [isMobile, navigate, config]);
 }
