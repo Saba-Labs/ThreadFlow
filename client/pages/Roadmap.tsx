@@ -719,6 +719,48 @@ export default function RoadmapPage() {
           )}
         </div>
       </SimpleModal>
+
+      {/* Clear Models Confirmation Modal */}
+      <SimpleModal
+        open={clearModelsConfirmId !== null && !isShared}
+        onOpenChange={(v: boolean) => !v && setClearModelsConfirmId(null)}
+        title="Clear All Models"
+        footer={
+          <div className="flex items-center gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setClearModelsConfirmId(null)}
+              className="flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (clearModelsConfirmId) handleClearAllModels(clearModelsConfirmId);
+              }}
+              className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700"
+            >
+              Clear Models
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Are you sure you want to clear all models from this roadmap? This action cannot be undone.
+          </p>
+          {clearModelsConfirmId && (
+            <div className="p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-sm font-semibold text-slate-900">
+                {roadmaps.find((r) => r.id === clearModelsConfirmId)?.title}
+              </p>
+              <p className="text-xs text-slate-600 mt-1">
+                {roadmaps.find((r) => r.id === clearModelsConfirmId)?.items.length} model(s) will be removed
+              </p>
+            </div>
+          )}
+        </div>
+      </SimpleModal>
     </div>
   );
 }
