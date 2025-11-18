@@ -181,6 +181,16 @@ export default function RoadmapPage() {
     }
   };
 
+  const handleClearAllModels = (roadmapId: string) => {
+    const roadmap = roadmaps.find((r) => r.id === roadmapId);
+    if (roadmap) {
+      roadmap.items.forEach((item) => {
+        removeModelFromRoadmap(roadmapId, item.modelId);
+      });
+    }
+    setClearModelsConfirmId(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 -ml-[calc((100vw-100%)/2)] w-screen">
       <div className="w-full">
