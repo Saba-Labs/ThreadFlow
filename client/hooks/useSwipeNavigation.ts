@@ -5,8 +5,8 @@ import { useIsMobile } from "./use-mobile";
 const MIN_SWIPE_DISTANCE = 150;
 
 interface SwipeNavigationConfig {
-  leftPage: string;
-  rightPage: string;
+  leftPage?: string | null;
+  rightPage?: string | null;
   disabled?: boolean;
 }
 
