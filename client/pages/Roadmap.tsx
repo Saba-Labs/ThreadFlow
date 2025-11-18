@@ -78,6 +78,7 @@ export default function RoadmapPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [clearModelsConfirmId, setClearModelsConfirmId] = useState<string | null>(null);
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
