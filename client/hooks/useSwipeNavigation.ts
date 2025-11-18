@@ -5,8 +5,8 @@ import { useIsMobile } from "./use-mobile";
 const MIN_SWIPE_DISTANCE = 150;
 
 interface SwipeNavigationConfig {
-  leftPage: string;
-  rightPage: string;
+  leftPage?: string | null;
+  rightPage?: string | null;
   disabled?: boolean;
 }
 
@@ -43,11 +43,11 @@ export function useSwipeNavigation(config: SwipeNavigationConfig) {
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         if (Math.abs(deltaX) > MIN_SWIPE_DISTANCE) {
           // Swipe right (positive deltaX)
-          if (deltaX > 0) {
+          if (deltaX > 0 && config.rightPage) {
             navigate(config.rightPage);
           }
           // Swipe left (negative deltaX)
-          else {
+          else if (deltaX < 0 && config.leftPage) {
             navigate(config.leftPage);
           }
         }
@@ -64,5 +64,5 @@ export function useSwipeNavigation(config: SwipeNavigationConfig) {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isMobile, navigate, config.leftPage, config.rightPage, config.disabled]);
+  }, [isMobile, navigate, config]);
 }

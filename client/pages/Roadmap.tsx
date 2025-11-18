@@ -12,9 +12,11 @@ import {
   Check,
   Map,
   Share2,
+  Eraser,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useRoadmaps } from "@/context/RoadmapContext";
@@ -67,6 +69,11 @@ export default function RoadmapPage() {
   const [searchParams] = useSearchParams();
   const isShared = searchParams.get("shared") === "true";
 
+  useSwipeNavigation({
+    leftPage: "/restok",
+    rightPage: "/",
+  });
+
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
@@ -78,6 +85,9 @@ export default function RoadmapPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [clearModelsConfirmId, setClearModelsConfirmId] = useState<
+    string | null
+  >(null);
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
@@ -178,6 +188,16 @@ export default function RoadmapPage() {
     } catch (err) {
       console.error("Failed to copy to clipboard:", err);
     }
+  };
+
+  const handleClearAllModels = (roadmapId: string) => {
+    const roadmap = roadmaps.find((r) => r.id === roadmapId);
+    if (roadmap) {
+      roadmap.items.forEach((item) => {
+        removeModelFromRoadmap(roadmapId, item.modelId);
+      });
+    }
+    setClearModelsConfirmId(null);
   };
 
   return (
@@ -307,8 +327,14 @@ export default function RoadmapPage() {
                           <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-sm sm:text-lg flex-shrink-0">
                             {r.title.charAt(0).toUpperCase()}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-white text-sm sm:text-lg font-semibold truncate">
+                          <div
+                            className="flex-1 min-w-0 cursor-pointer group"
+                            onClick={() =>
+                              !isShared &&
+                              (setEditingTitleId(r.id), setTitleDraft(r.title))
+                            }
+                          >
+                            <CardTitle className="text-white text-sm sm:text-lg font-semibold truncate group-hover:underline group-hover:underline-offset-2 transition-all">
                               {r.title}
                             </CardTitle>
                             <p className="text-blue-100 text-xs mt-0.5">
@@ -331,17 +357,17 @@ export default function RoadmapPage() {
                                 Add Models
                               </span>
                             </Button>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingTitleId(r.id);
-                                setTitleDraft(r.title);
-                              }}
-                              className="h-9 w-9 bg-white hover:bg-white/90 text-slate-900"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
+                            {r.items.length > 0 && (
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => setClearModelsConfirmId(r.id)}
+                                className="h-9 w-9 bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200"
+                                title="Clear all models"
+                              >
+                                <Eraser className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
                             <Button
                               size="icon"
                               variant="destructive"
@@ -703,6 +729,54 @@ export default function RoadmapPage() {
             <div className="p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
               <p className="text-sm font-semibold text-slate-900">
                 {roadmaps.find((r) => r.id === deleteConfirmId)?.title}
+              </p>
+            </div>
+          )}
+        </div>
+      </SimpleModal>
+
+      {/* Clear Models Confirmation Modal */}
+      <SimpleModal
+        open={clearModelsConfirmId !== null && !isShared}
+        onOpenChange={(v: boolean) => !v && setClearModelsConfirmId(null)}
+        title="Clear All Models"
+        footer={
+          <div className="flex items-center gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setClearModelsConfirmId(null)}
+              className="flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (clearModelsConfirmId)
+                  handleClearAllModels(clearModelsConfirmId);
+              }}
+              className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700"
+            >
+              Clear Models
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Are you sure you want to clear all models from this roadmap? This
+            action cannot be undone.
+          </p>
+          {clearModelsConfirmId && (
+            <div className="p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-sm font-semibold text-slate-900">
+                {roadmaps.find((r) => r.id === clearModelsConfirmId)?.title}
+              </p>
+              <p className="text-xs text-slate-600 mt-1">
+                {
+                  roadmaps.find((r) => r.id === clearModelsConfirmId)?.items
+                    .length
+                }{" "}
+                model(s) will be removed
               </p>
             </div>
           )}

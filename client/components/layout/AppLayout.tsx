@@ -202,6 +202,20 @@ export default function AppLayout() {
             <nav className="flex-1 overflow-y-auto px-2 py-4">
               <div className="flex flex-col gap-2">
                 <NavLink
+                  to="/roadmap"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  Roadmap
+                </NavLink>
+                <NavLink
                   to="/"
                   end
                   onClick={() => setMenuOpen(false)}
@@ -229,20 +243,6 @@ export default function AppLayout() {
                   }
                 >
                   All Models
-                </NavLink>
-                <NavLink
-                  to="/roadmap"
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
-                      isActive
-                        ? "bg-accent text-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-                    )
-                  }
-                >
-                  Roadmap
                 </NavLink>
                 <NavLink
                   to="/job-work"
@@ -338,6 +338,20 @@ export default function AppLayout() {
               {/* Desktop links */}
               <div className="hidden sm:flex items-center gap-1">
                 <NavLink
+                  to="/roadmap"
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium",
+                      isActive
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )
+                  }
+                >
+                  Roadmap
+                </NavLink>
+
+                <NavLink
                   to="/"
                   end
                   className={({ isActive }) =>
@@ -364,20 +378,6 @@ export default function AppLayout() {
                   }
                 >
                   All Models
-                </NavLink>
-
-                <NavLink
-                  to="/roadmap"
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  Roadmap
                 </NavLink>
 
                 <NavLink

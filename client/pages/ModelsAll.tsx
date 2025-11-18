@@ -56,7 +56,7 @@ export default function ModelsAll() {
     [pipeline],
   );
   useSwipeNavigation({
-    leftPage: "/job-work",
+    leftPage: "/",
     rightPage: "/job-work",
   });
   const [filter, setFilter] = useState<

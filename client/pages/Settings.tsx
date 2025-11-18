@@ -8,10 +8,16 @@ import {
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useFontSize } from "@/hooks/use-font-size";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 export default function SettingsPage() {
   const { value: fontSize, setValue: setFontSize } = useFontSize();
   const [modelsView, setModelsViewState] = useState<string>("cards");
+
+  useSwipeNavigation({
+    leftPage: null,
+    rightPage: null,
+  });
 
   useEffect(() => {
     try {
@@ -107,7 +113,12 @@ export default function SettingsPage() {
                         value={fontSize}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (value === "small" || value === "medium" || value === "large" || value === "extra-large") {
+                          if (
+                            value === "small" ||
+                            value === "medium" ||
+                            value === "large" ||
+                            value === "extra-large"
+                          ) {
                             setFontSize(value);
                           }
                         }}

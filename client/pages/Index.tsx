@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import MachineBoard from "@/components/pipeline/MachineBoard";
 import { useCallback, useState, useEffect } from "react";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { toast } from "@/hooks/use-toast";
 import { useRoadmaps } from "@/context/RoadmapContext";
 
@@ -27,6 +28,11 @@ export default function Index() {
   const [roadmapExpanded, setRoadmapExpanded] = useState(false);
   const [restokExpanded, setRestokExpanded] = useState(false);
   const [restokItems, setRestokItems] = useState<any[]>([]);
+
+  useSwipeNavigation({
+    leftPage: "/roadmap",
+    rightPage: "/models/all",
+  });
 
   const handleMoveNext = useCallback(
     async (id: string) => {

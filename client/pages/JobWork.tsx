@@ -36,7 +36,7 @@ export default function JobWork() {
   const pipeline = useProductionPipeline();
   useSwipeNavigation({
     leftPage: "/models/all",
-    rightPage: "/models/all",
+    rightPage: "/restok",
   });
 
   const [local, setLocal] = useState<JobWork[]>(() => getJobWorks());
