@@ -43,11 +43,11 @@ export function useSwipeNavigation(config: SwipeNavigationConfig) {
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         if (Math.abs(deltaX) > MIN_SWIPE_DISTANCE) {
           // Swipe right (positive deltaX)
-          if (deltaX > 0) {
+          if (deltaX > 0 && config.rightPage) {
             navigate(config.rightPage);
           }
           // Swipe left (negative deltaX)
-          else {
+          else if (deltaX < 0 && config.leftPage) {
             navigate(config.leftPage);
           }
         }
