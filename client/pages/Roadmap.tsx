@@ -12,7 +12,7 @@ import {
   Check,
   Map,
   Share2,
-  Broom,
+  Eraser,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
