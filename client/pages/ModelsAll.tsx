@@ -57,7 +57,7 @@ export default function ModelsAll() {
   );
   useSwipeNavigation({
     leftPage: "/",
-    rightPage: "/roadmap",
+    rightPage: "/job-work",
   });
   const [filter, setFilter] = useState<
     "all" | "hold" | "running" | "completed" | "job" | "onboard"
