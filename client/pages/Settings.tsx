@@ -14,6 +14,11 @@ export default function SettingsPage() {
   const { value: fontSize, setValue: setFontSize } = useFontSize();
   const [modelsView, setModelsViewState] = useState<string>("cards");
 
+  useSwipeNavigation({
+    leftPage: null,
+    rightPage: null,
+  });
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem("models.viewMode") || "cards";
