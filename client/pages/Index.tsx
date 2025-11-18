@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import MachineBoard from "@/components/pipeline/MachineBoard";
 import { useCallback, useState, useEffect } from "react";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { toast } from "@/hooks/use-toast";
 import { useRoadmaps } from "@/context/RoadmapContext";
 
