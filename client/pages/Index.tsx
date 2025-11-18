@@ -29,6 +29,11 @@ export default function Index() {
   const [restokExpanded, setRestokExpanded] = useState(false);
   const [restokItems, setRestokItems] = useState<any[]>([]);
 
+  useSwipeNavigation({
+    leftPage: null,
+    rightPage: "/models/all",
+  });
+
   const handleMoveNext = useCallback(
     async (id: string) => {
       try {
