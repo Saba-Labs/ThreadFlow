@@ -69,6 +69,11 @@ export default function RoadmapPage() {
   const [searchParams] = useSearchParams();
   const isShared = searchParams.get("shared") === "true";
 
+  useSwipeNavigation({
+    leftPage: "/models/all",
+    rightPage: "/job-work",
+  });
+
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
