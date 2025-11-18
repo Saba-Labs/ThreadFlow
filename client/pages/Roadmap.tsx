@@ -342,6 +342,17 @@ export default function RoadmapPage() {
                                 Add Models
                               </span>
                             </Button>
+                            {r.items.length > 0 && (
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => setClearModelsConfirmId(r.id)}
+                                className="h-9 w-9 bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200"
+                                title="Clear all models"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
                             <Button
                               size="icon"
                               variant="destructive"
