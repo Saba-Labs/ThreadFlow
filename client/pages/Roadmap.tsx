@@ -351,7 +351,7 @@ export default function RoadmapPage() {
                                 className="h-9 w-9 bg-amber-50 hover:bg-amber-100 text-amber-600 border-amber-200"
                                 title="Clear all models"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Broom className="h-3.5 w-3.5" />
                               </Button>
                             )}
                             <Button
