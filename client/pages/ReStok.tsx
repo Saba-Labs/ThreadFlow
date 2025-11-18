@@ -13,6 +13,7 @@ import AddItemModal from "@/components/modals/AddItemModal";
 import EditItemModal from "@/components/modals/EditItemModal";
 import { useReStok } from "@/context/ReStokContext";
 import PageSearchHeader from "@/components/ui/PageSearchHeader";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 export default function ReStok() {
   const {
