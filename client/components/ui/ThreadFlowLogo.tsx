@@ -22,126 +22,76 @@ export default function ThreadFlowLogo({
           <stop offset="0%" stopColor="#10B981" />
           <stop offset="100%" stopColor="#059669" />
         </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="1" result="coloredBlur" />
-          <feMerge>
-            <feMergeNode in="coloredBlur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
 
-      {/* Background circle (subtle) */}
-      <circle
-        cx="100"
-        cy="100"
-        r="95"
+      {/* Top-left flowing thread */}
+      <path
+        d="M 40 50 Q 60 40 80 60"
+        stroke="url(#threadFlowGradient)"
+        strokeWidth="5"
         fill="none"
-        stroke="#10B981"
-        strokeWidth="0.5"
-        opacity="0.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
 
-      {/* Central node - represents data/model hub */}
+      {/* Top-right flowing thread */}
+      <path
+        d="M 160 50 Q 140 40 120 60"
+        stroke="url(#threadFlowGradient)"
+        strokeWidth="5"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.8"
+      />
+
+      {/* Center convergence point - stylized */}
       <circle
         cx="100"
         cy="100"
-        r="18"
+        r="14"
         fill="url(#threadFlowGradient)"
-        filter="url(#glow)"
       />
 
-      {/* Top-left node */}
-      <circle cx="50" cy="50" r="12" fill="#10B981" opacity="0.8" />
-
-      {/* Top-right node */}
-      <circle cx="150" cy="50" r="12" fill="#10B981" opacity="0.8" />
-
-      {/* Bottom-left node */}
-      <circle cx="50" cy="150" r="12" fill="#10B981" opacity="0.8" />
-
-      {/* Bottom-right node */}
-      <circle cx="150" cy="150" r="12" fill="#10B981" opacity="0.8" />
-
-      {/* Connection lines - representing data flow/pipeline */}
-      <line
-        x1="100"
-        y1="100"
-        x2="50"
-        y2="50"
-        stroke="#10B981"
-        strokeWidth="2"
-        opacity="0.6"
-      />
-      <line
-        x1="100"
-        y1="100"
-        x2="150"
-        y2="50"
-        stroke="#10B981"
-        strokeWidth="2"
-        opacity="0.6"
-      />
-      <line
-        x1="100"
-        y1="100"
-        x2="50"
-        y2="150"
-        stroke="#10B981"
-        strokeWidth="2"
-        opacity="0.6"
-      />
-      <line
-        x1="100"
-        y1="100"
-        x2="150"
-        y2="150"
-        stroke="#10B981"
-        strokeWidth="2"
-        opacity="0.6"
+      {/* Inner circle for depth */}
+      <circle
+        cx="100"
+        cy="100"
+        r="8"
+        fill="white"
       />
 
-      {/* Diagonal connections - representing interconnected ML models */}
-      <line
-        x1="50"
-        y1="50"
-        x2="150"
-        y2="150"
-        stroke="#10B981"
-        strokeWidth="1.5"
-        opacity="0.3"
-        strokeDasharray="3,2"
-      />
-      <line
-        x1="150"
-        y1="50"
-        x2="50"
-        y2="150"
-        stroke="#10B981"
-        strokeWidth="1.5"
-        opacity="0.3"
-        strokeDasharray="3,2"
+      {/* Bottom-left flowing thread */}
+      <path
+        d="M 50 120 Q 70 110 90 140"
+        stroke="url(#threadFlowGradient)"
+        strokeWidth="5"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.9"
       />
 
-      {/* Inner geometric pattern - data layer representation */}
-      <g opacity="0.5">
-        <polygon
-          points="100,100 115,90 120,105 105,115"
-          fill="none"
-          stroke="#10B981"
-          strokeWidth="1"
-        />
-      </g>
-
-      {/* Top accent bar - representing thread/flow direction */}
-      <rect
-        x="85"
-        y="25"
-        width="30"
-        height="4"
-        rx="2"
-        fill="url(#threadFlowGradient)"
+      {/* Bottom-right flowing thread */}
+      <path
+        d="M 150 120 Q 130 110 110 140"
+        stroke="url(#threadFlowGradient)"
+        strokeWidth="5"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         opacity="0.8"
+      />
+
+      {/* Bottom center accent - represents continuous flow */}
+      <path
+        d="M 85 150 Q 100 160 115 150"
+        stroke="url(#threadFlowGradient)"
+        strokeWidth="4"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.7"
       />
     </svg>
   );
