@@ -23,11 +23,12 @@ let isLoading = false;
 let isInitialized = false;
 let lastFetchError: Error | null = null;
 let lastFetchTs = 0; // timestamp of last successful or attempted fetch
+let isBackgroundRefresh = false; // true if refetching due to SSE/polling, false if due to user action
 
 const subscribers = new Set<() => void>();
 const loadingSubscribers = new Set<() => void>();
 
-async function fetchItems() {
+async function fetchItems(isUserAction: boolean = false) {
   const now = Date.now();
   // Debounce: avoid fetching more than once per second to prevent tight polling loops
   if (now - lastFetchTs < 1000) {
@@ -36,8 +37,15 @@ async function fetchItems() {
   if (isLoading) return;
   lastFetchTs = now;
 
+  // Track if this is a background refresh (from SSE/polling) vs user action
+  isBackgroundRefresh = !isUserAction && isInitialized;
+
   isLoading = true;
-  for (const s of Array.from(loadingSubscribers)) s();
+  // Only notify loading subscribers during initial load or user actions, not background refreshes
+  if (!isBackgroundRefresh) {
+    for (const s of Array.from(loadingSubscribers)) s();
+  }
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -72,7 +80,10 @@ async function fetchItems() {
     }
   } finally {
     isLoading = false;
-    for (const s of Array.from(loadingSubscribers)) s();
+    // Only notify loading subscribers if this wasn't a background refresh
+    if (!isBackgroundRefresh) {
+      for (const s of Array.from(loadingSubscribers)) s();
+    }
   }
 }
 
@@ -178,7 +189,7 @@ export function useReStok() {
             lowStock: sub.lowStock,
           })),
         });
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Item added successfully",
@@ -200,7 +211,7 @@ export function useReStok() {
   const deleteItem = useCallback(async (itemId: string) => {
     try {
       await apiCall(`/api/restok/items/${itemId}`, "DELETE");
-      await fetchItems();
+      await fetchItems(true);
       toast({
         title: "Success",
         description: "Item deleted successfully",
@@ -231,7 +242,7 @@ export function useReStok() {
           note: item.note,
           subItems: item.subItems,
         });
-        await fetchItems();
+        await fetchItems(true);
       } catch (error) {
         console.error("Failed to update item quantity:", error);
         throw error;
@@ -253,7 +264,7 @@ export function useReStok() {
           note,
           subItems: item.subItems,
         });
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Item saved successfully",
@@ -305,7 +316,7 @@ export function useReStok() {
 
       try {
         await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Sub-item added successfully",
@@ -344,7 +355,7 @@ export function useReStok() {
               lowStock: s.lowStock ?? 0,
             })),
         });
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Sub-item deleted successfully",
@@ -393,7 +404,7 @@ export function useReStok() {
                 },
           ),
         });
-        await fetchItems();
+        await fetchItems(true);
       } catch (error) {
         console.error("Failed to update sub-item quantity:", error);
         throw error;
@@ -436,7 +447,7 @@ export function useReStok() {
 
       try {
         await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Sub-item updated successfully",
@@ -460,7 +471,7 @@ export function useReStok() {
   const reorderItems = useCallback(async (itemIds: string[]) => {
     try {
       await apiCall("/api/restok/reorder", "POST", { itemIds });
-      await fetchItems();
+      await fetchItems(true);
       toast({
         title: "Success",
         description: "Items reordered successfully",
@@ -501,7 +512,7 @@ export function useReStok() {
           });
         }
 
-        await fetchItems();
+        await fetchItems(true);
         toast({ title: "Success", description: "Changes saved" });
       } catch (error) {
         console.error("Failed to save bulk edits:", error);

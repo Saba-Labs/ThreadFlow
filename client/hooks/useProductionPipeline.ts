@@ -241,8 +241,11 @@ export function useProductionPipeline() {
 
   const editPath = useCallback(
     async (orderId: string, editor: (steps: PathStep[]) => PathStep[]) => {
-      const order = state.orders.find((o) => o.id === orderId);
-      if (!order) return;
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const order = STORE.orders.find((o) => o.id === orderId);
+      if (!order) {
+        throw new Error(`Order ${orderId} not found`);
+      }
 
       const currentStepId = order.steps[order.currentStepIndex]?.id;
       const nextSteps = editor([...order.steps]);
@@ -275,7 +278,7 @@ export function useProductionPipeline() {
         throw error;
       }
     },
-    [state.orders],
+    [],
   );
 
   const updateStepStatus = useCallback(
@@ -342,7 +345,8 @@ export function useProductionPipeline() {
 
   const moveToNextStep = useCallback(
     async (orderId: string) => {
-      const order = state.orders.find((o) => o.id === orderId);
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const order = STORE.orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Order not found");
 
       const idx = order.currentStepIndex;
@@ -408,12 +412,13 @@ export function useProductionPipeline() {
         ),
       );
     },
-    [state.orders],
+    [],
   );
 
   const moveToPrevStep = useCallback(
     async (orderId: string) => {
-      const order = state.orders.find((o) => o.id === orderId);
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const order = STORE.orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Order not found");
 
       const previousOrder = order;
@@ -484,7 +489,7 @@ export function useProductionPipeline() {
         ),
       );
     },
-    [state.orders],
+    [],
   );
 
   const setCurrentStep = useCallback((orderId: string, index: number) => {
@@ -548,8 +553,11 @@ export function useProductionPipeline() {
 
   const saveOrderProgress = useCallback(
     async (orderId: string, steps: PathStep[], currentStepIndex: number) => {
-      const order = state.orders.find((o) => o.id === orderId);
-      if (!order) return;
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const order = STORE.orders.find((o) => o.id === orderId);
+      if (!order) {
+        throw new Error(`Order ${orderId} not found`);
+      }
       try {
         await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
@@ -571,12 +579,13 @@ export function useProductionPipeline() {
         throw error;
       }
     },
-    [state.orders],
+    [],
   );
 
   const splitOrder = useCallback(
     async (orderId: string, quantities: number[]) => {
-      const src = state.orders.find((o) => o.id === orderId);
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const src = STORE.orders.find((o) => o.id === orderId);
       if (!src) return;
 
       const valid = quantities
@@ -663,7 +672,7 @@ export function useProductionPipeline() {
         throw error;
       }
     },
-    [state.orders],
+    [],
   );
 
   const machineTypes = useMachineTypes();
