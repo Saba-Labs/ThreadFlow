@@ -489,7 +489,7 @@ export function useProductionPipeline() {
         ),
       );
     },
-    [state.orders],
+    [],
   );
 
   const setCurrentStep = useCallback((orderId: string, index: number) => {
