@@ -189,7 +189,7 @@ export function useReStok() {
             lowStock: sub.lowStock,
           })),
         });
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Item added successfully",
