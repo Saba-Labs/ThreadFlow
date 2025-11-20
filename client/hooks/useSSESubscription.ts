@@ -94,9 +94,9 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
             );
             setupPollingFallback();
           } else {
-            console.log("[SSE] Retrying connection in 2 seconds...");
+            console.log("[SSE] Retrying connection in 5 seconds...");
             if (!reconnectTimeout) {
-              reconnectTimeout = setTimeout(connect, 2000);
+              reconnectTimeout = setTimeout(connect, 5000);
             }
           }
         };
