@@ -23,6 +23,7 @@ let isLoading = false;
 let isInitialized = false;
 let lastFetchError: Error | null = null;
 let lastFetchTs = 0; // timestamp of last successful or attempted fetch
+let isBackgroundRefresh = false; // true if refetching due to SSE/polling, false if due to user action
 
 const subscribers = new Set<() => void>();
 const loadingSubscribers = new Set<() => void>();
