@@ -242,7 +242,7 @@ export function useReStok() {
           note: item.note,
           subItems: item.subItems,
         });
-        await fetchItems();
+        await fetchItems(true);
       } catch (error) {
         console.error("Failed to update item quantity:", error);
         throw error;
