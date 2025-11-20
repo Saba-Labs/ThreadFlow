@@ -134,15 +134,18 @@ export default function JobWork() {
   // helper: return assignments for this job work
   const getAssignmentsForJobWork = (jwId: string) => {
     const orders = pipeline.orders || [];
-    const assignmentMap = new Map<string, {
-      id: string;
-      orderId: string;
-      modelName: string;
-      quantity: number;
-      pickupDate: number;
-      completionDate?: number;
-      status: "pending" | "completed";
-    }>();
+    const assignmentMap = new Map<
+      string,
+      {
+        id: string;
+        orderId: string;
+        modelName: string;
+        quantity: number;
+        pickupDate: number;
+        completionDate?: number;
+        status: "pending" | "completed";
+      }
+    >();
 
     for (const o of orders) {
       const jwAssignments = o.jobWorkAssignments || [];

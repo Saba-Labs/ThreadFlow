@@ -983,7 +983,10 @@ export default function ModelList(props: ModelListProps) {
                                           return rest;
                                         });
                                       } catch (error) {
-                                        console.error("Failed to save path changes:", error);
+                                        console.error(
+                                          "Failed to save path changes:",
+                                          error,
+                                        );
                                         toast({
                                           title: "Error",
                                           description:
@@ -1205,7 +1208,9 @@ export default function ModelList(props: ModelListProps) {
               const isExpandedMobile = toggledIds.includes(o.id);
               const hasPendingJW =
                 ((o as any).jobWorkIds || []).length > 0 ||
-                (o.jobWorkAssignments || []).some((a) => a.status === "pending");
+                (o.jobWorkAssignments || []).some(
+                  (a) => a.status === "pending",
+                );
               return (
                 <div
                   key={o.id}
@@ -1304,169 +1309,25 @@ export default function ModelList(props: ModelListProps) {
                               : step.status
                             : undefined;
 
-                          if (viewMode === "list") {
-                            // Stack current, status badge, and job work vertically like card view
-                            const parallelGroup = (o.parallelGroups || []).find(
-                              (g) => g.stepIndex === i,
+                        if (viewMode === "list") {
+                          // Stack current, status badge, and job work vertically like card view
+                          const parallelGroup = (o.parallelGroups || []).find(
+                            (g) => g.stepIndex === i,
+                          );
+                          const selectedIndices =
+                            parallelGroup?.machineIndices || [];
+                          const primaryMachine =
+                            step.kind === "machine"
+                              ? step.machineType
+                              : "Job Work";
+                          const selectedMachines = selectedIndices
+                            .map((idx) => machineTypes[idx]?.name)
+                            .filter(
+                              (name) => !!name && name !== primaryMachine,
                             );
-                            const selectedIndices =
-                              parallelGroup?.machineIndices || [];
-                            const primaryMachine =
-                              step.kind === "machine"
-                                ? step.machineType
-                                : "Job Work";
-                            const selectedMachines = selectedIndices
-                              .map((idx) => machineTypes[idx]?.name)
-                              .filter(
-                                (name) => !!name && name !== primaryMachine,
-                              );
 
-                            return (
-                              <div className="flex flex-col items-end gap-1 text-right">
-                                {hasPendingJW ? (
-                                  <div className="flex flex-col items-end gap-0.5 text-sm">
-                                    {(() => {
-                                      const allAssignments =
-                                        o.jobWorkAssignments || [];
-                                      const assignmentNames = allAssignments
-                                        .map((a) => a.jobWorkName)
-                                        .filter(Boolean);
-
-                                      const jobWorkIdNames = (
-                                        (o as any).jobWorkIds || []
-                                      )
-                                        .map((id: string) => {
-                                          const jw = jobWorks.find(
-                                            (j) => j.id === id,
-                                          );
-                                          return jw?.name;
-                                        })
-                                        .filter(Boolean);
-
-                                      const allNames = Array.from(
-                                        new Set([
-                                          ...assignmentNames,
-                                          ...jobWorkIdNames,
-                                        ]),
-                                      );
-
-                                      return allNames.length > 0 ? (
-                                        allNames.map((name) => (
-                                          <span
-                                            key={name}
-                                            className="font-medium text-purple-700 dark:text-purple-300"
-                                          >
-                                            {name}
-                                          </span>
-                                        ))
-                                      ) : (
-                                        <span className="font-medium text-purple-700 dark:text-purple-300">
-                                          Job Work
-                                        </span>
-                                      );
-                                    })()}
-                                  </div>
-                                ) : i < 0 ? (
-                                  <div className="text-sm">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                                      Out of Path
-                                    </span>
-                                  </div>
-                                ) : i >= o.steps.length ? (
-                                  <div className="text-sm">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                                      Completed
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <div className="text-sm">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                                      {step.kind === "machine"
-                                        ? step.machineType
-                                        : "Job Work"}
-                                    </span>
-                                  </div>
-                                )}
-
-                                {/* Status badge always visible for pending JW or when expanded */}
-                                {(isExpandedMobile || hasPendingJW) && (
-                                  <>
-                                    {selectedMachines.length > 0 && isExpandedMobile && (
-                                      <div className="text-sm">
-                                        {selectedMachines.map((m) => (
-                                          <div
-                                            key={m}
-                                            className="font-medium text-gray-900 dark:text-gray-100"
-                                          >
-                                            {m}
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-
-                                    <div>
-                                      <button
-                                        onClick={
-                                          pathEditId === o.id
-                                            ? () => toggleCardStatus(o)
-                                            : undefined
-                                        }
-                                      >
-                                        <Badge
-                                          variant={"default"}
-                                          className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                            hasPendingJW
-                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                              : displayStatus === "running"
-                                                ? "bg-green-600 text-white"
-                                                : displayStatus === "hold"
-                                                  ? "bg-red-600 text-white"
-                                                  : "bg-gray-500 text-white"
-                                          }`}
-                                        >
-                                          {(() => {
-                                            if (hasPendingJW) {
-                                              const allAssignments =
-                                                o.jobWorkAssignments || [];
-                                              const assignmentNames =
-                                                allAssignments
-                                                  .map((a) => a.jobWorkName)
-                                                  .filter(Boolean);
-
-                                              const jobWorkIdNames = (
-                                                (o as any).jobWorkIds || []
-                                              )
-                                                .map((id: string) => {
-                                                  const jw = jobWorks.find(
-                                                    (j) => j.id === id,
-                                                  );
-                                                  return jw?.name;
-                                                })
-                                                .filter(Boolean);
-
-                                              const allNames = Array.from(
-                                                new Set([
-                                                  ...assignmentNames,
-                                                  ...jobWorkIdNames,
-                                                ]),
-                                              );
-
-                                              return "Job Work";
-                                            }
-                                            return cap(displayStatus);
-                                          })()}
-                                        </Badge>
-                                      </button>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            );
-                          }
-
-                          // cards (compact) default behaviour
                           return (
-                            <>
+                            <div className="flex flex-col items-end gap-1 text-right">
                               {hasPendingJW ? (
                                 <div className="flex flex-col items-end gap-0.5 text-sm">
                                   {(() => {
@@ -1511,19 +1372,19 @@ export default function ModelList(props: ModelListProps) {
                                   })()}
                                 </div>
                               ) : i < 0 ? (
-                                <div className="text-sm text-right">
+                                <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
                                     Out of Path
                                   </span>
                                 </div>
                               ) : i >= o.steps.length ? (
-                                <div className="text-sm text-right">
+                                <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
                                     Completed
                                   </span>
                                 </div>
                               ) : (
-                                <div className="text-sm text-right">
+                                <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
                                     {step.kind === "machine"
                                       ? step.machineType
@@ -1532,94 +1393,239 @@ export default function ModelList(props: ModelListProps) {
                                 </div>
                               )}
 
-                              {(() => {
-                                const parallelGroup = (
-                                  o.parallelGroups || []
-                                ).find((g) => g.stepIndex === i);
-                                const selectedIndices =
-                                  parallelGroup?.machineIndices || [];
-                                const primaryMachine =
-                                  step.kind === "machine"
-                                    ? step.machineType
-                                    : "Job Work";
-                                const selectedMachines = selectedIndices
-                                  .map((idx) => machineTypes[idx]?.name)
-                                  .filter(
-                                    (name) => !!name && name !== primaryMachine,
-                                  );
-                                if (selectedMachines.length === 0) return null;
-                                return (
-                                  <div className="text-sm text-right">
-                                    {selectedMachines.map((m) => (
-                                      <div
-                                        key={m}
-                                        className="font-medium text-gray-900 dark:text-gray-100"
-                                      >
-                                        {m}
-                                      </div>
-                                    ))}
-                                  </div>
-                                );
-                              })()}
-
+                              {/* Status badge always visible for pending JW or when expanded */}
                               {(isExpandedMobile || hasPendingJW) && (
                                 <>
-                                  <button
-                                    onClick={
-                                      pathEditId === o.id
-                                        ? () => toggleCardStatus(o)
-                                        : undefined
-                                    }
-                                  >
-                                    <Badge
-                                      variant={"default"}
-                                      className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                        hasPendingJW
-                                          ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                          : displayStatus === "running"
-                                            ? "bg-green-600 text-white"
-                                            : displayStatus === "hold"
-                                              ? "bg-red-600 text-white"
-                                              : "bg-gray-500 text-white"
-                                      }`}
+                                  {selectedMachines.length > 0 &&
+                                    isExpandedMobile && (
+                                      <div className="text-sm">
+                                        {selectedMachines.map((m) => (
+                                          <div
+                                            key={m}
+                                            className="font-medium text-gray-900 dark:text-gray-100"
+                                          >
+                                            {m}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                  <div>
+                                    <button
+                                      onClick={
+                                        pathEditId === o.id
+                                          ? () => toggleCardStatus(o)
+                                          : undefined
+                                      }
                                     >
-                                      {(() => {
-                                        if (hasPendingJW) {
-                                          const allAssignments =
-                                            o.jobWorkAssignments || [];
-                                          const assignmentNames = allAssignments
-                                            .map((a) => a.jobWorkName)
-                                            .filter(Boolean);
+                                      <Badge
+                                        variant={"default"}
+                                        className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                          hasPendingJW
+                                            ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                            : displayStatus === "running"
+                                              ? "bg-green-600 text-white"
+                                              : displayStatus === "hold"
+                                                ? "bg-red-600 text-white"
+                                                : "bg-gray-500 text-white"
+                                        }`}
+                                      >
+                                        {(() => {
+                                          if (hasPendingJW) {
+                                            const allAssignments =
+                                              o.jobWorkAssignments || [];
+                                            const assignmentNames =
+                                              allAssignments
+                                                .map((a) => a.jobWorkName)
+                                                .filter(Boolean);
 
-                                          const jobWorkIdNames = (
-                                            (o as any).jobWorkIds || []
-                                          )
-                                            .map((id: string) => {
-                                              const jw = jobWorks.find(
-                                                (j) => j.id === id,
-                                              );
-                                              return jw?.name;
-                                            })
-                                            .filter(Boolean);
+                                            const jobWorkIdNames = (
+                                              (o as any).jobWorkIds || []
+                                            )
+                                              .map((id: string) => {
+                                                const jw = jobWorks.find(
+                                                  (j) => j.id === id,
+                                                );
+                                                return jw?.name;
+                                              })
+                                              .filter(Boolean);
 
-                                          const allNames = Array.from(
-                                            new Set([
-                                              ...assignmentNames,
-                                              ...jobWorkIdNames,
-                                            ]),
-                                          );
+                                            const allNames = Array.from(
+                                              new Set([
+                                                ...assignmentNames,
+                                                ...jobWorkIdNames,
+                                              ]),
+                                            );
 
-                                          return "Job Work";
-                                        }
-                                        return cap(displayStatus);
-                                      })()}
-                                    </Badge>
-                                  </button>
+                                            return "Job Work";
+                                          }
+                                          return cap(displayStatus);
+                                        })()}
+                                      </Badge>
+                                    </button>
+                                  </div>
                                 </>
                               )}
-                            </>
+                            </div>
                           );
-                        })()}
+                        }
+
+                        // cards (compact) default behaviour
+                        return (
+                          <>
+                            {hasPendingJW ? (
+                              <div className="flex flex-col items-end gap-0.5 text-sm">
+                                {(() => {
+                                  const allAssignments =
+                                    o.jobWorkAssignments || [];
+                                  const assignmentNames = allAssignments
+                                    .map((a) => a.jobWorkName)
+                                    .filter(Boolean);
+
+                                  const jobWorkIdNames = (
+                                    (o as any).jobWorkIds || []
+                                  )
+                                    .map((id: string) => {
+                                      const jw = jobWorks.find(
+                                        (j) => j.id === id,
+                                      );
+                                      return jw?.name;
+                                    })
+                                    .filter(Boolean);
+
+                                  const allNames = Array.from(
+                                    new Set([
+                                      ...assignmentNames,
+                                      ...jobWorkIdNames,
+                                    ]),
+                                  );
+
+                                  return allNames.length > 0 ? (
+                                    allNames.map((name) => (
+                                      <span
+                                        key={name}
+                                        className="font-medium text-purple-700 dark:text-purple-300"
+                                      >
+                                        {name}
+                                      </span>
+                                    ))
+                                  ) : (
+                                    <span className="font-medium text-purple-700 dark:text-purple-300">
+                                      Job Work
+                                    </span>
+                                  );
+                                })()}
+                              </div>
+                            ) : i < 0 ? (
+                              <div className="text-sm text-right">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  Out of Path
+                                </span>
+                              </div>
+                            ) : i >= o.steps.length ? (
+                              <div className="text-sm text-right">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  Completed
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="text-sm text-right">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  {step.kind === "machine"
+                                    ? step.machineType
+                                    : "Job Work"}
+                                </span>
+                              </div>
+                            )}
+
+                            {(() => {
+                              const parallelGroup = (
+                                o.parallelGroups || []
+                              ).find((g) => g.stepIndex === i);
+                              const selectedIndices =
+                                parallelGroup?.machineIndices || [];
+                              const primaryMachine =
+                                step.kind === "machine"
+                                  ? step.machineType
+                                  : "Job Work";
+                              const selectedMachines = selectedIndices
+                                .map((idx) => machineTypes[idx]?.name)
+                                .filter(
+                                  (name) => !!name && name !== primaryMachine,
+                                );
+                              if (selectedMachines.length === 0) return null;
+                              return (
+                                <div className="text-sm text-right">
+                                  {selectedMachines.map((m) => (
+                                    <div
+                                      key={m}
+                                      className="font-medium text-gray-900 dark:text-gray-100"
+                                    >
+                                      {m}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
+
+                            {(isExpandedMobile || hasPendingJW) && (
+                              <>
+                                <button
+                                  onClick={
+                                    pathEditId === o.id
+                                      ? () => toggleCardStatus(o)
+                                      : undefined
+                                  }
+                                >
+                                  <Badge
+                                    variant={"default"}
+                                    className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                      hasPendingJW
+                                        ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                        : displayStatus === "running"
+                                          ? "bg-green-600 text-white"
+                                          : displayStatus === "hold"
+                                            ? "bg-red-600 text-white"
+                                            : "bg-gray-500 text-white"
+                                    }`}
+                                  >
+                                    {(() => {
+                                      if (hasPendingJW) {
+                                        const allAssignments =
+                                          o.jobWorkAssignments || [];
+                                        const assignmentNames = allAssignments
+                                          .map((a) => a.jobWorkName)
+                                          .filter(Boolean);
+
+                                        const jobWorkIdNames = (
+                                          (o as any).jobWorkIds || []
+                                        )
+                                          .map((id: string) => {
+                                            const jw = jobWorks.find(
+                                              (j) => j.id === id,
+                                            );
+                                            return jw?.name;
+                                          })
+                                          .filter(Boolean);
+
+                                        const allNames = Array.from(
+                                          new Set([
+                                            ...assignmentNames,
+                                            ...jobWorkIdNames,
+                                          ]),
+                                        );
+
+                                        return "Job Work";
+                                      }
+                                      return cap(displayStatus);
+                                    })()}
+                                  </Badge>
+                                </button>
+                              </>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
@@ -1751,7 +1757,10 @@ export default function ModelList(props: ModelListProps) {
                                   return rest;
                                 });
                               } catch (error) {
-                                console.error("Failed to save path changes:", error);
+                                console.error(
+                                  "Failed to save path changes:",
+                                  error,
+                                );
                                 toast({
                                   title: "Error",
                                   description:
