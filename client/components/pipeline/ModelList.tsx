@@ -27,6 +27,7 @@ import type {
   JobWorkAssignment,
 } from "@/hooks/useProductionPipeline";
 import { useMachineTypes, getMachineTypeConfig } from "@/lib/machineTypes";
+import { toast } from "@/hooks/use-toast";
 
 interface ModelListProps {
   orders: WorkOrder[];
