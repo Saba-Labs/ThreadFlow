@@ -1284,11 +1284,13 @@ export default function ModelList(props: ModelListProps) {
                           : "flex items-center gap-1"
                       }
                     >
-                      {i >= 0 &&
-                        i < o.steps.length &&
-                        (() => {
-                          const displayStatus =
-                            step.status === "pending" ? "hold" : step.status;
+                      {(() => {
+                        const displayStatus =
+                          i >= 0 && i < o.steps.length && step
+                            ? step.status === "pending"
+                              ? "hold"
+                              : step.status
+                            : undefined;
 
                           if (viewMode === "list") {
                             // Stack current, status badge, and job work vertically like card view
