@@ -447,7 +447,7 @@ export function useReStok() {
 
       try {
         await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Sub-item updated successfully",
@@ -471,7 +471,7 @@ export function useReStok() {
   const reorderItems = useCallback(async (itemIds: string[]) => {
     try {
       await apiCall("/api/restok/reorder", "POST", { itemIds });
-      await fetchItems();
+      await fetchItems(true);
       toast({
         title: "Success",
         description: "Items reordered successfully",
