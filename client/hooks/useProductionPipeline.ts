@@ -241,8 +241,11 @@ export function useProductionPipeline() {
 
   const editPath = useCallback(
     async (orderId: string, editor: (steps: PathStep[]) => PathStep[]) => {
-      const order = state.orders.find((o) => o.id === orderId);
-      if (!order) return;
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const order = STORE.orders.find((o) => o.id === orderId);
+      if (!order) {
+        throw new Error(`Order ${orderId} not found`);
+      }
 
       const currentStepId = order.steps[order.currentStepIndex]?.id;
       const nextSteps = editor([...order.steps]);
@@ -275,7 +278,7 @@ export function useProductionPipeline() {
         throw error;
       }
     },
-    [state.orders],
+    [],
   );
 
   const updateStepStatus = useCallback(
