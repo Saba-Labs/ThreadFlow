@@ -1550,7 +1550,7 @@ export default function ModelList(props: ModelListProps) {
                                 );
                               })()}
 
-                              {isExpandedMobile && (
+                              {(isExpandedMobile || hasPendingJW) && (
                                 <>
                                   <button
                                     onClick={
