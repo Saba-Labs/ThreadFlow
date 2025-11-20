@@ -355,7 +355,7 @@ export function useReStok() {
               lowStock: s.lowStock ?? 0,
             })),
         });
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Sub-item deleted successfully",
