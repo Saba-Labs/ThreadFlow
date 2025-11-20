@@ -935,6 +935,9 @@ export default function ModelList(props: ModelListProps) {
                                   variant="ghost"
                                   onClick={async () => {
                                     if (pathEditId === o.id) {
+                                      // Prevent multiple simultaneous saves
+                                      if (savingIds[o.id]) return;
+
                                       setSavingIds((s) => ({
                                         ...s,
                                         [o.id]: true,
@@ -951,11 +954,7 @@ export default function ModelList(props: ModelListProps) {
                                           stepsToSave,
                                           idx,
                                         );
-                                      } finally {
-                                        setSavingIds((s) => {
-                                          const { [o.id]: _drop, ...rest } = s;
-                                          return rest;
-                                        });
+                                        // Only clear edit state on successful save
                                         setPathEditId(null);
                                         setPendingIndex((m) => {
                                           const { [o.id]: _drop, ...rest } = m;
@@ -963,6 +962,14 @@ export default function ModelList(props: ModelListProps) {
                                         });
                                         setPendingStepsMap((m) => {
                                           const { [o.id]: _drop, ...rest } = m;
+                                          return rest;
+                                        });
+                                      } catch (error) {
+                                        console.error("Failed to save path changes:", error);
+                                        // Keep edit state open so user can retry or fix issues
+                                      } finally {
+                                        setSavingIds((s) => {
+                                          const { [o.id]: _drop, ...rest } = s;
                                           return rest;
                                         });
                                       }
