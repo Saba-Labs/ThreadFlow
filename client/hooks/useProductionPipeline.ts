@@ -417,7 +417,8 @@ export function useProductionPipeline() {
 
   const moveToPrevStep = useCallback(
     async (orderId: string) => {
-      const order = state.orders.find((o) => o.id === orderId);
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const order = STORE.orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Order not found");
 
       const previousOrder = order;
