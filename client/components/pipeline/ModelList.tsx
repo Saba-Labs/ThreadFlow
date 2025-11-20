@@ -1294,19 +1294,7 @@ export default function ModelList(props: ModelListProps) {
 
                             return (
                               <div className="flex flex-col items-end gap-1 text-right">
-                                {i < 0 ? (
-                                  <div className="text-sm">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                                      Out of Path
-                                    </span>
-                                  </div>
-                                ) : i >= o.steps.length ? (
-                                  <div className="text-sm">
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                                      Completed
-                                    </span>
-                                  </div>
-                                ) : hasPendingJW ? (
+                                {hasPendingJW ? (
                                   <div className="flex flex-col items-end gap-0.5 text-sm">
                                     {(() => {
                                       const allAssignments =
@@ -1348,6 +1336,18 @@ export default function ModelList(props: ModelListProps) {
                                         </span>
                                       );
                                     })()}
+                                  </div>
+                                ) : i < 0 ? (
+                                  <div className="text-sm">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                      Out of Path
+                                    </span>
+                                  </div>
+                                ) : i >= o.steps.length ? (
+                                  <div className="text-sm">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                      Completed
+                                    </span>
                                   </div>
                                 ) : (
                                   <div className="text-sm">
