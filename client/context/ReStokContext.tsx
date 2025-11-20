@@ -264,7 +264,7 @@ export function useReStok() {
           note,
           subItems: item.subItems,
         });
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Item saved successfully",
