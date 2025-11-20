@@ -1289,11 +1289,6 @@ export default function ModelList(props: ModelListProps) {
                         (() => {
                           const displayStatus =
                             step.status === "pending" ? "hold" : step.status;
-                          const hasPendingJW =
-                            ((o as any).jobWorkIds || []).length > 0 ||
-                            (o.jobWorkAssignments || []).some(
-                              (a) => a.status === "pending",
-                            );
 
                           if (viewMode === "list") {
                             // Stack current, status badge, and job work vertically like card view
