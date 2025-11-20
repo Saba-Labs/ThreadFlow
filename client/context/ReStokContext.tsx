@@ -28,7 +28,7 @@ let isBackgroundRefresh = false; // true if refetching due to SSE/polling, false
 const subscribers = new Set<() => void>();
 const loadingSubscribers = new Set<() => void>();
 
-async function fetchItems() {
+async function fetchItems(isUserAction: boolean = false) {
   const now = Date.now();
   // Debounce: avoid fetching more than once per second to prevent tight polling loops
   if (now - lastFetchTs < 1000) {
@@ -37,8 +37,15 @@ async function fetchItems() {
   if (isLoading) return;
   lastFetchTs = now;
 
+  // Track if this is a background refresh (from SSE/polling) vs user action
+  isBackgroundRefresh = !isUserAction && isInitialized;
+
   isLoading = true;
-  for (const s of Array.from(loadingSubscribers)) s();
+  // Only notify loading subscribers during initial load or user actions, not background refreshes
+  if (!isBackgroundRefresh) {
+    for (const s of Array.from(loadingSubscribers)) s();
+  }
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -73,7 +80,10 @@ async function fetchItems() {
     }
   } finally {
     isLoading = false;
-    for (const s of Array.from(loadingSubscribers)) s();
+    // Only notify loading subscribers if this wasn't a background refresh
+    if (!isBackgroundRefresh) {
+      for (const s of Array.from(loadingSubscribers)) s();
+    }
   }
 }
 
