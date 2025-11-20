@@ -412,7 +412,7 @@ export function useProductionPipeline() {
         ),
       );
     },
-    [state.orders],
+    [],
   );
 
   const moveToPrevStep = useCallback(
