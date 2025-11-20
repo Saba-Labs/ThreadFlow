@@ -1723,6 +1723,14 @@ export default function ModelList(props: ModelListProps) {
                                 });
                               } catch (error) {
                                 console.error("Failed to save path changes:", error);
+                                toast({
+                                  title: "Error",
+                                  description:
+                                    error instanceof Error
+                                      ? error.message
+                                      : "Failed to save path changes. Please try again.",
+                                  variant: "destructive",
+                                });
                                 // Keep edit state open so user can retry or fix issues
                               } finally {
                                 setSavingIds((s) => {
