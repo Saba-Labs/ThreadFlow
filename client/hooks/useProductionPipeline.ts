@@ -584,7 +584,8 @@ export function useProductionPipeline() {
 
   const splitOrder = useCallback(
     async (orderId: string, quantities: number[]) => {
-      const src = state.orders.find((o) => o.id === orderId);
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const src = STORE.orders.find((o) => o.id === orderId);
       if (!src) return;
 
       const valid = quantities
