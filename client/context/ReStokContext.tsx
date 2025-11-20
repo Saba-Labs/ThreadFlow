@@ -211,7 +211,7 @@ export function useReStok() {
   const deleteItem = useCallback(async (itemId: string) => {
     try {
       await apiCall(`/api/restok/items/${itemId}`, "DELETE");
-      await fetchItems();
+      await fetchItems(true);
       toast({
         title: "Success",
         description: "Item deleted successfully",
