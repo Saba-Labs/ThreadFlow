@@ -101,7 +101,8 @@ export default function ModelForm(props: {
       const allMachines = machineTypes
         .filter((m) => m.name !== "Job Work")
         .map((m) => m.name);
-      setSelectedMachines(new Set(allMachines));
+      const firstMachine = allMachines.length > 0 ? allMachines[0] : undefined;
+      setSelectedMachines(firstMachine ? new Set([firstMachine]) : new Set());
     }
   }, [open, props.inline, machineTypes, props.initialData]);
 

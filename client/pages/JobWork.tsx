@@ -134,22 +134,26 @@ export default function JobWork() {
   // helper: return assignments for this job work
   const getAssignmentsForJobWork = (jwId: string) => {
     const orders = pipeline.orders || [];
-    const assignments: Array<{
-      id: string;
-      orderId: string;
-      modelName: string;
-      quantity: number;
-      pickupDate: number;
-      completionDate?: number;
-      status: "pending" | "completed";
-    }> = [];
+    const assignmentMap = new Map<
+      string,
+      {
+        id: string;
+        orderId: string;
+        modelName: string;
+        quantity: number;
+        pickupDate: number;
+        completionDate?: number;
+        status: "pending" | "completed";
+      }
+    >();
 
     for (const o of orders) {
       const jwAssignments = o.jobWorkAssignments || [];
       for (const assignment of jwAssignments) {
         if (assignment.jobWorkId === jwId) {
-          assignments.push({
-            id: `${o.id}_${assignment.jobWorkId}_${assignment.pickupDate}`,
+          const uniqueKey = `${o.id}_${assignment.jobWorkId}_${assignment.pickupDate}_${assignment.completionDate || ""}`;
+          assignmentMap.set(uniqueKey, {
+            id: uniqueKey,
             orderId: o.id,
             modelName: o.modelName,
             quantity: assignment.quantity,
@@ -160,7 +164,7 @@ export default function JobWork() {
         }
       }
     }
-    return assignments;
+    return Array.from(assignmentMap.values());
   };
 
   // helper: return unique model names that reference this job work id (backward compat)
