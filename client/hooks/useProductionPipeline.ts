@@ -672,7 +672,7 @@ export function useProductionPipeline() {
         throw error;
       }
     },
-    [state.orders],
+    [],
   );
 
   const machineTypes = useMachineTypes();
