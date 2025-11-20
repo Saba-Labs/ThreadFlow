@@ -787,50 +787,67 @@ export default function ModelList(props: ModelListProps) {
                           </td>
                           {showDetails && (
                             <td className="p-3" style={{ width: "120px" }}>
-                              {i < 0 || i >= o.steps.length ? (
-                                <Badge variant="secondary">—</Badge>
-                              ) : (
-                                (() => {
-                                  const hasPendingJW =
-                                    ((o as any).jobWorkIds || []).length > 0 ||
-                                    (o.jobWorkAssignments || []).some(
-                                      (a) => a.status === "pending",
-                                    );
-                                  const displayStatus =
-                                    step.status === "pending"
-                                      ? "hold"
-                                      : step.status;
-                                  return (
-                                    <>
-                                      <button
-                                        onClick={
-                                          pathEditId === o.id
-                                            ? () => toggleCardStatus(o)
-                                            : undefined
-                                        }
-                                      >
-                                        <Badge
-                                          variant={"default"}
-                                          className={`${pathEditId === o.id ? "cursor-pointer" : ""} whitespace-nowrap ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                            hasPendingJW
-                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                              : displayStatus === "running"
-                                                ? "bg-green-600 text-white"
-                                                : displayStatus === "hold"
-                                                  ? "bg-red-600 text-white"
-                                                  : "bg-gray-500 text-white"
-                                          }`}
-                                          aria-label={`Set status for ${o.modelName}`}
-                                        >
-                                          {hasPendingJW
-                                            ? "Job Work"
-                                            : cap(displayStatus)}
-                                        </Badge>
-                                      </button>
-                                    </>
+                              {(() => {
+                                const hasPendingJW =
+                                  ((o as any).jobWorkIds || []).length > 0 ||
+                                  (o.jobWorkAssignments || []).some(
+                                    (a) => a.status === "pending",
                                   );
-                                })()
-                              )}
+
+                                if (hasPendingJW) {
+                                  return (
+                                    <button
+                                      onClick={
+                                        pathEditId === o.id
+                                          ? () => toggleCardStatus(o)
+                                          : undefined
+                                      }
+                                    >
+                                      <Badge
+                                        variant={"default"}
+                                        className={`${pathEditId === o.id ? "cursor-pointer" : ""} whitespace-nowrap hover:bg-purple-700 bg-purple-700 dark:bg-purple-600 text-white`}
+                                        aria-label={`Set status for ${o.modelName}`}
+                                      >
+                                        Job Work
+                                      </Badge>
+                                    </button>
+                                  );
+                                }
+
+                                if (i < 0 || i >= o.steps.length) {
+                                  return <Badge variant="secondary">—</Badge>;
+                                }
+
+                                const displayStatus =
+                                  step.status === "pending"
+                                    ? "hold"
+                                    : step.status;
+                                return (
+                                  <>
+                                    <button
+                                      onClick={
+                                        pathEditId === o.id
+                                          ? () => toggleCardStatus(o)
+                                          : undefined
+                                      }
+                                    >
+                                      <Badge
+                                        variant={"default"}
+                                        className={`${pathEditId === o.id ? "cursor-pointer" : ""} whitespace-nowrap ${displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                          displayStatus === "running"
+                                            ? "bg-green-600 text-white"
+                                            : displayStatus === "hold"
+                                              ? "bg-red-600 text-white"
+                                              : "bg-gray-500 text-white"
+                                        }`}
+                                        aria-label={`Set status for ${o.modelName}`}
+                                      >
+                                        {cap(displayStatus)}
+                                      </Badge>
+                                    </button>
+                                  </>
+                                );
+                              })()}
                             </td>
                           )}
                           {showDetails && (
