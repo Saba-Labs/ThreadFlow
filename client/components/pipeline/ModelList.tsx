@@ -1203,6 +1203,9 @@ export default function ModelList(props: ModelListProps) {
               const step = ov.steps[i];
               const bg = statusBgClass(ov);
               const isExpandedMobile = toggledIds.includes(o.id);
+              const hasPendingJW =
+                ((o as any).jobWorkIds || []).length > 0 ||
+                (o.jobWorkAssignments || []).some((a) => a.status === "pending");
               return (
                 <div
                   key={o.id}
