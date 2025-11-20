@@ -316,7 +316,7 @@ export function useReStok() {
 
       try {
         await apiCall(`/api/restok/items/${parentItemId}`, "PUT", payload);
-        await fetchItems();
+        await fetchItems(true);
         toast({
           title: "Success",
           description: "Sub-item added successfully",
