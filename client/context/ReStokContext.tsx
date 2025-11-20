@@ -512,7 +512,7 @@ export function useReStok() {
           });
         }
 
-        await fetchItems();
+        await fetchItems(true);
         toast({ title: "Success", description: "Changes saved" });
       } catch (error) {
         console.error("Failed to save bulk edits:", error);
