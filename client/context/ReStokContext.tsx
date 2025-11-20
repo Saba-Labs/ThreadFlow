@@ -404,7 +404,7 @@ export function useReStok() {
                 },
           ),
         });
-        await fetchItems();
+        await fetchItems(true);
       } catch (error) {
         console.error("Failed to update sub-item quantity:", error);
         throw error;
