@@ -25,7 +25,7 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
 
     function setupPollingFallback() {
       console.log(
-        "[SSE Fallback] SSE not available, switching to polling every 2 seconds",
+        "[SSE Fallback] SSE not available, switching to polling every 30 seconds",
       );
       sseFailedRef.current = true;
       connectAttemptsRef.current = 0;
@@ -36,7 +36,7 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         callbackRef.current({ type: "machine_types_updated" });
         callbackRef.current({ type: "restok_updated" });
         callbackRef.current({ type: "roadmaps_updated" });
-      }, 2000);
+      }, 30000);
     }
 
     function connect() {
