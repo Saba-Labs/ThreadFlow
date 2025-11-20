@@ -1285,6 +1285,18 @@ export default function ModelList(props: ModelListProps) {
                       }
                     >
                       {(() => {
+                        if (i < 0 && hasPendingJW) {
+                          // Out of path but has pending job work - show Job Work badge
+                          return (
+                            <Badge
+                              variant={"default"}
+                              className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
+                            >
+                              Job Work
+                            </Badge>
+                          );
+                        }
+
                         const displayStatus =
                           i >= 0 && i < o.steps.length && step
                             ? step.status === "pending"
