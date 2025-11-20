@@ -1376,10 +1376,10 @@ export default function ModelList(props: ModelListProps) {
                                   </div>
                                 )}
 
-                                {/* Only show selected machines and status when the row is expanded */}
-                                {isExpandedMobile && (
+                                {/* Status badge always visible for pending JW or when expanded */}
+                                {(isExpandedMobile || hasPendingJW) && (
                                   <>
-                                    {selectedMachines.length > 0 && (
+                                    {selectedMachines.length > 0 && isExpandedMobile && (
                                       <div className="text-sm">
                                         {selectedMachines.map((m) => (
                                           <div
