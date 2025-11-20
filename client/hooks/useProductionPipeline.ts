@@ -548,8 +548,11 @@ export function useProductionPipeline() {
 
   const saveOrderProgress = useCallback(
     async (orderId: string, steps: PathStep[], currentStepIndex: number) => {
-      const order = state.orders.find((o) => o.id === orderId);
-      if (!order) return;
+      // Read from STORE instead of state.orders to avoid stale closure dependency
+      const order = STORE.orders.find((o) => o.id === orderId);
+      if (!order) {
+        throw new Error(`Order ${orderId} not found`);
+      }
       try {
         await fetchWithTimeout(`/api/pipeline/orders/${orderId}`, {
           method: "PUT",
@@ -571,7 +574,7 @@ export function useProductionPipeline() {
         throw error;
       }
     },
-    [state.orders],
+    [],
   );
 
   const splitOrder = useCallback(
