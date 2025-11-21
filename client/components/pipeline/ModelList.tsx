@@ -1274,14 +1274,48 @@ export default function ModelList(props: ModelListProps) {
                     >
                       {(() => {
                         if (i < 0 && hasPendingJW) {
-                          // Out of path but has pending job work - show Job Work badge
+                          // Out of path but has pending job work - show names above Job Work badge
+                          const allAssignments = o.jobWorkAssignments || [];
+                          const assignmentNames = allAssignments
+                            .map((a) => a.jobWorkName)
+                            .filter(Boolean);
+
+                          const jobWorkIdNames = ((o as any).jobWorkIds || [])
+                            .map((id: string) => {
+                              const jw = jobWorks.find((j) => j.id === id);
+                              return jw?.name;
+                            })
+                            .filter(Boolean);
+
+                          const allNames = Array.from(
+                            new Set([...assignmentNames, ...jobWorkIdNames]),
+                          );
+
                           return (
-                            <Badge
-                              variant={"default"}
-                              className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
-                            >
-                              Job Work
-                            </Badge>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <div className="flex flex-col items-end gap-0.5 text-sm">
+                                {allNames.length > 0 ? (
+                                  allNames.map((name) => (
+                                    <span
+                                      key={name}
+                                      className="font-medium text-purple-700 dark:text-purple-300"
+                                    >
+                                      {name}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="font-medium text-purple-700 dark:text-purple-300">
+                                    Job Work
+                                  </span>
+                                )}
+                              </div>
+                              <Badge
+                                variant={"default"}
+                                className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
+                              >
+                                Job Work
+                              </Badge>
+                            </div>
                           );
                         }
 
