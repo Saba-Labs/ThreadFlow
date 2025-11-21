@@ -1547,7 +1547,7 @@ export default function ModelList(props: ModelListProps) {
                               const selectedIndices =
                                 parallelGroup?.machineIndices || [];
                               const primaryMachine =
-                                step.kind === "machine"
+                                step && step.kind === "machine"
                                   ? step.machineType
                                   : "Job Work";
                               const selectedMachines = selectedIndices
