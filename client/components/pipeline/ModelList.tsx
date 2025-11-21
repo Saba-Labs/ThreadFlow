@@ -1114,6 +1114,7 @@ export default function ModelList(props: ModelListProps) {
                                         (orderId, stepIdx) => {
                                           const stepAtIdx = ov.steps[stepIdx];
                                           if (
+                                            stepAtIdx &&
                                             stepAtIdx.kind === "machine" &&
                                             stepAtIdx.machineType
                                           ) {
