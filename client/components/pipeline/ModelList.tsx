@@ -1308,12 +1308,14 @@ export default function ModelList(props: ModelListProps) {
                                   </span>
                                 )}
                               </div>
-                              <Badge
-                                variant={"default"}
-                                className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
-                              >
-                                Job Work
-                              </Badge>
+                              {!isMobile && (
+                                <Badge
+                                  variant={"default"}
+                                  className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
+                                >
+                                  Job Work
+                                </Badge>
+                              )}
                             </div>
                           );
                         }
