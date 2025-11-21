@@ -1494,7 +1494,7 @@ export default function ModelList(props: ModelListProps) {
 
                         return (
                           <>
-                            {hasPendingJW ? (
+                            {isExpandedMobile && hasPendingJW ? (
                               <div className="flex flex-col items-end gap-0.5 text-sm">
                                 {(() => {
                                   const allAssignments =
@@ -1537,7 +1537,7 @@ export default function ModelList(props: ModelListProps) {
                                   );
                                 })()}
                               </div>
-                            ) : i >= o.steps.length ? (
+                            ) : !isExpandedMobile && hasPendingJW ? null : i >= o.steps.length ? (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   Completed
@@ -1553,38 +1553,38 @@ export default function ModelList(props: ModelListProps) {
                               </div>
                             )}
 
-                            {(() => {
-                              const parallelGroup = (
-                                o.parallelGroups || []
-                              ).find((g) => g.stepIndex === i);
-                              const selectedIndices =
-                                parallelGroup?.machineIndices || [];
-                              const primaryMachine =
-                                step && step.kind === "machine"
-                                  ? step.machineType
-                                  : "Job Work";
-                              const selectedMachines = selectedIndices
-                                .map((idx) => machineTypes[idx]?.name)
-                                .filter(
-                                  (name) => !!name && name !== primaryMachine,
-                                );
-                              if (selectedMachines.length === 0) return null;
-                              return (
-                                <div className="text-sm text-right">
-                                  {selectedMachines.map((m) => (
-                                    <div
-                                      key={m}
-                                      className="font-medium text-gray-900 dark:text-gray-100"
-                                    >
-                                      {m}
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })()}
-
                             {isExpandedMobile && (
                               <>
+                                {(() => {
+                                  const parallelGroup = (
+                                    o.parallelGroups || []
+                                  ).find((g) => g.stepIndex === i);
+                                  const selectedIndices =
+                                    parallelGroup?.machineIndices || [];
+                                  const primaryMachine =
+                                    step && step.kind === "machine"
+                                      ? step.machineType
+                                      : "Job Work";
+                                  const selectedMachines = selectedIndices
+                                    .map((idx) => machineTypes[idx]?.name)
+                                    .filter(
+                                      (name) => !!name && name !== primaryMachine,
+                                    );
+                                  if (selectedMachines.length === 0) return null;
+                                  return (
+                                    <div className="text-sm text-right">
+                                      {selectedMachines.map((m) => (
+                                        <div
+                                          key={m}
+                                          className="font-medium text-gray-900 dark:text-gray-100"
+                                        >
+                                          {m}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
+
                                 <button
                                   onClick={
                                     pathEditId === o.id
