@@ -1494,7 +1494,7 @@ export default function ModelList(props: ModelListProps) {
 
                         return (
                           <>
-                            {isExpandedMobile && hasPendingJW ? (
+                            {hasPendingJW ? (
                               <div className="flex flex-col items-end gap-0.5 text-sm">
                                 {(() => {
                                   const allAssignments =
@@ -1537,7 +1537,7 @@ export default function ModelList(props: ModelListProps) {
                                   );
                                 })()}
                               </div>
-                            ) : !isExpandedMobile && hasPendingJW ? null : i >= o.steps.length ? (
+                            ) : i >= o.steps.length ? (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   Completed
