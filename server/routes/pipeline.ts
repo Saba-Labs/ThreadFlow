@@ -42,7 +42,11 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
     const result = await query(
       "SELECT * FROM work_orders ORDER BY created_at DESC, id ASC",
     );
-    console.log("[getPipelineOrders] Query returned", result.rows.length, "orders");
+    console.log(
+      "[getPipelineOrders] Query returned",
+      result.rows.length,
+      "orders",
+    );
 
     const orders: WorkOrder[] = [];
     for (const row of result.rows) {

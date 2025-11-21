@@ -742,8 +742,7 @@ export default function ModelList(props: ModelListProps) {
                               const selectedMachines = selectedIndices
                                 .map((idx) => machineTypes[idx]?.name)
                                 .filter(
-                                  (name) =>
-                                    !!name && name !== primaryMachine,
+                                  (name) => !!name && name !== primaryMachine,
                                 );
                               return (
                                 <div className="flex flex-col gap-0.5">
