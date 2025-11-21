@@ -646,6 +646,7 @@ export default function ModelList(props: ModelListProps) {
                                 {getPathLetterPills(ov, (orderId, stepIdx) => {
                                   const stepAtIdx = ov.steps[stepIdx];
                                   if (
+                                    stepAtIdx &&
                                     stepAtIdx.kind === "machine" &&
                                     stepAtIdx.machineType
                                   ) {
@@ -722,7 +723,7 @@ export default function ModelList(props: ModelListProps) {
                                     }
 
                                     const primaryMachine =
-                                      step.kind === "machine"
+                                      step && step.kind === "machine"
                                         ? step.machineType
                                         : (() => {
                                             const allAssignments =
@@ -815,6 +816,10 @@ export default function ModelList(props: ModelListProps) {
                                 }
 
                                 if (i < 0 || i >= o.steps.length) {
+                                  return <Badge variant="secondary">—</Badge>;
+                                }
+
+                                if (!step) {
                                   return <Badge variant="secondary">—</Badge>;
                                 }
 
@@ -1113,6 +1118,7 @@ export default function ModelList(props: ModelListProps) {
                                         (orderId, stepIdx) => {
                                           const stepAtIdx = ov.steps[stepIdx];
                                           if (
+                                            stepAtIdx &&
                                             stepAtIdx.kind === "machine" &&
                                             stepAtIdx.machineType
                                           ) {
@@ -1263,6 +1269,7 @@ export default function ModelList(props: ModelListProps) {
                           {getPathLetterPills(ov, (orderId, stepIdx) => {
                             const stepAtIdx = ov.steps[stepIdx];
                             if (
+                              stepAtIdx &&
                               stepAtIdx.kind === "machine" &&
                               stepAtIdx.machineType
                             ) {
@@ -1317,7 +1324,7 @@ export default function ModelList(props: ModelListProps) {
                           const selectedIndices =
                             parallelGroup?.machineIndices || [];
                           const primaryMachine =
-                            step.kind === "machine"
+                            step && step.kind === "machine"
                               ? step.machineType
                               : "Job Work";
                           const selectedMachines = selectedIndices
@@ -1386,7 +1393,7 @@ export default function ModelList(props: ModelListProps) {
                               ) : (
                                 <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
-                                    {step.kind === "machine"
+                                    {step && step.kind === "machine"
                                       ? step.machineType
                                       : "Job Work"}
                                   </span>
@@ -1531,7 +1538,7 @@ export default function ModelList(props: ModelListProps) {
                             ) : (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
-                                  {step.kind === "machine"
+                                  {step && step.kind === "machine"
                                     ? step.machineType
                                     : "Job Work"}
                                 </span>
@@ -1545,7 +1552,7 @@ export default function ModelList(props: ModelListProps) {
                               const selectedIndices =
                                 parallelGroup?.machineIndices || [];
                               const primaryMachine =
-                                step.kind === "machine"
+                                step && step.kind === "machine"
                                   ? step.machineType
                                   : "Job Work";
                               const selectedMachines = selectedIndices
