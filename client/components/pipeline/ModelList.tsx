@@ -1537,12 +1537,16 @@ function ModelList(props: ModelListProps) {
                                   );
                                 })()}
                               </div>
+                            ) : isMobile && i < 0 ? (
+                              null
                             ) : i < 0 ? (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   Out of Path
                                 </span>
                               </div>
+                            ) : isMobile && i >= o.steps.length ? (
+                              null
                             ) : i >= o.steps.length ? (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
