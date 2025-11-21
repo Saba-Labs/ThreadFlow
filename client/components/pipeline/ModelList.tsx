@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState, useRef } from "react";
+import { Fragment, useEffect, useMemo, useState, useRef, memo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,7 @@ interface ModelListProps {
   viewMode?: "cards" | "list";
 }
 
-export default function ModelList(props: ModelListProps) {
+function ModelList(props: ModelListProps) {
   const machineTypes = useMachineTypes();
   const navigate = useNavigate();
   const viewMode = props.viewMode ?? "cards";
@@ -89,7 +89,10 @@ export default function ModelList(props: ModelListProps) {
     string | null
   >(null);
 
-  const sorted = useMemo(() => props.orders.slice(), [props.orders]);
+  const sorted = useMemo(() => {
+    // Return same reference if orders haven't changed to prevent unnecessary recalculations
+    return props.orders.slice();
+  }, [props.orders]);
 
   const editing = editingId
     ? sorted.find((o) => o.id === editingId) || null
@@ -1308,12 +1311,14 @@ export default function ModelList(props: ModelListProps) {
                                   </span>
                                 )}
                               </div>
-                              <Badge
-                                variant={"default"}
-                                className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
-                              >
-                                Job Work
-                              </Badge>
+                              {(!isMobile || showDetails) && (
+                                <Badge
+                                  variant={"default"}
+                                  className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
+                                >
+                                  Job Work
+                                </Badge>
+                              )}
                             </div>
                           );
                         }
@@ -1487,11 +1492,6 @@ export default function ModelList(props: ModelListProps) {
                         }
 
                         // cards (compact) default behaviour
-                        if (i < 0 && !hasPendingJW) {
-                          // Out of path with no job work - render nothing
-                          return null;
-                        }
-
                         return (
                           <>
                             {hasPendingJW ? (
@@ -1537,7 +1537,14 @@ export default function ModelList(props: ModelListProps) {
                                   );
                                 })()}
                               </div>
-                            ) : i >= o.steps.length ? (
+                            ) : isMobile && i < 0 ? null : i < 0 ? (
+                              <div className="text-sm text-right">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  Out of Path
+                                </span>
+                              </div>
+                            ) : isMobile && i >= o.steps.length ? null : i >=
+                              o.steps.length ? (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   Completed
@@ -1553,38 +1560,40 @@ export default function ModelList(props: ModelListProps) {
                               </div>
                             )}
 
-                            {(() => {
-                              const parallelGroup = (
-                                o.parallelGroups || []
-                              ).find((g) => g.stepIndex === i);
-                              const selectedIndices =
-                                parallelGroup?.machineIndices || [];
-                              const primaryMachine =
-                                step && step.kind === "machine"
-                                  ? step.machineType
-                                  : "Job Work";
-                              const selectedMachines = selectedIndices
-                                .map((idx) => machineTypes[idx]?.name)
-                                .filter(
-                                  (name) => !!name && name !== primaryMachine,
-                                );
-                              if (selectedMachines.length === 0) return null;
-                              return (
-                                <div className="text-sm text-right">
-                                  {selectedMachines.map((m) => (
-                                    <div
-                                      key={m}
-                                      className="font-medium text-gray-900 dark:text-gray-100"
-                                    >
-                                      {m}
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })()}
-
                             {isExpandedMobile && (
                               <>
+                                {(() => {
+                                  const parallelGroup = (
+                                    o.parallelGroups || []
+                                  ).find((g) => g.stepIndex === i);
+                                  const selectedIndices =
+                                    parallelGroup?.machineIndices || [];
+                                  const primaryMachine =
+                                    step && step.kind === "machine"
+                                      ? step.machineType
+                                      : "Job Work";
+                                  const selectedMachines = selectedIndices
+                                    .map((idx) => machineTypes[idx]?.name)
+                                    .filter(
+                                      (name) =>
+                                        !!name && name !== primaryMachine,
+                                    );
+                                  if (selectedMachines.length === 0)
+                                    return null;
+                                  return (
+                                    <div className="text-sm text-right">
+                                      {selectedMachines.map((m) => (
+                                        <div
+                                          key={m}
+                                          className="font-medium text-gray-900 dark:text-gray-100"
+                                        >
+                                          {m}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
+
                                 <button
                                   onClick={
                                     pathEditId === o.id
@@ -2319,3 +2328,5 @@ export default function ModelList(props: ModelListProps) {
     </div>
   );
 }
+
+export default memo(ModelList);

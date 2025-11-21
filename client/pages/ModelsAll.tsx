@@ -60,8 +60,8 @@ export default function ModelsAll() {
     rightPage: "/job-work",
   });
   const [filter, setFilter] = useState<
-    "all" | "hold" | "running" | "completed" | "job" | "onboard"
-  >("all");
+    "active" | "all" | "hold" | "running" | "completed" | "job" | "onboard"
+  >("active");
   const [localQuery, setLocalQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -86,7 +86,12 @@ export default function ModelsAll() {
       const s = o.steps[o.currentStepIndex]?.status || "hold";
       return s === "pending" ? "hold" : (s as "hold" | "running" | "completed");
     };
-    if (filter === "all") return pipeline.orders;
+    if (filter === "active") {
+      return pipeline.orders.filter((o) => statusOf(o) !== "completed");
+    }
+    if (filter === "all") {
+      return pipeline.orders;
+    }
     if (filter === "job") {
       return pipeline.orders.filter((o) => hasPendingJobWork(o));
     }
@@ -198,15 +203,16 @@ export default function ModelsAll() {
           </Button>
           <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
             <SelectTrigger className="w-24">
-              <SelectValue placeholder="All" />
+              <SelectValue placeholder="Active" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
               <SelectItem value="onboard">On Board</SelectItem>
               <SelectItem value="hold">Hold</SelectItem>
               <SelectItem value="running">Running</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="job">Job Work</SelectItem>
+              <SelectItem value="all">All</SelectItem>
             </SelectContent>
           </Select>
         </div>
