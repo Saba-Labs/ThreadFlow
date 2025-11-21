@@ -39,40 +39,71 @@ export interface WorkOrder {
 export const getPipelineOrders: RequestHandler = async (req, res) => {
   console.log("[getPipelineOrders] API endpoint called");
   try {
-    const result = await query(
+    const ordersResult = await query(
       "SELECT * FROM work_orders ORDER BY created_at DESC, id ASC",
     );
     console.log(
       "[getPipelineOrders] Query returned",
-      result.rows.length,
+      ordersResult.rows.length,
       "orders",
     );
 
-    const orders: WorkOrder[] = [];
-    for (const row of result.rows) {
-      // Fetch steps
+    const orderIds = ordersResult.rows.map((row: any) => row.id);
+
+    let stepsMap: Record<string, any[]> = {};
+    let assignmentsMap: Record<string, any[]> = {};
+
+    if (orderIds.length > 0) {
+      // Fetch all steps in one query
+      const placeholders = orderIds.map((_, i) => `$${i + 1}`).join(",");
       const stepsResult = await query(
-        "SELECT * FROM path_steps WHERE order_id = $1 ORDER BY step_index ASC",
-        [row.id],
+        `SELECT * FROM path_steps WHERE order_id IN (${placeholders}) ORDER BY order_id ASC, step_index ASC`,
+        orderIds,
       );
 
-      const steps = stepsResult.rows.map((s: any) => ({
+      for (const step of stepsResult.rows) {
+        if (!stepsMap[step.order_id]) {
+          stepsMap[step.order_id] = [];
+        }
+        stepsMap[step.order_id].push(step);
+      }
+
+      // Fetch all job work assignments in one query
+      const assignmentsResult = await query(
+        `SELECT jwa.order_id, jwa.job_work_id, jw.name, jwa.quantity, jwa.pickup_date, jwa.completion_date, jwa.status
+         FROM job_work_assignments jwa
+         LEFT JOIN job_works jw ON jwa.job_work_id = jw.id
+         WHERE jwa.order_id IN (${placeholders})
+         ORDER BY jwa.order_id ASC`,
+        orderIds,
+      );
+
+      for (const assignment of assignmentsResult.rows) {
+        if (!assignmentsMap[assignment.order_id]) {
+          assignmentsMap[assignment.order_id] = [];
+        }
+        assignmentsMap[assignment.order_id].push(assignment);
+      }
+    }
+
+    const orders: WorkOrder[] = ordersResult.rows.map((row: any) => {
+      const steps = (stepsMap[row.id] || []).map((s: any) => ({
         id: s.id,
         kind: s.kind,
         machineType: s.machine_type,
         externalUnitName: s.external_unit_name,
         status: s.status,
-        activeMachines: s.active_machines,
-        quantityDone: s.quantity_done,
+        activeMachines:
+          typeof s.active_machines === "number"
+            ? s.active_machines
+            : parseInt(s.active_machines || "0"),
+        quantityDone:
+          typeof s.quantity_done === "number"
+            ? s.quantity_done
+            : parseInt(s.quantity_done || "0"),
       }));
 
-      // Fetch job work assignments with job work names
-      const assignmentsResult = await query(
-        "SELECT jwa.job_work_id, jw.name, jwa.quantity, jwa.pickup_date, jwa.completion_date, jwa.status FROM job_work_assignments jwa LEFT JOIN job_works jw ON jwa.job_work_id = jw.id WHERE jwa.order_id = $1",
-        [row.id],
-      );
-
-      const jobWorkAssignments = assignmentsResult.rows.map((a: any) => ({
+      const jobWorkAssignments = (assignmentsMap[row.id] || []).map((a: any) => ({
         jobWorkId: a.job_work_id,
         jobWorkName: a.name,
         quantity: a.quantity,
@@ -88,27 +119,7 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         status: a.status,
       }));
 
-      if (jobWorkAssignments.length > 0) {
-        console.log("[getPipelineOrders] Found assignments for order", {
-          orderId: row.id,
-          assignmentsCount: jobWorkAssignments.length,
-          assignments: jobWorkAssignments,
-        });
-      }
-
-      const normalizedSteps = steps.map((s) => ({
-        ...s,
-        activeMachines:
-          typeof s.activeMachines === "number"
-            ? s.activeMachines
-            : parseInt(s.activeMachines || "0"),
-        quantityDone:
-          typeof s.quantityDone === "number"
-            ? s.quantityDone
-            : parseInt(s.quantityDone || "0"),
-      }));
-
-      orders.push({
+      return {
         id: row.id,
         modelName: row.model_name,
         quantity: row.quantity,
@@ -116,13 +127,13 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
           typeof row.created_at === "number"
             ? row.created_at
             : parseInt(row.created_at || "0"),
-        steps: normalizedSteps,
+        steps,
         currentStepIndex: row.current_step_index,
         parentId: row.parent_id,
         parallelGroups: [],
         jobWorkAssignments,
-      });
-    }
+      };
+    });
 
     res.json(orders);
   } catch (error) {
