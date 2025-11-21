@@ -89,7 +89,10 @@ export default function ModelList(props: ModelListProps) {
     string | null
   >(null);
 
-  const sorted = useMemo(() => props.orders.slice(), [props.orders]);
+  const sorted = useMemo(() => {
+    // Return same reference if orders haven't changed to prevent unnecessary recalculations
+    return props.orders.slice();
+  }, [props.orders]);
 
   const editing = editingId
     ? sorted.find((o) => o.id === editingId) || null
