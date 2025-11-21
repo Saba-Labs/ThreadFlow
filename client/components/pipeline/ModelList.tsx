@@ -1308,7 +1308,7 @@ export default function ModelList(props: ModelListProps) {
                                   </span>
                                 )}
                               </div>
-                              {!isMobile && (
+                              {(!isMobile || showDetails) && (
                                 <Badge
                                   variant={"default"}
                                   className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
