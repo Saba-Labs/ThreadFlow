@@ -819,6 +819,10 @@ export default function ModelList(props: ModelListProps) {
                                   return <Badge variant="secondary">—</Badge>;
                                 }
 
+                                if (!step) {
+                                  return <Badge variant="secondary">—</Badge>;
+                                }
+
                                 const displayStatus =
                                   step.status === "pending"
                                     ? "hold"
