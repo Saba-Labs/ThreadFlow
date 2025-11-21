@@ -723,7 +723,7 @@ export default function ModelList(props: ModelListProps) {
                                     }
 
                                     const primaryMachine =
-                                      step.kind === "machine"
+                                      step && step.kind === "machine"
                                         ? step.machineType
                                         : (() => {
                                             const allAssignments =
