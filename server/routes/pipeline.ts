@@ -103,21 +103,23 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
             : parseInt(s.quantity_done || "0"),
       }));
 
-      const jobWorkAssignments = (assignmentsMap[row.id] || []).map((a: any) => ({
-        jobWorkId: a.job_work_id,
-        jobWorkName: a.name,
-        quantity: a.quantity,
-        pickupDate:
-          typeof a.pickup_date === "number"
-            ? a.pickup_date
-            : parseInt(a.pickup_date || "0", 10),
-        completionDate: a.completion_date
-          ? typeof a.completion_date === "number"
-            ? a.completion_date
-            : parseInt(a.completion_date, 10)
-          : undefined,
-        status: a.status,
-      }));
+      const jobWorkAssignments = (assignmentsMap[row.id] || []).map(
+        (a: any) => ({
+          jobWorkId: a.job_work_id,
+          jobWorkName: a.name,
+          quantity: a.quantity,
+          pickupDate:
+            typeof a.pickup_date === "number"
+              ? a.pickup_date
+              : parseInt(a.pickup_date || "0", 10),
+          completionDate: a.completion_date
+            ? typeof a.completion_date === "number"
+              ? a.completion_date
+              : parseInt(a.completion_date, 10)
+            : undefined,
+          status: a.status,
+        }),
+      );
 
       return {
         id: row.id,

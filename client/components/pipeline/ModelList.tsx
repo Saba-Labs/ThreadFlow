@@ -1537,17 +1537,14 @@ function ModelList(props: ModelListProps) {
                                   );
                                 })()}
                               </div>
-                            ) : isMobile && i < 0 ? (
-                              null
-                            ) : i < 0 ? (
+                            ) : isMobile && i < 0 ? null : i < 0 ? (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   Out of Path
                                 </span>
                               </div>
-                            ) : isMobile && i >= o.steps.length ? (
-                              null
-                            ) : i >= o.steps.length ? (
+                            ) : isMobile && i >= o.steps.length ? null : i >=
+                              o.steps.length ? (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                   Completed
@@ -1578,9 +1575,11 @@ function ModelList(props: ModelListProps) {
                                   const selectedMachines = selectedIndices
                                     .map((idx) => machineTypes[idx]?.name)
                                     .filter(
-                                      (name) => !!name && name !== primaryMachine,
+                                      (name) =>
+                                        !!name && name !== primaryMachine,
                                     );
-                                  if (selectedMachines.length === 0) return null;
+                                  if (selectedMachines.length === 0)
+                                    return null;
                                   return (
                                     <div className="text-sm text-right">
                                       {selectedMachines.map((m) => (
