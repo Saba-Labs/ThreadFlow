@@ -1269,6 +1269,7 @@ export default function ModelList(props: ModelListProps) {
                           {getPathLetterPills(ov, (orderId, stepIdx) => {
                             const stepAtIdx = ov.steps[stepIdx];
                             if (
+                              stepAtIdx &&
                               stepAtIdx.kind === "machine" &&
                               stepAtIdx.machineType
                             ) {
