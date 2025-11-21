@@ -2325,3 +2325,5 @@ function ModelList(props: ModelListProps) {
     </div>
   );
 }
+
+export default memo(ModelList);
