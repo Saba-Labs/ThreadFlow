@@ -1533,7 +1533,7 @@ export default function ModelList(props: ModelListProps) {
                             ) : (
                               <div className="text-sm text-right">
                                 <span className="font-medium text-gray-900 dark:text-gray-100">
-                                  {step.kind === "machine"
+                                  {step && step.kind === "machine"
                                     ? step.machineType
                                     : "Job Work"}
                                 </span>
