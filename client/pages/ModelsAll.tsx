@@ -86,7 +86,9 @@ export default function ModelsAll() {
       const s = o.steps[o.currentStepIndex]?.status || "hold";
       return s === "pending" ? "hold" : (s as "hold" | "running" | "completed");
     };
-    if (filter === "all") return pipeline.orders;
+    if (filter === "all") {
+      return pipeline.orders.filter((o) => statusOf(o) !== "completed");
+    }
     if (filter === "job") {
       return pipeline.orders.filter((o) => hasPendingJobWork(o));
     }
