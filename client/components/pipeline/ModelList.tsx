@@ -644,23 +644,24 @@ export default function ModelList(props: ModelListProps) {
                             <td className="p-3" style={{ width: "240px" }}>
                               <div className="flex flex-wrap items-center gap-1">
                                 {getPathLetterPills(ov, (orderId, stepIdx) => {
-                                  const stepAtIdx = ov.steps[stepIdx];
-                                  if (
-                                    stepAtIdx.kind === "machine" &&
-                                    stepAtIdx.machineType
-                                  ) {
-                                    const machineIndex = machineTypes.findIndex(
-                                      (m) => m.name === stepAtIdx.machineType,
-                                    );
-                                    if (machineIndex >= 0) {
-                                      props.onToggleParallelMachine(
-                                        orderId,
-                                        i,
-                                        machineIndex,
-                                      );
-                                    }
-                                  }
-                                })}
+                                   const stepAtIdx = ov.steps[stepIdx];
+                                   if (
+                                     stepAtIdx &&
+                                     stepAtIdx.kind === "machine" &&
+                                     stepAtIdx.machineType
+                                   ) {
+                                     const machineIndex = machineTypes.findIndex(
+                                       (m) => m.name === stepAtIdx.machineType,
+                                     );
+                                     if (machineIndex >= 0) {
+                                       props.onToggleParallelMachine(
+                                         orderId,
+                                         i,
+                                         machineIndex,
+                                       );
+                                     }
+                                   }
+                                 })}
                               </div>
                             </td>
                           )}
