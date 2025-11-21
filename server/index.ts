@@ -77,6 +77,14 @@ export function createServer() {
       });
   }
 
+  // Log all API requests for debugging
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+      console.log(`[API] ${req.method} ${req.path}`);
+    }
+    next();
+  });
+
   // Middleware to ensure database is initialized before handling requests
   app.use((req, res, next) => {
     if (req.path.startsWith("/api/") && !req.path.startsWith("/api/health")) {

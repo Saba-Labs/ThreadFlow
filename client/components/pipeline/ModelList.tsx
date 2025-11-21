@@ -669,122 +669,97 @@ export default function ModelList(props: ModelListProps) {
                             className="p-3 text-gray-700 dark:text-gray-300"
                             style={{ width: "120px" }}
                           >
-                            {i < 0
-                              ? "Out of Path"
-                              : i >= o.steps.length
-                                ? "Completed"
-                                : (() => {
-                                    const hasPendingJW =
-                                      ((o as any).jobWorkIds || []).length >
-                                        0 ||
-                                      (o.jobWorkAssignments || []).some(
-                                        (a) => a.status === "pending",
-                                      );
+                            {(() => {
+                              const hasPendingJW =
+                                ((o as any).jobWorkIds || []).length > 0 ||
+                                (o.jobWorkAssignments || []).some(
+                                  (a) => a.status === "pending",
+                                );
 
-                                    if (hasPendingJW) {
-                                      const allAssignments =
-                                        o.jobWorkAssignments || [];
-                                      const assignmentNames = allAssignments
-                                        .map((a) => a.jobWorkName)
-                                        .filter(Boolean);
+                              if (hasPendingJW) {
+                                const allAssignments =
+                                  o.jobWorkAssignments || [];
+                                const assignmentNames = allAssignments
+                                  .map((a) => a.jobWorkName)
+                                  .filter(Boolean);
 
-                                      const jobWorkIdNames = (
-                                        (o as any).jobWorkIds || []
-                                      )
-                                        .map((id: string) => {
-                                          const jw = jobWorks.find(
-                                            (j) => j.id === id,
-                                          );
-                                          return jw?.name;
-                                        })
-                                        .filter(Boolean);
-
-                                      const allNames = Array.from(
-                                        new Set([
-                                          ...assignmentNames,
-                                          ...jobWorkIdNames,
-                                        ]),
-                                      );
-
-                                      return (
-                                        <div className="flex flex-col gap-0.5">
-                                          {allNames.length > 0
-                                            ? allNames.map((name) => (
-                                                <div
-                                                  key={name}
-                                                  className="font-medium text-purple-700 dark:text-purple-300"
-                                                >
-                                                  {name}
-                                                </div>
-                                              ))
-                                            : null}
-                                        </div>
-                                      );
-                                    }
-
-                                    const primaryMachine =
-                                      step && step.kind === "machine"
-                                        ? step.machineType
-                                        : (() => {
-                                            const allAssignments =
-                                              o.jobWorkAssignments || [];
-                                            const assignmentNames =
-                                              allAssignments
-                                                .map((a) => a.jobWorkName)
-                                                .filter(Boolean);
-
-                                            const jobWorkIdNames = (
-                                              (o as any).jobWorkIds || []
-                                            )
-                                              .map((id: string) => {
-                                                const jw = jobWorks.find(
-                                                  (j) => j.id === id,
-                                                );
-                                                return jw?.name;
-                                              })
-                                              .filter(Boolean);
-
-                                            const allNames = Array.from(
-                                              new Set([
-                                                ...assignmentNames,
-                                                ...jobWorkIdNames,
-                                              ]),
-                                            );
-
-                                            return "Job Work";
-                                          })();
-                                    const parallelGroup = (
-                                      o.parallelGroups || []
-                                    ).find((g) => g.stepIndex === i);
-                                    const selectedIndices =
-                                      parallelGroup?.machineIndices || [];
-
-                                    if (selectedIndices.length === 0) {
-                                      return primaryMachine;
-                                    }
-
-                                    const selectedMachines = selectedIndices
-                                      .map((idx) => machineTypes[idx]?.name)
-                                      .filter(
-                                        (name) =>
-                                          !!name && name !== primaryMachine,
-                                      );
-                                    return (
-                                      <div className="flex flex-col gap-0.5">
-                                        <div className="font-medium">
-                                          {primaryMachine}
-                                        </div>
-                                        {selectedMachines.map((machine) => (
-                                          <div
-                                            key={machine}
-                                            className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                          >
-                                            {machine}
-                                          </div>
-                                        ))}
-                                      </div>
+                                const jobWorkIdNames = (
+                                  (o as any).jobWorkIds || []
+                                )
+                                  .map((id: string) => {
+                                    const jw = jobWorks.find(
+                                      (j) => j.id === id,
                                     );
-                                  })()}
+                                    return jw?.name;
+                                  })
+                                  .filter(Boolean);
+
+                                const allNames = Array.from(
+                                  new Set([
+                                    ...assignmentNames,
+                                    ...jobWorkIdNames,
+                                  ]),
+                                );
+
+                                return (
+                                  <div className="flex flex-col gap-0.5">
+                                    {allNames.length > 0
+                                      ? allNames.map((name) => (
+                                          <div
+                                            key={name}
+                                            className="font-medium text-purple-700 dark:text-purple-300"
+                                          >
+                                            {name}
+                                          </div>
+                                        ))
+                                      : null}
+                                  </div>
+                                );
+                              }
+
+                              if (i < 0) {
+                                return "Out of Path";
+                              }
+
+                              if (i >= o.steps.length) {
+                                return "Completed";
+                              }
+
+                              const primaryMachine =
+                                step && step.kind === "machine"
+                                  ? step.machineType
+                                  : "Job Work";
+                              const parallelGroup = (
+                                o.parallelGroups || []
+                              ).find((g) => g.stepIndex === i);
+                              const selectedIndices =
+                                parallelGroup?.machineIndices || [];
+
+                              if (selectedIndices.length === 0) {
+                                return primaryMachine;
+                              }
+
+                              const selectedMachines = selectedIndices
+                                .map((idx) => machineTypes[idx]?.name)
+                                .filter(
+                                  (name) => !!name && name !== primaryMachine,
+                                );
+                              return (
+                                <div className="flex flex-col gap-0.5">
+                                  <div className="font-medium">
+                                    {primaryMachine}
+                                  </div>
+                                  {selectedMachines.map((machine) => (
+                                    <div
+                                      key={machine}
+                                      className="text-sm font-medium text-gray-900 dark:text-gray-100"
+                                    >
+                                      {machine}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
                           </td>
                           {showDetails && (
                             <td className="p-3" style={{ width: "120px" }}>
@@ -1298,14 +1273,48 @@ export default function ModelList(props: ModelListProps) {
                     >
                       {(() => {
                         if (i < 0 && hasPendingJW) {
-                          // Out of path but has pending job work - show Job Work badge
+                          // Out of path but has pending job work - show names above Job Work badge
+                          const allAssignments = o.jobWorkAssignments || [];
+                          const assignmentNames = allAssignments
+                            .map((a) => a.jobWorkName)
+                            .filter(Boolean);
+
+                          const jobWorkIdNames = ((o as any).jobWorkIds || [])
+                            .map((id: string) => {
+                              const jw = jobWorks.find((j) => j.id === id);
+                              return jw?.name;
+                            })
+                            .filter(Boolean);
+
+                          const allNames = Array.from(
+                            new Set([...assignmentNames, ...jobWorkIdNames]),
+                          );
+
                           return (
-                            <Badge
-                              variant={"default"}
-                              className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
-                            >
-                              Job Work
-                            </Badge>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <div className="flex flex-col items-end gap-0.5 text-sm">
+                                {allNames.length > 0 ? (
+                                  allNames.map((name) => (
+                                    <span
+                                      key={name}
+                                      className="font-medium text-purple-700 dark:text-purple-300"
+                                    >
+                                      {name}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="font-medium text-purple-700 dark:text-purple-300">
+                                    Job Work
+                                  </span>
+                                )}
+                              </div>
+                              <Badge
+                                variant={"default"}
+                                className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
+                              >
+                                Job Work
+                              </Badge>
+                            </div>
                           );
                         }
 
@@ -1478,6 +1487,11 @@ export default function ModelList(props: ModelListProps) {
                         }
 
                         // cards (compact) default behaviour
+                        if (i < 0 && !hasPendingJW) {
+                          // Out of path with no job work - render nothing
+                          return null;
+                        }
+
                         return (
                           <>
                             {hasPendingJW ? (
@@ -1522,12 +1536,6 @@ export default function ModelList(props: ModelListProps) {
                                     </span>
                                   );
                                 })()}
-                              </div>
-                            ) : i < 0 ? (
-                              <div className="text-sm text-right">
-                                <span className="font-medium text-gray-900 dark:text-gray-100">
-                                  Out of Path
-                                </span>
                               </div>
                             ) : i >= o.steps.length ? (
                               <div className="text-sm text-right">
@@ -1575,7 +1583,7 @@ export default function ModelList(props: ModelListProps) {
                               );
                             })()}
 
-                            {(isExpandedMobile || hasPendingJW) && (
+                            {isExpandedMobile && (
                               <>
                                 <button
                                   onClick={
@@ -1598,30 +1606,6 @@ export default function ModelList(props: ModelListProps) {
                                   >
                                     {(() => {
                                       if (hasPendingJW) {
-                                        const allAssignments =
-                                          o.jobWorkAssignments || [];
-                                        const assignmentNames = allAssignments
-                                          .map((a) => a.jobWorkName)
-                                          .filter(Boolean);
-
-                                        const jobWorkIdNames = (
-                                          (o as any).jobWorkIds || []
-                                        )
-                                          .map((id: string) => {
-                                            const jw = jobWorks.find(
-                                              (j) => j.id === id,
-                                            );
-                                            return jw?.name;
-                                          })
-                                          .filter(Boolean);
-
-                                        const allNames = Array.from(
-                                          new Set([
-                                            ...assignmentNames,
-                                            ...jobWorkIdNames,
-                                          ]),
-                                        );
-
                                         return "Job Work";
                                       }
                                       return cap(displayStatus);

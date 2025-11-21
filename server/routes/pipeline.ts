@@ -37,9 +37,15 @@ export interface WorkOrder {
 }
 
 export const getPipelineOrders: RequestHandler = async (req, res) => {
+  console.log("[getPipelineOrders] API endpoint called");
   try {
     const result = await query(
       "SELECT * FROM work_orders ORDER BY created_at DESC, id ASC",
+    );
+    console.log(
+      "[getPipelineOrders] Query returned",
+      result.rows.length,
+      "orders",
     );
 
     const orders: WorkOrder[] = [];
