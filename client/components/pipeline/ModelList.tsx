@@ -1584,7 +1584,7 @@ export default function ModelList(props: ModelListProps) {
                               );
                             })()}
 
-                            {(isExpandedMobile || hasPendingJW) && (
+                            {isExpandedMobile && (
                               <>
                                 <button
                                   onClick={
@@ -1607,30 +1607,6 @@ export default function ModelList(props: ModelListProps) {
                                   >
                                     {(() => {
                                       if (hasPendingJW) {
-                                        const allAssignments =
-                                          o.jobWorkAssignments || [];
-                                        const assignmentNames = allAssignments
-                                          .map((a) => a.jobWorkName)
-                                          .filter(Boolean);
-
-                                        const jobWorkIdNames = (
-                                          (o as any).jobWorkIds || []
-                                        )
-                                          .map((id: string) => {
-                                            const jw = jobWorks.find(
-                                              (j) => j.id === id,
-                                            );
-                                            return jw?.name;
-                                          })
-                                          .filter(Boolean);
-
-                                        const allNames = Array.from(
-                                          new Set([
-                                            ...assignmentNames,
-                                            ...jobWorkIdNames,
-                                          ]),
-                                        );
-
                                         return "Job Work";
                                       }
                                       return cap(displayStatus);
