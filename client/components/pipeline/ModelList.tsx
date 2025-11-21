@@ -69,7 +69,7 @@ interface ModelListProps {
   viewMode?: "cards" | "list";
 }
 
-export default function ModelList(props: ModelListProps) {
+function ModelList(props: ModelListProps) {
   const machineTypes = useMachineTypes();
   const navigate = useNavigate();
   const viewMode = props.viewMode ?? "cards";
