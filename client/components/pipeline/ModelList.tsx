@@ -1454,6 +1454,11 @@ export default function ModelList(props: ModelListProps) {
                         }
 
                         // cards (compact) default behaviour
+                        if (i < 0 && !hasPendingJW) {
+                          // Out of path with no job work - render nothing
+                          return null;
+                        }
+
                         return (
                           <>
                             {hasPendingJW ? (
@@ -1498,12 +1503,6 @@ export default function ModelList(props: ModelListProps) {
                                     </span>
                                   );
                                 })()}
-                              </div>
-                            ) : i < 0 ? (
-                              <div className="text-sm text-right">
-                                <span className="font-medium text-gray-900 dark:text-gray-100">
-                                  Out of Path
-                                </span>
                               </div>
                             ) : i >= o.steps.length ? (
                               <div className="text-sm text-right">
