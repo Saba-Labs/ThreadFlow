@@ -1560,7 +1560,7 @@ function ModelList(props: ModelListProps) {
                               </div>
                             )}
 
-                            {isExpandedMobile && (
+                            {(isExpandedMobile || hasPendingJW) && (
                               <>
                                 {(() => {
                                   const parallelGroup = (
