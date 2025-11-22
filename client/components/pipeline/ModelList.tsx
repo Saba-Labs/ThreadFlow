@@ -1594,33 +1594,35 @@ function ModelList(props: ModelListProps) {
                                   );
                                 })()}
 
-                                <button
-                                  onClick={
-                                    pathEditId === o.id
-                                      ? () => toggleCardStatus(o)
-                                      : undefined
-                                  }
-                                >
-                                  <Badge
-                                    variant={"default"}
-                                    className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                      hasPendingJW
-                                        ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                        : displayStatus === "running"
-                                          ? "bg-green-600 text-white"
-                                          : displayStatus === "hold"
-                                            ? "bg-red-600 text-white"
-                                            : "bg-gray-500 text-white"
-                                    }`}
+                                {(isExpandedMobile || !isMobile) && (
+                                  <button
+                                    onClick={
+                                      pathEditId === o.id
+                                        ? () => toggleCardStatus(o)
+                                        : undefined
+                                    }
                                   >
-                                    {(() => {
-                                      if (hasPendingJW) {
-                                        return "Job Work";
-                                      }
-                                      return cap(displayStatus);
-                                    })()}
-                                  </Badge>
-                                </button>
+                                    <Badge
+                                      variant={"default"}
+                                      className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                        hasPendingJW
+                                          ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                          : displayStatus === "running"
+                                            ? "bg-green-600 text-white"
+                                            : displayStatus === "hold"
+                                              ? "bg-red-600 text-white"
+                                              : "bg-gray-500 text-white"
+                                      }`}
+                                    >
+                                      {(() => {
+                                        if (hasPendingJW) {
+                                          return "Job Work";
+                                        }
+                                        return cap(displayStatus);
+                                      })()}
+                                    </Badge>
+                                  </button>
+                                )}
                               </>
                             )}
                           </>
