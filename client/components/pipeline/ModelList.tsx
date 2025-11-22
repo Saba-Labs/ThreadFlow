@@ -1311,7 +1311,7 @@ function ModelList(props: ModelListProps) {
                                   </span>
                                 )}
                               </div>
-                              {(!isMobile || showDetails) && (
+                              {(isExpandedMobile || !isMobile) && (
                                 <Badge
                                   variant={"default"}
                                   className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
