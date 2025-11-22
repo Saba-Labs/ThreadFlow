@@ -1431,60 +1431,62 @@ function ModelList(props: ModelListProps) {
                                       </div>
                                     )}
 
-                                  <div>
-                                    <button
-                                      onClick={
-                                        pathEditId === o.id
-                                          ? () => toggleCardStatus(o)
-                                          : undefined
-                                      }
-                                    >
-                                      <Badge
-                                        variant={"default"}
-                                        className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                          hasPendingJW
-                                            ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                            : displayStatus === "running"
-                                              ? "bg-green-600 text-white"
-                                              : displayStatus === "hold"
-                                                ? "bg-red-600 text-white"
-                                                : "bg-gray-500 text-white"
-                                        }`}
+                                  {(isExpandedMobile || !isMobile) && (
+                                    <div>
+                                      <button
+                                        onClick={
+                                          pathEditId === o.id
+                                            ? () => toggleCardStatus(o)
+                                            : undefined
+                                        }
                                       >
-                                        {(() => {
-                                          if (hasPendingJW) {
-                                            const allAssignments =
-                                              o.jobWorkAssignments || [];
-                                            const assignmentNames =
-                                              allAssignments
-                                                .map((a) => a.jobWorkName)
+                                        <Badge
+                                          variant={"default"}
+                                          className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                            hasPendingJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
+                                        >
+                                          {(() => {
+                                            if (hasPendingJW) {
+                                              const allAssignments =
+                                                o.jobWorkAssignments || [];
+                                              const assignmentNames =
+                                                allAssignments
+                                                  .map((a) => a.jobWorkName)
+                                                  .filter(Boolean);
+
+                                              const jobWorkIdNames = (
+                                                (o as any).jobWorkIds || []
+                                              )
+                                                .map((id: string) => {
+                                                  const jw = jobWorks.find(
+                                                    (j) => j.id === id,
+                                                  );
+                                                  return jw?.name;
+                                                })
                                                 .filter(Boolean);
 
-                                            const jobWorkIdNames = (
-                                              (o as any).jobWorkIds || []
-                                            )
-                                              .map((id: string) => {
-                                                const jw = jobWorks.find(
-                                                  (j) => j.id === id,
-                                                );
-                                                return jw?.name;
-                                              })
-                                              .filter(Boolean);
+                                              const allNames = Array.from(
+                                                new Set([
+                                                  ...assignmentNames,
+                                                  ...jobWorkIdNames,
+                                                ]),
+                                              );
 
-                                            const allNames = Array.from(
-                                              new Set([
-                                                ...assignmentNames,
-                                                ...jobWorkIdNames,
-                                              ]),
-                                            );
-
-                                            return "Job Work";
-                                          }
-                                          return cap(displayStatus);
-                                        })()}
-                                      </Badge>
-                                    </button>
-                                  </div>
+                                              return "Job Work";
+                                            }
+                                            return cap(displayStatus);
+                                          })()}
+                                        </Badge>
+                                      </button>
+                                    </div>
+                                  )}
                                 </>
                               )}
                             </div>
