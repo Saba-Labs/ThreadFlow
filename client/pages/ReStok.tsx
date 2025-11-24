@@ -238,6 +238,22 @@ export default function ReStok() {
       : filteredItems;
   }, [filteredItems, reorderMode, reorderDraftIds]);
 
+  const groupedItems = useMemo(() => {
+    const groups: { [key: string]: typeof displayItems } = {};
+
+    displayItems.forEach((item) => {
+      const category = item.category || "Uncategorized";
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(item);
+    });
+
+    return Object.entries(groups)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([category, items]) => ({ category, items }));
+  }, [displayItems]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
