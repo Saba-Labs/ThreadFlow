@@ -357,6 +357,7 @@ export function useReStok() {
           quantity: item.quantity,
           lowStock: item.lowStock,
           note: item.note,
+          category: item.category ?? "",
           subItems: item.subItems
             .filter((s) => s.id !== subItemId)
             .map((s) => ({
