@@ -255,7 +255,13 @@ export function useReStok() {
   );
 
   const saveEditItemDetails = useCallback(
-    async (itemId: string, name: string, lowStock: number, note: string) => {
+    async (
+      itemId: string,
+      name: string,
+      lowStock: number,
+      note: string,
+      category: string = "",
+    ) => {
       const item = STORE.find((i) => i.id === itemId);
       if (!item) return;
 
@@ -265,6 +271,7 @@ export function useReStok() {
           quantity: item.quantity,
           lowStock,
           note,
+          category,
           subItems: item.subItems,
         });
         await fetchItems(true);
