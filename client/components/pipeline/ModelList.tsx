@@ -794,11 +794,15 @@ function ModelList(props: ModelListProps) {
                                 }
 
                                 if (i < 0 || i >= o.steps.length) {
-                                  return isMobile ? null : <Badge variant="secondary">—</Badge>;
+                                  return isMobile ? null : (
+                                    <Badge variant="secondary">—</Badge>
+                                  );
                                 }
 
                                 if (!step) {
-                                  return isMobile ? null : <Badge variant="secondary">—</Badge>;
+                                  return isMobile ? null : (
+                                    <Badge variant="secondary">—</Badge>
+                                  );
                                 }
 
                                 const displayStatus =
@@ -1398,7 +1402,8 @@ function ModelList(props: ModelListProps) {
                                     Out of Path
                                   </span>
                                 </div>
-                              ) : isMobile && i >= o.steps.length ? null : i >= o.steps.length ? (
+                              ) : isMobile && i >= o.steps.length ? null : i >=
+                                o.steps.length ? (
                                 <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
                                     Completed
