@@ -15,6 +15,7 @@ interface Item {
   quantity: number;
   lowStock: number;
   note?: string;
+  category?: string;
   subItems: SubItem[];
 }
 
@@ -37,6 +38,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
         quantity: row.quantity,
         lowStock: row.low_stock,
         note: row.note,
+        category: row.category,
         subItems: subItemsResult.rows.map((r: any) => ({
           id: r.id,
           name: r.name,
@@ -55,7 +57,7 @@ export const getRestokItems: RequestHandler = async (req, res) => {
 
 export const createRestokItem: RequestHandler = async (req, res) => {
   try {
-    const { id, name, quantity, lowStock, note, subItems } = req.body;
+    const { id, name, quantity, lowStock, note, category, subItems } = req.body;
     const now = Date.now();
 
     // Validate required fields
@@ -94,13 +96,14 @@ export const createRestokItem: RequestHandler = async (req, res) => {
     const nextOrderIndex = (maxOrderResult.rows[0]?.max_order || -1) + 1;
 
     await query(
-      "INSERT INTO restok_items (id, name, quantity, low_stock, note, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      "INSERT INTO restok_items (id, name, quantity, low_stock, note, category, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
       [
         id.trim(),
         name.trim(),
         Number(quantity),
         Number(lowStock),
         note || null,
+        category || null,
         nextOrderIndex,
         now,
         now,
@@ -129,7 +132,7 @@ export const createRestokItem: RequestHandler = async (req, res) => {
 export const updateRestokItem: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, quantity, lowStock, note, subItems } = req.body;
+    const { name, quantity, lowStock, note, category, subItems } = req.body;
     const now = Date.now();
 
     console.log("[updateRestokItem] Request body:", {
@@ -179,8 +182,8 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
     }
 
     await query(
-      "UPDATE restok_items SET name = $1, quantity = $2, low_stock = $3, note = $4, updated_at = $5 WHERE id = $6",
-      [name.trim(), Number(quantity), Number(lowStock), note || null, now, id],
+      "UPDATE restok_items SET name = $1, quantity = $2, low_stock = $3, note = $4, category = $5, updated_at = $6 WHERE id = $7",
+      [name.trim(), Number(quantity), Number(lowStock), note || null, category || null, now, id],
     );
 
     // Delete existing sub-items and insert new ones
