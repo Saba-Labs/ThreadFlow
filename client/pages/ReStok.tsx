@@ -89,7 +89,7 @@ export default function ReStok() {
       return (
         <span className="text-xs font-bold text-yellow-700">LOW STOCK</span>
       );
-    return <span className="text-xs font-bold text-green-700">NORMAL</span>;
+    return <span className="text-xs font-bold text-green-700">AVAILABLE</span>;
   };
 
   const toggleItemExpanded = (itemId: string) => {
