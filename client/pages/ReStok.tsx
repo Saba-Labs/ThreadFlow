@@ -625,17 +625,17 @@ export default function ReStok() {
           note={getItem(editingItemId)?.note || ""}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={(getItem(editingItemId)?.subItems.length || 0) > 0}
-          onSubmit={(name, lowStock, note) => {
+          onSubmit={(name, lowStock, note, category) => {
             if (editMode && draftItems) {
               setDraftItems((prev) =>
                 (prev || []).map((it) =>
                   it.id === editingItemId
-                    ? { ...it, name, lowStock, note }
+                    ? { ...it, name, lowStock, note, category }
                     : it,
                 ),
               );
             } else {
-              return saveEditItemDetails(editingItemId, name, lowStock, note);
+              return saveEditItemDetails(editingItemId, name, lowStock, note, category);
             }
           }}
           onAddSubItem={async (name, lowStock) => {
