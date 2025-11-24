@@ -174,6 +174,7 @@ export function useReStok() {
       lowStock: number,
       subItems: any[] = [],
       note: string = "",
+      category: string = "",
     ) => {
       try {
         const id = Date.now().toString();
@@ -183,6 +184,7 @@ export function useReStok() {
           quantity: 0,
           lowStock,
           note,
+          category,
           subItems: subItems.map((sub) => ({
             id: sub.id,
             name: sub.name,
