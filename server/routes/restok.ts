@@ -183,7 +183,15 @@ export const updateRestokItem: RequestHandler = async (req, res) => {
 
     await query(
       "UPDATE restok_items SET name = $1, quantity = $2, low_stock = $3, note = $4, category = $5, updated_at = $6 WHERE id = $7",
-      [name.trim(), Number(quantity), Number(lowStock), note || null, category || null, now, id],
+      [
+        name.trim(),
+        Number(quantity),
+        Number(lowStock),
+        note || null,
+        category || null,
+        now,
+        id,
+      ],
     );
 
     // Delete existing sub-items and insert new ones

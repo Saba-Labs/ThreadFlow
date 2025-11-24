@@ -348,7 +348,9 @@ export default function ReStok() {
               </h2>
               <div className="space-y-3">
                 {categoryItems.map((item) => {
-                  const flatIndex = displayItems.findIndex((i) => i.id === item.id);
+                  const flatIndex = displayItems.findIndex(
+                    (i) => i.id === item.id,
+                  );
                   const status = getItemStockStatus(item);
                   const isExpanded = expandedItems.has(item.id);
 
@@ -469,7 +471,10 @@ export default function ReStok() {
                                         setDraftItems((prev) =>
                                           (prev || []).map((it) =>
                                             it.id === item.id
-                                              ? { ...it, quantity: it.quantity + 1 }
+                                              ? {
+                                                  ...it,
+                                                  quantity: it.quantity + 1,
+                                                }
                                               : it,
                                           ),
                                         );
@@ -497,7 +502,9 @@ export default function ReStok() {
                             <div className="flex items-center gap-2">
                               <div className="text-right">
                                 {item.subItems.length === 0 && (
-                                  <p className="font-bold text-sm">{item.quantity}</p>
+                                  <p className="font-bold text-sm">
+                                    {item.quantity}
+                                  </p>
                                 )}
                                 {getStatusBadge(status)}
                               </div>
@@ -543,18 +550,22 @@ export default function ReStok() {
                                                   it.id === item.id
                                                     ? {
                                                         ...it,
-                                                        subItems: it.subItems.map(
-                                                          (s: any) =>
-                                                            s.id === subItem.id
-                                                              ? {
-                                                                  ...s,
-                                                                  quantity: Math.max(
-                                                                    0,
-                                                                    s.quantity - 1,
-                                                                  ),
-                                                                }
-                                                              : s,
-                                                        ),
+                                                        subItems:
+                                                          it.subItems.map(
+                                                            (s: any) =>
+                                                              s.id ===
+                                                              subItem.id
+                                                                ? {
+                                                                    ...s,
+                                                                    quantity:
+                                                                      Math.max(
+                                                                        0,
+                                                                        s.quantity -
+                                                                          1,
+                                                                      ),
+                                                                  }
+                                                                : s,
+                                                          ),
                                                       }
                                                     : it,
                                                 ),
@@ -586,16 +597,19 @@ export default function ReStok() {
                                                   it.id === item.id
                                                     ? {
                                                         ...it,
-                                                        subItems: it.subItems.map(
-                                                          (s: any) =>
-                                                            s.id === subItem.id
-                                                              ? {
-                                                                  ...s,
-                                                                  quantity:
-                                                                    s.quantity + 1,
-                                                                }
-                                                              : s,
-                                                        ),
+                                                        subItems:
+                                                          it.subItems.map(
+                                                            (s: any) =>
+                                                              s.id ===
+                                                              subItem.id
+                                                                ? {
+                                                                    ...s,
+                                                                    quantity:
+                                                                      s.quantity +
+                                                                      1,
+                                                                  }
+                                                                : s,
+                                                          ),
                                                       }
                                                     : it,
                                                 ),
@@ -663,7 +677,13 @@ export default function ReStok() {
                 ),
               );
             } else {
-              return saveEditItemDetails(editingItemId, name, lowStock, note, category);
+              return saveEditItemDetails(
+                editingItemId,
+                name,
+                lowStock,
+                note,
+                category,
+              );
             }
           }}
           onAddSubItem={async (name, lowStock) => {
