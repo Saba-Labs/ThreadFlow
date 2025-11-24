@@ -104,6 +104,18 @@ export default function ReStok() {
     });
   };
 
+  const toggleCategoryExpanded = (category: string) => {
+    setExpandedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
   const moveItemUp = (index: number) => {
     if (index === 0) return;
     if (reorderMode && reorderDraftIds) {
