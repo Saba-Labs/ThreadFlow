@@ -129,6 +129,14 @@ export default function AddItemModal({
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Category (Optional)</label>
+            <Input
+              placeholder="e.g. Electronics, Clothing, Office Supplies"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Sub-items Section */}
