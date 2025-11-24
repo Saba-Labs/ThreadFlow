@@ -272,6 +272,14 @@ export default function EditItemModal({
               onChange={(e) => setEditingNote(e.target.value)}
             />
           </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Category (Optional)</label>
+            <Input
+              placeholder="e.g. Electronics, Clothing, Office Supplies"
+              value={editingCategory}
+              onChange={(e) => setEditingCategory(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Sub-items Section */}
