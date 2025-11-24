@@ -49,6 +49,7 @@ export default function AddItemModal({
   const resetForm = () => {
     setItemName("");
     setLowStock(0);
+    setCategory("");
     setSubItems([]);
     setShowAddSubItemForm(false);
     setNewSubItemName("");
