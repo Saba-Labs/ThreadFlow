@@ -15,6 +15,7 @@ export interface Item {
   quantity: number;
   lowStock: number;
   note?: string;
+  category?: string;
   subItems: SubItem[];
 }
 
