@@ -183,6 +183,7 @@ export default function ReStok() {
       if (
         a.name !== b.name ||
         String(a.note || "") !== String(b.note || "") ||
+        String(a.category || "") !== String(b.category || "") ||
         Number(a.quantity) !== Number(b.quantity) ||
         Number(a.lowStock) !== Number(b.lowStock)
       )
