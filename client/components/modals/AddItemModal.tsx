@@ -28,6 +28,7 @@ export default function AddItemModal({
 }: AddItemModalProps) {
   const [itemName, setItemName] = useState("");
   const [lowStock, setLowStock] = useState(0);
+  const [category, setCategory] = useState("");
   const [subItems, setSubItems] = useState<SubItem[]>([]);
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
