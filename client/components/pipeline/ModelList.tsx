@@ -469,16 +469,26 @@ function ModelList(props: ModelListProps) {
   const [selectedOrderForJWModal, setSelectedOrderForJWModal] =
     useState<WorkOrder | null>(null);
 
-  // When 'showDetails' toggles, control which rows are expanded.
+  // When 'showDetails' or 'viewMode' toggles, control which rows are expanded.
   // If details are shown we expand all rows by default, but still allow
   // the user to toggle individual cards. If details are hidden we collapse all.
+  // In list view on desktop, also collapse all by default.
   const prevShowRef = useRef<boolean | undefined>(undefined);
+  const prevViewModeRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const prev = prevShowRef.current;
-    // First render or when showDetails toggles
-    if (prev === undefined || prev !== showDetails) {
-      if (showDetails) {
+    const prevViewMode = prevViewModeRef.current;
+    // First render or when showDetails/viewMode toggles
+    if (
+      prev === undefined ||
+      prev !== showDetails ||
+      prevViewMode !== viewMode
+    ) {
+      // In list view on desktop, always collapse
+      if (!isMobile && viewMode === "list") {
+        setToggledIds([]);
+      } else if (showDetails) {
         // Show details => expand all
         setToggledIds(sorted.map((o) => o.id));
       } else {
@@ -486,7 +496,7 @@ function ModelList(props: ModelListProps) {
         setToggledIds([]);
       }
     } else {
-      // showDetails unchanged; preserve user toggles across data updates
+      // showDetails and viewMode unchanged; preserve user toggles across data updates
       // but remove IDs that no longer exist
       setToggledIds((prevIds) =>
         prevIds.filter((id) => sorted.some((o) => o.id === id)),
@@ -494,7 +504,8 @@ function ModelList(props: ModelListProps) {
     }
 
     prevShowRef.current = showDetails;
-  }, [showDetails, sorted]);
+    prevViewModeRef.current = viewMode;
+  }, [showDetails, viewMode, sorted, isMobile]);
 
   const toggleExpanded = (id: string) => {
     // Allow toggling in list view mode on desktop, or on mobile
