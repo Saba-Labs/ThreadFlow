@@ -623,6 +623,7 @@ export default function ReStok() {
           itemName={getItem(editingItemId)?.name || ""}
           lowStock={getItem(editingItemId)?.lowStock || 0}
           note={getItem(editingItemId)?.note || ""}
+          category={getItem(editingItemId)?.category || ""}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={(getItem(editingItemId)?.subItems.length || 0) > 0}
           onSubmit={(name, lowStock, note, category) => {
