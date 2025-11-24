@@ -37,7 +37,7 @@ export default function ReStok() {
   });
 
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(groupedItems.map(g => g.category)));
   const [editMode, setEditMode] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
   const [reorderDraftIds, setReorderDraftIds] = useState<string[] | null>(null);
