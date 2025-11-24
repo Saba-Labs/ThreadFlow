@@ -354,12 +354,27 @@ export default function ReStok() {
             <p>No items match your search.</p>
           </div>
         ) : (
-          groupedItems.map(({ category, items: categoryItems }) => (
-            <div key={category} className="space-y-2">
-              <h2 className="text-sm font-semibold text-gray-600 px-3 py-2 bg-gray-50 rounded-lg">
-                {category}
-              </h2>
-              <div className="space-y-3">
+          groupedItems.map(({ category, items: categoryItems }) => {
+            const isCategoryExpanded = expandedCategories.has(category);
+
+            return (
+              <div key={category} className="space-y-2">
+                <button
+                  onClick={() => toggleCategoryExpanded(category)}
+                  className="w-full flex items-center gap-2 text-sm font-semibold text-gray-600 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  {isCategoryExpanded ? (
+                    <ChevronUp className="h-4 w-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  )}
+                  <span>{category}</span>
+                  <span className="text-xs text-gray-500 ml-auto">
+                    ({categoryItems.length})
+                  </span>
+                </button>
+                {isCategoryExpanded && (
+                  <div className="space-y-3">
                 {categoryItems.map((item) => {
                   const flatIndex = displayItems.findIndex(
                     (i) => i.id === item.id,
@@ -657,9 +672,11 @@ export default function ReStok() {
                     </div>
                   );
                 })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
