@@ -18,12 +18,14 @@ interface EditItemModalProps {
   itemName: string;
   lowStock: number;
   note: string;
+  category?: string;
   subItems: SubItem[];
   hasSubItems: boolean;
   onSubmit: (
     name: string,
     lowStock: number,
     note: string,
+    category: string,
   ) => void | Promise<void>;
   onAddSubItem: (name: string, lowStock: number) => void | Promise<void>;
   onUpdateSubItem: (
