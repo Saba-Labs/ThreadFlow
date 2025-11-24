@@ -794,11 +794,11 @@ function ModelList(props: ModelListProps) {
                                 }
 
                                 if (i < 0 || i >= o.steps.length) {
-                                  return <Badge variant="secondary">—</Badge>;
+                                  return isMobile ? null : <Badge variant="secondary">—</Badge>;
                                 }
 
                                 if (!step) {
-                                  return <Badge variant="secondary">—</Badge>;
+                                  return isMobile ? null : <Badge variant="secondary">—</Badge>;
                                 }
 
                                 const displayStatus =
