@@ -38,7 +38,7 @@ export default function AddItemModal({
   const handleSubmit = async () => {
     if (!itemName.trim()) return;
     try {
-      await onSubmit(itemName, lowStock, subItems, note);
+      await onSubmit(itemName, lowStock, subItems, note, category);
       resetForm();
       onOpenChange(false);
     } catch (error) {
