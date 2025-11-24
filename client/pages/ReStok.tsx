@@ -268,6 +268,11 @@ export default function ReStok() {
       .map(([category, items]) => ({ category, items }));
   }, [displayItems]);
 
+  useEffect(() => {
+    const allCategories = groupedItems.map((g) => g.category);
+    setExpandedCategories(new Set(allCategories));
+  }, [groupedItems]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
