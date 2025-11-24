@@ -15,6 +15,7 @@ export interface Item {
   quantity: number;
   lowStock: number;
   note?: string;
+  category?: string;
   subItems: SubItem[];
 }
 
@@ -173,6 +174,7 @@ export function useReStok() {
       lowStock: number,
       subItems: any[] = [],
       note: string = "",
+      category: string = "",
     ) => {
       try {
         const id = Date.now().toString();
@@ -182,6 +184,7 @@ export function useReStok() {
           quantity: 0,
           lowStock,
           note,
+          category,
           subItems: subItems.map((sub) => ({
             id: sub.id,
             name: sub.name,
@@ -252,7 +255,13 @@ export function useReStok() {
   );
 
   const saveEditItemDetails = useCallback(
-    async (itemId: string, name: string, lowStock: number, note: string) => {
+    async (
+      itemId: string,
+      name: string,
+      lowStock: number,
+      note: string,
+      category: string = "",
+    ) => {
       const item = STORE.find((i) => i.id === itemId);
       if (!item) return;
 
@@ -262,6 +271,7 @@ export function useReStok() {
           quantity: item.quantity,
           lowStock,
           note,
+          category,
           subItems: item.subItems,
         });
         await fetchItems(true);
@@ -303,6 +313,7 @@ export function useReStok() {
         quantity: item.quantity,
         lowStock: item.lowStock,
         note: item.note,
+        category: item.category ?? "",
         subItems: [
           ...item.subItems.map((s) => ({
             id: s.id,
@@ -346,6 +357,7 @@ export function useReStok() {
           quantity: item.quantity,
           lowStock: item.lowStock,
           note: item.note,
+          category: item.category ?? "",
           subItems: item.subItems
             .filter((s) => s.id !== subItemId)
             .map((s) => ({
@@ -388,6 +400,7 @@ export function useReStok() {
           quantity: item.quantity,
           lowStock: item.lowStock,
           note: item.note,
+          category: item.category ?? "",
           subItems: item.subItems.map((s) =>
             s.id === subItemId
               ? {
@@ -428,6 +441,7 @@ export function useReStok() {
         quantity: item.quantity,
         lowStock: item.lowStock,
         note: item.note,
+        category: item.category ?? "",
         subItems: item.subItems.map((s) =>
           s.id === subItemId
             ? {
@@ -503,6 +517,7 @@ export function useReStok() {
             quantity: Math.max(0, Number(item.quantity) || 0),
             lowStock: Math.max(0, Number(item.lowStock) || 0),
             note: item.note ?? "",
+            category: item.category ?? "",
             subItems: item.subItems.map((s) => ({
               id: s.id,
               name: s.name,

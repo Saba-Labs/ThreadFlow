@@ -65,10 +65,14 @@ export async function initializeDatabase() {
         quantity INTEGER NOT NULL,
         low_stock INTEGER NOT NULL,
         note TEXT,
+        category TEXT,
         order_index INTEGER NOT NULL DEFAULT 0,
         created_at BIGINT NOT NULL,
         updated_at BIGINT NOT NULL
       );
+
+      -- Ensure category column exists in restok_items (migration)
+      ALTER TABLE IF EXISTS restok_items ADD COLUMN IF NOT EXISTS category TEXT;
 
       CREATE TABLE IF NOT EXISTS restok_sub_items (
         id TEXT PRIMARY KEY,

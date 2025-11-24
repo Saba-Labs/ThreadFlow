@@ -28,6 +28,7 @@ export default function AddItemModal({
 }: AddItemModalProps) {
   const [itemName, setItemName] = useState("");
   const [lowStock, setLowStock] = useState(0);
+  const [category, setCategory] = useState("");
   const [subItems, setSubItems] = useState<SubItem[]>([]);
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
@@ -37,7 +38,7 @@ export default function AddItemModal({
   const handleSubmit = async () => {
     if (!itemName.trim()) return;
     try {
-      await onSubmit(itemName, lowStock, subItems, note);
+      await onSubmit(itemName, lowStock, subItems, note, category);
       resetForm();
       onOpenChange(false);
     } catch (error) {
@@ -48,6 +49,7 @@ export default function AddItemModal({
   const resetForm = () => {
     setItemName("");
     setLowStock(0);
+    setCategory("");
     setSubItems([]);
     setShowAddSubItemForm(false);
     setNewSubItemName("");
@@ -125,6 +127,14 @@ export default function AddItemModal({
               placeholder="Add a note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Category (Optional)</label>
+            <Input
+              placeholder="e.g. Electronics, Clothing, Office Supplies"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
             />
           </div>
         </div>

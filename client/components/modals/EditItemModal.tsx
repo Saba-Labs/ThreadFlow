@@ -18,12 +18,14 @@ interface EditItemModalProps {
   itemName: string;
   lowStock: number;
   note: string;
+  category?: string;
   subItems: SubItem[];
   hasSubItems: boolean;
   onSubmit: (
     name: string,
     lowStock: number,
     note: string,
+    category: string,
   ) => void | Promise<void>;
   onAddSubItem: (name: string, lowStock: number) => void | Promise<void>;
   onUpdateSubItem: (
@@ -41,6 +43,7 @@ export default function EditItemModal({
   itemName,
   lowStock,
   note,
+  category,
   subItems,
   hasSubItems,
   onSubmit,
@@ -52,6 +55,7 @@ export default function EditItemModal({
   const [editingName, setEditingName] = useState(itemName);
   const [editingLowStock, setEditingLowStock] = useState(lowStock);
   const [editingNote, setEditingNote] = useState(note);
+  const [editingCategory, setEditingCategory] = useState(category || "");
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
@@ -66,20 +70,21 @@ export default function EditItemModal({
       setEditingName(itemName);
       setEditingLowStock(lowStock);
       setEditingNote(note);
+      setEditingCategory(category || "");
       setShowAddSubItemForm(false);
       setNewSubItemName("");
       setNewSubItemLowStock(0);
       setEditingSubItemId(null);
       setEditingSubItem(null);
     }
-  }, [open, itemName, lowStock, note]);
+  }, [open, itemName, lowStock, note, category]);
 
   const handleSubmitItem = async () => {
     if (!editingName.trim()) return;
     // Close immediately and sync in background
     onOpenChange(false);
     const p = Promise.resolve(
-      onSubmit(editingName, editingLowStock, editingNote),
+      onSubmit(editingName, editingLowStock, editingNote, editingCategory),
     );
     p.then(() => {
       toast({
@@ -265,6 +270,14 @@ export default function EditItemModal({
               placeholder="Add a note"
               value={editingNote}
               onChange={(e) => setEditingNote(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Category (Optional)</label>
+            <Input
+              placeholder="e.g. Electronics, Clothing, Office Supplies"
+              value={editingCategory}
+              onChange={(e) => setEditingCategory(e.target.value)}
             />
           </div>
         </div>

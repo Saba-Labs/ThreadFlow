@@ -183,6 +183,7 @@ export default function ReStok() {
       if (
         a.name !== b.name ||
         String(a.note || "") !== String(b.note || "") ||
+        String(a.category || "") !== String(b.category || "") ||
         Number(a.quantity) !== Number(b.quantity) ||
         Number(a.lowStock) !== Number(b.lowStock)
       )
@@ -237,6 +238,22 @@ export default function ReStok() {
           .filter(Boolean) as typeof filteredItems)
       : filteredItems;
   }, [filteredItems, reorderMode, reorderDraftIds]);
+
+  const groupedItems = useMemo(() => {
+    const groups: { [key: string]: typeof displayItems } = {};
+
+    displayItems.forEach((item) => {
+      const category = item.category || "Uncategorized";
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(item);
+    });
+
+    return Object.entries(groups)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([category, items]) => ({ category, items }));
+  }, [displayItems]);
 
   return (
     <div className="space-y-6">
@@ -324,191 +341,94 @@ export default function ReStok() {
             <p>No items match your search.</p>
           </div>
         ) : (
-          displayItems.map((item, index, arr) => {
-            const status = getItemStockStatus(item);
-            const isExpanded = expandedItems.has(item.id);
+          groupedItems.map(({ category, items: categoryItems }) => (
+            <div key={category} className="space-y-2">
+              <h2 className="text-sm font-semibold text-gray-600 px-3 py-2 bg-gray-50 rounded-lg">
+                {category}
+              </h2>
+              <div className="space-y-3">
+                {categoryItems.map((item) => {
+                  const flatIndex = displayItems.findIndex(
+                    (i) => i.id === item.id,
+                  );
+                  const status = getItemStockStatus(item);
+                  const isExpanded = expandedItems.has(item.id);
 
-            return (
-              <div key={item.id}>
-                <div
-                  className={`rounded-lg p-3 ${
-                    item.subItems.length > 0 && isExpanded
-                      ? "bg-blue-50 border border-blue-200"
-                      : getStatusColor(status)
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-1">
-                      {reorderMode
-                        ? null
-                        : item.subItems.length > 0 && (
-                            <button
-                              onClick={() => toggleItemExpanded(item.id)}
-                              className="text-muted-foreground hover:text-foreground"
-                            >
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </button>
-                          )}
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{item.name}</p>
-                        {item.note && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {item.note}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {reorderMode ? (
-                      <div className="flex items-center gap-2 ml-auto">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => moveItemUp(index)}
-                          disabled={index === 0}
-                          className="h-8 w-8 p-0 rounded-full shadow-sm"
-                          aria-label="Move up"
-                          title="Move up"
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => moveItemDown(index)}
-                          disabled={index === arr.length - 1}
-                          className="h-8 w-8 p-0 rounded-full shadow-sm"
-                          aria-label="Move down"
-                          title="Move down"
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : editMode ? (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingItemId(item.id);
-                            setShowEditItemModal(true);
-                          }}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit2 className="h-3 w-3" />
-                        </Button>
-                        {item.subItems.length === 0 && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                if (editMode && draftItems) {
-                                  setDraftItems((prev) =>
-                                    (prev || []).map((it) =>
-                                      it.id === item.id
-                                        ? {
-                                            ...it,
-                                            quantity: Math.max(
-                                              0,
-                                              it.quantity - 1,
-                                            ),
-                                          }
-                                        : it,
-                                    ),
-                                  );
-                                } else {
-                                  updateItemQuantity(
-                                    item.id,
-                                    item.quantity - 1,
-                                  );
-                                }
-                              }}
-                              className="h-8 w-8 p-0 text-lg font-bold"
-                            >
-                              −
-                            </Button>
-                            <div className="w-12 text-center">
-                              <p className="font-bold text-sm">
-                                {item.quantity}
-                              </p>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                if (editMode && draftItems) {
-                                  setDraftItems((prev) =>
-                                    (prev || []).map((it) =>
-                                      it.id === item.id
-                                        ? { ...it, quantity: it.quantity + 1 }
-                                        : it,
-                                    ),
-                                  );
-                                } else {
-                                  updateItemQuantity(
-                                    item.id,
-                                    item.quantity + 1,
-                                  );
-                                }
-                              }}
-                              className="h-8 w-8 p-0 text-lg font-bold"
-                            >
-                              +
-                            </Button>
-                          </>
-                        )}
-                        {item.subItems.length > 0 && (
-                          <div className="text-xs text-muted-foreground">
-                            {item.subItems.length} sub-item
-                            {item.subItems.length !== 1 ? "s" : ""}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="text-right">
-                          {item.subItems.length === 0 && (
-                            <p className="font-bold text-sm">{item.quantity}</p>
-                          )}
-                          {getStatusBadge(status)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Sub Items - Visible in both modes */}
-                  {isExpanded && item.subItems.length > 0 && (
-                    <div className="mt-3 space-y-2 border-t pt-3">
-                      {item.subItems.map((subItem) => {
-                        return (
-                          <div
-                            key={subItem.id}
-                            className={`rounded-md p-2 ${getStatusColor(
-                              getStockStatus(
-                                subItem.quantity,
-                                subItem.lowStock,
-                              ),
-                            )}`}
-                          >
-                            <div className="flex items-center justify-between gap-2 ml-6">
-                              <div className="flex-1">
-                                <p className="font-medium text-xs">
-                                  {subItem.name}
-                                </p>
-                                {editMode && (
-                                  <p className="text-xs text-muted-foreground">
-                                    Low: {subItem.lowStock}
-                                  </p>
+                  return (
+                    <div key={item.id}>
+                      <div
+                        className={`rounded-lg p-3 ${
+                          item.subItems.length > 0 && isExpanded
+                            ? "bg-blue-50 border border-blue-200"
+                            : getStatusColor(status)
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-1">
+                            {reorderMode
+                              ? null
+                              : item.subItems.length > 0 && (
+                                  <button
+                                    onClick={() => toggleItemExpanded(item.id)}
+                                    className="text-muted-foreground hover:text-foreground"
+                                  >
+                                    {isExpanded ? (
+                                      <ChevronUp className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronDown className="h-4 w-4" />
+                                    )}
+                                  </button>
                                 )}
-                              </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{item.name}</p>
+                              {item.note && (
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {item.note}
+                                </p>
+                              )}
+                            </div>
+                          </div>
 
-                              {editMode ? (
-                                <div className="flex items-center gap-1">
+                          {reorderMode ? (
+                            <div className="flex items-center gap-2 ml-auto">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => moveItemUp(flatIndex)}
+                                disabled={flatIndex === 0}
+                                className="h-8 w-8 p-0 rounded-full shadow-sm"
+                                aria-label="Move up"
+                                title="Move up"
+                              >
+                                <ArrowUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => moveItemDown(flatIndex)}
+                                disabled={flatIndex === displayItems.length - 1}
+                                className="h-8 w-8 p-0 rounded-full shadow-sm"
+                                aria-label="Move down"
+                                title="Move down"
+                              >
+                                <ArrowDown className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : editMode ? (
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingItemId(item.id);
+                                  setShowEditItemModal(true);
+                                }}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit2 className="h-3 w-3" />
+                              </Button>
+                              {item.subItems.length === 0 && (
+                                <>
                                   <Button
                                     size="sm"
                                     variant="outline"
@@ -519,37 +439,28 @@ export default function ReStok() {
                                             it.id === item.id
                                               ? {
                                                   ...it,
-                                                  subItems: it.subItems.map(
-                                                    (s: any) =>
-                                                      s.id === subItem.id
-                                                        ? {
-                                                            ...s,
-                                                            quantity: Math.max(
-                                                              0,
-                                                              s.quantity - 1,
-                                                            ),
-                                                          }
-                                                        : s,
+                                                  quantity: Math.max(
+                                                    0,
+                                                    it.quantity - 1,
                                                   ),
                                                 }
                                               : it,
                                           ),
                                         );
                                       } else {
-                                        updateSubItemQuantity(
+                                        updateItemQuantity(
                                           item.id,
-                                          subItem.id,
-                                          subItem.quantity - 1,
+                                          item.quantity - 1,
                                         );
                                       }
                                     }}
-                                    className="h-7 w-7 p-0 text-sm font-bold"
+                                    className="h-8 w-8 p-0 text-lg font-bold"
                                   >
                                     −
                                   </Button>
-                                  <div className="w-10 text-center">
-                                    <p className="font-bold text-xs">
-                                      {subItem.quantity}
+                                  <div className="w-12 text-center">
+                                    <p className="font-bold text-sm">
+                                      {item.quantity}
                                     </p>
                                   </div>
                                   <Button
@@ -562,50 +473,180 @@ export default function ReStok() {
                                             it.id === item.id
                                               ? {
                                                   ...it,
-                                                  subItems: it.subItems.map(
-                                                    (s: any) =>
-                                                      s.id === subItem.id
-                                                        ? {
-                                                            ...s,
-                                                            quantity:
-                                                              s.quantity + 1,
-                                                          }
-                                                        : s,
-                                                  ),
+                                                  quantity: it.quantity + 1,
                                                 }
                                               : it,
                                           ),
                                         );
                                       } else {
-                                        updateSubItemQuantity(
+                                        updateItemQuantity(
                                           item.id,
-                                          subItem.id,
-                                          subItem.quantity + 1,
+                                          item.quantity + 1,
                                         );
                                       }
                                     }}
-                                    className="h-7 w-7 p-0 text-sm font-bold"
+                                    className="h-8 w-8 p-0 text-lg font-bold"
                                   >
                                     +
                                   </Button>
-                                </div>
-                              ) : (
-                                <div className="text-right">
-                                  <p className="font-bold text-xs">
-                                    {subItem.quantity}
-                                  </p>
+                                </>
+                              )}
+                              {item.subItems.length > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  {item.subItems.length} sub-item
+                                  {item.subItems.length !== 1 ? "s" : ""}
                                 </div>
                               )}
                             </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <div className="text-right">
+                                {item.subItems.length === 0 && (
+                                  <p className="font-bold text-sm">
+                                    {item.quantity}
+                                  </p>
+                                )}
+                                {getStatusBadge(status)}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sub Items - Visible in both modes */}
+                        {isExpanded && item.subItems.length > 0 && (
+                          <div className="mt-3 space-y-2 border-t pt-3">
+                            {item.subItems.map((subItem) => {
+                              return (
+                                <div
+                                  key={subItem.id}
+                                  className={`rounded-md p-2 ${getStatusColor(
+                                    getStockStatus(
+                                      subItem.quantity,
+                                      subItem.lowStock,
+                                    ),
+                                  )}`}
+                                >
+                                  <div className="flex items-center justify-between gap-2 ml-6">
+                                    <div className="flex-1">
+                                      <p className="font-medium text-xs">
+                                        {subItem.name}
+                                      </p>
+                                      {editMode && (
+                                        <p className="text-xs text-muted-foreground">
+                                          Low: {subItem.lowStock}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    {editMode ? (
+                                      <div className="flex items-center gap-1">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => {
+                                            if (editMode && draftItems) {
+                                              setDraftItems((prev) =>
+                                                (prev || []).map((it) =>
+                                                  it.id === item.id
+                                                    ? {
+                                                        ...it,
+                                                        subItems:
+                                                          it.subItems.map(
+                                                            (s: any) =>
+                                                              s.id ===
+                                                              subItem.id
+                                                                ? {
+                                                                    ...s,
+                                                                    quantity:
+                                                                      Math.max(
+                                                                        0,
+                                                                        s.quantity -
+                                                                          1,
+                                                                      ),
+                                                                  }
+                                                                : s,
+                                                          ),
+                                                      }
+                                                    : it,
+                                                ),
+                                              );
+                                            } else {
+                                              updateSubItemQuantity(
+                                                item.id,
+                                                subItem.id,
+                                                subItem.quantity - 1,
+                                              );
+                                            }
+                                          }}
+                                          className="h-7 w-7 p-0 text-sm font-bold"
+                                        >
+                                          −
+                                        </Button>
+                                        <div className="w-10 text-center">
+                                          <p className="font-bold text-xs">
+                                            {subItem.quantity}
+                                          </p>
+                                        </div>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => {
+                                            if (editMode && draftItems) {
+                                              setDraftItems((prev) =>
+                                                (prev || []).map((it) =>
+                                                  it.id === item.id
+                                                    ? {
+                                                        ...it,
+                                                        subItems:
+                                                          it.subItems.map(
+                                                            (s: any) =>
+                                                              s.id ===
+                                                              subItem.id
+                                                                ? {
+                                                                    ...s,
+                                                                    quantity:
+                                                                      s.quantity +
+                                                                      1,
+                                                                  }
+                                                                : s,
+                                                          ),
+                                                      }
+                                                    : it,
+                                                ),
+                                              );
+                                            } else {
+                                              updateSubItemQuantity(
+                                                item.id,
+                                                subItem.id,
+                                                subItem.quantity + 1,
+                                              );
+                                            }
+                                          }}
+                                          className="h-7 w-7 p-0 text-sm font-bold"
+                                        >
+                                          +
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <div className="text-right">
+                                        <p className="font-bold text-xs">
+                                          {subItem.quantity}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
+                  );
+                })}
               </div>
-            );
-          })
+            </div>
+          ))
         )}
       </div>
 
@@ -623,19 +664,26 @@ export default function ReStok() {
           itemName={getItem(editingItemId)?.name || ""}
           lowStock={getItem(editingItemId)?.lowStock || 0}
           note={getItem(editingItemId)?.note || ""}
+          category={getItem(editingItemId)?.category || ""}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={(getItem(editingItemId)?.subItems.length || 0) > 0}
-          onSubmit={(name, lowStock, note) => {
+          onSubmit={(name, lowStock, note, category) => {
             if (editMode && draftItems) {
               setDraftItems((prev) =>
                 (prev || []).map((it) =>
                   it.id === editingItemId
-                    ? { ...it, name, lowStock, note }
+                    ? { ...it, name, lowStock, note, category }
                     : it,
                 ),
               );
             } else {
-              return saveEditItemDetails(editingItemId, name, lowStock, note);
+              return saveEditItemDetails(
+                editingItemId,
+                name,
+                lowStock,
+                note,
+                category,
+              );
             }
           }}
           onAddSubItem={async (name, lowStock) => {
