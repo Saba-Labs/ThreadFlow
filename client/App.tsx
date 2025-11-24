@@ -18,33 +18,35 @@ import ReStok from "./pages/ReStok";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SearchProvider>
-      <FontSizeProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route
-                path="/settings/production-path"
-                element={<SettingsProductionPath />}
-              />
-              <Route path="/models/all" element={<ModelsAll />} />
-              <Route path="/job-work" element={<JobWork />} />
-              <Route path="/models/new" element={<NewModel />} />
-              <Route path="/models/:id/edit" element={<EditModel />} />
-              <Route path="/roadmap" element={<Roadmap />} />
-              <Route path="/restok" element={<ReStok />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </FontSizeProvider>
-    </SearchProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SearchProvider>
+        <FontSizeProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route
+                  path="/settings/production-path"
+                  element={<SettingsProductionPath />}
+                />
+                <Route path="/models/all" element={<ModelsAll />} />
+                <Route path="/job-work" element={<JobWork />} />
+                <Route path="/models/new" element={<NewModel />} />
+                <Route path="/models/:id/edit" element={<EditModel />} />
+                <Route path="/roadmap" element={<Roadmap />} />
+                <Route path="/restok" element={<ReStok />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </FontSizeProvider>
+      </SearchProvider>
+    </QueryClientProvider>
+  );
+}
 
 // PWA: register service worker and forward beforeinstallprompt event to React
 if ("serviceWorker" in navigator) {
@@ -70,4 +72,7 @@ window.addEventListener("appinstalled", () => {
   window.dispatchEvent(new CustomEvent("pwa-appinstalled"));
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+const root = document.getElementById("root");
+if (root) {
+  createRoot(root).render(<App />);
+}

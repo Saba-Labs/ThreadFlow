@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, FC } from "react";
 
 type SearchContextValue = {
   query: string;
@@ -13,29 +7,39 @@ type SearchContextValue = {
 
 const SearchContext = createContext<SearchContextValue | undefined>(undefined);
 
-export function SearchProvider({ children }: { children: ReactNode }) {
-  const [query, setQuery] = useState("");
+export const SearchProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [query, setQuery] = useState<string>("");
 
-  // Listen to global-search events dispatched from the header without importing useSearch in AppLayout
   useEffect(() => {
-    const handler = (e: any) => {
-      const q = (e && (e as CustomEvent).detail) || "";
+    const handleGlobalSearch = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      const q = customEvent.detail || "";
       setQuery(String(q));
     };
-    window.addEventListener("global-search", handler as EventListener);
-    return () =>
-      window.removeEventListener("global-search", handler as EventListener);
+
+    window.addEventListener("global-search", handleGlobalSearch);
+
+    return () => {
+      window.removeEventListener("global-search", handleGlobalSearch);
+    };
   }, []);
 
+  const value: SearchContextValue = {
+    query,
+    setQuery,
+  };
+
   return (
-    <SearchContext.Provider value={{ query, setQuery }}>
+    <SearchContext.Provider value={value}>
       {children}
     </SearchContext.Provider>
   );
-}
+};
 
-export function useSearch() {
+export function useSearch(): SearchContextValue {
   const ctx = useContext(SearchContext);
-  if (!ctx) throw new Error("useSearch must be used within SearchProvider");
+  if (!ctx) {
+    throw new Error("useSearch must be used within SearchProvider");
+  }
   return ctx;
 }

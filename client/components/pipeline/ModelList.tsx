@@ -794,11 +794,15 @@ function ModelList(props: ModelListProps) {
                                 }
 
                                 if (i < 0 || i >= o.steps.length) {
-                                  return <Badge variant="secondary">—</Badge>;
+                                  return isMobile ? null : (
+                                    <Badge variant="secondary">—</Badge>
+                                  );
                                 }
 
                                 if (!step) {
-                                  return <Badge variant="secondary">—</Badge>;
+                                  return isMobile ? null : (
+                                    <Badge variant="secondary">—</Badge>
+                                  );
                                 }
 
                                 const displayStatus =
@@ -1311,7 +1315,7 @@ function ModelList(props: ModelListProps) {
                                   </span>
                                 )}
                               </div>
-                              {(!isMobile || showDetails) && (
+                              {(isExpandedMobile || !isMobile) && (
                                 <Badge
                                   variant={"default"}
                                   className="bg-purple-700 dark:bg-purple-600 text-white shrink-0"
@@ -1392,13 +1396,14 @@ function ModelList(props: ModelListProps) {
                                     );
                                   })()}
                                 </div>
-                              ) : i < 0 ? (
+                              ) : isMobile && i < 0 ? null : i < 0 ? (
                                 <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
                                     Out of Path
                                   </span>
                                 </div>
-                              ) : i >= o.steps.length ? (
+                              ) : isMobile && i >= o.steps.length ? null : i >=
+                                o.steps.length ? (
                                 <div className="text-sm">
                                   <span className="font-medium text-gray-900 dark:text-gray-100">
                                     Completed
@@ -1431,60 +1436,62 @@ function ModelList(props: ModelListProps) {
                                       </div>
                                     )}
 
-                                  <div>
-                                    <button
-                                      onClick={
-                                        pathEditId === o.id
-                                          ? () => toggleCardStatus(o)
-                                          : undefined
-                                      }
-                                    >
-                                      <Badge
-                                        variant={"default"}
-                                        className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                          hasPendingJW
-                                            ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                            : displayStatus === "running"
-                                              ? "bg-green-600 text-white"
-                                              : displayStatus === "hold"
-                                                ? "bg-red-600 text-white"
-                                                : "bg-gray-500 text-white"
-                                        }`}
+                                  {(isExpandedMobile || !isMobile) && (
+                                    <div>
+                                      <button
+                                        onClick={
+                                          pathEditId === o.id
+                                            ? () => toggleCardStatus(o)
+                                            : undefined
+                                        }
                                       >
-                                        {(() => {
-                                          if (hasPendingJW) {
-                                            const allAssignments =
-                                              o.jobWorkAssignments || [];
-                                            const assignmentNames =
-                                              allAssignments
-                                                .map((a) => a.jobWorkName)
+                                        <Badge
+                                          variant={"default"}
+                                          className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                            hasPendingJW
+                                              ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                              : displayStatus === "running"
+                                                ? "bg-green-600 text-white"
+                                                : displayStatus === "hold"
+                                                  ? "bg-red-600 text-white"
+                                                  : "bg-gray-500 text-white"
+                                          }`}
+                                        >
+                                          {(() => {
+                                            if (hasPendingJW) {
+                                              const allAssignments =
+                                                o.jobWorkAssignments || [];
+                                              const assignmentNames =
+                                                allAssignments
+                                                  .map((a) => a.jobWorkName)
+                                                  .filter(Boolean);
+
+                                              const jobWorkIdNames = (
+                                                (o as any).jobWorkIds || []
+                                              )
+                                                .map((id: string) => {
+                                                  const jw = jobWorks.find(
+                                                    (j) => j.id === id,
+                                                  );
+                                                  return jw?.name;
+                                                })
                                                 .filter(Boolean);
 
-                                            const jobWorkIdNames = (
-                                              (o as any).jobWorkIds || []
-                                            )
-                                              .map((id: string) => {
-                                                const jw = jobWorks.find(
-                                                  (j) => j.id === id,
-                                                );
-                                                return jw?.name;
-                                              })
-                                              .filter(Boolean);
+                                              const allNames = Array.from(
+                                                new Set([
+                                                  ...assignmentNames,
+                                                  ...jobWorkIdNames,
+                                                ]),
+                                              );
 
-                                            const allNames = Array.from(
-                                              new Set([
-                                                ...assignmentNames,
-                                                ...jobWorkIdNames,
-                                              ]),
-                                            );
-
-                                            return "Job Work";
-                                          }
-                                          return cap(displayStatus);
-                                        })()}
-                                      </Badge>
-                                    </button>
-                                  </div>
+                                              return "Job Work";
+                                            }
+                                            return cap(displayStatus);
+                                          })()}
+                                        </Badge>
+                                      </button>
+                                    </div>
+                                  )}
                                 </>
                               )}
                             </div>
@@ -1560,7 +1567,7 @@ function ModelList(props: ModelListProps) {
                               </div>
                             )}
 
-                            {isExpandedMobile && (
+                            {(isExpandedMobile || hasPendingJW) && (
                               <>
                                 {(() => {
                                   const parallelGroup = (
@@ -1594,33 +1601,35 @@ function ModelList(props: ModelListProps) {
                                   );
                                 })()}
 
-                                <button
-                                  onClick={
-                                    pathEditId === o.id
-                                      ? () => toggleCardStatus(o)
-                                      : undefined
-                                  }
-                                >
-                                  <Badge
-                                    variant={"default"}
-                                    className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
-                                      hasPendingJW
-                                        ? "bg-purple-700 dark:bg-purple-600 text-white"
-                                        : displayStatus === "running"
-                                          ? "bg-green-600 text-white"
-                                          : displayStatus === "hold"
-                                            ? "bg-red-600 text-white"
-                                            : "bg-gray-500 text-white"
-                                    }`}
+                                {(isExpandedMobile || !isMobile) && (
+                                  <button
+                                    onClick={
+                                      pathEditId === o.id
+                                        ? () => toggleCardStatus(o)
+                                        : undefined
+                                    }
                                   >
-                                    {(() => {
-                                      if (hasPendingJW) {
-                                        return "Job Work";
-                                      }
-                                      return cap(displayStatus);
-                                    })()}
-                                  </Badge>
-                                </button>
+                                    <Badge
+                                      variant={"default"}
+                                      className={`shrink-0 ${pathEditId === o.id ? "cursor-pointer" : ""} ${hasPendingJW ? "hover:bg-purple-700" : displayStatus === "running" ? "hover:bg-green-600" : displayStatus === "hold" ? "hover:bg-red-600" : "hover:bg-gray-500"} ${
+                                        hasPendingJW
+                                          ? "bg-purple-700 dark:bg-purple-600 text-white"
+                                          : displayStatus === "running"
+                                            ? "bg-green-600 text-white"
+                                            : displayStatus === "hold"
+                                              ? "bg-red-600 text-white"
+                                              : "bg-gray-500 text-white"
+                                      }`}
+                                    >
+                                      {(() => {
+                                        if (hasPendingJW) {
+                                          return "Job Work";
+                                        }
+                                        return cap(displayStatus);
+                                      })()}
+                                    </Badge>
+                                  </button>
+                                )}
                               </>
                             )}
                           </>
