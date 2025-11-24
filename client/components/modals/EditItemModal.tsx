@@ -70,13 +70,14 @@ export default function EditItemModal({
       setEditingName(itemName);
       setEditingLowStock(lowStock);
       setEditingNote(note);
+      setEditingCategory(category || "");
       setShowAddSubItemForm(false);
       setNewSubItemName("");
       setNewSubItemLowStock(0);
       setEditingSubItemId(null);
       setEditingSubItem(null);
     }
-  }, [open, itemName, lowStock, note]);
+  }, [open, itemName, lowStock, note, category]);
 
   const handleSubmitItem = async () => {
     if (!editingName.trim()) return;
