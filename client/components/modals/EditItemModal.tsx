@@ -43,6 +43,7 @@ export default function EditItemModal({
   itemName,
   lowStock,
   note,
+  category,
   subItems,
   hasSubItems,
   onSubmit,
@@ -54,6 +55,7 @@ export default function EditItemModal({
   const [editingName, setEditingName] = useState(itemName);
   const [editingLowStock, setEditingLowStock] = useState(lowStock);
   const [editingNote, setEditingNote] = useState(note);
+  const [editingCategory, setEditingCategory] = useState(category || "");
   const [showAddSubItemForm, setShowAddSubItemForm] = useState(false);
   const [newSubItemName, setNewSubItemName] = useState("");
   const [newSubItemLowStock, setNewSubItemLowStock] = useState(0);
