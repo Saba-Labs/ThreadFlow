@@ -517,6 +517,7 @@ export function useReStok() {
             quantity: Math.max(0, Number(item.quantity) || 0),
             lowStock: Math.max(0, Number(item.lowStock) || 0),
             note: item.note ?? "",
+            category: item.category ?? "",
             subItems: item.subItems.map((s) => ({
               id: s.id,
               name: s.name,
