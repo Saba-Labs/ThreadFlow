@@ -84,7 +84,7 @@ export default function EditItemModal({
     // Close immediately and sync in background
     onOpenChange(false);
     const p = Promise.resolve(
-      onSubmit(editingName, editingLowStock, editingNote),
+      onSubmit(editingName, editingLowStock, editingNote, editingCategory),
     );
     p.then(() => {
       toast({
