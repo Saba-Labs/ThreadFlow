@@ -613,12 +613,7 @@ function ModelList(props: ModelListProps) {
                             style={{ width: "120px" }}
                           >
                             <div
-                              className={`text-left break-words whitespace-normal flex items-start gap-2 ${viewMode === "list" ? "cursor-pointer hover:opacity-70 transition-opacity" : ""}`}
-                              onClick={() => {
-                                if (viewMode === "list") {
-                                  toggleExpanded(o.id);
-                                }
-                              }}
+                              className={`text-left break-words whitespace-normal flex items-start gap-2`}
                             >
                               {!showDetails && (
                                 <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
