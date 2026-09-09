@@ -1197,8 +1197,10 @@ function ModelList(props: ModelListProps) {
                   ? { ...o, currentStepIndex: overrideIdx }
                   : o;
               const i = ov.currentStepIndex;
-              const step = ov.steps[i];
-              const bg = statusBgClass(ov);
+              const stepsArr = pendingStepsMap[o.id] ?? ov.steps;
+              const step = stepsArr[i];
+              const renderOrder = { ...ov, steps: stepsArr } as WorkOrder;
+              const bg = statusBgClass(renderOrder);
               const isExpandedMobile = toggledIds.includes(o.id);
               const hasPendingJW =
                 ((o as any).jobWorkIds || []).length > 0 ||
