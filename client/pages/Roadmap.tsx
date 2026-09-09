@@ -15,7 +15,14 @@ import {
   Share2,
   Eraser,
 } from "lucide-react";
-import { Fragment, useState, useMemo, useEffect, type DragEvent } from "react";
+import {
+  Fragment,
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  type DragEvent,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -102,6 +109,10 @@ export default function RoadmapPage() {
     null,
   );
   const [dropTarget, setDropTarget] = useState<{
+    roadmapId: string;
+    index: number;
+  } | null>(null);
+  const dropTargetRef = useRef<{
     roadmapId: string;
     index: number;
   } | null>(null);
@@ -224,6 +235,7 @@ export default function RoadmapPage() {
     setDraggedItem(null);
     setDragOverRoadmapId(null);
     setDropTarget(null);
+    dropTargetRef.current = null;
   };
 
   const handleDropOnRoadmap = async (
@@ -237,18 +249,20 @@ export default function RoadmapPage() {
       return;
     }
 
+    const activeTarget = dropTargetRef.current;
+
     try {
       if (
         draggedItem.roadmapId === toRoadmapId &&
-        dropTarget?.roadmapId === toRoadmapId
+        activeTarget?.roadmapId === toRoadmapId
       ) {
         const sourceIndex = roadmaps
           .find((roadmap) => roadmap.id === toRoadmapId)
           ?.items.findIndex((item) => item.modelId === draggedItem.modelId);
         const adjustedIndex =
-          typeof sourceIndex === "number" && sourceIndex < dropTarget.index
-            ? dropTarget.index - 1
-            : dropTarget.index;
+          typeof sourceIndex === "number" && sourceIndex < activeTarget.index
+            ? activeTarget.index - 1
+            : activeTarget.index;
         if (sourceIndex !== adjustedIndex) {
           await moveModelWithinRoadmap(
             toRoadmapId,
@@ -261,7 +275,9 @@ export default function RoadmapPage() {
           draggedItem.roadmapId,
           toRoadmapId,
           draggedItem.modelId,
-          dropTarget?.roadmapId === toRoadmapId ? dropTarget.index : undefined,
+          activeTarget?.roadmapId === toRoadmapId
+            ? activeTarget.index
+            : undefined,
         );
       }
     } finally {
@@ -282,7 +298,9 @@ export default function RoadmapPage() {
     const targetIndex =
       event.clientY < bounds.top + bounds.height / 2 ? index : index + 1;
     setDragOverRoadmapId(roadmapId);
-    setDropTarget({ roadmapId, index: targetIndex });
+    const nextTarget = { roadmapId, index: targetIndex };
+    dropTargetRef.current = nextTarget;
+    setDropTarget(nextTarget);
   };
 
   const handleDropOnModel = async (
@@ -298,10 +316,15 @@ export default function RoadmapPage() {
     }
 
     const bounds = event.currentTarget.getBoundingClientRect();
-    const insertionIndex =
+    const fallbackIndex =
       event.clientY < bounds.top + bounds.height / 2
         ? targetIndex
         : targetIndex + 1;
+    const activeTarget = dropTargetRef.current;
+    const insertionIndex =
+      activeTarget?.roadmapId === roadmapId
+        ? activeTarget.index
+        : fallbackIndex;
 
     try {
       if (draggedItem.roadmapId === roadmapId) {
