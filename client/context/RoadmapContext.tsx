@@ -56,6 +56,7 @@ function subscribe(cb: () => void) {
 
 export function useRoadmaps() {
   const state = useSyncExternalStore(subscribe, getRoadmaps, getRoadmaps);
+  const refreshRoadmaps = useCallback(() => fetchRoadmaps(), []);
 
   useSSESubscription((event) => {
     if (event.type === "roadmaps_updated") {
@@ -280,5 +281,6 @@ export function useRoadmaps() {
     removeModelFromRoadmap,
     moveModelWithinRoadmap,
     moveModelToRoadmap,
+    refreshRoadmaps,
   };
 }

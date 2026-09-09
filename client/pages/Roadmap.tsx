@@ -71,6 +71,7 @@ export default function RoadmapPage() {
     addModelToRoadmap,
     moveModelWithinRoadmap,
     moveModelToRoadmap,
+    refreshRoadmaps,
   } = useRoadmaps();
 
   const pipeline = useProductionPipeline();
@@ -78,6 +79,15 @@ export default function RoadmapPage() {
   const isShared = searchParams.get("shared") === "true";
   const isDisplayMode = searchParams.get("display") === "true";
   const isReadOnly = isShared || isDisplayMode;
+
+  useEffect(() => {
+    if (!isDisplayMode) return;
+    void refreshRoadmaps();
+    const interval = window.setInterval(() => {
+      void refreshRoadmaps();
+    }, 30_000);
+    return () => window.clearInterval(interval);
+  }, [isDisplayMode, refreshRoadmaps]);
 
   useSwipeNavigation({
     leftPage: "/restok",
