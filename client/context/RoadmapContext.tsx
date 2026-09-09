@@ -25,12 +25,16 @@ let isLoading = false;
 
 const subscribers = new Set<() => void>();
 
+function notifySubscribers() {
+  for (const subscriber of Array.from(subscribers)) subscriber();
+}
+
 async function fetchRoadmaps() {
   if (isLoading) return;
   isLoading = true;
   try {
     STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
-    for (const s of Array.from(subscribers)) s();
+    notifySubscribers();
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
   } finally {
@@ -162,28 +166,38 @@ export function useRoadmaps() {
 
   const moveModelWithinRoadmap = useCallback(
     async (roadmapId: string, modelId: string, toIndex: number) => {
+      const previousStore = STORE;
+      const roadmap = STORE.find((r) => r.id === roadmapId);
+      if (!roadmap) return;
+
+      const currentIndex = roadmap.items.findIndex(
+        (item) => item.modelId === modelId,
+      );
+      if (currentIndex === -1) return;
+
+      const newItems = roadmap.items.slice();
+      const [item] = newItems.splice(currentIndex, 1);
+      const dest = Math.max(0, Math.min(toIndex, newItems.length));
+      newItems.splice(dest, 0, item);
+      STORE = STORE.map((currentRoadmap) =>
+        currentRoadmap.id === roadmapId
+          ? { ...currentRoadmap, items: newItems }
+          : currentRoadmap,
+      );
+      notifySubscribers();
+
       try {
-        const roadmap = STORE.find((r) => r.id === roadmapId);
-        if (!roadmap) return;
-
-        const items = roadmap.items;
-        const currentIndex = items.findIndex((it) => it.modelId === modelId);
-        if (currentIndex === -1) return;
-
-        const newItems = items.slice();
-        const [item] = newItems.splice(currentIndex, 1);
-        const dest = Math.max(0, Math.min(toIndex, newItems.length));
-        newItems.splice(dest, 0, item);
-
-        const modelIds = newItems.map((it) => it.modelId);
         await fetchWithTimeout(`/api/roadmaps/${roadmapId}/reorder`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: modelIds }),
+          body: JSON.stringify({
+            items: newItems.map((roadmapItem) => roadmapItem.modelId),
+          }),
         });
-
         await fetchRoadmaps();
       } catch (error) {
+        STORE = previousStore;
+        notifySubscribers();
         console.error("Error moving model within roadmap:", error);
         throw error;
       }
@@ -198,6 +212,43 @@ export function useRoadmaps() {
       modelId: string,
       toIndex?: number,
     ) => {
+      const previousStore = STORE;
+      const sourceRoadmap = STORE.find(
+        (roadmap) => roadmap.id === fromRoadmapId,
+      );
+      const destinationRoadmap = STORE.find(
+        (roadmap) => roadmap.id === toRoadmapId,
+      );
+      const item = sourceRoadmap?.items.find(
+        (roadmapItem) => roadmapItem.modelId === modelId,
+      );
+      if (!sourceRoadmap || !destinationRoadmap || !item) return;
+
+      const destinationHasItem = destinationRoadmap.items.some(
+        (roadmapItem) => roadmapItem.modelId === modelId,
+      );
+      const sourceItems = sourceRoadmap.items.filter(
+        (roadmapItem) => roadmapItem.modelId !== modelId,
+      );
+      const destinationItems = destinationRoadmap.items.slice();
+      if (!destinationHasItem) {
+        const destinationIndex =
+          typeof toIndex === "number"
+            ? Math.max(0, Math.min(toIndex, destinationItems.length))
+            : destinationItems.length;
+        destinationItems.splice(destinationIndex, 0, item);
+      }
+
+      STORE = STORE.map((roadmap) => {
+        if (roadmap.id === fromRoadmapId)
+          return { ...roadmap, items: sourceItems };
+        if (roadmap.id === toRoadmapId) {
+          return { ...roadmap, items: destinationItems };
+        }
+        return roadmap;
+      });
+      notifySubscribers();
+
       try {
         await fetchWithTimeout("/api/roadmaps/move-model", {
           method: "POST",
@@ -211,6 +262,8 @@ export function useRoadmaps() {
         });
         await fetchRoadmaps();
       } catch (error) {
+        STORE = previousStore;
+        notifySubscribers();
         console.error("Error moving model to roadmap:", error);
         throw error;
       }
