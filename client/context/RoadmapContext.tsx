@@ -148,12 +148,9 @@ export function useRoadmaps() {
   const removeModelFromRoadmap = useCallback(
     async (roadmapId: string, modelId: string) => {
       try {
-        await fetchWithTimeout(
-          `/api/roadmaps/${roadmapId}/models/${modelId}`,
-          {
-            method: "DELETE",
-          },
-        );
+        await fetchWithTimeout(`/api/roadmaps/${roadmapId}/models/${modelId}`, {
+          method: "DELETE",
+        });
         await fetchRoadmaps();
       } catch (error) {
         console.error("Error removing model from roadmap:", error);
@@ -209,6 +206,7 @@ export function useRoadmaps() {
             fromRoadmapId,
             toRoadmapId,
             modelId,
+            ...(typeof toIndex === "number" ? { toIndex } : {}),
           }),
         });
         await fetchRoadmaps();

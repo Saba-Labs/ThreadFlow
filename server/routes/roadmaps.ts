@@ -186,12 +186,10 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("[addModelToRoadmap] Error occurred:", error);
-    res
-      .status(500)
-      .json({
-        error: "Failed to add model to roadmap",
-        details: String(error),
-      });
+    res.status(500).json({
+      error: "Failed to add model to roadmap",
+      details: String(error),
+    });
   }
 };
 
@@ -240,7 +238,7 @@ export const reorderRoadmapItems: RequestHandler = async (req, res) => {
 
 export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
   try {
-    const { fromRoadmapId, toRoadmapId, modelId } = req.body;
+    const { fromRoadmapId, toRoadmapId, modelId, toIndex } = req.body;
 
     if (!fromRoadmapId || !toRoadmapId || !modelId) {
       return res.status(400).json({
@@ -275,12 +273,15 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
         [fromRoadmapId, modelId],
       );
     } else {
-      // Get next index in destination
-      const indexResult = await query(
-        "SELECT MAX(item_index) as max_index FROM roadmap_items WHERE roadmap_id = $1",
+      const countResult = await query(
+        "SELECT COUNT(*)::int as count FROM roadmap_items WHERE roadmap_id = $1",
         [toRoadmapId],
       );
-      const nextIndex = (indexResult.rows[0]?.max_index ?? -1) + 1;
+      const itemCount = countResult.rows[0]?.count ?? 0;
+      const insertionIndex =
+        typeof toIndex === "number"
+          ? Math.max(0, Math.min(Math.floor(toIndex), itemCount))
+          : itemCount;
 
       const now = Date.now();
       const itemId = uid("rit");
@@ -292,6 +293,11 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
       );
 
       await query(
+        "UPDATE roadmap_items SET item_index = item_index + 1, updated_at = $1 WHERE roadmap_id = $2 AND item_index >= $3",
+        [now, toRoadmapId, insertionIndex],
+      );
+
+      await query(
         "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
         [
           itemId,
@@ -300,7 +306,7 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
           model_name,
           quantity,
           now,
-          nextIndex,
+          insertionIndex,
           now,
           now,
         ],

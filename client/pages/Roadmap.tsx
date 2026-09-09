@@ -261,6 +261,7 @@ export default function RoadmapPage() {
           draggedItem.roadmapId,
           toRoadmapId,
           draggedItem.modelId,
+          dropTarget?.roadmapId === toRoadmapId ? dropTarget.index : undefined,
         );
       }
     } finally {
@@ -317,6 +318,7 @@ export default function RoadmapPage() {
           draggedItem.roadmapId,
           roadmapId,
           draggedItem.modelId,
+          targetIndex,
         );
       }
     } finally {
