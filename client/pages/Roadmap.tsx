@@ -297,15 +297,21 @@ export default function RoadmapPage() {
       return;
     }
 
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const insertionIndex =
+      event.clientY < bounds.top + bounds.height / 2
+        ? targetIndex
+        : targetIndex + 1;
+
     try {
       if (draggedItem.roadmapId === roadmapId) {
         const sourceIndex = roadmaps
           .find((roadmap) => roadmap.id === roadmapId)
           ?.items.findIndex((item) => item.modelId === draggedItem.modelId);
         const adjustedIndex =
-          typeof sourceIndex === "number" && sourceIndex < targetIndex
-            ? targetIndex - 1
-            : targetIndex;
+          typeof sourceIndex === "number" && sourceIndex < insertionIndex
+            ? insertionIndex - 1
+            : insertionIndex;
         if (sourceIndex !== adjustedIndex) {
           await moveModelWithinRoadmap(
             roadmapId,
@@ -318,7 +324,7 @@ export default function RoadmapPage() {
           draggedItem.roadmapId,
           roadmapId,
           draggedItem.modelId,
-          targetIndex,
+          insertionIndex,
         );
       }
     } finally {
@@ -583,13 +589,7 @@ export default function RoadmapPage() {
                                 handleDragOverModel(event, r.id, idx)
                               }
                               onDrop={(event) =>
-                                handleDropOnModel(
-                                  event,
-                                  r.id,
-                                  dropTarget?.roadmapId === r.id
-                                    ? dropTarget.index
-                                    : idx,
-                                )
+                                handleDropOnModel(event, r.id, idx)
                               }
                               className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all duration-150 ${
                                 !isReadOnly
