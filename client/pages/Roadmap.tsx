@@ -15,7 +15,7 @@ import {
   Share2,
   Eraser,
 } from "lucide-react";
-import { useState, useMemo, useEffect, type DragEvent } from "react";
+import { Fragment, useState, useMemo, useEffect, type DragEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -101,6 +101,10 @@ export default function RoadmapPage() {
   const [dragOverRoadmapId, setDragOverRoadmapId] = useState<string | null>(
     null,
   );
+  const [dropTarget, setDropTarget] = useState<{
+    roadmapId: string;
+    index: number;
+  } | null>(null);
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -219,6 +223,7 @@ export default function RoadmapPage() {
   const handleDragEnd = () => {
     setDraggedItem(null);
     setDragOverRoadmapId(null);
+    setDropTarget(null);
   };
 
   const handleDropOnRoadmap = async (
@@ -227,20 +232,56 @@ export default function RoadmapPage() {
   ) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!draggedItem || isReadOnly || draggedItem.roadmapId === toRoadmapId) {
+    if (!draggedItem || isReadOnly) {
       handleDragEnd();
       return;
     }
 
     try {
-      await moveModelToRoadmap(
-        draggedItem.roadmapId,
-        toRoadmapId,
-        draggedItem.modelId,
-      );
+      if (
+        draggedItem.roadmapId === toRoadmapId &&
+        dropTarget?.roadmapId === toRoadmapId
+      ) {
+        const sourceIndex = roadmaps
+          .find((roadmap) => roadmap.id === toRoadmapId)
+          ?.items.findIndex((item) => item.modelId === draggedItem.modelId);
+        const adjustedIndex =
+          typeof sourceIndex === "number" && sourceIndex < dropTarget.index
+            ? dropTarget.index - 1
+            : dropTarget.index;
+        if (sourceIndex !== adjustedIndex) {
+          await moveModelWithinRoadmap(
+            toRoadmapId,
+            draggedItem.modelId,
+            adjustedIndex,
+          );
+        }
+      } else if (draggedItem.roadmapId !== toRoadmapId) {
+        await moveModelToRoadmap(
+          draggedItem.roadmapId,
+          toRoadmapId,
+          draggedItem.modelId,
+        );
+      }
     } finally {
       handleDragEnd();
     }
+  };
+
+  const handleDragOverModel = (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+    index: number,
+  ) => {
+    if (isReadOnly || !draggedItem) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "move";
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const targetIndex =
+      event.clientY < bounds.top + bounds.height / 2 ? index : index + 1;
+    setDragOverRoadmapId(roadmapId);
+    setDropTarget({ roadmapId, index: targetIndex });
   };
 
   const handleDropOnModel = async (
@@ -257,11 +298,20 @@ export default function RoadmapPage() {
 
     try {
       if (draggedItem.roadmapId === roadmapId) {
-        await moveModelWithinRoadmap(
-          roadmapId,
-          draggedItem.modelId,
-          targetIndex,
-        );
+        const sourceIndex = roadmaps
+          .find((roadmap) => roadmap.id === roadmapId)
+          ?.items.findIndex((item) => item.modelId === draggedItem.modelId);
+        const adjustedIndex =
+          typeof sourceIndex === "number" && sourceIndex < targetIndex
+            ? targetIndex - 1
+            : targetIndex;
+        if (sourceIndex !== adjustedIndex) {
+          await moveModelWithinRoadmap(
+            roadmapId,
+            draggedItem.modelId,
+            adjustedIndex,
+          );
+        }
       } else {
         await moveModelToRoadmap(
           draggedItem.roadmapId,
@@ -515,97 +565,113 @@ export default function RoadmapPage() {
                     ) : (
                       <div className="space-y-2">
                         {r.items.map((it, idx) => (
-                          <div
-                            key={`${r.id}-${it.modelId}-${idx}`}
-                            draggable={!isReadOnly}
-                            onDragStart={(event) =>
-                              handleDragStart(event, r.id, it.modelId)
-                            }
-                            onDragEnd={handleDragEnd}
-                            onDragOver={(event) => {
-                              if (!isReadOnly && draggedItem) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                event.dataTransfer.dropEffect = "move";
+                          <Fragment key={`${r.id}-${it.modelId}-${idx}`}>
+                            {dropTarget?.roadmapId === r.id &&
+                              dropTarget.index === idx &&
+                              draggedItem?.modelId !== it.modelId && (
+                                <div className="h-1 rounded-full bg-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.15)] transition-all duration-150" />
+                              )}
+                            <div
+                              draggable={!isReadOnly}
+                              onDragStart={(event) =>
+                                handleDragStart(event, r.id, it.modelId)
                               }
-                            }}
-                            onDrop={(event) =>
-                              handleDropOnModel(event, r.id, idx)
-                            }
-                            className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all ${
-                              !isReadOnly
-                                ? "cursor-grab active:cursor-grabbing"
-                                : ""
-                            }`}
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-sm sm:text-lg text-slate-900 truncate">
-                                {it.modelName}{" "}
-                                <span className="text-slate-400 font-normal">
-                                  ({it.quantity})
-                                </span>
+                              onDragEnd={handleDragEnd}
+                              onDragOver={(event) =>
+                                handleDragOverModel(event, r.id, idx)
+                              }
+                              onDrop={(event) =>
+                                handleDropOnModel(
+                                  event,
+                                  r.id,
+                                  dropTarget?.roadmapId === r.id
+                                    ? dropTarget.index
+                                    : idx,
+                                )
+                              }
+                              className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all duration-150 ${
+                                !isReadOnly
+                                  ? "cursor-grab active:cursor-grabbing"
+                                  : ""
+                              } ${
+                                draggedItem?.modelId === it.modelId
+                                  ? "scale-[0.98] opacity-40 shadow-inner"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-sm sm:text-lg text-slate-900 truncate">
+                                  {it.modelName}{" "}
+                                  <span className="text-slate-400 font-normal">
+                                    ({it.quantity})
+                                  </span>
+                                </div>
                               </div>
-                            </div>
 
-                            {!isReadOnly && (
-                              <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    moveModelWithinRoadmap(
-                                      r.id,
-                                      it.modelId,
-                                      idx - 1,
-                                    )
-                                  }
-                                  disabled={idx === 0}
-                                  className="h-8 w-8 hover:bg-slate-100"
-                                >
-                                  <ChevronUp className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    moveModelWithinRoadmap(
-                                      r.id,
-                                      it.modelId,
-                                      idx + 1,
-                                    )
-                                  }
-                                  disabled={idx === r.items.length - 1}
-                                  className="h-8 w-8 hover:bg-slate-100"
-                                >
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    setMoveItem({
-                                      fromRoadmapId: r.id,
-                                      modelId: it.modelId,
-                                    })
-                                  }
-                                  className="h-8 w-8 hover:bg-blue-50 text-blue-600"
-                                >
-                                  <ArrowRight className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    removeModelFromRoadmap(r.id, it.modelId)
-                                  }
-                                  className="h-8 w-8 hover:bg-red-50 text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </div>
+                              {!isReadOnly && (
+                                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      moveModelWithinRoadmap(
+                                        r.id,
+                                        it.modelId,
+                                        idx - 1,
+                                      )
+                                    }
+                                    disabled={idx === 0}
+                                    className="h-8 w-8 hover:bg-slate-100"
+                                  >
+                                    <ChevronUp className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      moveModelWithinRoadmap(
+                                        r.id,
+                                        it.modelId,
+                                        idx + 1,
+                                      )
+                                    }
+                                    disabled={idx === r.items.length - 1}
+                                    className="h-8 w-8 hover:bg-slate-100"
+                                  >
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      setMoveItem({
+                                        fromRoadmapId: r.id,
+                                        modelId: it.modelId,
+                                      })
+                                    }
+                                    className="h-8 w-8 hover:bg-blue-50 text-blue-600"
+                                  >
+                                    <ArrowRight className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      removeModelFromRoadmap(r.id, it.modelId)
+                                    }
+                                    className="h-8 w-8 hover:bg-red-50 text-red-600"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </Fragment>
                         ))}
+                        {dropTarget?.roadmapId === r.id &&
+                          dropTarget.index === r.items.length && (
+                            <div className="h-1 rounded-full bg-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.15)] transition-all duration-150" />
+                          )}
                       </div>
                     )}
                   </CardContent>
