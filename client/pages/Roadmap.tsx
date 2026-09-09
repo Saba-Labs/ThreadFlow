@@ -11,6 +11,7 @@ import {
   X,
   Check,
   Map,
+  Monitor,
   Share2,
   Eraser,
 } from "lucide-react";
@@ -68,6 +69,8 @@ export default function RoadmapPage() {
   const pipeline = useProductionPipeline();
   const [searchParams] = useSearchParams();
   const isShared = searchParams.get("shared") === "true";
+  const isDisplayMode = searchParams.get("display") === "true";
+  const isReadOnly = isShared || isDisplayMode;
 
   useSwipeNavigation({
     leftPage: "/restok",
@@ -179,6 +182,11 @@ export default function RoadmapPage() {
     setEditingTitleId(null);
   };
 
+  const openDisplayMode = () => {
+    const displayUrl = `${window.location.origin}${window.location.pathname}?display=true`;
+    window.open(displayUrl, "_blank", "noopener,noreferrer");
+  };
+
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}${window.location.pathname}?shared=true`;
     try {
@@ -201,7 +209,13 @@ export default function RoadmapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 -ml-[calc((100vw-100%)/2)] w-screen">
+    <div
+      className={`min-h-screen -ml-[calc((100vw-100%)/2)] w-screen ${
+        isDisplayMode
+          ? "bg-slate-950 text-white"
+          : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50"
+      }`}
+    >
       <div className="w-full">
         {/* Header */}
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8">
@@ -215,38 +229,51 @@ export default function RoadmapPage() {
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
                     Roadmaps
                   </h1>
-                  {isShared && (
+                  {isReadOnly && (
                     <span className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-800">
-                      Shared View
+                      {isDisplayMode ? "TV Display" : "Shared View"}
                     </span>
                   )}
                 </div>
-                <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
+                <p
+                  className={`text-xs sm:text-sm mt-0.5 ${isDisplayMode ? "text-slate-300" : "text-slate-600"}`}
+                >
                   {roadmaps.length} active roadmap
                   {roadmaps.length !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                onClick={handleShare}
-                variant="outline"
-                className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
-                title="Copy share link to clipboard"
-              >
-                <Share2 className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Share</span>
-              </Button>
-              {!isShared && (
+            {!isDisplayMode && (
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Button
-                  onClick={handleAddRoadmap}
-                  className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
+                  onClick={openDisplayMode}
+                  variant="outline"
+                  className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
+                  title="Open TV display"
                 >
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Add Roadmap</span>
+                  <Monitor className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">TV Display</span>
                 </Button>
-              )}
-            </div>
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
+                  title="Copy share link to clipboard"
+                >
+                  <Share2 className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Share</span>
+                </Button>
+                {!isReadOnly && (
+                  <Button
+                    onClick={handleAddRoadmap}
+                    className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
+                  >
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Add Roadmap</span>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
           {shareToast && (
             <div className="mt-3 p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-800">
@@ -330,7 +357,7 @@ export default function RoadmapPage() {
                           <div
                             className="flex-1 min-w-0 cursor-pointer group"
                             onClick={() =>
-                              !isShared &&
+                              !isReadOnly &&
                               (setEditingTitleId(r.id), setTitleDraft(r.title))
                             }
                           >
@@ -344,7 +371,7 @@ export default function RoadmapPage() {
                           </div>
                         </div>
 
-                        {!isShared && (
+                        {!isReadOnly && (
                           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                             <Button
                               size="sm"
@@ -388,7 +415,7 @@ export default function RoadmapPage() {
                         <div className="text-sm text-slate-600 mb-3">
                           No models added yet
                         </div>
-                        {!isShared && (
+                        {!isReadOnly && (
                           <Button
                             size="sm"
                             onClick={() => openAddModels(r.id)}
@@ -415,7 +442,7 @@ export default function RoadmapPage() {
                               </div>
                             </div>
 
-                            {!isShared && (
+                            {!isReadOnly && (
                               <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                                 <Button
                                   size="icon"
@@ -486,7 +513,7 @@ export default function RoadmapPage() {
 
       {/* Add Models Modal */}
       <SimpleModal
-        open={openFor !== null && !isShared}
+        open={openFor !== null && !isReadOnly}
         onOpenChange={(v: boolean) => {
           if (!v) {
             setOpenFor(null);
@@ -594,7 +621,7 @@ export default function RoadmapPage() {
 
       {/* Create Roadmap Modal */}
       <SimpleModal
-        open={showCreateModal && !isShared}
+        open={showCreateModal && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setShowCreateModal(false)}
         title="Create New Roadmap"
         footer={
@@ -636,7 +663,7 @@ export default function RoadmapPage() {
 
       {/* Move Model Modal */}
       <SimpleModal
-        open={moveItem !== null && !isShared}
+        open={moveItem !== null && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setMoveItem(null)}
         title="Move Model"
         footer={
@@ -695,7 +722,7 @@ export default function RoadmapPage() {
 
       {/* Delete Confirmation Modal */}
       <SimpleModal
-        open={deleteConfirmId !== null && !isShared}
+        open={deleteConfirmId !== null && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setDeleteConfirmId(null)}
         title="Delete Roadmap"
         footer={
@@ -737,7 +764,7 @@ export default function RoadmapPage() {
 
       {/* Clear Models Confirmation Modal */}
       <SimpleModal
-        open={clearModelsConfirmId !== null && !isShared}
+        open={clearModelsConfirmId !== null && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setClearModelsConfirmId(null)}
         title="Clear All Models"
         footer={

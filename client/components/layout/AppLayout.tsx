@@ -80,6 +80,9 @@ export default function AppLayout() {
     );
   }
   const location = useLocation();
+  const isDisplayMode =
+    location.pathname === "/roadmap" &&
+    new URLSearchParams(location.search).get("display") === "true";
   const [menuOpen, setMenuOpen] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const queryClient = useQueryClient();
@@ -309,154 +312,162 @@ export default function AppLayout() {
           </div>
         </div>
 
-        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur overflow-x-hidden">
-          <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
-            <div className="flex items-center gap-2">
-              <Link to="/" className="flex items-center gap-2 font-semibold">
-                <span
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
-                  aria-hidden
-                >
-                  <ThreadFlowLogo className="h-6 w-6" />
-                </span>
-                <span className="tracking-tight">ThreadFlow</span>
-              </Link>
-              <button
-                aria-label="Refresh and clear cache"
-                onClick={handleRefreshClick}
-                disabled={isRefreshing}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
-                title="Refresh and clear all caches"
-              >
-                <RotateCw
-                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-                />
-              </button>
-            </div>
-
-            <nav className="flex items-center gap-1">
-              {/* Desktop links */}
-              <div className="hidden sm:flex items-center gap-1">
-                <NavLink
-                  to="/roadmap"
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  Roadmap
-                </NavLink>
-
-                <NavLink
-                  to="/"
-                  end
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  Dashboard
-                </NavLink>
-
-                <NavLink
-                  to="/models/all"
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  All Models
-                </NavLink>
-
-                <NavLink
-                  to="/job-work"
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  Job Work
-                </NavLink>
-
-                <NavLink
-                  to="/restok"
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  ReStok
-                </NavLink>
-
-                <NavLink
-                  to="/settings"
-                  className={({ isActive }) =>
-                    cn(
-                      "rounded-md px-3 py-2 text-sm font-medium",
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )
-                  }
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Settings className="h-4 w-4" /> Settings
+        {!isDisplayMode && (
+          <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur overflow-x-hidden">
+            <div className="container flex h-14 items-center justify-between px-3 sm:px-0">
+              <div className="flex items-center gap-2">
+                <Link to="/" className="flex items-center gap-2 font-semibold">
+                  <span
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white"
+                    aria-hidden
+                  >
+                    <ThreadFlowLogo className="h-6 w-6" />
                   </span>
-                </NavLink>
-
-                <Button asChild size="sm" className="ml-2">
-                  <Link to="/models/new">New Model</Link>
-                </Button>
-              </div>
-
-              {/* Install button (shows when PWA install available) */}
-              {canInstall && (
-                <div className="mr-2">
-                  <Button onClick={handleInstallClick} size="sm">
-                    Install
-                  </Button>
-                </div>
-              )}
-
-              {/* Mobile menu button */}
-              <div className="sm:hidden">
+                  <span className="tracking-tight">ThreadFlow</span>
+                </Link>
                 <button
-                  aria-label={menuOpen ? "Close menu" : "Open menu"}
-                  onClick={() => setMenuOpen((s) => !s)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
+                  aria-label="Refresh and clear cache"
+                  onClick={handleRefreshClick}
+                  disabled={isRefreshing}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border p-1 hover:bg-accent disabled:opacity-50"
+                  title="Refresh and clear all caches"
                 >
-                  {menuOpen ? (
-                    <X className="h-5 w-5" />
-                  ) : (
-                    <Menu className="h-5 w-5" />
-                  )}
+                  <RotateCw
+                    className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                  />
                 </button>
               </div>
-            </nav>
-          </div>
-        </header>
 
-        <main className="container py-3 sm:py-6 overflow-x-hidden">
+              <nav className="flex items-center gap-1">
+                {/* Desktop links */}
+                <div className="hidden sm:flex items-center gap-1">
+                  <NavLink
+                    to="/roadmap"
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    Roadmap
+                  </NavLink>
+
+                  <NavLink
+                    to="/"
+                    end
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    Dashboard
+                  </NavLink>
+
+                  <NavLink
+                    to="/models/all"
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    All Models
+                  </NavLink>
+
+                  <NavLink
+                    to="/job-work"
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    Job Work
+                  </NavLink>
+
+                  <NavLink
+                    to="/restok"
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    ReStok
+                  </NavLink>
+
+                  <NavLink
+                    to="/settings"
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Settings className="h-4 w-4" /> Settings
+                    </span>
+                  </NavLink>
+
+                  <Button asChild size="sm" className="ml-2">
+                    <Link to="/models/new">New Model</Link>
+                  </Button>
+                </div>
+
+                {/* Install button (shows when PWA install available) */}
+                {canInstall && (
+                  <div className="mr-2">
+                    <Button onClick={handleInstallClick} size="sm">
+                      Install
+                    </Button>
+                  </div>
+                )}
+
+                {/* Mobile menu button */}
+                <div className="sm:hidden">
+                  <button
+                    aria-label={menuOpen ? "Close menu" : "Open menu"}
+                    onClick={() => setMenuOpen((s) => !s)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-md border p-1"
+                  >
+                    {menuOpen ? (
+                      <X className="h-5 w-5" />
+                    ) : (
+                      <Menu className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </nav>
+            </div>
+          </header>
+        )}
+
+        <main
+          className={
+            isDisplayMode
+              ? "w-full overflow-x-hidden"
+              : "container py-3 sm:py-6 overflow-x-hidden"
+          }
+        >
           <Outlet />
         </main>
       </div>
