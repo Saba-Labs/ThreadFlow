@@ -15,7 +15,7 @@ import {
   Share2,
   Eraser,
 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, type DragEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -94,6 +94,13 @@ export default function RoadmapPage() {
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
+  const [draggedItem, setDraggedItem] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
+  const [dragOverRoadmapId, setDragOverRoadmapId] = useState<string | null>(
+    null,
+  );
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -195,6 +202,75 @@ export default function RoadmapPage() {
       setTimeout(() => setShareToast(false), 3000);
     } catch (err) {
       console.error("Failed to copy to clipboard:", err);
+    }
+  };
+
+  const handleDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+    modelId: string,
+  ) => {
+    if (isReadOnly) return;
+    setDraggedItem({ roadmapId, modelId });
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", modelId);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverRoadmapId(null);
+  };
+
+  const handleDropOnRoadmap = async (
+    event: DragEvent<HTMLDivElement>,
+    toRoadmapId: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!draggedItem || isReadOnly || draggedItem.roadmapId === toRoadmapId) {
+      handleDragEnd();
+      return;
+    }
+
+    try {
+      await moveModelToRoadmap(
+        draggedItem.roadmapId,
+        toRoadmapId,
+        draggedItem.modelId,
+      );
+    } finally {
+      handleDragEnd();
+    }
+  };
+
+  const handleDropOnModel = async (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+    targetIndex: number,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!draggedItem || isReadOnly) {
+      handleDragEnd();
+      return;
+    }
+
+    try {
+      if (draggedItem.roadmapId === roadmapId) {
+        await moveModelWithinRoadmap(
+          roadmapId,
+          draggedItem.modelId,
+          targetIndex,
+        );
+      } else {
+        await moveModelToRoadmap(
+          draggedItem.roadmapId,
+          roadmapId,
+          draggedItem.modelId,
+        );
+      }
+    } finally {
+      handleDragEnd();
     }
   };
 
@@ -315,7 +391,17 @@ export default function RoadmapPage() {
               {roadmaps.map((r) => (
                 <Card
                   key={r.id}
-                  className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                  className={`overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${
+                    dragOverRoadmapId === r.id ? "ring-2 ring-blue-400" : ""
+                  }`}
+                  onDragOver={(event) => {
+                    if (!isReadOnly && draggedItem) {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "move";
+                      setDragOverRoadmapId(r.id);
+                    }
+                  }}
+                  onDrop={(event) => handleDropOnRoadmap(event, r.id)}
                 >
                   <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
                     {editingTitleId === r.id ? (
@@ -431,7 +517,26 @@ export default function RoadmapPage() {
                         {r.items.map((it, idx) => (
                           <div
                             key={`${r.id}-${it.modelId}-${idx}`}
-                            className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
+                            draggable={!isReadOnly}
+                            onDragStart={(event) =>
+                              handleDragStart(event, r.id, it.modelId)
+                            }
+                            onDragEnd={handleDragEnd}
+                            onDragOver={(event) => {
+                              if (!isReadOnly && draggedItem) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                event.dataTransfer.dropEffect = "move";
+                              }
+                            }}
+                            onDrop={(event) =>
+                              handleDropOnModel(event, r.id, idx)
+                            }
+                            className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all ${
+                              !isReadOnly
+                                ? "cursor-grab active:cursor-grabbing"
+                                : ""
+                            }`}
                           >
                             <div className="flex-1 min-w-0">
                               <div className="font-semibold text-sm sm:text-lg text-slate-900 truncate">
