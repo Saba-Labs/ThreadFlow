@@ -528,7 +528,7 @@ export default function RoadmapPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => setEditingTitleId(null)}
-                          className="h-10"
+                          className="h-10 text-slate-700 bg-white border-slate-300 hover:bg-slate-100 hover:text-slate-900"
                         >
                           <X className="h-4 w-4" />
                         </Button>
