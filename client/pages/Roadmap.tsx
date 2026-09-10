@@ -5,8 +5,6 @@ import {
   Trash2,
   Plus,
   Pencil,
-  ChevronUp,
-  ChevronDown,
   ArrowRight,
   X,
   Check,
@@ -659,36 +657,6 @@ export default function RoadmapPage() {
                                     size="icon"
                                     variant="ghost"
                                     onClick={() =>
-                                      moveModelWithinRoadmap(
-                                        r.id,
-                                        it.modelId,
-                                        idx - 1,
-                                      )
-                                    }
-                                    disabled={idx === 0}
-                                    className="h-8 w-8 hover:bg-slate-100"
-                                  >
-                                    <ChevronUp className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() =>
-                                      moveModelWithinRoadmap(
-                                        r.id,
-                                        it.modelId,
-                                        idx + 1,
-                                      )
-                                    }
-                                    disabled={idx === r.items.length - 1}
-                                    className="h-8 w-8 hover:bg-slate-100"
-                                  >
-                                    <ChevronDown className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() =>
                                       setMoveItem({
                                         fromRoadmapId: r.id,
                                         modelId: it.modelId,
@@ -795,7 +763,7 @@ export default function RoadmapPage() {
                   handleAddCustomModel();
                 }
               }}
-              className="h-10 w-20"
+              className="no-number-spinner h-10 w-20"
             />
             <Button
               size="icon"
