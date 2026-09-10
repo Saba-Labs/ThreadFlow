@@ -758,6 +758,10 @@ export default function RoadmapPage() {
               placeholder="Qty"
               value={customModelQuantity}
               onChange={(e) => setCustomModelQuantity(e.target.value)}
+              onWheel={(e) => {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleAddCustomModel();
