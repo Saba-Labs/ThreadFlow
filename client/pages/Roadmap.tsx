@@ -103,6 +103,10 @@ export default function RoadmapPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteModelConfirm, setDeleteModelConfirm] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
   const [clearModelsConfirmId, setClearModelsConfirmId] = useState<
     string | null
   >(null);
@@ -670,7 +674,10 @@ export default function RoadmapPage() {
                                     size="icon"
                                     variant="ghost"
                                     onClick={() =>
-                                      removeModelFromRoadmap(r.id, it.modelId)
+                                      setDeleteModelConfirm({
+                                        roadmapId: r.id,
+                                        modelId: it.modelId,
+                                      })
                                     }
                                     className="h-8 w-8 hover:bg-red-50 text-red-600"
                                   >
@@ -972,6 +979,44 @@ export default function RoadmapPage() {
             </div>
           )}
         </div>
+      </SimpleModal>
+
+      {/* Delete Model Confirmation Modal */}
+      <SimpleModal
+        open={deleteModelConfirm !== null && !isReadOnly}
+        onOpenChange={(v: boolean) => !v && setDeleteModelConfirm(null)}
+        title="Delete Model"
+        footer={
+          <div className="flex items-center gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteModelConfirm(null)}
+              className="flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleteModelConfirm) {
+                  removeModelFromRoadmap(
+                    deleteModelConfirm.roadmapId,
+                    deleteModelConfirm.modelId,
+                  );
+                }
+                setDeleteModelConfirm(null);
+              }}
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-sm text-slate-600">
+          Are you sure you want to remove this model from the roadmap? This
+          action cannot be undone.
+        </p>
       </SimpleModal>
 
       {/* Clear Models Confirmation Modal */}
