@@ -111,6 +111,7 @@ export default function RoadmapPage() {
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
+  const [customModelQuantity, setCustomModelQuantity] = useState("1");
   const [draggedItem, setDraggedItem] = useState<{
     roadmapId: string;
     modelId: string;
@@ -161,6 +162,7 @@ export default function RoadmapPage() {
     setSelectedModels([]);
     setAddModelsSearch("");
     setCustomModelInput("");
+    setCustomModelQuantity("1");
     setOpenFor(roadmapId);
   };
 
@@ -194,13 +196,21 @@ export default function RoadmapPage() {
   };
 
   const handleAddCustomModel = async () => {
-    if (!openFor || !customModelInput.trim()) return;
+    const quantity = Number.parseInt(customModelQuantity, 10);
+    if (
+      !openFor ||
+      !customModelInput.trim() ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    )
+      return;
 
     try {
       const modelName = customModelInput.trim();
       const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      await addModelToRoadmap(openFor, customModelId, modelName, 1);
+      await addModelToRoadmap(openFor, customModelId, modelName, quantity);
       setCustomModelInput("");
+      setCustomModelQuantity("1");
     } catch (error) {
       console.error("Error adding custom model to roadmap:", error);
     }
@@ -725,6 +735,7 @@ export default function RoadmapPage() {
             setOpenFor(null);
             setAddModelsSearch("");
             setCustomModelInput("");
+            setCustomModelQuantity("1");
           }
         }}
         title="Add Models"
@@ -736,6 +747,7 @@ export default function RoadmapPage() {
                 setOpenFor(null);
                 setAddModelsSearch("");
                 setCustomModelInput("");
+                setCustomModelQuantity("1");
               }}
               className="flex-1 sm:flex-none"
             >
@@ -770,11 +782,30 @@ export default function RoadmapPage() {
               }}
               className="h-10 flex-1"
             />
+            <Input
+              type="number"
+              min="1"
+              step="1"
+              aria-label="Custom model quantity"
+              placeholder="Qty"
+              value={customModelQuantity}
+              onChange={(e) => setCustomModelQuantity(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddCustomModel();
+                }
+              }}
+              className="h-10 w-20"
+            />
             <Button
               size="icon"
               variant="outline"
               onClick={handleAddCustomModel}
-              disabled={!customModelInput.trim()}
+              disabled={
+                !customModelInput.trim() ||
+                !Number.isInteger(Number.parseInt(customModelQuantity, 10)) ||
+                Number.parseInt(customModelQuantity, 10) < 1
+              }
               className="h-10 w-10 border-green-300 hover:bg-green-50 text-green-600"
               title="Add custom model"
             >
@@ -783,7 +814,10 @@ export default function RoadmapPage() {
             <Button
               size="icon"
               variant="outline"
-              onClick={() => setCustomModelInput("")}
+              onClick={() => {
+                setCustomModelInput("");
+                setCustomModelQuantity("1");
+              }}
               className="h-10 w-10 border-red-300 hover:bg-red-50 text-red-600"
               title="Clear input"
             >
