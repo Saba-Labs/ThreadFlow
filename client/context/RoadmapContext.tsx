@@ -153,6 +153,42 @@ export function useRoadmaps() {
     [],
   );
 
+  const updateModelPhoto = useCallback(
+    async (roadmapId: string, modelId: string, photoUrl: string | null) => {
+      const previousStore = STORE;
+      STORE = STORE.map((roadmap) =>
+        roadmap.id === roadmapId
+          ? {
+              ...roadmap,
+              items: roadmap.items.map((item) =>
+                item.modelId === modelId
+                  ? { ...item, photoUrl: photoUrl || undefined }
+                  : item,
+              ),
+            }
+          : roadmap,
+      );
+      notifySubscribers();
+
+      try {
+        await fetchWithTimeout(
+          `/api/roadmaps/${roadmapId}/models/${modelId}/photo`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ photoUrl }),
+          },
+        );
+      } catch (error) {
+        STORE = previousStore;
+        notifySubscribers();
+        console.error("Error updating roadmap model photo:", error);
+        throw error;
+      }
+    },
+    [],
+  );
+
   const removeModelFromRoadmap = useCallback(
     async (roadmapId: string, modelId: string) => {
       try {
@@ -281,6 +317,7 @@ export function useRoadmaps() {
     deleteRoadmap,
     renameRoadmap,
     addModelToRoadmap,
+    updateModelPhoto,
     removeModelFromRoadmap,
     moveModelWithinRoadmap,
     moveModelToRoadmap,

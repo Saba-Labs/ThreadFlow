@@ -195,6 +195,30 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
   }
 };
 
+export const updateRoadmapModelPhoto: RequestHandler = async (req, res) => {
+  try {
+    const { roadmapId, modelId } = req.params;
+    const { photoUrl } = req.body;
+
+    if (photoUrl !== null && typeof photoUrl !== "string") {
+      return res
+        .status(400)
+        .json({ error: "photoUrl must be a string or null" });
+    }
+
+    await query(
+      "UPDATE roadmap_items SET photo_url = $1, updated_at = $2 WHERE roadmap_id = $3 AND model_id = $4",
+      [photoUrl || null, Date.now(), roadmapId, modelId],
+    );
+
+    broadcastChange({ type: "roadmaps_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating roadmap model photo:", error);
+    res.status(500).json({ error: "Failed to update roadmap model photo" });
+  }
+};
+
 export const removeModelFromRoadmap: RequestHandler = async (req, res) => {
   try {
     const { roadmapId, modelId } = req.params;

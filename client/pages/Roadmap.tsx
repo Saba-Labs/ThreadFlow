@@ -12,6 +12,7 @@ import {
   Monitor,
   Share2,
   Eraser,
+  ImagePlus,
 } from "lucide-react";
 import {
   Fragment,
@@ -69,6 +70,7 @@ export default function RoadmapPage() {
     addModelToRoadmap,
     moveModelWithinRoadmap,
     moveModelToRoadmap,
+    updateModelPhoto,
     refreshRoadmaps,
   } = useRoadmaps();
 
@@ -129,6 +131,7 @@ export default function RoadmapPage() {
     roadmapId: string;
     index: number;
   } | null>(null);
+  const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -166,6 +169,25 @@ export default function RoadmapPage() {
     setCustomModelInput("");
     setCustomModelQuantity("1");
     setOpenFor(roadmapId);
+  };
+
+  const handlePhotoFile = (
+    file: File | undefined,
+    roadmapId: string,
+    modelId: string,
+  ) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    if (file.size > 2 * 1024 * 1024) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        void updateModelPhoto(roadmapId, modelId, reader.result).catch(
+          (error) => console.error("Error saving roadmap model photo:", error),
+        );
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const toggleModelSelection = (id: string) => {
@@ -652,17 +674,90 @@ export default function RoadmapPage() {
                                   : ""
                               }`}
                             >
-                              {it.photoUrl ? (
-                                <img
-                                  src={it.photoUrl}
-                                  alt=""
-                                  className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200 flex-shrink-0"
-                                />
-                              ) : (
-                                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-xs flex-shrink-0">
-                                  No photo
-                                </div>
-                              )}
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                {it.photoUrl ? (
+                                  <img
+                                    src={it.photoUrl}
+                                    alt={`${it.modelName} preview`}
+                                    className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
+                                  />
+                                ) : (
+                                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-xs">
+                                    No photo
+                                  </div>
+                                )}
+                                {!isReadOnly && (
+                                  <div className="flex flex-col gap-1">
+                                    <input
+                                      ref={(element) => {
+                                        photoInputRefs.current[
+                                          `${r.id}:${it.modelId}`
+                                        ] = element;
+                                      }}
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(event) => {
+                                        handlePhotoFile(
+                                          event.target.files?.[0],
+                                          r.id,
+                                          it.modelId,
+                                        );
+                                        event.currentTarget.value = "";
+                                      }}
+                                    />
+                                    <Button
+                                      type="button"
+                                      size="icon"
+                                      variant="ghost"
+                                      aria-label={
+                                        it.photoUrl
+                                          ? "Replace photo"
+                                          : "Add photo"
+                                      }
+                                      title={
+                                        it.photoUrl
+                                          ? "Replace photo"
+                                          : "Add photo"
+                                      }
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        photoInputRefs.current[
+                                          `${r.id}:${it.modelId}`
+                                        ]?.click();
+                                      }}
+                                      className="h-7 w-7 text-blue-600 hover:bg-blue-50"
+                                    >
+                                      <ImagePlus className="h-4 w-4" />
+                                    </Button>
+                                    {it.photoUrl && (
+                                      <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        aria-label="Remove photo"
+                                        title="Remove photo"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          void updateModelPhoto(
+                                            r.id,
+                                            it.modelId,
+                                            null,
+                                          ).catch((error) =>
+                                            console.error(
+                                              "Error removing roadmap model photo:",
+                                              error,
+                                            ),
+                                          );
+                                        }}
+                                        className="h-7 w-7 text-red-600 hover:bg-red-50"
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-sm sm:text-lg text-slate-900 truncate">
                                   {it.modelName}{" "}
