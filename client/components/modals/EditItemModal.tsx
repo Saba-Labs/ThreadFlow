@@ -19,6 +19,7 @@ interface EditItemModalProps {
   lowStock: number;
   note: string;
   category?: string;
+  categories: string[];
   subItems: SubItem[];
   hasSubItems: boolean;
   onSubmit: (
@@ -44,6 +45,7 @@ export default function EditItemModal({
   lowStock,
   note,
   category,
+  categories,
   subItems,
   hasSubItems,
   onSubmit,
@@ -279,6 +281,24 @@ export default function EditItemModal({
               value={editingCategory}
               onChange={(e) => setEditingCategory(e.target.value)}
             />
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {categories.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setEditingCategory(option)}
+                    className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                      editingCategory === option
+                        ? "border-blue-600 bg-blue-100 text-blue-700"
+                        : "border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-300 hover:bg-blue-50"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

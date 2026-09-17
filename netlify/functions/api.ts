@@ -33,6 +33,7 @@ import {
   updateRoadmap,
   deleteRoadmap,
   addModelToRoadmap,
+  updateRoadmapModelPhoto,
   removeModelFromRoadmap,
   reorderRoadmapItems,
   moveModelBetweenRoadmaps,
@@ -134,6 +135,10 @@ function initializeHandler() {
   app.put("/api/roadmaps/:id", updateRoadmap);
   app.delete("/api/roadmaps/:id", deleteRoadmap);
   app.post("/api/roadmaps/:roadmapId/models", addModelToRoadmap);
+  app.patch(
+    "/api/roadmaps/:roadmapId/models/:modelId/photo",
+    updateRoadmapModelPhoto,
+  );
   app.delete(
     "/api/roadmaps/:roadmapId/models/:modelId",
     removeModelFromRoadmap,

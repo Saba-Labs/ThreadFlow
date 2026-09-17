@@ -15,6 +15,7 @@ export default function NewModel() {
             await pipeline.createWorkOrder({
               modelName: data.modelName,
               quantity: data.quantity,
+              photoUrl: data.photoUrl,
               createdAt: data.createdAt,
               path: data.path as any,
             });

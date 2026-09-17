@@ -18,13 +18,16 @@ interface AddItemModalProps {
     lowStock: number,
     subItems: SubItem[],
     note: string,
+    category: string,
   ) => void | Promise<void>;
+  categories: string[];
 }
 
 export default function AddItemModal({
   open,
   onOpenChange,
   onSubmit,
+  categories,
 }: AddItemModalProps) {
   const [itemName, setItemName] = useState("");
   const [lowStock, setLowStock] = useState(0);
@@ -136,6 +139,24 @@ export default function AddItemModal({
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             />
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {categories.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setCategory(option)}
+                    className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                      category === option
+                        ? "border-blue-600 bg-blue-100 text-blue-700"
+                        : "border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-300 hover:bg-blue-50"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

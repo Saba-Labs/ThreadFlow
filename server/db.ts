@@ -124,6 +124,7 @@ export async function initializeDatabase() {
         id TEXT PRIMARY KEY,
         model_name TEXT NOT NULL,
         quantity INTEGER NOT NULL,
+        photo_url TEXT,
         created_at BIGINT NOT NULL,
         updated_at BIGINT NOT NULL,
         current_step_index INTEGER NOT NULL,
@@ -157,6 +158,8 @@ export async function initializeDatabase() {
         machine_index INTEGER NOT NULL
       );
 
+      ALTER TABLE IF EXISTS work_orders ADD COLUMN IF NOT EXISTS photo_url TEXT;
+
       CREATE TABLE IF NOT EXISTS roadmaps (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -170,11 +173,14 @@ export async function initializeDatabase() {
         model_id TEXT NOT NULL,
         model_name TEXT NOT NULL,
         quantity INTEGER NOT NULL,
+        photo_url TEXT,
         added_at BIGINT NOT NULL,
         item_index INTEGER NOT NULL,
         created_at BIGINT NOT NULL,
         updated_at BIGINT NOT NULL
       );
+
+      ALTER TABLE IF EXISTS roadmap_items ADD COLUMN IF NOT EXISTS photo_url TEXT;
 
       CREATE INDEX IF NOT EXISTS idx_restok_sub_items_item_id ON restok_sub_items(item_id);
       CREATE INDEX IF NOT EXISTS idx_path_steps_order_id ON path_steps(order_id);

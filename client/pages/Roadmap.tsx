@@ -5,16 +5,23 @@ import {
   Trash2,
   Plus,
   Pencil,
-  ChevronUp,
-  ChevronDown,
   ArrowRight,
   X,
   Check,
   Map,
+  Monitor,
   Share2,
   Eraser,
+  ImagePlus,
 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import {
+  Fragment,
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  type DragEvent,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -63,11 +70,24 @@ export default function RoadmapPage() {
     addModelToRoadmap,
     moveModelWithinRoadmap,
     moveModelToRoadmap,
+    updateModelPhoto,
+    refreshRoadmaps,
   } = useRoadmaps();
 
   const pipeline = useProductionPipeline();
   const [searchParams] = useSearchParams();
   const isShared = searchParams.get("shared") === "true";
+  const isDisplayMode = searchParams.get("display") === "true";
+  const isReadOnly = isShared || isDisplayMode;
+
+  useEffect(() => {
+    if (!isDisplayMode) return;
+    void refreshRoadmaps();
+    const interval = window.setInterval(() => {
+      void refreshRoadmaps();
+    }, 30_000);
+    return () => window.clearInterval(interval);
+  }, [isDisplayMode, refreshRoadmaps]);
 
   useSwipeNavigation({
     leftPage: "/restok",
@@ -85,12 +105,33 @@ export default function RoadmapPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoadmapTitle, setNewRoadmapTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteModelConfirm, setDeleteModelConfirm] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
   const [clearModelsConfirmId, setClearModelsConfirmId] = useState<
     string | null
   >(null);
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
+  const [customModelQuantity, setCustomModelQuantity] = useState("1");
+  const [draggedItem, setDraggedItem] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
+  const [dragOverRoadmapId, setDragOverRoadmapId] = useState<string | null>(
+    null,
+  );
+  const [dropTarget, setDropTarget] = useState<{
+    roadmapId: string;
+    index: number;
+  } | null>(null);
+  const dropTargetRef = useRef<{
+    roadmapId: string;
+    index: number;
+  } | null>(null);
+  const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -126,7 +167,27 @@ export default function RoadmapPage() {
     setSelectedModels([]);
     setAddModelsSearch("");
     setCustomModelInput("");
+    setCustomModelQuantity("1");
     setOpenFor(roadmapId);
+  };
+
+  const handlePhotoFile = (
+    file: File | undefined,
+    roadmapId: string,
+    modelId: string,
+  ) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    if (file.size > 2 * 1024 * 1024) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        void updateModelPhoto(roadmapId, modelId, reader.result).catch(
+          (error) => console.error("Error saving roadmap model photo:", error),
+        );
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const toggleModelSelection = (id: string) => {
@@ -145,7 +206,13 @@ export default function RoadmapPage() {
       for (const id of selectedModels) {
         const order = eligibleOrders.find((o) => o.id === id);
         if (order) {
-          await addModelToRoadmap(openFor, id, order.modelName, order.quantity);
+          await addModelToRoadmap(
+            openFor,
+            id,
+            order.modelName,
+            order.quantity,
+            order.photoUrl,
+          );
         }
       }
 
@@ -159,13 +226,21 @@ export default function RoadmapPage() {
   };
 
   const handleAddCustomModel = async () => {
-    if (!openFor || !customModelInput.trim()) return;
+    const quantity = Number.parseInt(customModelQuantity, 10);
+    if (
+      !openFor ||
+      !customModelInput.trim() ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    )
+      return;
 
     try {
       const modelName = customModelInput.trim();
       const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      await addModelToRoadmap(openFor, customModelId, modelName, 1);
+      await addModelToRoadmap(openFor, customModelId, modelName, quantity);
       setCustomModelInput("");
+      setCustomModelQuantity("1");
     } catch (error) {
       console.error("Error adding custom model to roadmap:", error);
     }
@@ -179,6 +254,11 @@ export default function RoadmapPage() {
     setEditingTitleId(null);
   };
 
+  const openDisplayMode = () => {
+    const displayUrl = `${window.location.origin}${window.location.pathname}?display=true`;
+    window.open(displayUrl, "_blank", "noopener,noreferrer");
+  };
+
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}${window.location.pathname}?shared=true`;
     try {
@@ -187,6 +267,141 @@ export default function RoadmapPage() {
       setTimeout(() => setShareToast(false), 3000);
     } catch (err) {
       console.error("Failed to copy to clipboard:", err);
+    }
+  };
+
+  const handleDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+    modelId: string,
+  ) => {
+    if (isReadOnly) return;
+    setDraggedItem({ roadmapId, modelId });
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", modelId);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverRoadmapId(null);
+    setDropTarget(null);
+    dropTargetRef.current = null;
+  };
+
+  const handleDropOnRoadmap = async (
+    event: DragEvent<HTMLDivElement>,
+    toRoadmapId: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!draggedItem || isReadOnly) {
+      handleDragEnd();
+      return;
+    }
+
+    const activeTarget = dropTargetRef.current;
+
+    try {
+      if (
+        draggedItem.roadmapId === toRoadmapId &&
+        activeTarget?.roadmapId === toRoadmapId
+      ) {
+        const sourceIndex = roadmaps
+          .find((roadmap) => roadmap.id === toRoadmapId)
+          ?.items.findIndex((item) => item.modelId === draggedItem.modelId);
+        const adjustedIndex =
+          typeof sourceIndex === "number" && sourceIndex < activeTarget.index
+            ? activeTarget.index - 1
+            : activeTarget.index;
+        if (sourceIndex !== adjustedIndex) {
+          await moveModelWithinRoadmap(
+            toRoadmapId,
+            draggedItem.modelId,
+            adjustedIndex,
+          );
+        }
+      } else if (draggedItem.roadmapId !== toRoadmapId) {
+        await moveModelToRoadmap(
+          draggedItem.roadmapId,
+          toRoadmapId,
+          draggedItem.modelId,
+          activeTarget?.roadmapId === toRoadmapId
+            ? activeTarget.index
+            : undefined,
+        );
+      }
+    } finally {
+      handleDragEnd();
+    }
+  };
+
+  const handleDragOverModel = (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+    index: number,
+  ) => {
+    if (isReadOnly || !draggedItem) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "move";
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const targetIndex =
+      event.clientY < bounds.top + bounds.height / 2 ? index : index + 1;
+    setDragOverRoadmapId(roadmapId);
+    const nextTarget = { roadmapId, index: targetIndex };
+    dropTargetRef.current = nextTarget;
+    setDropTarget(nextTarget);
+  };
+
+  const handleDropOnModel = async (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+    targetIndex: number,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!draggedItem || isReadOnly) {
+      handleDragEnd();
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const fallbackIndex =
+      event.clientY < bounds.top + bounds.height / 2
+        ? targetIndex
+        : targetIndex + 1;
+    const activeTarget = dropTargetRef.current;
+    const insertionIndex =
+      activeTarget?.roadmapId === roadmapId
+        ? activeTarget.index
+        : fallbackIndex;
+
+    try {
+      if (draggedItem.roadmapId === roadmapId) {
+        const sourceIndex = roadmaps
+          .find((roadmap) => roadmap.id === roadmapId)
+          ?.items.findIndex((item) => item.modelId === draggedItem.modelId);
+        const adjustedIndex =
+          typeof sourceIndex === "number" && sourceIndex < insertionIndex
+            ? insertionIndex - 1
+            : insertionIndex;
+        if (sourceIndex !== adjustedIndex) {
+          await moveModelWithinRoadmap(
+            roadmapId,
+            draggedItem.modelId,
+            adjustedIndex,
+          );
+        }
+      } else {
+        await moveModelToRoadmap(
+          draggedItem.roadmapId,
+          roadmapId,
+          draggedItem.modelId,
+          insertionIndex,
+        );
+      }
+    } finally {
+      handleDragEnd();
     }
   };
 
@@ -201,7 +416,13 @@ export default function RoadmapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 -ml-[calc((100vw-100%)/2)] w-screen">
+    <div
+      className={`min-h-screen -ml-[calc((100vw-100%)/2)] w-screen ${
+        isDisplayMode
+          ? "bg-slate-950 text-white"
+          : "bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50"
+      }`}
+    >
       <div className="w-full">
         {/* Header */}
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 lg:p-8">
@@ -215,38 +436,51 @@ export default function RoadmapPage() {
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
                     Roadmaps
                   </h1>
-                  {isShared && (
+                  {isReadOnly && (
                     <span className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-800">
-                      Shared View
+                      {isDisplayMode ? "TV Display" : "Shared View"}
                     </span>
                   )}
                 </div>
-                <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
+                <p
+                  className={`text-xs sm:text-sm mt-0.5 ${isDisplayMode ? "text-slate-300" : "text-slate-600"}`}
+                >
                   {roadmaps.length} active roadmap
                   {roadmaps.length !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                onClick={handleShare}
-                variant="outline"
-                className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
-                title="Copy share link to clipboard"
-              >
-                <Share2 className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Share</span>
-              </Button>
-              {!isShared && (
+            {!isDisplayMode && (
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Button
-                  onClick={handleAddRoadmap}
-                  className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
+                  onClick={openDisplayMode}
+                  variant="outline"
+                  className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
+                  title="Open TV display"
                 >
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Add Roadmap</span>
+                  <Monitor className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">TV Display</span>
                 </Button>
-              )}
-            </div>
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
+                  title="Copy share link to clipboard"
+                >
+                  <Share2 className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Share</span>
+                </Button>
+                {!isReadOnly && (
+                  <Button
+                    onClick={handleAddRoadmap}
+                    className="h-10 sm:h-11 px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 shadow-md"
+                  >
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Add Roadmap</span>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
           {shareToast && (
             <div className="mt-3 p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-800">
@@ -288,7 +522,17 @@ export default function RoadmapPage() {
               {roadmaps.map((r) => (
                 <Card
                   key={r.id}
-                  className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                  className={`overflow-hidden shadow-lg hover:shadow-xl transition-shadow ${
+                    dragOverRoadmapId === r.id ? "ring-2 ring-blue-400" : ""
+                  }`}
+                  onDragOver={(event) => {
+                    if (!isReadOnly && draggedItem) {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "move";
+                      setDragOverRoadmapId(r.id);
+                    }
+                  }}
+                  onDrop={(event) => handleDropOnRoadmap(event, r.id)}
                 >
                   <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
                     {editingTitleId === r.id ? (
@@ -316,7 +560,7 @@ export default function RoadmapPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => setEditingTitleId(null)}
-                          className="h-10"
+                          className="h-10 text-slate-700 bg-white border-slate-300 hover:bg-slate-100 hover:text-slate-900"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -330,7 +574,7 @@ export default function RoadmapPage() {
                           <div
                             className="flex-1 min-w-0 cursor-pointer group"
                             onClick={() =>
-                              !isShared &&
+                              !isReadOnly &&
                               (setEditingTitleId(r.id), setTitleDraft(r.title))
                             }
                           >
@@ -344,7 +588,7 @@ export default function RoadmapPage() {
                           </div>
                         </div>
 
-                        {!isShared && (
+                        {!isReadOnly && (
                           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                             <Button
                               size="sm"
@@ -388,7 +632,7 @@ export default function RoadmapPage() {
                         <div className="text-sm text-slate-600 mb-3">
                           No models added yet
                         </div>
-                        {!isShared && (
+                        {!isReadOnly && (
                           <Button
                             size="sm"
                             onClick={() => openAddModels(r.id)}
@@ -402,78 +646,164 @@ export default function RoadmapPage() {
                     ) : (
                       <div className="space-y-2">
                         {r.items.map((it, idx) => (
-                          <div
-                            key={`${r.id}-${it.modelId}-${idx}`}
-                            className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-sm sm:text-lg text-slate-900 truncate">
-                                {it.modelName}{" "}
-                                <span className="text-slate-400 font-normal">
-                                  ({it.quantity})
-                                </span>
+                          <Fragment key={`${r.id}-${it.modelId}-${idx}`}>
+                            {dropTarget?.roadmapId === r.id &&
+                              dropTarget.index === idx &&
+                              draggedItem?.modelId !== it.modelId && (
+                                <div className="h-1 rounded-full bg-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.15)] transition-all duration-150" />
+                              )}
+                            <div
+                              draggable={!isReadOnly}
+                              onDragStart={(event) =>
+                                handleDragStart(event, r.id, it.modelId)
+                              }
+                              onDragEnd={handleDragEnd}
+                              onDragOver={(event) =>
+                                handleDragOverModel(event, r.id, idx)
+                              }
+                              onDrop={(event) =>
+                                handleDropOnModel(event, r.id, idx)
+                              }
+                              className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all duration-150 ${
+                                !isReadOnly
+                                  ? "cursor-grab active:cursor-grabbing"
+                                  : ""
+                              } ${
+                                draggedItem?.modelId === it.modelId
+                                  ? "scale-[0.98] opacity-40 shadow-inner"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                {it.photoUrl ? (
+                                  <img
+                                    src={it.photoUrl}
+                                    alt={`${it.modelName} preview`}
+                                    className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
+                                  />
+                                ) : (
+                                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-xs">
+                                    No photo
+                                  </div>
+                                )}
+                                {!isReadOnly && (
+                                  <div className="flex flex-col gap-1">
+                                    <input
+                                      ref={(element) => {
+                                        photoInputRefs.current[
+                                          `${r.id}:${it.modelId}`
+                                        ] = element;
+                                      }}
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(event) => {
+                                        handlePhotoFile(
+                                          event.target.files?.[0],
+                                          r.id,
+                                          it.modelId,
+                                        );
+                                        event.currentTarget.value = "";
+                                      }}
+                                    />
+                                    <Button
+                                      type="button"
+                                      size="icon"
+                                      variant="ghost"
+                                      aria-label={
+                                        it.photoUrl
+                                          ? "Replace photo"
+                                          : "Add photo"
+                                      }
+                                      title={
+                                        it.photoUrl
+                                          ? "Replace photo"
+                                          : "Add photo"
+                                      }
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        photoInputRefs.current[
+                                          `${r.id}:${it.modelId}`
+                                        ]?.click();
+                                      }}
+                                      className="h-7 w-7 text-blue-600 hover:bg-blue-50"
+                                    >
+                                      <ImagePlus className="h-4 w-4" />
+                                    </Button>
+                                    {it.photoUrl && (
+                                      <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        aria-label="Remove photo"
+                                        title="Remove photo"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          void updateModelPhoto(
+                                            r.id,
+                                            it.modelId,
+                                            null,
+                                          ).catch((error) =>
+                                            console.error(
+                                              "Error removing roadmap model photo:",
+                                              error,
+                                            ),
+                                          );
+                                        }}
+                                        className="h-7 w-7 text-red-600 hover:bg-red-50"
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                            </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-sm sm:text-lg text-slate-900 truncate">
+                                  {it.modelName}{" "}
+                                  <span className="text-slate-400 font-normal">
+                                    ({it.quantity})
+                                  </span>
+                                </div>
+                              </div>
 
-                            {!isShared && (
-                              <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    moveModelWithinRoadmap(
-                                      r.id,
-                                      it.modelId,
-                                      idx - 1,
-                                    )
-                                  }
-                                  disabled={idx === 0}
-                                  className="h-8 w-8 hover:bg-slate-100"
-                                >
-                                  <ChevronUp className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    moveModelWithinRoadmap(
-                                      r.id,
-                                      it.modelId,
-                                      idx + 1,
-                                    )
-                                  }
-                                  disabled={idx === r.items.length - 1}
-                                  className="h-8 w-8 hover:bg-slate-100"
-                                >
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    setMoveItem({
-                                      fromRoadmapId: r.id,
-                                      modelId: it.modelId,
-                                    })
-                                  }
-                                  className="h-8 w-8 hover:bg-blue-50 text-blue-600"
-                                >
-                                  <ArrowRight className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() =>
-                                    removeModelFromRoadmap(r.id, it.modelId)
-                                  }
-                                  className="h-8 w-8 hover:bg-red-50 text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          </div>
+                              {!isReadOnly && (
+                                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      setMoveItem({
+                                        fromRoadmapId: r.id,
+                                        modelId: it.modelId,
+                                      })
+                                    }
+                                    className="h-8 w-8 hover:bg-blue-50 text-blue-600"
+                                  >
+                                    <ArrowRight className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      setDeleteModelConfirm({
+                                        roadmapId: r.id,
+                                        modelId: it.modelId,
+                                      })
+                                    }
+                                    className="h-8 w-8 hover:bg-red-50 text-red-600"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </Fragment>
                         ))}
+                        {dropTarget?.roadmapId === r.id &&
+                          dropTarget.index === r.items.length && (
+                            <div className="h-1 rounded-full bg-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.15)] transition-all duration-150" />
+                          )}
                       </div>
                     )}
                   </CardContent>
@@ -486,12 +816,13 @@ export default function RoadmapPage() {
 
       {/* Add Models Modal */}
       <SimpleModal
-        open={openFor !== null && !isShared}
+        open={openFor !== null && !isReadOnly}
         onOpenChange={(v: boolean) => {
           if (!v) {
             setOpenFor(null);
             setAddModelsSearch("");
             setCustomModelInput("");
+            setCustomModelQuantity("1");
           }
         }}
         title="Add Models"
@@ -503,6 +834,7 @@ export default function RoadmapPage() {
                 setOpenFor(null);
                 setAddModelsSearch("");
                 setCustomModelInput("");
+                setCustomModelQuantity("1");
               }}
               className="flex-1 sm:flex-none"
             >
@@ -537,11 +869,34 @@ export default function RoadmapPage() {
               }}
               className="h-10 flex-1"
             />
+            <Input
+              type="number"
+              min="1"
+              step="1"
+              aria-label="Custom model quantity"
+              placeholder="Qty"
+              value={customModelQuantity}
+              onChange={(e) => setCustomModelQuantity(e.target.value)}
+              onWheel={(e) => {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddCustomModel();
+                }
+              }}
+              className="no-number-spinner h-10 w-20"
+            />
             <Button
               size="icon"
               variant="outline"
               onClick={handleAddCustomModel}
-              disabled={!customModelInput.trim()}
+              disabled={
+                !customModelInput.trim() ||
+                !Number.isInteger(Number.parseInt(customModelQuantity, 10)) ||
+                Number.parseInt(customModelQuantity, 10) < 1
+              }
               className="h-10 w-10 border-green-300 hover:bg-green-50 text-green-600"
               title="Add custom model"
             >
@@ -550,7 +905,10 @@ export default function RoadmapPage() {
             <Button
               size="icon"
               variant="outline"
-              onClick={() => setCustomModelInput("")}
+              onClick={() => {
+                setCustomModelInput("");
+                setCustomModelQuantity("1");
+              }}
               className="h-10 w-10 border-red-300 hover:bg-red-50 text-red-600"
               title="Clear input"
             >
@@ -594,7 +952,7 @@ export default function RoadmapPage() {
 
       {/* Create Roadmap Modal */}
       <SimpleModal
-        open={showCreateModal && !isShared}
+        open={showCreateModal && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setShowCreateModal(false)}
         title="Create New Roadmap"
         footer={
@@ -636,7 +994,7 @@ export default function RoadmapPage() {
 
       {/* Move Model Modal */}
       <SimpleModal
-        open={moveItem !== null && !isShared}
+        open={moveItem !== null && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setMoveItem(null)}
         title="Move Model"
         footer={
@@ -695,7 +1053,7 @@ export default function RoadmapPage() {
 
       {/* Delete Confirmation Modal */}
       <SimpleModal
-        open={deleteConfirmId !== null && !isShared}
+        open={deleteConfirmId !== null && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setDeleteConfirmId(null)}
         title="Delete Roadmap"
         footer={
@@ -735,9 +1093,47 @@ export default function RoadmapPage() {
         </div>
       </SimpleModal>
 
+      {/* Delete Model Confirmation Modal */}
+      <SimpleModal
+        open={deleteModelConfirm !== null && !isReadOnly}
+        onOpenChange={(v: boolean) => !v && setDeleteModelConfirm(null)}
+        title="Delete Model"
+        footer={
+          <div className="flex items-center gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteModelConfirm(null)}
+              className="flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleteModelConfirm) {
+                  removeModelFromRoadmap(
+                    deleteModelConfirm.roadmapId,
+                    deleteModelConfirm.modelId,
+                  );
+                }
+                setDeleteModelConfirm(null);
+              }}
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-sm text-slate-600">
+          Are you sure you want to remove this model from the roadmap? This
+          action cannot be undone.
+        </p>
+      </SimpleModal>
+
       {/* Clear Models Confirmation Modal */}
       <SimpleModal
-        open={clearModelsConfirmId !== null && !isShared}
+        open={clearModelsConfirmId !== null && !isReadOnly}
         onOpenChange={(v: boolean) => !v && setClearModelsConfirmId(null)}
         title="Clear All Models"
         footer={

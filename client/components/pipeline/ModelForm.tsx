@@ -42,6 +42,7 @@ export default function ModelForm(props: {
   onCreate: (data: {
     modelName: string;
     quantity: number;
+    photoUrl?: string;
     createdAt: number;
     path: NewPathStep[];
   }) => void;
@@ -50,6 +51,7 @@ export default function ModelForm(props: {
   initialData?: {
     modelName: string;
     quantity: number;
+    photoUrl?: string;
     createdAt: number;
     path: NewPathStep[];
   };
@@ -60,6 +62,7 @@ export default function ModelForm(props: {
   const [modelNamePart2, setModelNamePart2] = useState("");
   const [modelNamePart3, setModelNamePart3] = useState("");
   const [quantity, setQuantity] = useState<number | null>(null);
+  const [photoUrl, setPhotoUrl] = useState("");
   const [dateStr, setDateStr] = useState(() =>
     new Date().toISOString().slice(0, 10),
   );
@@ -78,6 +81,7 @@ export default function ModelForm(props: {
       setModelNamePart2(parsed.part2);
       setModelNamePart3(parsed.part3);
       setQuantity(props.initialData.quantity || null);
+      setPhotoUrl(props.initialData.photoUrl || "");
 
       const timestamp = props.initialData.createdAt;
       const dateValue =
@@ -141,9 +145,22 @@ export default function ModelForm(props: {
     setModelNamePart2("");
     setModelNamePart3("");
     setQuantity(null);
+    setPhotoUrl("");
     setDateStr(new Date().toISOString().slice(0, 10));
     setSelectedMachines(new Set());
     setIncludeJobWork(false);
+  };
+
+  const handlePhotoChange = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    if (file.size > 2 * 1024 * 1024) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") setPhotoUrl(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const submit = () => {
@@ -161,6 +178,7 @@ export default function ModelForm(props: {
     props.onCreate({
       modelName: fullModelName,
       quantity: quantityValue,
+      photoUrl: photoUrl || undefined,
       createdAt: new Date(dateStr).getTime(),
       path,
     });
@@ -201,6 +219,24 @@ export default function ModelForm(props: {
               placeholder="e.g., Spl (optional)"
             />
           </div>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Model photo</label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handlePhotoChange(e.target.files?.[0])}
+          />
+          {photoUrl && (
+            <img
+              src={photoUrl}
+              alt="Model preview"
+              className="h-20 w-20 rounded-lg object-cover border"
+            />
+          )}
+          <p className="text-xs text-muted-foreground">
+            Image files up to 2 MB.
+          </p>
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Quantity</label>

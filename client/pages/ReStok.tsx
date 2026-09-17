@@ -246,6 +246,18 @@ export default function ReStok() {
     return currentItems.filter((item) => item.name.toLowerCase().includes(q));
   }, [items, draftItems, editMode, localQuery]);
 
+  const availableCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          items
+            .map((item) => String(item.category || "").trim())
+            .filter(Boolean),
+        ),
+      ).sort((a, b) => a.localeCompare(b)),
+    [items],
+  );
+
   const displayItems = useMemo(() => {
     return reorderMode && reorderDraftIds
       ? (reorderDraftIds
@@ -698,6 +710,7 @@ export default function ReStok() {
         open={showAddItemModal}
         onOpenChange={setShowAddItemModal}
         onSubmit={addItem}
+        categories={availableCategories}
       />
 
       {editingItemId && (
@@ -708,6 +721,7 @@ export default function ReStok() {
           lowStock={getItem(editingItemId)?.lowStock || 0}
           note={getItem(editingItemId)?.note || ""}
           category={getItem(editingItemId)?.category || ""}
+          categories={availableCategories}
           subItems={getItem(editingItemId)?.subItems || []}
           hasSubItems={(getItem(editingItemId)?.subItems.length || 0) > 0}
           onSubmit={(name, lowStock, note, category) => {

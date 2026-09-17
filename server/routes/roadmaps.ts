@@ -15,7 +15,7 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
     const roadmaps = await Promise.all(
       roadmapsResult.rows.map(async (roadmap: any) => {
         const itemsResult = await query(
-          "SELECT id, model_id, model_name, quantity, added_at FROM roadmap_items WHERE roadmap_id = $1 ORDER BY item_index ASC",
+          "SELECT id, model_id, model_name, quantity, photo_url, added_at FROM roadmap_items WHERE roadmap_id = $1 ORDER BY item_index ASC",
           [roadmap.id],
         );
         return {
@@ -26,6 +26,7 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
             modelId: item.model_id,
             modelName: item.model_name,
             quantity: item.quantity,
+            photoUrl: item.photo_url || undefined,
             addedAt: item.added_at,
           })),
         };
@@ -109,7 +110,7 @@ export const deleteRoadmap: RequestHandler = async (req, res) => {
 export const addModelToRoadmap: RequestHandler = async (req, res) => {
   try {
     const { roadmapId } = req.params;
-    const { modelId, modelName, quantity } = req.body;
+    const { modelId, modelName, quantity, photoUrl } = req.body;
 
     console.log("[addModelToRoadmap] Called with:", {
       roadmapId,
@@ -167,13 +168,14 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
     });
 
     await query(
-      "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+      "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, photo_url, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
       [
         itemId,
         roadmapId,
         modelId,
         modelName,
         quantity,
+        photoUrl || null,
         now,
         nextIndex,
         now,
@@ -186,12 +188,34 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("[addModelToRoadmap] Error occurred:", error);
-    res
-      .status(500)
-      .json({
-        error: "Failed to add model to roadmap",
-        details: String(error),
-      });
+    res.status(500).json({
+      error: "Failed to add model to roadmap",
+      details: String(error),
+    });
+  }
+};
+
+export const updateRoadmapModelPhoto: RequestHandler = async (req, res) => {
+  try {
+    const { roadmapId, modelId } = req.params;
+    const { photoUrl } = req.body;
+
+    if (photoUrl !== null && typeof photoUrl !== "string") {
+      return res
+        .status(400)
+        .json({ error: "photoUrl must be a string or null" });
+    }
+
+    await query(
+      "UPDATE roadmap_items SET photo_url = $1, updated_at = $2 WHERE roadmap_id = $3 AND model_id = $4",
+      [photoUrl || null, Date.now(), roadmapId, modelId],
+    );
+
+    broadcastChange({ type: "roadmaps_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating roadmap model photo:", error);
+    res.status(500).json({ error: "Failed to update roadmap model photo" });
   }
 };
 
@@ -240,7 +264,7 @@ export const reorderRoadmapItems: RequestHandler = async (req, res) => {
 
 export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
   try {
-    const { fromRoadmapId, toRoadmapId, modelId } = req.body;
+    const { fromRoadmapId, toRoadmapId, modelId, toIndex } = req.body;
 
     if (!fromRoadmapId || !toRoadmapId || !modelId) {
       return res.status(400).json({
@@ -250,7 +274,7 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
 
     // Get the item to move
     const itemResult = await query(
-      "SELECT model_name, quantity FROM roadmap_items WHERE roadmap_id = $1 AND model_id = $2",
+      "SELECT model_name, quantity, photo_url FROM roadmap_items WHERE roadmap_id = $1 AND model_id = $2",
       [fromRoadmapId, modelId],
     );
 
@@ -260,7 +284,7 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
         .json({ error: "Model not found in source roadmap" });
     }
 
-    const { model_name, quantity } = itemResult.rows[0];
+    const { model_name, quantity, photo_url } = itemResult.rows[0];
 
     // Check if already exists in destination
     const existsResult = await query(
@@ -275,12 +299,15 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
         [fromRoadmapId, modelId],
       );
     } else {
-      // Get next index in destination
-      const indexResult = await query(
-        "SELECT MAX(item_index) as max_index FROM roadmap_items WHERE roadmap_id = $1",
+      const countResult = await query(
+        "SELECT COUNT(*)::int as count FROM roadmap_items WHERE roadmap_id = $1",
         [toRoadmapId],
       );
-      const nextIndex = (indexResult.rows[0]?.max_index ?? -1) + 1;
+      const itemCount = countResult.rows[0]?.count ?? 0;
+      const insertionIndex =
+        typeof toIndex === "number"
+          ? Math.max(0, Math.min(Math.floor(toIndex), itemCount))
+          : itemCount;
 
       const now = Date.now();
       const itemId = uid("rit");
@@ -292,15 +319,21 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
       );
 
       await query(
-        "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+        "UPDATE roadmap_items SET item_index = item_index + 1, updated_at = $1 WHERE roadmap_id = $2 AND item_index >= $3",
+        [now, toRoadmapId, insertionIndex],
+      );
+
+      await query(
+        "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, photo_url, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
         [
           itemId,
           toRoadmapId,
           modelId,
           model_name,
           quantity,
+          photo_url,
           now,
-          nextIndex,
+          insertionIndex,
           now,
           now,
         ],

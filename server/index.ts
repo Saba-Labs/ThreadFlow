@@ -33,6 +33,7 @@ import {
   updateRoadmap,
   deleteRoadmap,
   addModelToRoadmap,
+  updateRoadmapModelPhoto,
   removeModelFromRoadmap,
   reorderRoadmapItems,
   moveModelBetweenRoadmaps,
@@ -40,6 +41,22 @@ import {
 
 let dbInitialized = false;
 let dbInitializationPromise: Promise<void> | null = null;
+
+function ensureDatabaseInitialized() {
+  if (dbInitialized) return Promise.resolve();
+  if (!dbInitializationPromise) {
+    dbInitializationPromise = initializeDatabase()
+      .then(() => {
+        dbInitialized = true;
+        console.log("✅ Database initialized successfully");
+      })
+      .catch((error) => {
+        dbInitializationPromise = null;
+        throw error;
+      });
+  }
+  return dbInitializationPromise;
+}
 
 export function createServer() {
   const app = express();
@@ -63,19 +80,9 @@ export function createServer() {
     next();
   });
 
-  // Initialize database once - ensure it only runs once
-  if (!dbInitialized && !dbInitializationPromise) {
-    dbInitializationPromise = initializeDatabase()
-      .then(() => {
-        dbInitialized = true;
-        console.log("✅ Database initialized successfully");
-      })
-      .catch((error) => {
-        console.error("❌ Failed to initialize database:", error);
-        // Don't set dbInitialized to true, allow retries
-        dbInitializationPromise = null;
-      });
-  }
+  void ensureDatabaseInitialized().catch((error) => {
+    console.error("❌ Failed to initialize database:", error);
+  });
 
   // Log all API requests for debugging
   app.use((req, res, next) => {
@@ -88,24 +95,14 @@ export function createServer() {
   // Middleware to ensure database is initialized before handling requests
   app.use((req, res, next) => {
     if (req.path.startsWith("/api/") && !req.path.startsWith("/api/health")) {
-      if (dbInitializationPromise) {
-        dbInitializationPromise.then(
-          () => {
-            next();
-          },
-          () => {
-            res.status(503).json({
-              error: "Service unavailable: Database initialization in progress",
-            });
-          },
-        );
-      } else if (!dbInitialized) {
-        res.status(503).json({
-          error: "Service unavailable: Database not initialized",
+      ensureDatabaseInitialized()
+        .then(next)
+        .catch((error) => {
+          console.error("❌ Database unavailable for API request:", error);
+          res.status(503).json({
+            error: "Service unavailable: Database initialization failed",
+          });
         });
-      } else {
-        next();
-      }
     } else {
       next();
     }
@@ -191,6 +188,10 @@ export function createServer() {
   app.put("/api/roadmaps/:id", updateRoadmap);
   app.delete("/api/roadmaps/:id", deleteRoadmap);
   app.post("/api/roadmaps/:roadmapId/models", addModelToRoadmap);
+  app.patch(
+    "/api/roadmaps/:roadmapId/models/:modelId/photo",
+    updateRoadmapModelPhoto,
+  );
   app.delete(
     "/api/roadmaps/:roadmapId/models/:modelId",
     removeModelFromRoadmap,

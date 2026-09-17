@@ -631,6 +631,13 @@ function ModelList(props: ModelListProps) {
                                   {formatDateShort(o.createdAt)}
                                 </span>
                               )}
+                              {o.photoUrl ? (
+                                <img
+                                  src={o.photoUrl}
+                                  alt=""
+                                  className="h-8 w-8 rounded object-cover flex-shrink-0"
+                                />
+                              ) : null}
                               <span>
                                 {o.modelName}{" "}
                                 {!showDetails && o.quantity > 0 && (
@@ -1197,8 +1204,10 @@ function ModelList(props: ModelListProps) {
                   ? { ...o, currentStepIndex: overrideIdx }
                   : o;
               const i = ov.currentStepIndex;
-              const step = ov.steps[i];
-              const bg = statusBgClass(ov);
+              const stepsArr = pendingStepsMap[o.id] ?? ov.steps;
+              const step = stepsArr[i];
+              const renderOrder = { ...ov, steps: stepsArr } as WorkOrder;
+              const bg = statusBgClass(renderOrder);
               const isExpandedMobile = toggledIds.includes(o.id);
               const hasPendingJW =
                 ((o as any).jobWorkIds || []).length > 0 ||
@@ -1224,7 +1233,16 @@ function ModelList(props: ModelListProps) {
                           onClick={() => toggleExpanded(o.id)}
                           className="text-left truncate hover:opacity-70 transition-opacity"
                         >
-                          {o.modelName}{" "}
+                          <span className="inline-flex items-center gap-2">
+                            {o.photoUrl ? (
+                              <img
+                                src={o.photoUrl}
+                                alt=""
+                                className="h-8 w-8 rounded object-cover"
+                              />
+                            ) : null}
+                            {o.modelName}{" "}
+                          </span>
                           {o.quantity > 0 && (
                             <span className="text-muted-foreground">
                               ({o.quantity})

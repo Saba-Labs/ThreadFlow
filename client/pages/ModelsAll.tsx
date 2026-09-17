@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Eye, EyeOff, Plus } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
 import PageSearchHeader from "@/components/ui/PageSearchHeader";
 
@@ -114,7 +113,19 @@ export default function ModelsAll() {
   }, [filtered, localQuery]);
 
   const [showDetails, setShowDetails] = useState(false);
-  const isMobile = useIsMobile();
+  const [isLargeScreen, setIsLargeScreen] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 1280px)").matches,
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const updateScreenSize = () => setIsLargeScreen(mediaQuery.matches);
+    updateScreenSize();
+    mediaQuery.addEventListener("change", updateScreenSize);
+    return () => mediaQuery.removeEventListener("change", updateScreenSize);
+  }, []);
 
   // View mode for models list: 'cards' or 'list'. Default to 'cards' for new devices.
   const [viewMode, setViewMode] = useState<"cards" | "list">(() => {
@@ -177,6 +188,8 @@ export default function ModelsAll() {
     }
   }, [showDetails]);
 
+  const detailsVisible = isLargeScreen || showDetails;
+
   return (
     <div className="space-y-6">
       <div
@@ -190,12 +203,12 @@ export default function ModelsAll() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={showDetails ? "Hide details" : "Show details"}
+            aria-label={detailsVisible ? "Hide details" : "Show details"}
             onClick={() => setShowDetails((s) => !s)}
-            title={showDetails ? "Hide details" : "Show details"}
-            className="lg:hidden"
+            title={detailsVisible ? "Hide details" : "Show details"}
+            className="xl:hidden"
           >
-            {showDetails ? (
+            {detailsVisible ? (
               <Eye className="h-4 w-4" />
             ) : (
               <EyeOff className="h-4 w-4" />
@@ -239,7 +252,7 @@ export default function ModelsAll() {
           setOrderJobWorks={pipeline.setOrderJobWorks}
           setJobWorkAssignments={pipeline.setJobWorkAssignments}
           updateJobWorkAssignmentStatus={pipeline.updateJobWorkAssignmentStatus}
-          showDetails={isMobile ? showDetails : true}
+          showDetails={detailsVisible}
           viewMode={viewMode}
         />
         <Button

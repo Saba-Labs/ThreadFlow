@@ -38,6 +38,7 @@ export interface WorkOrder {
   id: string;
   modelName: string;
   quantity: number;
+  photoUrl?: string;
   createdAt: number;
   steps: PathStep[];
   currentStepIndex: number;
@@ -133,6 +134,7 @@ export function useProductionPipeline() {
     async (input: {
       modelName: string;
       quantity: number;
+      photoUrl?: string;
       createdAt?: number;
       path: (
         | { kind: "machine"; machineType: Exclude<MachineType, "Job Work"> }
@@ -152,6 +154,7 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: input.modelName.trim(),
         quantity: Math.max(0, Math.floor(input.quantity)),
+        photoUrl: input.photoUrl,
         createdAt:
           typeof input.createdAt === "number" ? input.createdAt : Date.now(),
         steps,
@@ -590,6 +593,7 @@ export function useProductionPipeline() {
         id: uid("order"),
         modelName: src.modelName,
         quantity: q,
+        photoUrl: src.photoUrl,
         createdAt: src.createdAt,
         steps: src.steps.map((st) => ({
           id: uid("step"),
@@ -762,6 +766,7 @@ export function useProductionPipeline() {
       data: {
         modelName: string;
         quantity: number;
+        photoUrl?: string;
         createdAt: number;
         path: (
           | { kind: "machine"; machineType: string }
@@ -799,6 +804,7 @@ export function useProductionPipeline() {
           body: JSON.stringify({
             modelName: data.modelName,
             quantity: data.quantity,
+            photoUrl: data.photoUrl,
             currentStepIndex: newIndex,
             createdAt: data.createdAt,
             steps: newSteps,
@@ -811,6 +817,7 @@ export function useProductionPipeline() {
               ...o,
               modelName: data.modelName,
               quantity: data.quantity,
+              photoUrl: data.photoUrl,
               createdAt: data.createdAt,
               steps: newSteps,
               currentStepIndex: newIndex,
