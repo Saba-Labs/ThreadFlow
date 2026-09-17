@@ -22,6 +22,7 @@ export default function EditModel() {
   const initialData = {
     modelName: order.modelName,
     quantity: order.quantity,
+    photoUrl: order.photoUrl,
     createdAt: order.createdAt,
     path: order.steps.map((st) =>
       st.kind === "machine"
@@ -49,6 +50,7 @@ export default function EditModel() {
             await pipeline.updateOrder(order.id, {
               modelName: data.modelName,
               quantity: data.quantity,
+              photoUrl: data.photoUrl,
               createdAt: data.createdAt,
               path: data.path as any,
             });

@@ -184,7 +184,13 @@ export default function RoadmapPage() {
       for (const id of selectedModels) {
         const order = eligibleOrders.find((o) => o.id === id);
         if (order) {
-          await addModelToRoadmap(openFor, id, order.modelName, order.quantity);
+          await addModelToRoadmap(
+            openFor,
+            id,
+            order.modelName,
+            order.quantity,
+            order.photoUrl,
+          );
         }
       }
 
@@ -646,6 +652,17 @@ export default function RoadmapPage() {
                                   : ""
                               }`}
                             >
+                              {it.photoUrl ? (
+                                <img
+                                  src={it.photoUrl}
+                                  alt=""
+                                  className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200 flex-shrink-0"
+                                />
+                              ) : (
+                                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-xs flex-shrink-0">
+                                  No photo
+                                </div>
+                              )}
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-sm sm:text-lg text-slate-900 truncate">
                                   {it.modelName}{" "}

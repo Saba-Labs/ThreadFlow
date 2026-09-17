@@ -15,7 +15,7 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
     const roadmaps = await Promise.all(
       roadmapsResult.rows.map(async (roadmap: any) => {
         const itemsResult = await query(
-          "SELECT id, model_id, model_name, quantity, added_at FROM roadmap_items WHERE roadmap_id = $1 ORDER BY item_index ASC",
+          "SELECT id, model_id, model_name, quantity, photo_url, added_at FROM roadmap_items WHERE roadmap_id = $1 ORDER BY item_index ASC",
           [roadmap.id],
         );
         return {
@@ -26,6 +26,7 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
             modelId: item.model_id,
             modelName: item.model_name,
             quantity: item.quantity,
+            photoUrl: item.photo_url || undefined,
             addedAt: item.added_at,
           })),
         };
@@ -109,7 +110,7 @@ export const deleteRoadmap: RequestHandler = async (req, res) => {
 export const addModelToRoadmap: RequestHandler = async (req, res) => {
   try {
     const { roadmapId } = req.params;
-    const { modelId, modelName, quantity } = req.body;
+    const { modelId, modelName, quantity, photoUrl } = req.body;
 
     console.log("[addModelToRoadmap] Called with:", {
       roadmapId,
@@ -167,13 +168,14 @@ export const addModelToRoadmap: RequestHandler = async (req, res) => {
     });
 
     await query(
-      "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+      "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, photo_url, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
       [
         itemId,
         roadmapId,
         modelId,
         modelName,
         quantity,
+        photoUrl || null,
         now,
         nextIndex,
         now,
@@ -248,7 +250,7 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
 
     // Get the item to move
     const itemResult = await query(
-      "SELECT model_name, quantity FROM roadmap_items WHERE roadmap_id = $1 AND model_id = $2",
+      "SELECT model_name, quantity, photo_url FROM roadmap_items WHERE roadmap_id = $1 AND model_id = $2",
       [fromRoadmapId, modelId],
     );
 
@@ -258,7 +260,7 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
         .json({ error: "Model not found in source roadmap" });
     }
 
-    const { model_name, quantity } = itemResult.rows[0];
+    const { model_name, quantity, photo_url } = itemResult.rows[0];
 
     // Check if already exists in destination
     const existsResult = await query(
@@ -298,13 +300,14 @@ export const moveModelBetweenRoadmaps: RequestHandler = async (req, res) => {
       );
 
       await query(
-        "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+        "INSERT INTO roadmap_items (id, roadmap_id, model_id, model_name, quantity, photo_url, added_at, item_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
         [
           itemId,
           toRoadmapId,
           modelId,
           model_name,
           quantity,
+          photo_url,
           now,
           insertionIndex,
           now,

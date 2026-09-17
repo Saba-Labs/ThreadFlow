@@ -27,6 +27,7 @@ export interface WorkOrder {
   id: string;
   modelName: string;
   quantity: number;
+  photoUrl?: string;
   createdAt: number;
   steps: PathStep[];
   currentStepIndex: number;
@@ -125,6 +126,7 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
         id: row.id,
         modelName: row.model_name,
         quantity: row.quantity,
+        photoUrl: row.photo_url || undefined,
         createdAt:
           typeof row.created_at === "number"
             ? row.created_at
@@ -146,7 +148,7 @@ export const getPipelineOrders: RequestHandler = async (req, res) => {
 
 export const createWorkOrder: RequestHandler = async (req, res) => {
   try {
-    const { id, modelName, quantity, createdAt, steps } = req.body;
+    const { id, modelName, quantity, photoUrl, createdAt, steps } = req.body;
 
     if (!id || !modelName || quantity === undefined || quantity === null) {
       return res.status(400).json({
@@ -157,8 +159,8 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
     const now = Date.now();
 
     await query(
-      "INSERT INTO work_orders (id, model_name, quantity, created_at, updated_at, current_step_index) VALUES ($1, $2, $3, $4, $5, $6)",
-      [id, modelName, quantity, createdAt || now, now, -1],
+      "INSERT INTO work_orders (id, model_name, quantity, photo_url, created_at, updated_at, current_step_index) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [id, modelName, quantity, photoUrl || null, createdAt || now, now, -1],
     );
 
     // Insert steps
@@ -197,15 +199,22 @@ export const createWorkOrder: RequestHandler = async (req, res) => {
 export const updateWorkOrder: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const { modelName, quantity, currentStepIndex, createdAt, steps } =
-      req.body;
+    const {
+      modelName,
+      quantity,
+      photoUrl,
+      currentStepIndex,
+      createdAt,
+      steps,
+    } = req.body;
     const now = Date.now();
 
     await query(
-      "UPDATE work_orders SET model_name = COALESCE($1, model_name), quantity = COALESCE($2, quantity), current_step_index = COALESCE($3, current_step_index), created_at = COALESCE($4, created_at), updated_at = $5 WHERE id = $6",
+      "UPDATE work_orders SET model_name = COALESCE($1, model_name), quantity = COALESCE($2, quantity), photo_url = COALESCE($3, photo_url), current_step_index = COALESCE($4, current_step_index), created_at = COALESCE($5, created_at), updated_at = $6 WHERE id = $7",
       [
         modelName || null,
         quantity !== undefined && quantity !== null ? quantity : null,
+        photoUrl !== undefined ? photoUrl || null : null,
         currentStepIndex !== undefined ? currentStepIndex : null,
         typeof createdAt === "number" ? createdAt : null,
         now,

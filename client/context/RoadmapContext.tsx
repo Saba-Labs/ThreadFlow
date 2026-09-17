@@ -6,6 +6,7 @@ export interface RoadmapItem {
   modelId: string;
   modelName: string;
   quantity: number;
+  photoUrl?: string;
   addedAt: number;
 }
 
@@ -120,6 +121,7 @@ export function useRoadmaps() {
       modelId: string,
       modelName: string,
       quantity: number,
+      photoUrl?: string,
     ) => {
       try {
         console.log("[useRoadmaps.addModelToRoadmap] Called with:", {
@@ -136,6 +138,7 @@ export function useRoadmaps() {
             modelId,
             modelName,
             quantity,
+            photoUrl,
           }),
         });
 
