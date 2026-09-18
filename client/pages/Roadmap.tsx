@@ -10,7 +10,6 @@ import {
   Check,
   Map,
   Monitor,
-  Share2,
   Eraser,
   ImagePlus,
 } from "lucide-react";
@@ -22,7 +21,7 @@ import {
   useRef,
   type DragEvent,
 } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
@@ -78,6 +77,7 @@ export default function RoadmapPage() {
   const { images: libraryImages } = useImageLibrary();
 
   const pipeline = useProductionPipeline();
+  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const isShared = searchParams.get("shared") === "true";
@@ -130,7 +130,6 @@ export default function RoadmapPage() {
     roadmapId: string;
     modelId: string;
   } | null>(null);
-  const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
   const [customModelQuantity, setCustomModelQuantity] = useState("1");
@@ -286,17 +285,6 @@ export default function RoadmapPage() {
   const openDisplayMode = () => {
     const displayUrl = `${window.location.origin}/roadmap/display`;
     window.open(displayUrl, "_blank", "noopener,noreferrer");
-  };
-
-  const handleShare = async () => {
-    const shareUrl = `${window.location.origin}${window.location.pathname}?shared=true`;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setShareToast(true);
-      setTimeout(() => setShareToast(false), 3000);
-    } catch (err) {
-      console.error("Failed to copy to clipboard:", err);
-    }
   };
 
   const handleDragStart = (
@@ -548,13 +536,13 @@ export default function RoadmapPage() {
                   <span className="hidden sm:inline">TV Display</span>
                 </Button>
                 <Button
-                  onClick={handleShare}
+                  onClick={() => navigate("/library")}
                   variant="outline"
                   className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
-                  title="Copy share link to clipboard"
+                  title="Open image library"
                 >
-                  <Share2 className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Share</span>
+                  <ImagePlus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Library</span>
                 </Button>
                 {!isReadOnly && (
                   <Button
@@ -568,11 +556,6 @@ export default function RoadmapPage() {
               </div>
             )}
           </div>
-          {shareToast && (
-            <div className="mt-3 p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-800">
-              ✓ Share link copied to clipboard!
-            </div>
-          )}
         </div>
 
         {/* Empty State */}
