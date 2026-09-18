@@ -148,7 +148,15 @@ export default function LibraryPage() {
                   variant="ghost"
                   aria-label={`Delete ${image.name}`}
                   title="Delete image"
-                  onClick={() => void deleteImage(image.id)}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Delete “${image.name}” from the library? This cannot be undone.`,
+                      )
+                    ) {
+                      void deleteImage(image.id);
+                    }
+                  }}
                   className="h-8 w-8 flex-shrink-0 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
