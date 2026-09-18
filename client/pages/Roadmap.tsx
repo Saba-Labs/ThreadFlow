@@ -22,7 +22,7 @@ import {
   useRef,
   type DragEvent,
 } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
@@ -75,9 +75,12 @@ export default function RoadmapPage() {
   } = useRoadmaps();
 
   const pipeline = useProductionPipeline();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const isShared = searchParams.get("shared") === "true";
-  const isDisplayMode = searchParams.get("display") === "true";
+  const isDisplayMode =
+    location.pathname === "/roadmap/display" ||
+    searchParams.get("display") === "true";
   const isReadOnly = isShared || isDisplayMode;
 
   useEffect(() => {
@@ -268,7 +271,7 @@ export default function RoadmapPage() {
   };
 
   const openDisplayMode = () => {
-    const displayUrl = `${window.location.origin}${window.location.pathname}?display=true`;
+    const displayUrl = `${window.location.origin}/roadmap/display`;
     window.open(displayUrl, "_blank", "noopener,noreferrer");
   };
 

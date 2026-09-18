@@ -36,6 +36,7 @@ function App() {
                 <Route path="/job-work" element={<JobWork />} />
                 <Route path="/models/new" element={<NewModel />} />
                 <Route path="/models/:id/edit" element={<EditModel />} />
+                <Route path="/roadmap/display" element={<Roadmap />} />
                 <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/restok" element={<ReStok />} />
               </Route>

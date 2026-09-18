@@ -81,8 +81,9 @@ export default function AppLayout() {
   }
   const location = useLocation();
   const isDisplayMode =
-    location.pathname === "/roadmap" &&
-    new URLSearchParams(location.search).get("display") === "true";
+    location.pathname === "/roadmap/display" ||
+    (location.pathname === "/roadmap" &&
+      new URLSearchParams(location.search).get("display") === "true");
   const [menuOpen, setMenuOpen] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const queryClient = useQueryClient();
