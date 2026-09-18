@@ -1,4 +1,3 @@
-import { useAppUpdater } from "@/hooks/useAppUpdater";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "lucide-react";
 

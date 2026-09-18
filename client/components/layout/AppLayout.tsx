@@ -81,8 +81,9 @@ export default function AppLayout() {
   }
   const location = useLocation();
   const isDisplayMode =
-    location.pathname === "/roadmap" &&
-    new URLSearchParams(location.search).get("display") === "true";
+    location.pathname === "/roadmap/display" ||
+    (location.pathname === "/roadmap" &&
+      new URLSearchParams(location.search).get("display") === "true");
   const [menuOpen, setMenuOpen] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const queryClient = useQueryClient();
@@ -219,7 +220,7 @@ export default function AppLayout() {
                   Roadmap
                 </NavLink>
                 <NavLink
-                  to="/"
+                  to="/dashboard"
                   end
                   onClick={() => setMenuOpen(false)}
                   className={({ isActive }) =>
@@ -246,6 +247,20 @@ export default function AppLayout() {
                   }
                 >
                   All Models
+                </NavLink>
+                <NavLink
+                  to="/library"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  Library
                 </NavLink>
                 <NavLink
                   to="/job-work"
@@ -356,7 +371,7 @@ export default function AppLayout() {
                   </NavLink>
 
                   <NavLink
-                    to="/"
+                    to="/dashboard"
                     end
                     className={({ isActive }) =>
                       cn(
@@ -382,6 +397,20 @@ export default function AppLayout() {
                     }
                   >
                     All Models
+                  </NavLink>
+
+                  <NavLink
+                    to="/library"
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    Library
                   </NavLink>
 
                   <NavLink

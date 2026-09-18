@@ -6,7 +6,8 @@ type DataChangeCallback = (event: {
     | "jobworks_updated"
     | "machine_types_updated"
     | "restok_updated"
-    | "roadmaps_updated";
+    | "roadmaps_updated"
+    | "library_updated";
 }) => void;
 
 export function useSSESubscription(onDataChange: DataChangeCallback) {
@@ -36,15 +37,14 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
         callbackRef.current({ type: "machine_types_updated" });
         callbackRef.current({ type: "restok_updated" });
         callbackRef.current({ type: "roadmaps_updated" });
+        callbackRef.current({ type: "library_updated" });
       }, 30000);
     }
 
     function connect() {
       try {
         connectAttemptsRef.current += 1;
-        console.log(
-          `[SSE] Connection attempt ${connectAttemptsRef.current}`,
-        );
+        console.log(`[SSE] Connection attempt ${connectAttemptsRef.current}`);
         eventSource = new EventSource("/api/subscribe");
 
         eventSource.onopen = () => {
@@ -69,7 +69,8 @@ export function useSSESubscription(onDataChange: DataChangeCallback) {
               data.type === "jobworks_updated" ||
               data.type === "machine_types_updated" ||
               data.type === "restok_updated" ||
-              data.type === "roadmaps_updated"
+              data.type === "roadmaps_updated" ||
+              data.type === "library_updated"
             ) {
               callbackRef.current(data);
             }

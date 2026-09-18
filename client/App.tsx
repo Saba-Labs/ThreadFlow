@@ -1,7 +1,7 @@
 import "./global.css";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { FontSizeProvider } from "./hooks/use-font-size";
 import { SearchProvider } from "./context/SearchContext";
 import Index from "./pages/Index";
@@ -15,6 +15,7 @@ import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
 import Roadmap from "./pages/Roadmap";
 import ReStok from "./pages/ReStok";
+import Library from "./pages/Library";
 
 const queryClient = new QueryClient();
 
@@ -26,16 +27,19 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Navigate to="/roadmap" replace />} />
+                <Route path="/dashboard" element={<Index />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route
                   path="/settings/production-path"
                   element={<SettingsProductionPath />}
                 />
                 <Route path="/models/all" element={<ModelsAll />} />
+                <Route path="/library" element={<Library />} />
                 <Route path="/job-work" element={<JobWork />} />
                 <Route path="/models/new" element={<NewModel />} />
                 <Route path="/models/:id/edit" element={<EditModel />} />
+                <Route path="/roadmap/display" element={<Roadmap />} />
                 <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/restok" element={<ReStok />} />
               </Route>

@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, ReactNode, FC } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  FC,
+} from "react";
 
 type SearchContextValue = {
   query: string;
@@ -30,9 +37,7 @@ export const SearchProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   return (
-    <SearchContext.Provider value={value}>
-      {children}
-    </SearchContext.Provider>
+    <SearchContext.Provider value={value}>{children}</SearchContext.Provider>
   );
 };
 

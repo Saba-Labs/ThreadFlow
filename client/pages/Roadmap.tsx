@@ -10,7 +10,6 @@ import {
   Check,
   Map,
   Monitor,
-  Share2,
   Eraser,
   ImagePlus,
 } from "lucide-react";
@@ -22,12 +21,13 @@ import {
   useRef,
   type DragEvent,
 } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useRoadmaps } from "@/context/RoadmapContext";
 import { useToast } from "@/hooks/use-toast";
+import { useImageLibrary } from "@/context/ImageLibraryContext";
 
 // Simple Modal Component
 function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
@@ -70,14 +70,20 @@ export default function RoadmapPage() {
     addModelToRoadmap,
     moveModelWithinRoadmap,
     moveModelToRoadmap,
+    reorderRoadmaps,
     updateModelPhoto,
     refreshRoadmaps,
   } = useRoadmaps();
+  const { images: libraryImages } = useImageLibrary();
 
   const pipeline = useProductionPipeline();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const isShared = searchParams.get("shared") === "true";
-  const isDisplayMode = searchParams.get("display") === "true";
+  const isDisplayMode =
+    location.pathname === "/roadmap/display" ||
+    searchParams.get("display") === "true";
   const isReadOnly = isShared || isDisplayMode;
 
   useEffect(() => {
@@ -91,7 +97,7 @@ export default function RoadmapPage() {
 
   useSwipeNavigation({
     leftPage: "/restok",
-    rightPage: "/",
+    rightPage: "/dashboard",
   });
 
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
@@ -112,7 +118,18 @@ export default function RoadmapPage() {
   const [clearModelsConfirmId, setClearModelsConfirmId] = useState<
     string | null
   >(null);
-  const [shareToast, setShareToast] = useState(false);
+  const [expandedPhoto, setExpandedPhoto] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
+  const [photoSourceFor, setPhotoSourceFor] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
+  const [libraryPickerFor, setLibraryPickerFor] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
   const [customModelQuantity, setCustomModelQuantity] = useState("1");
@@ -120,6 +137,7 @@ export default function RoadmapPage() {
     roadmapId: string;
     modelId: string;
   } | null>(null);
+  const [draggedRoadmapId, setDraggedRoadmapId] = useState<string | null>(null);
   const [dragOverRoadmapId, setDragOverRoadmapId] = useState<string | null>(
     null,
   );
@@ -132,6 +150,16 @@ export default function RoadmapPage() {
     index: number;
   } | null>(null);
   const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const cameraInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  useEffect(() => {
+    if (!expandedPhoto) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpandedPhoto(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [expandedPhoto]);
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -255,19 +283,8 @@ export default function RoadmapPage() {
   };
 
   const openDisplayMode = () => {
-    const displayUrl = `${window.location.origin}${window.location.pathname}?display=true`;
+    const displayUrl = `${window.location.origin}/roadmap/display`;
     window.open(displayUrl, "_blank", "noopener,noreferrer");
-  };
-
-  const handleShare = async () => {
-    const shareUrl = `${window.location.origin}${window.location.pathname}?shared=true`;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setShareToast(true);
-      setTimeout(() => setShareToast(false), 3000);
-    } catch (err) {
-      console.error("Failed to copy to clipboard:", err);
-    }
   };
 
   const handleDragStart = (
@@ -286,6 +303,63 @@ export default function RoadmapPage() {
     setDragOverRoadmapId(null);
     setDropTarget(null);
     dropTargetRef.current = null;
+  };
+
+  const handleRoadmapDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+  ) => {
+    if (isReadOnly) return;
+    event.stopPropagation();
+    setDraggedRoadmapId(roadmapId);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", roadmapId);
+  };
+
+  const handleRoadmapDragEnd = () => {
+    setDraggedRoadmapId(null);
+    setDragOverRoadmapId(null);
+  };
+
+  const handleRoadmapDrop = async (
+    event: DragEvent<HTMLDivElement>,
+    targetRoadmapId: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!draggedRoadmapId || isReadOnly) {
+      handleRoadmapDragEnd();
+      return;
+    }
+
+    const sourceIndex = roadmaps.findIndex(
+      (roadmap) => roadmap.id === draggedRoadmapId,
+    );
+    const targetIndex = roadmaps.findIndex(
+      (roadmap) => roadmap.id === targetRoadmapId,
+    );
+    if (sourceIndex === -1 || targetIndex === -1) {
+      handleRoadmapDragEnd();
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    let insertionIndex =
+      event.clientY < bounds.top + bounds.height / 2
+        ? targetIndex
+        : targetIndex + 1;
+    const nextRoadmaps = roadmaps.slice();
+    const [roadmap] = nextRoadmaps.splice(sourceIndex, 1);
+    if (sourceIndex < insertionIndex) insertionIndex -= 1;
+    nextRoadmaps.splice(insertionIndex, 0, roadmap);
+
+    try {
+      if (sourceIndex !== insertionIndex) {
+        await reorderRoadmaps(nextRoadmaps.map((item) => item.id));
+      }
+    } finally {
+      handleRoadmapDragEnd();
+    }
   };
 
   const handleDropOnRoadmap = async (
@@ -462,13 +536,13 @@ export default function RoadmapPage() {
                   <span className="hidden sm:inline">TV Display</span>
                 </Button>
                 <Button
-                  onClick={handleShare}
+                  onClick={() => navigate("/library")}
                   variant="outline"
                   className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
-                  title="Copy share link to clipboard"
+                  title="Open image library"
                 >
-                  <Share2 className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Share</span>
+                  <ImagePlus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Library</span>
                 </Button>
                 {!isReadOnly && (
                   <Button
@@ -482,11 +556,6 @@ export default function RoadmapPage() {
               </div>
             )}
           </div>
-          {shareToast && (
-            <div className="mt-3 p-3 sm:p-4 rounded-lg bg-green-50 border border-green-200 text-sm text-green-800">
-              ✓ Share link copied to clipboard!
-            </div>
-          )}
         </div>
 
         {/* Empty State */}
@@ -526,15 +595,30 @@ export default function RoadmapPage() {
                     dragOverRoadmapId === r.id ? "ring-2 ring-blue-400" : ""
                   }`}
                   onDragOver={(event) => {
-                    if (!isReadOnly && draggedItem) {
+                    if (!isReadOnly && draggedRoadmapId) {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "move";
+                      setDragOverRoadmapId(r.id);
+                    } else if (!isReadOnly && draggedItem) {
                       event.preventDefault();
                       event.dataTransfer.dropEffect = "move";
                       setDragOverRoadmapId(r.id);
                     }
                   }}
-                  onDrop={(event) => handleDropOnRoadmap(event, r.id)}
+                  onDrop={(event) =>
+                    draggedRoadmapId
+                      ? handleRoadmapDrop(event, r.id)
+                      : handleDropOnRoadmap(event, r.id)
+                  }
                 >
-                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
+                  <CardHeader
+                    draggable={!isReadOnly}
+                    onDragStart={(event) => handleRoadmapDragStart(event, r.id)}
+                    onDragEnd={handleRoadmapDragEnd}
+                    className={`bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0 ${
+                      !isReadOnly ? "cursor-grab active:cursor-grabbing" : ""
+                    }`}
+                  >
                     {editingTitleId === r.id ? (
                       <div className="flex items-center gap-2 w-full">
                         <Input
@@ -676,13 +760,27 @@ export default function RoadmapPage() {
                             >
                               <div className="flex items-center gap-1.5 flex-shrink-0">
                                 {it.photoUrl ? (
-                                  <img
-                                    src={it.photoUrl}
-                                    alt={`${it.modelName} preview`}
-                                    className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
-                                  />
+                                  <button
+                                    type="button"
+                                    aria-label={`Enlarge ${it.modelName} photo`}
+                                    title="Enlarge photo"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setExpandedPhoto({
+                                        src: it.photoUrl!,
+                                        alt: `${it.modelName} preview`,
+                                      });
+                                    }}
+                                    className="rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                  >
+                                    <img
+                                      src={it.photoUrl}
+                                      alt={`${it.modelName} preview`}
+                                      className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
+                                    />
+                                  </button>
                                 ) : (
-                                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-xs">
+                                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-center text-xs">
                                     No photo
                                   </div>
                                 )}
@@ -696,6 +794,25 @@ export default function RoadmapPage() {
                                       }}
                                       type="file"
                                       accept="image/*"
+                                      className="hidden"
+                                      onChange={(event) => {
+                                        handlePhotoFile(
+                                          event.target.files?.[0],
+                                          r.id,
+                                          it.modelId,
+                                        );
+                                        event.currentTarget.value = "";
+                                      }}
+                                    />
+                                    <input
+                                      ref={(element) => {
+                                        cameraInputRefs.current[
+                                          `${r.id}:${it.modelId}`
+                                        ] = element;
+                                      }}
+                                      type="file"
+                                      accept="image/*"
+                                      capture="environment"
                                       className="hidden"
                                       onChange={(event) => {
                                         handlePhotoFile(
@@ -722,9 +839,10 @@ export default function RoadmapPage() {
                                       }
                                       onClick={(event) => {
                                         event.stopPropagation();
-                                        photoInputRefs.current[
-                                          `${r.id}:${it.modelId}`
-                                        ]?.click();
+                                        setPhotoSourceFor({
+                                          roadmapId: r.id,
+                                          modelId: it.modelId,
+                                        });
                                       }}
                                       className="h-7 w-7 text-blue-600 hover:bg-blue-50"
                                     >
@@ -1129,6 +1247,128 @@ export default function RoadmapPage() {
           Are you sure you want to remove this model from the roadmap? This
           action cannot be undone.
         </p>
+      </SimpleModal>
+
+      {expandedPhoto && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label={expandedPhoto.alt}
+          onClick={() => setExpandedPhoto(null)}
+        >
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Close enlarged image"
+            title="Close"
+            onClick={() => setExpandedPhoto(null)}
+            className="absolute right-3 top-3 z-10 h-10 w-10 text-white hover:bg-white/20 hover:text-white"
+          >
+            <X className="h-6 w-6" />
+          </Button>
+          <img
+            src={expandedPhoto.src}
+            alt={expandedPhoto.alt}
+            onClick={(event) => event.stopPropagation()}
+            className="max-h-[90vh] max-w-full rounded-lg object-contain shadow-2xl"
+          />
+        </div>
+      )}
+
+      <SimpleModal
+        open={photoSourceFor !== null}
+        onOpenChange={(open) => !open && setPhotoSourceFor(null)}
+        title="Add photo"
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!photoSourceFor) return;
+              setLibraryPickerFor(photoSourceFor);
+              setPhotoSourceFor(null);
+            }}
+            className="h-20 flex-col gap-2"
+          >
+            <ImagePlus className="h-5 w-5 text-blue-600" />
+            From Library
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!photoSourceFor) return;
+              cameraInputRefs.current[
+                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+              ]?.click();
+              setPhotoSourceFor(null);
+            }}
+            className="h-20 flex-col gap-2"
+          >
+            <Monitor className="h-5 w-5 text-blue-600" />
+            Open Camera
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!photoSourceFor) return;
+              photoInputRefs.current[
+                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+              ]?.click();
+              setPhotoSourceFor(null);
+            }}
+            className="h-20 flex-col gap-2"
+          >
+            <ImagePlus className="h-5 w-5 text-blue-600" />
+            Gallery
+          </Button>
+        </div>
+      </SimpleModal>
+
+      <SimpleModal
+        open={libraryPickerFor !== null}
+        onOpenChange={(open) => !open && setLibraryPickerFor(null)}
+        title="Choose from Library"
+      >
+        {libraryImages.length === 0 ? (
+          <p className="py-8 text-center text-sm text-slate-600">
+            No images saved in the Library yet.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {libraryImages.map((image) => (
+              <button
+                key={image.id}
+                type="button"
+                onClick={() => {
+                  if (!libraryPickerFor) return;
+                  void updateModelPhoto(
+                    libraryPickerFor.roadmapId,
+                    libraryPickerFor.modelId,
+                    image.imageData,
+                  ).catch((error) =>
+                    console.error("Error selecting library image:", error),
+                  );
+                  setLibraryPickerFor(null);
+                }}
+                className="overflow-hidden rounded-lg border border-slate-200 text-left transition hover:border-blue-500 hover:ring-2 hover:ring-blue-100"
+              >
+                <img
+                  src={image.imageData}
+                  alt={image.name}
+                  className="aspect-square w-full object-cover"
+                />
+                <span className="block truncate p-2 text-xs font-medium text-slate-700">
+                  {image.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </SimpleModal>
 
       {/* Clear Models Confirmation Modal */}
