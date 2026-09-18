@@ -780,7 +780,7 @@ export default function RoadmapPage() {
                                     />
                                   </button>
                                 ) : (
-                                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-xs">
+                                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-center text-xs">
                                     No photo
                                   </div>
                                 )}
