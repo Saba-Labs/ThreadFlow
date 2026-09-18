@@ -47,14 +47,33 @@ export function useImageLibrary() {
     if (event.type === "library_updated") void fetchImages();
   });
 
-  const addImage = useCallback(async (name: string, imageData: string) => {
-    await fetchWithTimeout("/api/library/images", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, imageData }),
-    });
-    await fetchImages();
-  }, []);
+  const addImage = useCallback(
+    async (name: string, imageData: string, refresh = true) => {
+      const optimisticId = `pending_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const optimisticImage: LibraryImage = {
+        id: optimisticId,
+        name: name.trim() || "Untitled image",
+        imageData,
+        createdAt: Date.now(),
+      };
+      STORE = [optimisticImage, ...STORE];
+      notifySubscribers();
+
+      try {
+        await fetchWithTimeout("/api/library/images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, imageData }),
+        });
+        if (refresh) await fetchImages();
+      } catch (error) {
+        STORE = STORE.filter((image) => image.id !== optimisticId);
+        notifySubscribers();
+        throw error;
+      }
+    },
+    [],
+  );
 
   const renameImage = useCallback(async (id: string, name: string) => {
     await fetchWithTimeout(`/api/library/images/${id}`, {
@@ -66,8 +85,17 @@ export function useImageLibrary() {
   }, []);
 
   const deleteImage = useCallback(async (id: string) => {
-    await fetchWithTimeout(`/api/library/images/${id}`, { method: "DELETE" });
-    await fetchImages();
+    const previousStore = STORE;
+    STORE = STORE.filter((image) => image.id !== id);
+    notifySubscribers();
+
+    try {
+      await fetchWithTimeout(`/api/library/images/${id}`, { method: "DELETE" });
+    } catch (error) {
+      STORE = previousStore;
+      notifySubscribers();
+      throw error;
+    }
   }, []);
 
   return {

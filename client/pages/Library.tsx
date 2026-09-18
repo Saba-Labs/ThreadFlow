@@ -1,42 +1,101 @@
 import { useMemo, useRef, useState } from "react";
 import {
+  Camera,
   ImagePlus,
+  Images,
   Trash2,
   Library as LibraryIcon,
   Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import SimpleModal from "@/components/ui/SimpleModal";
 import { useImageLibrary } from "@/context/ImageLibraryContext";
 
+async function prepareImage(file: File): Promise<string | null> {
+  const source = await new Promise<string | null>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      resolve(typeof reader.result === "string" ? reader.result : null);
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+  if (!source) return null;
+
+  const image = await new Promise<HTMLImageElement | null>((resolve) => {
+    const element = new Image();
+    element.onload = () => resolve(element);
+    element.onerror = () => resolve(null);
+    element.src = source;
+  });
+  if (!image) return source;
+
+  const maxDimension = 1600;
+  const scale = Math.min(
+    1,
+    maxDimension / Math.max(image.naturalWidth, image.naturalHeight),
+  );
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const context = canvas.getContext("2d");
+  if (!context) return source;
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/webp", 0.82);
+}
+
 export default function LibraryPage() {
-  const { images, addImage, renameImage, deleteImage } = useImageLibrary();
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const {
+    images,
+    addImage,
+    refreshImages,
+    renameImage,
+    deleteImage,
+  } = useImageLibrary();
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [nameDrafts, setNameDrafts] = useState<Record<string, string>>({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isSourcePickerOpen, setIsSourcePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const imageToDelete = images.find((image) => image.id === deleteConfirmId);
   const filteredImages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return images;
     return images.filter((image) => image.name.toLowerCase().includes(query));
   }, [images, searchQuery]);
 
-  const handleFiles = async (file: File | undefined) => {
-    if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024)
-      return;
+  const handleFiles = async (files: File[]) => {
+    const validFiles = files.filter(
+      (file) =>
+        file.type.startsWith("image/") && file.size <= 2 * 1024 * 1024,
+    );
+    if (validFiles.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      if (typeof reader.result !== "string") return;
-      setIsSaving(true);
-      try {
-        await addImage(file.name, reader.result);
-        setSearchQuery("");
-      } finally {
-        setIsSaving(false);
-      }
-    };
-    reader.readAsDataURL(file);
+    setIsSaving(true);
+    try {
+      await Promise.all(
+        validFiles.map(async (file) => {
+          const imageData = await prepareImage(file);
+          if (imageData) await addImage(file.name, imageData, false);
+        }),
+      );
+      void refreshImages();
+      setSearchQuery("");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -63,19 +122,31 @@ export default function LibraryPage() {
             className="h-10 sm:w-56"
           />
           <input
-            ref={inputRef}
+            ref={galleryInputRef}
             type="file"
             accept="image/*"
+            multiple
             className="hidden"
             onChange={(event) => {
-              void handleFiles(event.target.files?.[0]);
+              void handleFiles(Array.from(event.target.files ?? []));
+              event.currentTarget.value = "";
+            }}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(event) => {
+              void handleFiles(Array.from(event.target.files ?? []));
               event.currentTarget.value = "";
             }}
           />
           <Button
             type="button"
             disabled={isSaving}
-            onClick={() => inputRef.current?.click()}
+            onClick={() => setIsSourcePickerOpen(true)}
             className="h-10 bg-blue-600 hover:bg-blue-700"
           >
             <ImagePlus className="mr-2 h-4 w-4" />
@@ -83,6 +154,53 @@ export default function LibraryPage() {
           </Button>
         </div>
       </div>
+
+      <SimpleModal
+        open={isSourcePickerOpen}
+        onOpenChange={setIsSourcePickerOpen}
+        title="Add image"
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSaving}
+            onClick={() => {
+              setIsSourcePickerOpen(false);
+              cameraInputRef.current?.click();
+            }}
+            className="h-auto justify-start gap-3 p-4 text-left"
+          >
+            <Camera className="h-5 w-5 text-blue-600" />
+            <span>
+              <span className="block font-medium text-slate-900">
+                Open Camera
+              </span>
+              <span className="block text-xs font-normal text-slate-500">
+                Take a new photo
+              </span>
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSaving}
+            onClick={() => {
+              setIsSourcePickerOpen(false);
+              galleryInputRef.current?.click();
+            }}
+            className="h-auto justify-start gap-3 p-4 text-left"
+          >
+            <Images className="h-5 w-5 text-blue-600" />
+            <span>
+              <span className="block font-medium text-slate-900">Gallery</span>
+              <span className="block text-xs font-normal text-slate-500">
+                Select one or more images
+              </span>
+            </span>
+          </Button>
+        </div>
+      </SimpleModal>
 
       {images.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center text-sm text-slate-600">
@@ -148,7 +266,7 @@ export default function LibraryPage() {
                   variant="ghost"
                   aria-label={`Delete ${image.name}`}
                   title="Delete image"
-                  onClick={() => void deleteImage(image.id)}
+                  onClick={() => setDeleteConfirmId(image.id)}
                   className="h-8 w-8 flex-shrink-0 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -158,6 +276,40 @@ export default function LibraryPage() {
           ))}
         </div>
       )}
+
+      <AlertDialog
+        open={deleteConfirmId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete library image?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {imageToDelete
+                ? `“${imageToDelete.name}” will be permanently removed from the library.`
+                : "This image will be permanently removed from the library."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteConfirmId) {
+                  void deleteImage(deleteConfirmId).catch((error) =>
+                    console.error("Error deleting library image:", error),
+                  );
+                }
+                setDeleteConfirmId(null);
+              }}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete image
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

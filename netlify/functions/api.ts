@@ -39,6 +39,12 @@ import {
   moveModelBetweenRoadmaps,
 } from "../../server/routes/roadmaps";
 import { handleDemo } from "../../server/routes/demo";
+import {
+  getLibraryImages,
+  createLibraryImage,
+  renameLibraryImage,
+  deleteLibraryImage,
+} from "../../server/routes/library";
 import { initializeDatabase } from "../../server/db";
 import { subscribeToChanges } from "../../server/events";
 
@@ -148,6 +154,12 @@ function initializeHandler() {
   // Machine types routes
   app.get("/api/machine-types", getMachineTypes);
   app.post("/api/machine-types", setMachineTypes);
+
+  // Library routes
+  app.get("/api/library/images", getLibraryImages);
+  app.post("/api/library/images", createLibraryImage);
+  app.put("/api/library/images/:id", renameLibraryImage);
+  app.delete("/api/library/images/:id", deleteLibraryImage);
 
   // Pipeline routes
   app.get("/api/pipeline/orders", getPipelineOrders);
