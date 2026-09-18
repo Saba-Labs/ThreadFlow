@@ -91,7 +91,7 @@ export default function LibraryPage() {
           if (imageData) await addImage(file.name, imageData, false);
         }),
       );
-      await refreshImages();
+      void refreshImages();
       setSearchQuery("");
     } finally {
       setIsSaving(false);
@@ -296,7 +296,11 @@ export default function LibraryPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (deleteConfirmId) void deleteImage(deleteConfirmId);
+                if (deleteConfirmId) {
+                  void deleteImage(deleteConfirmId).catch((error) =>
+                    console.error("Error deleting library image:", error),
+                  );
+                }
                 setDeleteConfirmId(null);
               }}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
