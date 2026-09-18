@@ -22,8 +22,46 @@ import { Input } from "@/components/ui/input";
 import SimpleModal from "@/components/ui/SimpleModal";
 import { useImageLibrary } from "@/context/ImageLibraryContext";
 
+async function prepareImage(file: File): Promise<string | null> {
+  const source = await new Promise<string | null>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      resolve(typeof reader.result === "string" ? reader.result : null);
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+  if (!source) return null;
+
+  const image = await new Promise<HTMLImageElement | null>((resolve) => {
+    const element = new Image();
+    element.onload = () => resolve(element);
+    element.onerror = () => resolve(null);
+    element.src = source;
+  });
+  if (!image) return source;
+
+  const maxDimension = 1600;
+  const scale = Math.min(
+    1,
+    maxDimension / Math.max(image.naturalWidth, image.naturalHeight),
+  );
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const context = canvas.getContext("2d");
+  if (!context) return source;
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/webp", 0.82);
+}
+
 export default function LibraryPage() {
-  const { images, addImage, renameImage, deleteImage } = useImageLibrary();
+  const {
+    images,
+    addImage,
+    refreshImages,
+    renameImage,
+    deleteImage,
+  } = useImageLibrary();
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,16 +85,13 @@ export default function LibraryPage() {
 
     setIsSaving(true);
     try {
-      for (const file of validFiles) {
-        const imageData = await new Promise<string | null>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () =>
-            resolve(typeof reader.result === "string" ? reader.result : null);
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(file);
-        });
-        if (imageData) await addImage(file.name, imageData);
-      }
+      await Promise.all(
+        validFiles.map(async (file) => {
+          const imageData = await prepareImage(file);
+          if (imageData) await addImage(file.name, imageData, false);
+        }),
+      );
+      await refreshImages();
       setSearchQuery("");
     } finally {
       setIsSaving(false);

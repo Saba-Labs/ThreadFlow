@@ -47,14 +47,17 @@ export function useImageLibrary() {
     if (event.type === "library_updated") void fetchImages();
   });
 
-  const addImage = useCallback(async (name: string, imageData: string) => {
-    await fetchWithTimeout("/api/library/images", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, imageData }),
-    });
-    await fetchImages();
-  }, []);
+  const addImage = useCallback(
+    async (name: string, imageData: string, refresh = true) => {
+      await fetchWithTimeout("/api/library/images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, imageData }),
+      });
+      if (refresh) await fetchImages();
+    },
+    [],
+  );
 
   const renameImage = useCallback(async (id: string, name: string) => {
     await fetchWithTimeout(`/api/library/images/${id}`, {
