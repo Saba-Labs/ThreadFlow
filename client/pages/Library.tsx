@@ -6,6 +6,16 @@ import {
   Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useImageLibrary } from "@/context/ImageLibraryContext";
 
@@ -14,7 +24,9 @@ export default function LibraryPage() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [nameDrafts, setNameDrafts] = useState<Record<string, string>>({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const imageToDelete = images.find((image) => image.id === deleteConfirmId);
   const filteredImages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return images;
@@ -148,15 +160,7 @@ export default function LibraryPage() {
                   variant="ghost"
                   aria-label={`Delete ${image.name}`}
                   title="Delete image"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        `Delete “${image.name}” from the library? This cannot be undone.`,
-                      )
-                    ) {
-                      void deleteImage(image.id);
-                    }
-                  }}
+                  onClick={() => setDeleteConfirmId(image.id)}
                   className="h-8 w-8 flex-shrink-0 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -166,6 +170,36 @@ export default function LibraryPage() {
           ))}
         </div>
       )}
+
+      <AlertDialog
+        open={deleteConfirmId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete library image?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {imageToDelete
+                ? `“${imageToDelete.name}” will be permanently removed from the library.`
+                : "This image will be permanently removed from the library."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteConfirmId) void deleteImage(deleteConfirmId);
+                setDeleteConfirmId(null);
+              }}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete image
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
