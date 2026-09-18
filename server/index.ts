@@ -28,6 +28,11 @@ import {
   updateJobWorkAssignmentStatus,
 } from "./routes/pipeline";
 import {
+  getLibraryImages,
+  createLibraryImage,
+  deleteLibraryImage,
+} from "./routes/library";
+import {
   getRoadmaps,
   createRoadmap,
   updateRoadmap,
@@ -186,6 +191,9 @@ export function createServer() {
   // Roadmap routes
   app.get("/api/roadmaps", getRoadmaps);
   app.post("/api/roadmaps", createRoadmap);
+  app.get("/api/library/images", getLibraryImages);
+  app.post("/api/library/images", createLibraryImage);
+  app.delete("/api/library/images/:id", deleteLibraryImage);
   app.put("/api/roadmaps/reorder", reorderRoadmaps);
   app.put("/api/roadmaps/:id", updateRoadmap);
   app.delete("/api/roadmaps/:id", deleteRoadmap);

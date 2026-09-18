@@ -185,6 +185,13 @@ export async function initializeDatabase() {
 
       ALTER TABLE IF EXISTS roadmap_items ADD COLUMN IF NOT EXISTS photo_url TEXT;
 
+      CREATE TABLE IF NOT EXISTS library_images (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        image_data TEXT NOT NULL,
+        created_at BIGINT NOT NULL,
+        updated_at BIGINT NOT NULL
+      );
 
       CREATE INDEX IF NOT EXISTS idx_restok_sub_items_item_id ON restok_sub_items(item_id);
       CREATE INDEX IF NOT EXISTS idx_path_steps_order_id ON path_steps(order_id);

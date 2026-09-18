@@ -249,6 +249,20 @@ export default function AppLayout() {
                   All Models
                 </NavLink>
                 <NavLink
+                  to="/library"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "rounded-md px-3 py-2 text-sm font-medium w-full text-left",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    )
+                  }
+                >
+                  Library
+                </NavLink>
+                <NavLink
                   to="/job-work"
                   onClick={() => setMenuOpen(false)}
                   className={({ isActive }) =>
@@ -383,6 +397,20 @@ export default function AppLayout() {
                     }
                   >
                     All Models
+                  </NavLink>
+
+                  <NavLink
+                    to="/library"
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-md px-3 py-2 text-sm font-medium",
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )
+                    }
+                  >
+                    Library
                   </NavLink>
 
                   <NavLink

@@ -28,6 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useProductionPipeline } from "@/hooks/useProductionPipeline";
 import { useRoadmaps } from "@/context/RoadmapContext";
 import { useToast } from "@/hooks/use-toast";
+import { useImageLibrary } from "@/context/ImageLibraryContext";
 
 // Simple Modal Component
 function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
@@ -74,6 +75,7 @@ export default function RoadmapPage() {
     updateModelPhoto,
     refreshRoadmaps,
   } = useRoadmaps();
+  const { images: libraryImages } = useImageLibrary();
 
   const pipeline = useProductionPipeline();
   const location = useLocation();
@@ -120,6 +122,14 @@ export default function RoadmapPage() {
     src: string;
     alt: string;
   } | null>(null);
+  const [photoSourceFor, setPhotoSourceFor] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
+  const [libraryPickerFor, setLibraryPickerFor] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
@@ -141,6 +151,7 @@ export default function RoadmapPage() {
     index: number;
   } | null>(null);
   const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const cameraInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     if (!expandedPhoto) return;
@@ -810,6 +821,25 @@ export default function RoadmapPage() {
                                         event.currentTarget.value = "";
                                       }}
                                     />
+                                    <input
+                                      ref={(element) => {
+                                        cameraInputRefs.current[
+                                          `${r.id}:${it.modelId}`
+                                        ] = element;
+                                      }}
+                                      type="file"
+                                      accept="image/*"
+                                      capture="environment"
+                                      className="hidden"
+                                      onChange={(event) => {
+                                        handlePhotoFile(
+                                          event.target.files?.[0],
+                                          r.id,
+                                          it.modelId,
+                                        );
+                                        event.currentTarget.value = "";
+                                      }}
+                                    />
                                     <Button
                                       type="button"
                                       size="icon"
@@ -826,9 +856,10 @@ export default function RoadmapPage() {
                                       }
                                       onClick={(event) => {
                                         event.stopPropagation();
-                                        photoInputRefs.current[
-                                          `${r.id}:${it.modelId}`
-                                        ]?.click();
+                                        setPhotoSourceFor({
+                                          roadmapId: r.id,
+                                          modelId: it.modelId,
+                                        });
                                       }}
                                       className="h-7 w-7 text-blue-600 hover:bg-blue-50"
                                     >
@@ -1262,6 +1293,100 @@ export default function RoadmapPage() {
           />
         </div>
       )}
+
+      <SimpleModal
+        open={photoSourceFor !== null}
+        onOpenChange={(open) => !open && setPhotoSourceFor(null)}
+        title="Add photo"
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!photoSourceFor) return;
+              setLibraryPickerFor(photoSourceFor);
+              setPhotoSourceFor(null);
+            }}
+            className="h-20 flex-col gap-2"
+          >
+            <ImagePlus className="h-5 w-5 text-blue-600" />
+            From Library
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!photoSourceFor) return;
+              cameraInputRefs.current[
+                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+              ]?.click();
+              setPhotoSourceFor(null);
+            }}
+            className="h-20 flex-col gap-2"
+          >
+            <Monitor className="h-5 w-5 text-blue-600" />
+            Open Camera
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              if (!photoSourceFor) return;
+              photoInputRefs.current[
+                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+              ]?.click();
+              setPhotoSourceFor(null);
+            }}
+            className="h-20 flex-col gap-2"
+          >
+            <ImagePlus className="h-5 w-5 text-blue-600" />
+            Gallery
+          </Button>
+        </div>
+      </SimpleModal>
+
+      <SimpleModal
+        open={libraryPickerFor !== null}
+        onOpenChange={(open) => !open && setLibraryPickerFor(null)}
+        title="Choose from Library"
+      >
+        {libraryImages.length === 0 ? (
+          <p className="py-8 text-center text-sm text-slate-600">
+            No images saved in the Library yet.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {libraryImages.map((image) => (
+              <button
+                key={image.id}
+                type="button"
+                onClick={() => {
+                  if (!libraryPickerFor) return;
+                  void updateModelPhoto(
+                    libraryPickerFor.roadmapId,
+                    libraryPickerFor.modelId,
+                    image.imageData,
+                  ).catch((error) =>
+                    console.error("Error selecting library image:", error),
+                  );
+                  setLibraryPickerFor(null);
+                }}
+                className="overflow-hidden rounded-lg border border-slate-200 text-left transition hover:border-blue-500 hover:ring-2 hover:ring-blue-100"
+              >
+                <img
+                  src={image.imageData}
+                  alt={image.name}
+                  className="aspect-square w-full object-cover"
+                />
+                <span className="block truncate p-2 text-xs font-medium text-slate-700">
+                  {image.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </SimpleModal>
 
       {/* Clear Models Confirmation Modal */}
       <SimpleModal

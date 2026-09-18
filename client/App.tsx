@@ -15,6 +15,7 @@ import NewModel from "./pages/NewModel";
 import EditModel from "./pages/EditModel";
 import Roadmap from "./pages/Roadmap";
 import ReStok from "./pages/ReStok";
+import Library from "./pages/Library";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ function App() {
                   element={<SettingsProductionPath />}
                 />
                 <Route path="/models/all" element={<ModelsAll />} />
+                <Route path="/library" element={<Library />} />
                 <Route path="/job-work" element={<JobWork />} />
                 <Route path="/models/new" element={<NewModel />} />
                 <Route path="/models/:id/edit" element={<EditModel />} />
