@@ -56,10 +56,25 @@ export function useImageLibrary() {
     await fetchImages();
   }, []);
 
+  const renameImage = useCallback(async (id: string, name: string) => {
+    await fetchWithTimeout(`/api/library/images/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    await fetchImages();
+  }, []);
+
   const deleteImage = useCallback(async (id: string) => {
     await fetchWithTimeout(`/api/library/images/${id}`, { method: "DELETE" });
     await fetchImages();
   }, []);
 
-  return { images, addImage, deleteImage, refreshImages: fetchImages };
+  return {
+    images,
+    addImage,
+    renameImage,
+    deleteImage,
+    refreshImages: fetchImages,
+  };
 }

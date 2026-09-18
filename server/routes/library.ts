@@ -46,6 +46,23 @@ export const createLibraryImage: RequestHandler = async (req, res) => {
   }
 };
 
+export const renameLibraryImage: RequestHandler = async (req, res) => {
+  try {
+    const name = String(req.body?.name || "").trim();
+    if (!name) return res.status(400).json({ error: "Name is required" });
+
+    await query(
+      "UPDATE library_images SET name = $1, updated_at = $2 WHERE id = $3",
+      [name, Date.now(), req.params.id],
+    );
+    broadcastChange({ type: "library_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error renaming library image:", error);
+    res.status(500).json({ error: "Failed to rename library image" });
+  }
+};
+
 export const deleteLibraryImage: RequestHandler = async (req, res) => {
   try {
     await query("DELETE FROM library_images WHERE id = $1", [req.params.id]);
