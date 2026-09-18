@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import {
+  Camera,
   ImagePlus,
+  Images,
   Trash2,
   Library as LibraryIcon,
   Pencil,
@@ -17,14 +19,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import SimpleModal from "@/components/ui/SimpleModal";
 import { useImageLibrary } from "@/context/ImageLibraryContext";
 
 export default function LibraryPage() {
   const { images, addImage, renameImage, deleteImage } = useImageLibrary();
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [nameDrafts, setNameDrafts] = useState<Record<string, string>>({});
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isSourcePickerOpen, setIsSourcePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const imageToDelete = images.find((image) => image.id === deleteConfirmId);
   const filteredImages = useMemo(() => {
@@ -33,22 +38,29 @@ export default function LibraryPage() {
     return images.filter((image) => image.name.toLowerCase().includes(query));
   }, [images, searchQuery]);
 
-  const handleFiles = async (file: File | undefined) => {
-    if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024)
-      return;
+  const handleFiles = async (files: File[]) => {
+    const validFiles = files.filter(
+      (file) =>
+        file.type.startsWith("image/") && file.size <= 2 * 1024 * 1024,
+    );
+    if (validFiles.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      if (typeof reader.result !== "string") return;
-      setIsSaving(true);
-      try {
-        await addImage(file.name, reader.result);
-        setSearchQuery("");
-      } finally {
-        setIsSaving(false);
+    setIsSaving(true);
+    try {
+      for (const file of validFiles) {
+        const imageData = await new Promise<string | null>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () =>
+            resolve(typeof reader.result === "string" ? reader.result : null);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(file);
+        });
+        if (imageData) await addImage(file.name, imageData);
       }
-    };
-    reader.readAsDataURL(file);
+      setSearchQuery("");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -75,19 +87,31 @@ export default function LibraryPage() {
             className="h-10 sm:w-56"
           />
           <input
-            ref={inputRef}
+            ref={galleryInputRef}
             type="file"
             accept="image/*"
+            multiple
             className="hidden"
             onChange={(event) => {
-              void handleFiles(event.target.files?.[0]);
+              void handleFiles(Array.from(event.target.files ?? []));
+              event.currentTarget.value = "";
+            }}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(event) => {
+              void handleFiles(Array.from(event.target.files ?? []));
               event.currentTarget.value = "";
             }}
           />
           <Button
             type="button"
             disabled={isSaving}
-            onClick={() => inputRef.current?.click()}
+            onClick={() => setIsSourcePickerOpen(true)}
             className="h-10 bg-blue-600 hover:bg-blue-700"
           >
             <ImagePlus className="mr-2 h-4 w-4" />
@@ -95,6 +119,53 @@ export default function LibraryPage() {
           </Button>
         </div>
       </div>
+
+      <SimpleModal
+        open={isSourcePickerOpen}
+        onOpenChange={setIsSourcePickerOpen}
+        title="Add image"
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSaving}
+            onClick={() => {
+              setIsSourcePickerOpen(false);
+              cameraInputRef.current?.click();
+            }}
+            className="h-auto justify-start gap-3 p-4 text-left"
+          >
+            <Camera className="h-5 w-5 text-blue-600" />
+            <span>
+              <span className="block font-medium text-slate-900">
+                Open Camera
+              </span>
+              <span className="block text-xs font-normal text-slate-500">
+                Take a new photo
+              </span>
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSaving}
+            onClick={() => {
+              setIsSourcePickerOpen(false);
+              galleryInputRef.current?.click();
+            }}
+            className="h-auto justify-start gap-3 p-4 text-left"
+          >
+            <Images className="h-5 w-5 text-blue-600" />
+            <span>
+              <span className="block font-medium text-slate-900">Gallery</span>
+              <span className="block text-xs font-normal text-slate-500">
+                Select one or more images
+              </span>
+            </span>
+          </Button>
+        </div>
+      </SimpleModal>
 
       {images.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center text-sm text-slate-600">
