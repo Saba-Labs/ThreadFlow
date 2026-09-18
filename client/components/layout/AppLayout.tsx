@@ -220,7 +220,7 @@ export default function AppLayout() {
                   Roadmap
                 </NavLink>
                 <NavLink
-                  to="/"
+                  to="/dashboard"
                   end
                   onClick={() => setMenuOpen(false)}
                   className={({ isActive }) =>
@@ -371,7 +371,7 @@ export default function AppLayout() {
                   </NavLink>
 
                   <NavLink
-                    to="/"
+                    to="/dashboard"
                     end
                     className={({ isActive }) =>
                       cn(

@@ -97,7 +97,7 @@ export default function RoadmapPage() {
 
   useSwipeNavigation({
     leftPage: "/restok",
-    rightPage: "/",
+    rightPage: "/dashboard",
   });
 
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);

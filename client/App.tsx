@@ -1,7 +1,7 @@
 import "./global.css";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { FontSizeProvider } from "./hooks/use-font-size";
 import { SearchProvider } from "./context/SearchContext";
 import Index from "./pages/Index";
@@ -27,7 +27,8 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Navigate to="/roadmap" replace />} />
+                <Route path="/dashboard" element={<Index />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route
                   path="/settings/production-path"
