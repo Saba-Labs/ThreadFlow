@@ -112,6 +112,10 @@ export default function RoadmapPage() {
   const [clearModelsConfirmId, setClearModelsConfirmId] = useState<
     string | null
   >(null);
+  const [expandedPhoto, setExpandedPhoto] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
   const [shareToast, setShareToast] = useState(false);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
@@ -132,6 +136,15 @@ export default function RoadmapPage() {
     index: number;
   } | null>(null);
   const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  useEffect(() => {
+    if (!expandedPhoto) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpandedPhoto(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [expandedPhoto]);
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -676,11 +689,25 @@ export default function RoadmapPage() {
                             >
                               <div className="flex items-center gap-1.5 flex-shrink-0">
                                 {it.photoUrl ? (
-                                  <img
-                                    src={it.photoUrl}
-                                    alt={`${it.modelName} preview`}
-                                    className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
-                                  />
+                                  <button
+                                    type="button"
+                                    aria-label={`Enlarge ${it.modelName} photo`}
+                                    title="Enlarge photo"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setExpandedPhoto({
+                                        src: it.photoUrl!,
+                                        alt: `${it.modelName} preview`,
+                                      });
+                                    }}
+                                    className="rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                  >
+                                    <img
+                                      src={it.photoUrl}
+                                      alt={`${it.modelName} preview`}
+                                      className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
+                                    />
+                                  </button>
                                 ) : (
                                   <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center text-xs">
                                     No photo
@@ -1130,6 +1157,34 @@ export default function RoadmapPage() {
           action cannot be undone.
         </p>
       </SimpleModal>
+
+      {expandedPhoto && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label={expandedPhoto.alt}
+          onClick={() => setExpandedPhoto(null)}
+        >
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Close enlarged image"
+            title="Close"
+            onClick={() => setExpandedPhoto(null)}
+            className="absolute right-3 top-3 z-10 h-10 w-10 text-white hover:bg-white/20 hover:text-white"
+          >
+            <X className="h-6 w-6" />
+          </Button>
+          <img
+            src={expandedPhoto.src}
+            alt={expandedPhoto.alt}
+            onClick={(event) => event.stopPropagation()}
+            className="max-h-[90vh] max-w-full rounded-lg object-contain shadow-2xl"
+          />
+        </div>
+      )}
 
       {/* Clear Models Confirmation Modal */}
       <SimpleModal
