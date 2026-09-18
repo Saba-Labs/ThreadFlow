@@ -70,6 +70,7 @@ export default function RoadmapPage() {
     addModelToRoadmap,
     moveModelWithinRoadmap,
     moveModelToRoadmap,
+    reorderRoadmaps,
     updateModelPhoto,
     refreshRoadmaps,
   } = useRoadmaps();
@@ -127,6 +128,7 @@ export default function RoadmapPage() {
     roadmapId: string;
     modelId: string;
   } | null>(null);
+  const [draggedRoadmapId, setDraggedRoadmapId] = useState<string | null>(null);
   const [dragOverRoadmapId, setDragOverRoadmapId] = useState<string | null>(
     null,
   );
@@ -302,6 +304,63 @@ export default function RoadmapPage() {
     setDragOverRoadmapId(null);
     setDropTarget(null);
     dropTargetRef.current = null;
+  };
+
+  const handleRoadmapDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    roadmapId: string,
+  ) => {
+    if (isReadOnly) return;
+    event.stopPropagation();
+    setDraggedRoadmapId(roadmapId);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", roadmapId);
+  };
+
+  const handleRoadmapDragEnd = () => {
+    setDraggedRoadmapId(null);
+    setDragOverRoadmapId(null);
+  };
+
+  const handleRoadmapDrop = async (
+    event: DragEvent<HTMLDivElement>,
+    targetRoadmapId: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!draggedRoadmapId || isReadOnly) {
+      handleRoadmapDragEnd();
+      return;
+    }
+
+    const sourceIndex = roadmaps.findIndex(
+      (roadmap) => roadmap.id === draggedRoadmapId,
+    );
+    const targetIndex = roadmaps.findIndex(
+      (roadmap) => roadmap.id === targetRoadmapId,
+    );
+    if (sourceIndex === -1 || targetIndex === -1) {
+      handleRoadmapDragEnd();
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    let insertionIndex =
+      event.clientY < bounds.top + bounds.height / 2
+        ? targetIndex
+        : targetIndex + 1;
+    const nextRoadmaps = roadmaps.slice();
+    const [roadmap] = nextRoadmaps.splice(sourceIndex, 1);
+    if (sourceIndex < insertionIndex) insertionIndex -= 1;
+    nextRoadmaps.splice(insertionIndex, 0, roadmap);
+
+    try {
+      if (sourceIndex !== insertionIndex) {
+        await reorderRoadmaps(nextRoadmaps.map((item) => item.id));
+      }
+    } finally {
+      handleRoadmapDragEnd();
+    }
   };
 
   const handleDropOnRoadmap = async (
@@ -542,15 +601,30 @@ export default function RoadmapPage() {
                     dragOverRoadmapId === r.id ? "ring-2 ring-blue-400" : ""
                   }`}
                   onDragOver={(event) => {
-                    if (!isReadOnly && draggedItem) {
+                    if (!isReadOnly && draggedRoadmapId) {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "move";
+                      setDragOverRoadmapId(r.id);
+                    } else if (!isReadOnly && draggedItem) {
                       event.preventDefault();
                       event.dataTransfer.dropEffect = "move";
                       setDragOverRoadmapId(r.id);
                     }
                   }}
-                  onDrop={(event) => handleDropOnRoadmap(event, r.id)}
+                  onDrop={(event) =>
+                    draggedRoadmapId
+                      ? handleRoadmapDrop(event, r.id)
+                      : handleDropOnRoadmap(event, r.id)
+                  }
                 >
-                  <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0">
+                  <CardHeader
+                    draggable={!isReadOnly}
+                    onDragStart={(event) => handleRoadmapDragStart(event, r.id)}
+                    onDragEnd={handleRoadmapDragEnd}
+                    className={`bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-6 border-0 ${
+                      !isReadOnly ? "cursor-grab active:cursor-grabbing" : ""
+                    }`}
+                  >
                     {editingTitleId === r.id ? (
                       <div className="flex items-center gap-2 w-full">
                         <Input

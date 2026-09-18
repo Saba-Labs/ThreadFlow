@@ -35,6 +35,7 @@ import {
   addModelToRoadmap,
   updateRoadmapModelPhoto,
   removeModelFromRoadmap,
+  reorderRoadmaps,
   reorderRoadmapItems,
   moveModelBetweenRoadmaps,
 } from "./routes/roadmaps";
@@ -196,6 +197,7 @@ export function createServer() {
     "/api/roadmaps/:roadmapId/models/:modelId",
     removeModelFromRoadmap,
   );
+  app.put("/api/roadmaps/reorder", reorderRoadmaps);
   app.put("/api/roadmaps/:roadmapId/reorder", reorderRoadmapItems);
   app.post("/api/roadmaps/move-model", moveModelBetweenRoadmaps);
 

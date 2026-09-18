@@ -115,6 +115,29 @@ export function useRoadmaps() {
     [],
   );
 
+  const reorderRoadmaps = useCallback(async (roadmapIds: string[]) => {
+    const previousStore = STORE;
+    const roadmapById = new Map(STORE.map((roadmap) => [roadmap.id, roadmap]));
+    STORE = roadmapIds
+      .map((roadmapId) => roadmapById.get(roadmapId))
+      .filter((roadmap): roadmap is Roadmap => Boolean(roadmap));
+    notifySubscribers();
+
+    try {
+      await fetchWithTimeout("/api/roadmaps/reorder", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roadmapIds }),
+      });
+      await fetchRoadmaps();
+    } catch (error) {
+      STORE = previousStore;
+      notifySubscribers();
+      console.error("Error reordering roadmaps:", error);
+      throw error;
+    }
+  }, []);
+
   const addModelToRoadmap = useCallback(
     async (
       roadmapId: string,
@@ -316,6 +339,7 @@ export function useRoadmaps() {
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
+    reorderRoadmaps,
     addModelToRoadmap,
     updateModelPhoto,
     removeModelFromRoadmap,

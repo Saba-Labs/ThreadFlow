@@ -164,8 +164,11 @@ export async function initializeDatabase() {
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         created_at BIGINT NOT NULL,
-        updated_at BIGINT NOT NULL
+        updated_at BIGINT NOT NULL,
+        roadmap_index INTEGER NOT NULL DEFAULT 0
       );
+
+      ALTER TABLE IF EXISTS roadmaps ADD COLUMN IF NOT EXISTS roadmap_index INTEGER NOT NULL DEFAULT 0;
 
       CREATE TABLE IF NOT EXISTS roadmap_items (
         id TEXT PRIMARY KEY,
@@ -181,6 +184,7 @@ export async function initializeDatabase() {
       );
 
       ALTER TABLE IF EXISTS roadmap_items ADD COLUMN IF NOT EXISTS photo_url TEXT;
+
 
       CREATE INDEX IF NOT EXISTS idx_restok_sub_items_item_id ON restok_sub_items(item_id);
       CREATE INDEX IF NOT EXISTS idx_path_steps_order_id ON path_steps(order_id);

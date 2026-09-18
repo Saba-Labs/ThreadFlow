@@ -9,7 +9,7 @@ function uid(prefix = "rdm") {
 export const getRoadmaps: RequestHandler = async (req, res) => {
   try {
     const roadmapsResult = await query(
-      "SELECT id, title, created_at FROM roadmaps ORDER BY created_at DESC",
+      "SELECT id, title, created_at FROM roadmaps ORDER BY roadmap_index ASC, created_at DESC",
     );
 
     const roadmaps = await Promise.all(
@@ -52,10 +52,14 @@ export const createRoadmap: RequestHandler = async (req, res) => {
 
     const roadmapId = id || uid("roadmap");
     const now = Date.now();
+    const indexResult = await query(
+      "SELECT COALESCE(MAX(roadmap_index), -1) + 1 AS next_index FROM roadmaps",
+    );
+    const nextIndex = Number(indexResult.rows[0]?.next_index ?? 0);
 
     await query(
-      "INSERT INTO roadmaps (id, title, created_at, updated_at) VALUES ($1, $2, $3, $4)",
-      [roadmapId, String(title).trim(), now, now],
+      "INSERT INTO roadmaps (id, title, created_at, updated_at, roadmap_index) VALUES ($1, $2, $3, $4, $5)",
+      [roadmapId, String(title).trim(), now, now, nextIndex],
     );
 
     broadcastChange({ type: "roadmaps_updated" });
@@ -233,6 +237,30 @@ export const removeModelFromRoadmap: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error removing model from roadmap:", error);
     res.status(500).json({ error: "Failed to remove model from roadmap" });
+  }
+};
+
+export const reorderRoadmaps: RequestHandler = async (req, res) => {
+  try {
+    const { roadmapIds } = req.body;
+
+    if (!Array.isArray(roadmapIds)) {
+      return res.status(400).json({ error: "roadmapIds must be an array" });
+    }
+
+    const now = Date.now();
+    for (let i = 0; i < roadmapIds.length; i++) {
+      await query(
+        "UPDATE roadmaps SET roadmap_index = $1, updated_at = $2 WHERE id = $3",
+        [i, now, roadmapIds[i]],
+      );
+    }
+
+    broadcastChange({ type: "roadmaps_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error reordering roadmaps:", error);
+    res.status(500).json({ error: "Failed to reorder roadmaps" });
   }
 };
 
