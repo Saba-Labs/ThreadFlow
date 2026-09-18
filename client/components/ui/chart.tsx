@@ -59,3 +59,15 @@ const ChartContainer = React.forwardRef<
         <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
+      </div>
+    </ChartContext.Provider>
+  );
+});
+
+ChartContainer.displayName = "ChartContainer";
+
+function ChartStyle(_props: { id: string; config: ChartConfig }) {
+  return null;
+}
+
+export { ChartContainer, ChartStyle, useChart };
