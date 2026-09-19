@@ -1139,7 +1139,7 @@ export default function RoadmapPage() {
                 </label>
               ))
               )}
-              <div className="border-t pt-4">
+              <div className="sticky bottom-0 z-10 -mx-4 bg-white px-4 pb-4 pt-4 sm:-mx-6 sm:px-6">
                 <div className="flex items-center gap-3 justify-end">
                   <Button
                     variant="outline"
