@@ -124,14 +124,16 @@ export default function RoadmapPage() {
     src: string;
     alt: string;
   } | null>(null);
-  const [photoSourceFor, setPhotoSourceFor] = useState<{
-    roadmapId: string;
-    modelId: string;
-  } | null>(null);
-  const [libraryPickerFor, setLibraryPickerFor] = useState<{
-    roadmapId: string;
-    modelId: string;
-  } | null>(null);
+  const [photoSourceFor, setPhotoSourceFor] = useState<
+    | { type: "existing"; roadmapId: string; modelId: string }
+    | { type: "custom" }
+    | null
+  >(null);
+  const [libraryPickerFor, setLibraryPickerFor] = useState<
+    | { type: "existing"; roadmapId: string; modelId: string }
+    | { type: "custom" }
+    | null
+  >(null);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [librarySearch, setLibrarySearch] = useState("");
   const [customModelPart1, setCustomModelPart1] = useState("");
@@ -230,6 +232,15 @@ export default function RoadmapPage() {
           (error) => console.error("Error saving roadmap model photo:", error),
         );
       }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCustomPhotoFile = (file: File | undefined) => {
+    if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") setCustomModelPhoto(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -870,6 +881,7 @@ export default function RoadmapPage() {
                                       onClick={(event) => {
                                         event.stopPropagation();
                                         setPhotoSourceFor({
+                                          type: "existing",
                                           roadmapId: r.id,
                                           modelId: it.modelId,
                                         });
@@ -1008,64 +1020,6 @@ export default function RoadmapPage() {
         }
       >
         <div className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-900">Selected models</h3>
-              <span className="text-xs text-slate-500">{selectedModels.length} selected</span>
-            </div>
-            {selectedModels.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500">
-                Choose models from the list below.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {selectedModels.map((id) => {
-                  const order = eligibleOrders.find((item) => item.id === id);
-                  if (!order) return null;
-                  return (
-                    <div
-                      key={order.id}
-                      className="grid grid-cols-[minmax(0,1fr)_5rem_4.5rem] gap-2 rounded-lg border border-slate-200 p-2"
-                    >
-                      <div className="min-w-0 rounded-md bg-slate-50 px-3 py-2">
-                        <div className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                          Model name
-                        </div>
-                        <div className="truncate text-sm font-medium text-slate-900">
-                          {order.modelName}
-                        </div>
-                      </div>
-                      <div className="rounded-md bg-slate-50 px-2 py-2 text-center">
-                        <div className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                          Qty
-                        </div>
-                        <div className="text-sm font-medium text-slate-900">
-                          {order.quantity}
-                        </div>
-                      </div>
-                      <div className="overflow-hidden rounded-md bg-slate-50">
-                        <div className="text-center text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                          Photo
-                        </div>
-                        {order.photoUrl ? (
-                          <img
-                            src={order.photoUrl}
-                            alt={order.modelName}
-                            className="h-8 w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-8 items-center justify-center text-[10px] text-slate-400">
-                            None
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
           <Button
             type="button"
             variant="outline"
@@ -1095,38 +1049,17 @@ export default function RoadmapPage() {
               />
             </div>
             <div className="grid grid-cols-[5rem_minmax(0,1fr)_auto_auto] gap-2">
-              <Input
-                type="number"
-              min="1"
-              step="1"
-              aria-label="Quantity"
-              placeholder="Qty"
-              value={customModelQuantity}
-              onChange={(e) => setCustomModelQuantity(e.target.value)}
-              onWheel={(e) => {
-                e.preventDefault();
-                e.currentTarget.blur();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAddCustomModel();
-              }}
-              className="no-number-spinner h-10"
-            />
-            <Input
-              type="file"
-              accept="image/*"
-              aria-label="Model photo"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) return;
-                const reader = new FileReader();
-                reader.onload = () => {
-                  if (typeof reader.result === "string") setCustomModelPhoto(reader.result);
-                };
-                reader.readAsDataURL(file);
-              }}
-              className="h-10 cursor-pointer px-2 text-xs"
-            />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Add model photo"
+                title={customModelPhoto ? "Replace model photo" : "Add model photo"}
+                onClick={() => setPhotoSourceFor({ type: "custom" })}
+                className="h-10 w-10 text-blue-600"
+              >
+                <ImagePlus className="h-4 w-4" />
+              </Button>
             <Button
               size="icon"
               variant="outline"
@@ -1157,6 +1090,25 @@ export default function RoadmapPage() {
               <X className="h-4 w-4" />
             </Button>
             </div>
+            <input
+              ref={(element) => {
+                photoInputRefs.current.custom = element;
+              }}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+            />
+            <input
+              ref={(element) => {
+                cameraInputRefs.current.custom = element;
+              }}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+            />
           </div>
 
           {showModelChooser && (
@@ -1434,9 +1386,13 @@ export default function RoadmapPage() {
             variant="outline"
             onClick={() => {
               if (!photoSourceFor) return;
-              cameraInputRefs.current[
-                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
-              ]?.click();
+              if (photoSourceFor.type === "custom") {
+                cameraInputRefs.current.custom?.click();
+              } else {
+                cameraInputRefs.current[
+                  `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+                ]?.click();
+              }
               setPhotoSourceFor(null);
             }}
             className="h-20 flex-col gap-2"
@@ -1449,9 +1405,13 @@ export default function RoadmapPage() {
             variant="outline"
             onClick={() => {
               if (!photoSourceFor) return;
-              photoInputRefs.current[
-                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
-              ]?.click();
+              if (photoSourceFor.type === "custom") {
+                photoInputRefs.current.custom?.click();
+              } else {
+                photoInputRefs.current[
+                  `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+                ]?.click();
+              }
               setPhotoSourceFor(null);
             }}
             className="h-20 flex-col gap-2"
@@ -1497,13 +1457,17 @@ export default function RoadmapPage() {
                     type="button"
                     onClick={() => {
                       if (!libraryPickerFor) return;
-                      void updateModelPhoto(
-                        libraryPickerFor.roadmapId,
-                        libraryPickerFor.modelId,
-                        image.imageData,
-                      ).catch((error) =>
-                        console.error("Error selecting library image:", error),
-                      );
+                      if (libraryPickerFor.type === "custom") {
+                        setCustomModelPhoto(image.imageData);
+                      } else {
+                        void updateModelPhoto(
+                          libraryPickerFor.roadmapId,
+                          libraryPickerFor.modelId,
+                          image.imageData,
+                        ).catch((error) =>
+                          console.error("Error selecting library image:", error),
+                        );
+                      }
                       setLibraryPickerFor(null);
                       setLibrarySearch("");
                     }}
