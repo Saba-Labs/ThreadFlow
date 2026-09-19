@@ -178,6 +178,7 @@ export default function RoadmapPage() {
   } | null>(null);
   const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const cameraInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const addingCustomModelRef = useRef(false);
 
   useEffect(() => {
     if (!expandedPhoto) return;
@@ -324,7 +325,9 @@ export default function RoadmapPage() {
     }
   };
 
-  const handleAddCustomModel = async () => {
+  const handleAddCustomModel = () => {
+    if (addingCustomModelRef.current) return;
+
     const quantity = Number.parseInt(customModelQuantity, 10);
     if (
       !openFor ||
@@ -334,31 +337,32 @@ export default function RoadmapPage() {
     )
       return;
 
-    try {
-      const modelName = [customModelPart1, customModelPart2, customModelPart3]
-        .map((part) => part.trim())
-        .filter(Boolean)
-        .join(" ");
-      const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      await addModelToRoadmap(
-        openFor,
-        customModelId,
-        modelName,
-        quantity,
-        customModelPhoto || undefined,
-      );
-      setCustomModelPart1("");
-      setCustomModelPart2("");
-      setCustomModelPart3("");
-      setCustomModelQuantity("1");
-      setCustomModelPhoto("");
-      setOpenFor(null);
-      setSelectedModels([]);
-      setShowModelChooser(false);
-      setAddModelsSearch("");
-    } catch (error) {
-      console.error("Error adding custom model to roadmap:", error);
-    }
+    addingCustomModelRef.current = true;
+    const roadmapId = openFor;
+    const modelName = [customModelPart1, customModelPart2, customModelPart3]
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(" ");
+    const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const photoUrl = customModelPhoto || undefined;
+
+    setCustomModelPart1("");
+    setCustomModelPart2("");
+    setCustomModelPart3("");
+    setCustomModelQuantity("1");
+    setCustomModelPhoto("");
+    setOpenFor(null);
+    setSelectedModels([]);
+    setShowModelChooser(false);
+    setAddModelsSearch("");
+
+    void addModelToRoadmap(roadmapId, customModelId, modelName, quantity, photoUrl)
+      .catch((error) => {
+        console.error("Error adding custom model to roadmap:", error);
+      })
+      .finally(() => {
+        addingCustomModelRef.current = false;
+      });
   };
 
   const handleSaveTitle = (id: string) => {
