@@ -184,11 +184,16 @@ export default function RoadmapPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [expandedPhoto]);
 
+  const pipelinePhotos = useMemo(
+    () =>
+      new globalThis.Map(
+        pipeline.orders.map((order) => [order.id, order.photoUrl] as const),
+      ),
+    [pipeline.orders],
+  );
+
   const getPhotoUrl = (item: { modelId: string; photoUrl?: string }) =>
-    normalizePhotoUrl(
-      item.photoUrl ||
-        pipeline.orders.find((order) => order.id === item.modelId)?.photoUrl,
-    );
+    normalizePhotoUrl(item.photoUrl || pipelinePhotos.get(item.modelId));
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -849,6 +854,11 @@ export default function RoadmapPage() {
                                     <img
                                       src={getPhotoUrl(it)}
                                       alt={`${it.modelName} preview`}
+                                      width={56}
+                                      height={56}
+                                      loading={idx < 3 ? "eager" : "lazy"}
+                                      fetchPriority={idx < 3 ? "high" : "low"}
+                                      decoding="async"
                                       className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
                                     />
                                   </button>
