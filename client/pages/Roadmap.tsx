@@ -1020,15 +1020,6 @@ export default function RoadmapPage() {
         }
       >
         <div className="space-y-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowModelChooser((value) => !value)}
-            className="w-full"
-          >
-            {showModelChooser ? "Hide model list" : "Choose from list"}
-          </Button>
-
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-900">Model name</label>
             <div className="grid grid-cols-3 gap-2">
@@ -1049,16 +1040,30 @@ export default function RoadmapPage() {
               />
             </div>
             <div className="grid grid-cols-[5rem_minmax(0,1fr)_auto_auto] gap-2">
+              <Input
+                type="number"
+                min="1"
+                step="1"
+                aria-label="Quantity"
+                placeholder="Qty"
+                value={customModelQuantity}
+                onChange={(e) => setCustomModelQuantity(e.target.value)}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }}
+                className="no-number-spinner h-10"
+              />
               <Button
                 type="button"
                 variant="outline"
-                size="icon"
                 aria-label="Add model photo"
                 title={customModelPhoto ? "Replace model photo" : "Add model photo"}
                 onClick={() => setPhotoSourceFor({ type: "custom" })}
-                className="h-10 w-10 text-blue-600"
+                className="h-10 border-blue-200 bg-blue-50 px-3 text-blue-600 hover:border-blue-300 hover:bg-blue-100"
               >
                 <ImagePlus className="h-4 w-4" />
+                <span className="sr-only sm:not-sr-only sm:ml-2">Photo</span>
               </Button>
             <Button
               size="icon"
@@ -1110,6 +1115,15 @@ export default function RoadmapPage() {
               onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
             />
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowModelChooser((value) => !value)}
+            className="w-full"
+          >
+            {showModelChooser ? "Hide model list" : "Choose from list"}
+          </Button>
 
           {showModelChooser && (
             <div className="space-y-2">
