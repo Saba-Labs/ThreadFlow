@@ -105,6 +105,7 @@ export default function RoadmapPage() {
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [showModelChooser, setShowModelChooser] = useState(false);
   const [moveItem, setMoveItem] = useState<{
     fromRoadmapId: string;
     modelId: string;
@@ -201,6 +202,7 @@ export default function RoadmapPage() {
 
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
+    setShowModelChooser(false);
     setAddModelsSearch("");
     setCustomModelInput("");
     setCustomModelQuantity("1");
@@ -255,6 +257,8 @@ export default function RoadmapPage() {
       // Close modal and reset selection after all models are added
       setOpenFor(null);
       setSelectedModels([]);
+      setShowModelChooser(false);
+      setAddModelsSearch("");
     } catch (error) {
       console.error("Error adding models to roadmap:", error);
       // Optionally show an error toast here
@@ -946,6 +950,8 @@ export default function RoadmapPage() {
         onOpenChange={(v: boolean) => {
           if (!v) {
             setOpenFor(null);
+            setSelectedModels([]);
+            setShowModelChooser(false);
             setAddModelsSearch("");
             setCustomModelInput("");
             setCustomModelQuantity("1");
@@ -958,6 +964,8 @@ export default function RoadmapPage() {
               variant="outline"
               onClick={() => {
                 setOpenFor(null);
+                setSelectedModels([]);
+                setShowModelChooser(false);
                 setAddModelsSearch("");
                 setCustomModelInput("");
                 setCustomModelQuantity("1");
@@ -976,12 +984,72 @@ export default function RoadmapPage() {
         }
       >
         <div className="space-y-4">
-          <Input
-            placeholder="Search models..."
-            value={addModelsSearch}
-            onChange={(e) => setAddModelsSearch(e.target.value)}
-            className="h-10"
-          />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-900">Selected models</h3>
+              <span className="text-xs text-slate-500">{selectedModels.length} selected</span>
+            </div>
+            {selectedModels.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500">
+                Choose models from the list below.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {selectedModels.map((id) => {
+                  const order = eligibleOrders.find((item) => item.id === id);
+                  if (!order) return null;
+                  return (
+                    <div
+                      key={order.id}
+                      className="grid grid-cols-[minmax(0,1fr)_5rem_4.5rem] gap-2 rounded-lg border border-slate-200 p-2"
+                    >
+                      <div className="min-w-0 rounded-md bg-slate-50 px-3 py-2">
+                        <div className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                          Model name
+                        </div>
+                        <div className="truncate text-sm font-medium text-slate-900">
+                          {order.modelName}
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-slate-50 px-2 py-2 text-center">
+                        <div className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                          Qty
+                        </div>
+                        <div className="text-sm font-medium text-slate-900">
+                          {order.quantity}
+                        </div>
+                      </div>
+                      <div className="overflow-hidden rounded-md bg-slate-50">
+                        <div className="text-center text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                          Photo
+                        </div>
+                        {order.photoUrl ? (
+                          <img
+                            src={order.photoUrl}
+                            alt={order.modelName}
+                            className="h-8 w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-8 items-center justify-center text-[10px] text-slate-400">
+                            None
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowModelChooser((value) => !value)}
+            className="w-full"
+          >
+            {showModelChooser ? "Hide model list" : "Choose from list"}
+          </Button>
 
           <div className="flex gap-2">
             <Input
@@ -1042,8 +1110,15 @@ export default function RoadmapPage() {
             </Button>
           </div>
 
-          <div className="space-y-2">
-            {eligibleOrders.length === 0 ? (
+          {showModelChooser && (
+            <div className="space-y-2">
+              <Input
+                placeholder="Search models..."
+                value={addModelsSearch}
+                onChange={(e) => setAddModelsSearch(e.target.value)}
+                className="h-10"
+              />
+              {eligibleOrders.length === 0 ? (
               <div className="text-center py-8 text-sm text-slate-600">
                 No models available to add
               </div>
@@ -1071,8 +1146,9 @@ export default function RoadmapPage() {
                   </div>
                 </label>
               ))
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </SimpleModal>
 
