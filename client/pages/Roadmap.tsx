@@ -222,8 +222,7 @@ export default function RoadmapPage() {
     roadmapId: string,
     modelId: string,
   ) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    if (file.size > 2 * 1024 * 1024) return;
+    if (!file || (file.type && !file.type.startsWith("image/"))) return;
 
     const reader = new FileReader();
     reader.onload = () => {
