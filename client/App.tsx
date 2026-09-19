@@ -52,10 +52,17 @@ function App() {
   );
 }
 
-// PWA: register service worker and forward beforeinstallprompt event to React
+// PWA: register service worker in production only and clear stale dev registrations
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker
+    if (import.meta.env.DEV) {
+      void navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => void registration.unregister());
+      });
+      return;
+    }
+
+    void navigator.serviceWorker
       .register("/sw.js")
       .then(() => {
         console.log("Service worker registered");

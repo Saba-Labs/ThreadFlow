@@ -30,7 +30,21 @@ import { useRoadmaps } from "@/context/RoadmapContext";
 import { useToast } from "@/hooks/use-toast";
 import { useImageLibrary } from "@/context/ImageLibraryContext";
 
-// Simple Modal Component
+function normalizePhotoUrl(photoUrl?: string | null) {
+  const value = photoUrl?.trim();
+  if (!value) return undefined;
+  if (
+    value.startsWith("data:") ||
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith("/") ||
+    value.startsWith("blob:")
+  ) {
+    return value;
+  }
+  return `data:image/webp;base64,${value}`;
+}
+
 function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
   if (!open) return null;
 
@@ -76,9 +90,17 @@ export default function RoadmapPage() {
     updateModelPhoto,
     refreshRoadmaps,
   } = useRoadmaps();
-  const { images: libraryImages } = useImageLibrary();
+  const [libraryPickerFor, setLibraryPickerFor] = useState<
+    | { type: "existing"; roadmapId: string; modelId: string }
+    | { type: "custom" }
+    | null
+  >(null);
+  const { images: libraryImages } = useImageLibrary({
+    enabled: libraryPickerFor !== null,
+  });
+  const [openFor, setOpenFor] = useState<string | null>(null);
 
-  const pipeline = useProductionPipeline();
+  const pipeline = useProductionPipeline({ enabled: openFor !== null });
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -104,7 +126,6 @@ export default function RoadmapPage() {
 
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
-  const [openFor, setOpenFor] = useState<string | null>(null);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [showModelChooser, setShowModelChooser] = useState(false);
   const [moveItem, setMoveItem] = useState<{
@@ -126,11 +147,6 @@ export default function RoadmapPage() {
     alt: string;
   } | null>(null);
   const [photoSourceFor, setPhotoSourceFor] = useState<
-    | { type: "existing"; roadmapId: string; modelId: string }
-    | { type: "custom" }
-    | null
-  >(null);
-  const [libraryPickerFor, setLibraryPickerFor] = useState<
     | { type: "existing"; roadmapId: string; modelId: string }
     | { type: "custom" }
     | null
@@ -169,6 +185,30 @@ export default function RoadmapPage() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [expandedPhoto]);
+
+  const pipelinePhotos = useMemo(() => {
+    const byId = new globalThis.Map<string, string>();
+    const byName = new globalThis.Map<string, string>();
+    for (const order of pipeline.orders) {
+      if (!order.photoUrl) continue;
+      byId.set(order.id, order.photoUrl);
+      byName.set(order.modelName.trim().toLowerCase(), order.photoUrl);
+    }
+    return { byId, byName };
+  }, [pipeline.orders]);
+
+  const getPhotoUrl = (item: {
+    modelId: string;
+    modelName?: string;
+    photoUrl?: string;
+  }) =>
+    normalizePhotoUrl(
+      item.photoUrl ||
+        pipelinePhotos.byId.get(item.modelId) ||
+        (item.modelName
+          ? pipelinePhotos.byName.get(item.modelName.trim().toLowerCase())
+          : undefined),
+    );
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
@@ -812,7 +852,7 @@ export default function RoadmapPage() {
                               }`}
                             >
                               <div className="flex items-center gap-1.5 flex-shrink-0">
-                                {it.photoUrl ? (
+                                {getPhotoUrl(it) ? (
                                   <button
                                     type="button"
                                     aria-label={`Enlarge ${it.modelName} photo`}
@@ -820,15 +860,19 @@ export default function RoadmapPage() {
                                     onClick={(event) => {
                                       event.stopPropagation();
                                       setExpandedPhoto({
-                                        src: it.photoUrl!,
+                                        src: getPhotoUrl(it)!,
                                         alt: `${it.modelName} preview`,
                                       });
                                     }}
                                     className="rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                                   >
                                     <img
-                                      src={it.photoUrl}
+                                      src={getPhotoUrl(it)}
                                       alt={`${it.modelName} preview`}
+                                      width={56}
+                                      height={56}
+                                      loading={idx < 3 ? "eager" : "lazy"}
+                                      decoding="async"
                                       className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
                                     />
                                   </button>
@@ -881,12 +925,12 @@ export default function RoadmapPage() {
                                       size="icon"
                                       variant="ghost"
                                       aria-label={
-                                        it.photoUrl
+                                        getPhotoUrl(it)
                                           ? "Replace photo"
                                           : "Add photo"
                                       }
                                       title={
-                                        it.photoUrl
+                                        getPhotoUrl(it)
                                           ? "Replace photo"
                                           : "Add photo"
                                       }
@@ -902,7 +946,7 @@ export default function RoadmapPage() {
                                     >
                                       <ImagePlus className="h-4 w-4" />
                                     </Button>
-                                    {it.photoUrl && (
+                                    {getPhotoUrl(it) && (
                                       <Button
                                         type="button"
                                         size="icon"

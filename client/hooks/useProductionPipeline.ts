@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { useMachineTypes } from "@/lib/machineTypes";
 import { useSSESubscription } from "./useSSESubscription";
 import { syncQueue, createSyncTask } from "@/lib/backgroundSync";
@@ -110,23 +110,26 @@ function setStore(updater: (s: PipelineState) => PipelineState) {
 
 function subscribe(cb: () => void) {
   subscribers.add(cb);
-  if (!initialized) {
-    initialized = true;
-    fetchFromServer();
-  }
   return () => subscribers.delete(cb);
 }
 
-export function useProductionPipeline() {
+export function useProductionPipeline(options: { enabled?: boolean } = {}) {
+  const enabled = options.enabled ?? true;
   const state = useSyncExternalStore(
     subscribe,
     () => STORE,
     () => STORE,
   );
 
+  useEffect(() => {
+    if (!enabled || initialized) return;
+    initialized = true;
+    void fetchFromServer();
+  }, [enabled]);
+
   useSSESubscription((event) => {
-    if (event.type === "pipeline_updated") {
-      fetchFromServer();
+    if (enabled && event.type === "pipeline_updated") {
+      void fetchFromServer();
     }
   });
 

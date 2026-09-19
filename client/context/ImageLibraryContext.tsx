@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { useSSESubscription } from "@/hooks/useSSESubscription";
 
@@ -32,19 +32,23 @@ async function fetchImages() {
 
 function subscribe(callback: () => void) {
   subscribers.add(callback);
-  if (STORE.length === 0) void fetchImages();
   return () => subscribers.delete(callback);
 }
 
-export function useImageLibrary() {
+export function useImageLibrary(options: { enabled?: boolean } = {}) {
+  const enabled = options.enabled ?? true;
   const images = useSyncExternalStore(
     subscribe,
     () => STORE,
     () => STORE,
   );
 
+  useEffect(() => {
+    if (enabled && STORE.length === 0) void fetchImages();
+  }, [enabled]);
+
   useSSESubscription((event) => {
-    if (event.type === "library_updated") void fetchImages();
+    if (enabled && event.type === "library_updated") void fetchImages();
   });
 
   const addImage = useCallback(

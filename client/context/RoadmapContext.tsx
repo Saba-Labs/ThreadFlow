@@ -47,7 +47,7 @@ function notifySubscribers() {
 }
 
 async function hydrateRoadmapPhotos(roadmaps: Roadmap[]) {
-  const photoRequests = roadmaps.flatMap((roadmap) =>
+  const requests = roadmaps.flatMap((roadmap) =>
     roadmap.items
       .filter((item) => item.photoAvailable && !item.photoUrl)
       .map(async (item) => {
@@ -55,18 +55,21 @@ async function hydrateRoadmapPhotos(roadmaps: Roadmap[]) {
           const result = await fetchWithTimeout<{ photoUrl: string | null }>(
             `/api/roadmaps/${encodeURIComponent(roadmap.id)}/models/${encodeURIComponent(item.modelId)}/photo`,
           );
-          return { roadmapId: roadmap.id, modelId: item.modelId, photoUrl: result.photoUrl };
+          return {
+            roadmapId: roadmap.id,
+            modelId: item.modelId,
+            photoUrl: result.photoUrl,
+          };
         } catch {
           return null;
         }
       }),
   );
-
-  const photos = await Promise.all(photoRequests);
-  const photoByItem = new Map(
+  const photos = await Promise.all(requests);
+  const photoByItem = new globalThis.Map(
     photos
       .filter((photo): photo is NonNullable<typeof photo> => Boolean(photo?.photoUrl))
-      .map((photo) => [`${photo.roadmapId}:${photo.modelId}`, photo.photoUrl]),
+      .map((photo) => [`${photo.roadmapId}:${photo.modelId}`, photo.photoUrl] as const),
   );
   if (photoByItem.size === 0) return;
 
@@ -74,7 +77,7 @@ async function hydrateRoadmapPhotos(roadmaps: Roadmap[]) {
     ...roadmap,
     items: roadmap.items.map((item) => ({
       ...item,
-      photoUrl: photoByItem.get(`${roadmap.id}:${item.modelId}`) || item.photoUrl,
+      photoUrl: item.photoUrl || photoByItem.get(`${roadmap.id}:${item.modelId}`),
     })),
   }));
   notifySubscribers();
@@ -91,7 +94,26 @@ async function fetchRoadmaps() {
     }
   }, 1500);
   try {
-    STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
+    const fetchedRoadmaps = await fetchWithTimeout<unknown>("/api/roadmaps");
+    if (!Array.isArray(fetchedRoadmaps)) {
+      throw new Error("Roadmap API returned an invalid response");
+    }
+    const roadmaps = fetchedRoadmaps as Roadmap[];
+    const currentPhotos = new Map(
+      STORE.flatMap((roadmap) =>
+        roadmap.items
+          .filter((item) => item.photoUrl)
+          .map((item) => [`${roadmap.id}:${item.modelId}`, item.photoUrl!] as const),
+      ),
+    );
+    STORE = roadmaps.map((roadmap) => ({
+      ...roadmap,
+      items: roadmap.items.map((item) => ({
+        ...item,
+        photoUrl:
+          item.photoUrl || currentPhotos.get(`${roadmap.id}:${item.modelId}`),
+      })),
+    }));
     notifySubscribers();
     void hydrateRoadmapPhotos(STORE);
     if (typeof window !== "undefined") {
