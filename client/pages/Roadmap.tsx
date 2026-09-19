@@ -236,7 +236,7 @@ export default function RoadmapPage() {
   };
 
   const handleCustomPhotoFile = (file: File | undefined) => {
-    if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) return;
+    if (!file || (file.type && !file.type.startsWith("image/"))) return;
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") setCustomModelPhoto(reader.result);
@@ -1107,7 +1107,10 @@ export default function RoadmapPage() {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+              onChange={(event) => {
+                handleCustomPhotoFile(event.target.files?.[0]);
+                event.currentTarget.value = "";
+              }}
             />
             <input
               ref={(element) => {
@@ -1117,7 +1120,10 @@ export default function RoadmapPage() {
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+              onChange={(event) => {
+                handleCustomPhotoFile(event.target.files?.[0]);
+                event.currentTarget.value = "";
+              }}
             />
           </div>
 
