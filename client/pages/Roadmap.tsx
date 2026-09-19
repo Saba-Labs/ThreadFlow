@@ -90,9 +90,17 @@ export default function RoadmapPage() {
     updateModelPhoto,
     refreshRoadmaps,
   } = useRoadmaps();
-  const { images: libraryImages } = useImageLibrary();
+  const [libraryPickerFor, setLibraryPickerFor] = useState<
+    | { type: "existing"; roadmapId: string; modelId: string }
+    | { type: "custom" }
+    | null
+  >(null);
+  const { images: libraryImages } = useImageLibrary({
+    enabled: libraryPickerFor !== null,
+  });
+  const [openFor, setOpenFor] = useState<string | null>(null);
 
-  const pipeline = useProductionPipeline();
+  const pipeline = useProductionPipeline({ enabled: openFor !== null });
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -118,7 +126,6 @@ export default function RoadmapPage() {
 
   const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState<string>("");
-  const [openFor, setOpenFor] = useState<string | null>(null);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [showModelChooser, setShowModelChooser] = useState(false);
   const [moveItem, setMoveItem] = useState<{
@@ -140,11 +147,6 @@ export default function RoadmapPage() {
     alt: string;
   } | null>(null);
   const [photoSourceFor, setPhotoSourceFor] = useState<
-    | { type: "existing"; roadmapId: string; modelId: string }
-    | { type: "custom" }
-    | null
-  >(null);
-  const [libraryPickerFor, setLibraryPickerFor] = useState<
     | { type: "existing"; roadmapId: string; modelId: string }
     | { type: "custom" }
     | null
