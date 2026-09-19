@@ -12,6 +12,7 @@ import {
   Monitor,
   Eraser,
   ImagePlus,
+  Library,
 } from "lucide-react";
 import {
   Fragment,
@@ -541,7 +542,7 @@ export default function RoadmapPage() {
                   className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
                   title="Open image library"
                 >
-                  <ImagePlus className="h-4 w-4 sm:mr-2" />
+                  <Library className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Library</span>
                 </Button>
                 {!isReadOnly && (
