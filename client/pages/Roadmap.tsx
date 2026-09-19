@@ -184,16 +184,29 @@ export default function RoadmapPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [expandedPhoto]);
 
-  const pipelinePhotos = useMemo(
-    () =>
-      new globalThis.Map(
-        pipeline.orders.map((order) => [order.id, order.photoUrl] as const),
-      ),
-    [pipeline.orders],
-  );
+  const pipelinePhotos = useMemo(() => {
+    const byId = new globalThis.Map<string, string>();
+    const byName = new globalThis.Map<string, string>();
+    for (const order of pipeline.orders) {
+      if (!order.photoUrl) continue;
+      byId.set(order.id, order.photoUrl);
+      byName.set(order.modelName.trim().toLowerCase(), order.photoUrl);
+    }
+    return { byId, byName };
+  }, [pipeline.orders]);
 
-  const getPhotoUrl = (item: { modelId: string; photoUrl?: string }) =>
-    normalizePhotoUrl(item.photoUrl || pipelinePhotos.get(item.modelId));
+  const getPhotoUrl = (item: {
+    modelId: string;
+    modelName?: string;
+    photoUrl?: string;
+  }) =>
+    normalizePhotoUrl(
+      item.photoUrl ||
+        pipelinePhotos.byId.get(item.modelId) ||
+        (item.modelName
+          ? pipelinePhotos.byName.get(item.modelName.trim().toLowerCase())
+          : undefined),
+    );
 
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
