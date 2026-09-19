@@ -1103,7 +1103,7 @@ export default function RoadmapPage() {
           </Button>
 
           {showModelChooser && (
-            <div className="space-y-2">
+            <div className="space-y-2 pb-20">
               <Input
                 placeholder="Search models..."
                 value={addModelsSearch}
