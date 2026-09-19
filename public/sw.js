@@ -1,8 +1,8 @@
 // Service Worker with cache versioning
 // Cache is automatically cleared and updated when app is deployed with new build
 
-const CACHE_VERSION = "app-cache-v3";
-const RUNTIME_CACHE = "runtime-cache-v3";
+const CACHE_VERSION = "app-cache-v4";
+const RUNTIME_CACHE = "runtime-cache-v4";
 const ASSETS_TO_CACHE = ["/"];
 
 // Install event: cache essential assets
