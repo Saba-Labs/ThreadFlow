@@ -79,6 +79,7 @@ export default function RoadmapPage() {
   const {
     roadmaps,
     isLoading: roadmapsLoading,
+    loadError: roadmapsLoadError,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
@@ -95,6 +96,7 @@ export default function RoadmapPage() {
     | { type: "custom" }
     | null
   >(null);
+  const [isRetrying, setIsRetrying] = useState(false);
   const { images: libraryImages } = useImageLibrary({
     enabled: libraryPickerFor !== null,
   });
@@ -176,6 +178,7 @@ export default function RoadmapPage() {
   } | null>(null);
   const photoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const cameraInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const addingCustomModelRef = useRef(false);
 
   useEffect(() => {
     if (!expandedPhoto) return;
@@ -322,7 +325,9 @@ export default function RoadmapPage() {
     }
   };
 
-  const handleAddCustomModel = async () => {
+  const handleAddCustomModel = () => {
+    if (addingCustomModelRef.current) return;
+
     const quantity = Number.parseInt(customModelQuantity, 10);
     if (
       !openFor ||
@@ -332,31 +337,32 @@ export default function RoadmapPage() {
     )
       return;
 
-    try {
-      const modelName = [customModelPart1, customModelPart2, customModelPart3]
-        .map((part) => part.trim())
-        .filter(Boolean)
-        .join(" ");
-      const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      await addModelToRoadmap(
-        openFor,
-        customModelId,
-        modelName,
-        quantity,
-        customModelPhoto || undefined,
-      );
-      setCustomModelPart1("");
-      setCustomModelPart2("");
-      setCustomModelPart3("");
-      setCustomModelQuantity("1");
-      setCustomModelPhoto("");
-      setOpenFor(null);
-      setSelectedModels([]);
-      setShowModelChooser(false);
-      setAddModelsSearch("");
-    } catch (error) {
-      console.error("Error adding custom model to roadmap:", error);
-    }
+    addingCustomModelRef.current = true;
+    const roadmapId = openFor;
+    const modelName = [customModelPart1, customModelPart2, customModelPart3]
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(" ");
+    const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const photoUrl = customModelPhoto || undefined;
+
+    setCustomModelPart1("");
+    setCustomModelPart2("");
+    setCustomModelPart3("");
+    setCustomModelQuantity("1");
+    setCustomModelPhoto("");
+    setOpenFor(null);
+    setSelectedModels([]);
+    setShowModelChooser(false);
+    setAddModelsSearch("");
+
+    void addModelToRoadmap(roadmapId, customModelId, modelName, quantity, photoUrl)
+      .catch((error) => {
+        console.error("Error adding custom model to roadmap:", error);
+      })
+      .finally(() => {
+        addingCustomModelRef.current = false;
+      });
   };
 
   const handleSaveTitle = (id: string) => {
@@ -643,8 +649,32 @@ export default function RoadmapPage() {
           </div>
         </div>
 
+        {roadmapsLoadError && roadmaps.length === 0 && (
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm text-amber-900 shadow-sm">
+              <p className="font-semibold">Roadmaps are unavailable</p>
+              <p className="mt-2">{roadmapsLoadError}</p>
+              <Button
+                onClick={async () => {
+                  setIsRetrying(true);
+                  try {
+                    await refreshRoadmaps();
+                  } finally {
+                    setIsRetrying(false);
+                  }
+                }}
+                disabled={isRetrying}
+                variant="outline"
+                className="mt-4 border-amber-300 bg-white hover:bg-amber-100"
+              >
+                {isRetrying ? "Retrying..." : "Retry"}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Empty State */}
-        {!roadmapsLoading && roadmaps.length === 0 && (
+        {!roadmapsLoading && !roadmapsLoadError && roadmaps.length === 0 && (
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
               <div className="flex flex-col items-center">
@@ -669,7 +699,7 @@ export default function RoadmapPage() {
           </div>
         )}
 
-        {roadmapsLoading && roadmaps.length === 0 && (
+        {roadmapsLoading && roadmaps.length === 0 && !roadmapsLoadError && (
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
               Loading roadmaps...
@@ -1120,8 +1150,18 @@ export default function RoadmapPage() {
                 onClick={() => setPhotoSourceFor({ type: "custom" })}
                 className="h-10 border-blue-200 bg-blue-50 px-3 text-blue-600 hover:border-blue-300 hover:bg-blue-100"
               >
-                <ImagePlus className="h-4 w-4" />
-                <span className="sr-only sm:not-sr-only sm:ml-2">Photo</span>
+                {customModelPhoto ? (
+                  <img
+                    src={normalizePhotoUrl(customModelPhoto)}
+                    alt="Selected model photo"
+                    className="h-8 w-8 rounded object-cover"
+                  />
+                ) : (
+                  <ImagePlus className="h-4 w-4" />
+                )}
+                <span className="sr-only sm:not-sr-only sm:ml-2">
+                  {customModelPhoto ? "Replace photo" : "Photo"}
+                </span>
               </Button>
             <Button
               size="icon"

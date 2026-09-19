@@ -106,6 +106,17 @@ export async function initializeDatabase() {
         updated_at BIGINT NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS work_orders (
+        id TEXT PRIMARY KEY,
+        model_name TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        photo_url TEXT,
+        created_at BIGINT NOT NULL,
+        updated_at BIGINT NOT NULL,
+        current_step_index INTEGER NOT NULL,
+        parent_id TEXT
+      );
+
       CREATE TABLE IF NOT EXISTS path_steps (
         id TEXT PRIMARY KEY,
         order_id TEXT NOT NULL REFERENCES work_orders(id) ON DELETE CASCADE,
@@ -118,17 +129,6 @@ export async function initializeDatabase() {
         step_index INTEGER NOT NULL,
         created_at BIGINT NOT NULL,
         updated_at BIGINT NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS work_orders (
-        id TEXT PRIMARY KEY,
-        model_name TEXT NOT NULL,
-        quantity INTEGER NOT NULL,
-        photo_url TEXT,
-        created_at BIGINT NOT NULL,
-        updated_at BIGINT NOT NULL,
-        current_step_index INTEGER NOT NULL,
-        parent_id TEXT
       );
 
       CREATE TABLE IF NOT EXISTS job_work_assignments (
