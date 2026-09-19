@@ -16,7 +16,6 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
         i.model_id,
         i.model_name,
         i.quantity,
-        i.photo_url,
         i.photo_url IS NOT NULL AS has_photo,
         i.added_at
       FROM roadmaps r
@@ -42,7 +41,6 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
           modelId: row.model_id,
           modelName: row.model_name,
           quantity: row.quantity,
-          photoUrl: row.photo_url || undefined,
           photoAvailable: row.has_photo,
           addedAt: row.added_at,
         });
