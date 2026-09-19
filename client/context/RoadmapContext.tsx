@@ -57,7 +57,11 @@ async function fetchRoadmaps() {
     }
   }, 1500);
   try {
-    const fetchedRoadmaps = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
+    const fetchedRoadmaps = await fetchWithTimeout<unknown>("/api/roadmaps");
+    if (!Array.isArray(fetchedRoadmaps)) {
+      throw new Error("Roadmap API returned an invalid response");
+    }
+    const roadmaps = fetchedRoadmaps as Roadmap[];
     const currentPhotos = new Map(
       STORE.flatMap((roadmap) =>
         roadmap.items
@@ -65,7 +69,7 @@ async function fetchRoadmaps() {
           .map((item) => [`${roadmap.id}:${item.modelId}`, item.photoUrl!] as const),
       ),
     );
-    STORE = fetchedRoadmaps.map((roadmap) => ({
+    STORE = roadmaps.map((roadmap) => ({
       ...roadmap,
       items: roadmap.items.map((item) => ({
         ...item,
