@@ -30,7 +30,21 @@ import { useRoadmaps } from "@/context/RoadmapContext";
 import { useToast } from "@/hooks/use-toast";
 import { useImageLibrary } from "@/context/ImageLibraryContext";
 
-// Simple Modal Component
+function normalizePhotoUrl(photoUrl?: string | null) {
+  const value = photoUrl?.trim();
+  if (!value) return undefined;
+  if (
+    value.startsWith("data:") ||
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith("/") ||
+    value.startsWith("blob:")
+  ) {
+    return value;
+  }
+  return `data:image/webp;base64,${value}`;
+}
+
 function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
   if (!open) return null;
 
@@ -812,7 +826,7 @@ export default function RoadmapPage() {
                               }`}
                             >
                               <div className="flex items-center gap-1.5 flex-shrink-0">
-                                {it.photoUrl ? (
+                                {normalizePhotoUrl(it.photoUrl) ? (
                                   <button
                                     type="button"
                                     aria-label={`Enlarge ${it.modelName} photo`}
@@ -820,14 +834,14 @@ export default function RoadmapPage() {
                                     onClick={(event) => {
                                       event.stopPropagation();
                                       setExpandedPhoto({
-                                        src: it.photoUrl!,
+                                        src: normalizePhotoUrl(it.photoUrl)!,
                                         alt: `${it.modelName} preview`,
                                       });
                                     }}
                                     className="rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                                   >
                                     <img
-                                      src={it.photoUrl}
+                                      src={normalizePhotoUrl(it.photoUrl)}
                                       alt={`${it.modelName} preview`}
                                       className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
                                     />
@@ -881,12 +895,12 @@ export default function RoadmapPage() {
                                       size="icon"
                                       variant="ghost"
                                       aria-label={
-                                        it.photoUrl
+                                        normalizePhotoUrl(it.photoUrl)
                                           ? "Replace photo"
                                           : "Add photo"
                                       }
                                       title={
-                                        it.photoUrl
+                                        normalizePhotoUrl(it.photoUrl)
                                           ? "Replace photo"
                                           : "Add photo"
                                       }
@@ -902,7 +916,7 @@ export default function RoadmapPage() {
                                     >
                                       <ImagePlus className="h-4 w-4" />
                                     </Button>
-                                    {it.photoUrl && (
+                                    {normalizePhotoUrl(it.photoUrl) && (
                                       <Button
                                         type="button"
                                         size="icon"
