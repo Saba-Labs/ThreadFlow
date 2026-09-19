@@ -96,6 +96,7 @@ export default function RoadmapPage() {
     | { type: "custom" }
     | null
   >(null);
+  const [isRetrying, setIsRetrying] = useState(false);
   const { images: libraryImages } = useImageLibrary({
     enabled: libraryPickerFor !== null,
   });
@@ -650,11 +651,19 @@ export default function RoadmapPage() {
               <p className="font-semibold">Roadmaps are unavailable</p>
               <p className="mt-2">{roadmapsLoadError}</p>
               <Button
-                onClick={() => void refreshRoadmaps()}
+                onClick={async () => {
+                  setIsRetrying(true);
+                  try {
+                    await refreshRoadmaps();
+                  } finally {
+                    setIsRetrying(false);
+                  }
+                }}
+                disabled={isRetrying}
                 variant="outline"
                 className="mt-4 border-amber-300 bg-white hover:bg-amber-100"
               >
-                Retry
+                {isRetrying ? "Retrying..." : "Retry"}
               </Button>
             </div>
           </div>
