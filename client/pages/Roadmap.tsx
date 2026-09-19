@@ -132,6 +132,7 @@ export default function RoadmapPage() {
     modelId: string;
   } | null>(null);
   const [addModelsSearch, setAddModelsSearch] = useState("");
+  const [librarySearch, setLibrarySearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
   const [customModelQuantity, setCustomModelQuantity] = useState("1");
   const [draggedItem, setDraggedItem] = useState<{
@@ -186,6 +187,12 @@ export default function RoadmapPage() {
         o.modelName.toLowerCase().includes(q) || String(o.quantity).includes(q),
     );
   }, [eligibleOrders, addModelsSearch]);
+
+  const filteredLibraryImages = useMemo(() => {
+    const q = librarySearch.trim().toLowerCase();
+    if (!q) return libraryImages;
+    return libraryImages.filter((image) => image.name.toLowerCase().includes(q));
+  }, [libraryImages, librarySearch]);
 
   const handleAddRoadmap = () => {
     setNewRoadmapTitle("");
@@ -1332,7 +1339,12 @@ export default function RoadmapPage() {
 
       <SimpleModal
         open={libraryPickerFor !== null}
-        onOpenChange={(open) => !open && setLibraryPickerFor(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setLibraryPickerFor(null);
+            setLibrarySearch("");
+          }
+        }}
         title="Choose from Library"
       >
         {libraryImages.length === 0 ? (
@@ -1340,35 +1352,51 @@ export default function RoadmapPage() {
             No images saved in the Library yet.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {libraryImages.map((image) => (
-              <button
-                key={image.id}
-                type="button"
-                onClick={() => {
-                  if (!libraryPickerFor) return;
-                  void updateModelPhoto(
-                    libraryPickerFor.roadmapId,
-                    libraryPickerFor.modelId,
-                    image.imageData,
-                  ).catch((error) =>
-                    console.error("Error selecting library image:", error),
-                  );
-                  setLibraryPickerFor(null);
-                }}
-                className="overflow-hidden rounded-lg border border-slate-200 text-left transition hover:border-blue-500 hover:ring-2 hover:ring-blue-100"
-              >
-                <img
-                  src={image.imageData}
-                  alt={image.name}
-                  className="aspect-square w-full object-cover"
-                />
-                <span className="block truncate p-2 text-xs font-medium text-slate-700">
-                  {image.name}
-                </span>
-              </button>
-            ))}
-          </div>
+          <>
+            <Input
+              aria-label="Search library images"
+              placeholder="Search images..."
+              value={librarySearch}
+              onChange={(event) => setLibrarySearch(event.target.value)}
+              className="mb-4"
+            />
+            {filteredLibraryImages.length === 0 ? (
+              <p className="py-8 text-center text-sm text-slate-600">
+                No images match your search.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {filteredLibraryImages.map((image) => (
+                  <button
+                    key={image.id}
+                    type="button"
+                    onClick={() => {
+                      if (!libraryPickerFor) return;
+                      void updateModelPhoto(
+                        libraryPickerFor.roadmapId,
+                        libraryPickerFor.modelId,
+                        image.imageData,
+                      ).catch((error) =>
+                        console.error("Error selecting library image:", error),
+                      );
+                      setLibraryPickerFor(null);
+                      setLibrarySearch("");
+                    }}
+                    className="overflow-hidden rounded-lg border border-slate-200 text-left transition hover:border-blue-500 hover:ring-2 hover:ring-blue-100"
+                  >
+                    <img
+                      src={image.imageData}
+                      alt={image.name}
+                      className="aspect-square w-full object-cover"
+                    />
+                    <span className="block truncate p-2 text-xs font-medium text-slate-700">
+                      {image.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </SimpleModal>
 
