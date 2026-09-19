@@ -36,6 +36,7 @@ function readCachedRoadmaps(): Roadmap[] {
 let STORE: Roadmap[] = readCachedRoadmaps();
 let isLoading = false;
 let hasLoaded = STORE.length > 0;
+let initialFetchStarted = false;
 let loadingFallbackTimer: ReturnType<typeof setTimeout> | null = null;
 
 const subscribers = new Set<() => void>();
@@ -46,6 +47,7 @@ function notifySubscribers() {
 
 async function fetchRoadmaps() {
   if (isLoading) return;
+  initialFetchStarted = true;
   isLoading = true;
   loadingFallbackTimer = setTimeout(() => {
     if (isLoading) {
@@ -90,8 +92,8 @@ function getRoadmaps() {
 
 function subscribe(cb: () => void) {
   subscribers.add(cb);
-  if (STORE.length === 0) {
-    fetchRoadmaps();
+  if (!initialFetchStarted) {
+    void fetchRoadmaps();
   }
   return () => subscribers.delete(cb);
 }
