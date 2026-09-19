@@ -136,6 +136,7 @@ export default function RoadmapPage() {
   const [librarySearch, setLibrarySearch] = useState("");
   const [customModelInput, setCustomModelInput] = useState("");
   const [customModelQuantity, setCustomModelQuantity] = useState("1");
+  const [customModelPhoto, setCustomModelPhoto] = useState("");
   const [draggedItem, setDraggedItem] = useState<{
     roadmapId: string;
     modelId: string;
@@ -206,6 +207,7 @@ export default function RoadmapPage() {
     setAddModelsSearch("");
     setCustomModelInput("");
     setCustomModelQuantity("1");
+    setCustomModelPhoto("");
     setOpenFor(roadmapId);
   };
 
@@ -278,9 +280,16 @@ export default function RoadmapPage() {
     try {
       const modelName = customModelInput.trim();
       const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      await addModelToRoadmap(openFor, customModelId, modelName, quantity);
+      await addModelToRoadmap(
+        openFor,
+        customModelId,
+        modelName,
+        quantity,
+        customModelPhoto || undefined,
+      );
       setCustomModelInput("");
       setCustomModelQuantity("1");
+      setCustomModelPhoto("");
     } catch (error) {
       console.error("Error adding custom model to roadmap:", error);
     }
@@ -955,6 +964,7 @@ export default function RoadmapPage() {
             setAddModelsSearch("");
             setCustomModelInput("");
             setCustomModelQuantity("1");
+            setCustomModelPhoto("");
           }
         }}
         title="Add Models"
@@ -969,6 +979,7 @@ export default function RoadmapPage() {
                 setAddModelsSearch("");
                 setCustomModelInput("");
                 setCustomModelQuantity("1");
+                setCustomModelPhoto("");
               }}
               className="flex-1 sm:flex-none"
             >
@@ -1051,23 +1062,22 @@ export default function RoadmapPage() {
             {showModelChooser ? "Hide model list" : "Choose from list"}
           </Button>
 
-          <div className="flex gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)_5rem_minmax(0,8rem)_auto_auto] gap-2">
             <Input
-              placeholder="Add custom model name..."
+              aria-label="Model name"
+              placeholder="Model name"
               value={customModelInput}
               onChange={(e) => setCustomModelInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddCustomModel();
-                }
+                if (e.key === "Enter") handleAddCustomModel();
               }}
-              className="h-10 flex-1"
+              className="h-10"
             />
             <Input
               type="number"
               min="1"
               step="1"
-              aria-label="Custom model quantity"
+              aria-label="Quantity"
               placeholder="Qty"
               value={customModelQuantity}
               onChange={(e) => setCustomModelQuantity(e.target.value)}
@@ -1076,11 +1086,24 @@ export default function RoadmapPage() {
                 e.currentTarget.blur();
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddCustomModel();
-                }
+                if (e.key === "Enter") handleAddCustomModel();
               }}
-              className="no-number-spinner h-10 w-20"
+              className="no-number-spinner h-10"
+            />
+            <Input
+              type="file"
+              accept="image/*"
+              aria-label="Model photo"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  if (typeof reader.result === "string") setCustomModelPhoto(reader.result);
+                };
+                reader.readAsDataURL(file);
+              }}
+              className="h-10 cursor-pointer px-2 text-xs"
             />
             <Button
               size="icon"
@@ -1091,8 +1114,8 @@ export default function RoadmapPage() {
                 !Number.isInteger(Number.parseInt(customModelQuantity, 10)) ||
                 Number.parseInt(customModelQuantity, 10) < 1
               }
-              className="h-10 w-10 border-green-300 hover:bg-green-50 text-green-600"
-              title="Add custom model"
+              className="h-10 w-10 border-green-300 text-green-600 hover:bg-green-50"
+              title="Add model"
             >
               <Check className="h-4 w-4" />
             </Button>
@@ -1102,9 +1125,10 @@ export default function RoadmapPage() {
               onClick={() => {
                 setCustomModelInput("");
                 setCustomModelQuantity("1");
+                setCustomModelPhoto("");
               }}
-              className="h-10 w-10 border-red-300 hover:bg-red-50 text-red-600"
-              title="Clear input"
+              className="h-10 w-10 border-red-300 text-red-600 hover:bg-red-50"
+              title="Clear model inputs"
             >
               <X className="h-4 w-4" />
             </Button>
