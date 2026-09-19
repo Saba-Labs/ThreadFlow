@@ -1146,8 +1146,18 @@ export default function RoadmapPage() {
                 onClick={() => setPhotoSourceFor({ type: "custom" })}
                 className="h-10 border-blue-200 bg-blue-50 px-3 text-blue-600 hover:border-blue-300 hover:bg-blue-100"
               >
-                <ImagePlus className="h-4 w-4" />
-                <span className="sr-only sm:not-sr-only sm:ml-2">Photo</span>
+                {customModelPhoto ? (
+                  <img
+                    src={normalizePhotoUrl(customModelPhoto)}
+                    alt="Selected model photo"
+                    className="h-8 w-8 rounded object-cover"
+                  />
+                ) : (
+                  <ImagePlus className="h-4 w-4" />
+                )}
+                <span className="sr-only sm:not-sr-only sm:ml-2">
+                  {customModelPhoto ? "Replace photo" : "Photo"}
+                </span>
               </Button>
             <Button
               size="icon"
