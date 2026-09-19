@@ -37,6 +37,7 @@ function readCachedRoadmaps(): Roadmap[] {
 let STORE: Roadmap[] = readCachedRoadmaps();
 let isLoading = false;
 let hasLoaded = STORE.length > 0;
+let loadError: string | null = null;
 let initialFetchStarted = false;
 let loadingFallbackTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -95,6 +96,7 @@ async function fetchRoadmaps() {
   }, 1500);
   try {
     const fetchedRoadmaps = await fetchWithTimeout<unknown>("/api/roadmaps");
+    loadError = null;
     if (!Array.isArray(fetchedRoadmaps)) {
       throw new Error("Roadmap API returned an invalid response");
     }
@@ -133,6 +135,7 @@ async function fetchRoadmaps() {
       } catch {}
     }
   } catch (error) {
+    loadError = error instanceof Error ? error.message : "Unable to load roadmaps";
     console.error("Error fetching roadmaps:", error);
   } finally {
     isLoading = false;
@@ -447,6 +450,7 @@ export function useRoadmaps() {
   return {
     roadmaps: state,
     isLoading: !hasLoaded,
+    loadError,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,

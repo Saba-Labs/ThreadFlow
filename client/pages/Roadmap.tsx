@@ -79,6 +79,7 @@ export default function RoadmapPage() {
   const {
     roadmaps,
     isLoading: roadmapsLoading,
+    loadError: roadmapsLoadError,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
@@ -643,8 +644,24 @@ export default function RoadmapPage() {
           </div>
         </div>
 
+        {roadmapsLoadError && roadmaps.length === 0 && (
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-sm text-amber-900 shadow-sm">
+              <p className="font-semibold">Roadmaps are unavailable</p>
+              <p className="mt-2">{roadmapsLoadError}</p>
+              <Button
+                onClick={() => void refreshRoadmaps()}
+                variant="outline"
+                className="mt-4 border-amber-300 bg-white hover:bg-amber-100"
+              >
+                Retry
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Empty State */}
-        {!roadmapsLoading && roadmaps.length === 0 && (
+        {!roadmapsLoading && !roadmapsLoadError && roadmaps.length === 0 && (
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
               <div className="flex flex-col items-center">
@@ -669,7 +686,7 @@ export default function RoadmapPage() {
           </div>
         )}
 
-        {roadmapsLoading && roadmaps.length === 0 && (
+        {roadmapsLoading && roadmaps.length === 0 && !roadmapsLoadError && (
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
               Loading roadmaps...
