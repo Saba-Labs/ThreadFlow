@@ -120,17 +120,9 @@ async function fetchRoadmaps() {
     void hydrateRoadmapPhotos(STORE);
     if (typeof window !== "undefined") {
       try {
-        const cachedRoadmaps = STORE.map((roadmap) => ({
-          ...roadmap,
-          items: roadmap.items.map((item) =>
-            Object.fromEntries(
-              Object.entries(item).filter(([key]) => key !== "photoUrl"),
-            ),
-          ),
-        }));
         window.localStorage.setItem(
           ROADMAP_CACHE_KEY,
-          JSON.stringify(cachedRoadmaps),
+          JSON.stringify(STORE),
         );
       } catch {}
     }
