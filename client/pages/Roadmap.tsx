@@ -306,10 +306,14 @@ export default function RoadmapPage() {
         customModelPhoto || undefined,
       );
       setCustomModelPart1("");
-    setCustomModelPart2("");
-    setCustomModelPart3("");
-    setCustomModelQuantity("1");
+      setCustomModelPart2("");
+      setCustomModelPart3("");
+      setCustomModelQuantity("1");
       setCustomModelPhoto("");
+      setOpenFor(null);
+      setSelectedModels([]);
+      setShowModelChooser(false);
+      setAddModelsSearch("");
     } catch (error) {
       console.error("Error adding custom model to roadmap:", error);
     }
