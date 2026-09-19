@@ -50,7 +50,18 @@ async function fetchRoadmaps() {
     STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
     if (typeof window !== "undefined") {
       try {
-        window.localStorage.setItem(ROADMAP_CACHE_KEY, JSON.stringify(STORE));
+        const cachedRoadmaps = STORE.map((roadmap) => ({
+          ...roadmap,
+          items: roadmap.items.map((item) =>
+            Object.fromEntries(
+              Object.entries(item).filter(([key]) => key !== "photoUrl"),
+            ),
+          ),
+        }));
+        window.localStorage.setItem(
+          ROADMAP_CACHE_KEY,
+          JSON.stringify(cachedRoadmaps),
+        );
       } catch {}
     }
   } catch (error) {
