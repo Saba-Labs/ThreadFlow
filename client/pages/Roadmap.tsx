@@ -995,6 +995,35 @@ export default function RoadmapPage() {
           }
         }}
         title="Add Models"
+        footer={
+          showModelChooser ? (
+            <div className="flex items-center gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOpenFor(null);
+                  setSelectedModels([]);
+                  setShowModelChooser(false);
+                  setAddModelsSearch("");
+                  setCustomModelPart1("");
+                  setCustomModelPart2("");
+                  setCustomModelPart3("");
+                  setCustomModelQuantity("1");
+                  setCustomModelPhoto("");
+                }}
+                className="flex-1 sm:flex-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddSelectedToRoadmap}
+                className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700"
+              >
+                Add Selected ({selectedModels.length})
+              </Button>
+            </div>
+          ) : null
+        }
       >
         <div className="space-y-4">
           <div className="space-y-2">
@@ -1103,7 +1132,7 @@ export default function RoadmapPage() {
           </Button>
 
           {showModelChooser && (
-            <div className="space-y-2 pb-20">
+            <div className="space-y-2">
               <Input
                 placeholder="Search models..."
                 value={addModelsSearch}
@@ -1139,33 +1168,6 @@ export default function RoadmapPage() {
                 </label>
               ))
               )}
-              <div className="sticky bottom-0 z-10 -mx-4 bg-white px-4 pb-4 pt-4 sm:-mx-6 sm:px-6">
-                <div className="flex items-center gap-3 justify-end">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setOpenFor(null);
-                      setSelectedModels([]);
-                      setShowModelChooser(false);
-                      setAddModelsSearch("");
-                      setCustomModelPart1("");
-                      setCustomModelPart2("");
-                      setCustomModelPart3("");
-                      setCustomModelQuantity("1");
-                      setCustomModelPhoto("");
-                    }}
-                    className="flex-1 sm:flex-none"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleAddSelectedToRoadmap}
-                    className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700"
-                  >
-                    Add Selected ({selectedModels.length})
-                  </Button>
-                </div>
-              </div>
             </div>
           )}
         </div>
