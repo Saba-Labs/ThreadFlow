@@ -23,6 +23,7 @@ function uid(prefix = "rdm") {
 
 let STORE: Roadmap[] = [];
 let isLoading = false;
+let hasLoaded = false;
 
 const subscribers = new Set<() => void>();
 
@@ -35,11 +36,12 @@ async function fetchRoadmaps() {
   isLoading = true;
   try {
     STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
-    notifySubscribers();
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
   } finally {
     isLoading = false;
+    hasLoaded = true;
+    notifySubscribers();
   }
 }
 
@@ -344,6 +346,7 @@ export function useRoadmaps() {
 
   return {
     roadmaps: state,
+    isLoading: !hasLoaded,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,

@@ -64,6 +64,7 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
 export default function RoadmapPage() {
   const {
     roadmaps,
+    isLoading: roadmapsLoading,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
@@ -603,7 +604,7 @@ export default function RoadmapPage() {
         </div>
 
         {/* Empty State */}
-        {roadmaps.length === 0 && (
+        {!roadmapsLoading && roadmaps.length === 0 && (
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
               <div className="flex flex-col items-center">
@@ -624,6 +625,14 @@ export default function RoadmapPage() {
                   Create Roadmap
                 </Button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {roadmapsLoading && roadmaps.length === 0 && (
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+              Loading roadmaps...
             </div>
           </div>
         )}
