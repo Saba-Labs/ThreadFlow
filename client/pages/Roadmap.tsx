@@ -12,6 +12,7 @@ import {
   Monitor,
   Eraser,
   ImagePlus,
+  Library,
 } from "lucide-react";
 import {
   Fragment,
@@ -104,6 +105,7 @@ export default function RoadmapPage() {
   const [titleDraft, setTitleDraft] = useState<string>("");
   const [openFor, setOpenFor] = useState<string | null>(null);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [showModelChooser, setShowModelChooser] = useState(false);
   const [moveItem, setMoveItem] = useState<{
     fromRoadmapId: string;
     modelId: string;
@@ -122,17 +124,23 @@ export default function RoadmapPage() {
     src: string;
     alt: string;
   } | null>(null);
-  const [photoSourceFor, setPhotoSourceFor] = useState<{
-    roadmapId: string;
-    modelId: string;
-  } | null>(null);
-  const [libraryPickerFor, setLibraryPickerFor] = useState<{
-    roadmapId: string;
-    modelId: string;
-  } | null>(null);
+  const [photoSourceFor, setPhotoSourceFor] = useState<
+    | { type: "existing"; roadmapId: string; modelId: string }
+    | { type: "custom" }
+    | null
+  >(null);
+  const [libraryPickerFor, setLibraryPickerFor] = useState<
+    | { type: "existing"; roadmapId: string; modelId: string }
+    | { type: "custom" }
+    | null
+  >(null);
   const [addModelsSearch, setAddModelsSearch] = useState("");
-  const [customModelInput, setCustomModelInput] = useState("");
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [customModelPart1, setCustomModelPart1] = useState("");
+  const [customModelPart2, setCustomModelPart2] = useState("");
+  const [customModelPart3, setCustomModelPart3] = useState("");
   const [customModelQuantity, setCustomModelQuantity] = useState("1");
+  const [customModelPhoto, setCustomModelPhoto] = useState("");
   const [draggedItem, setDraggedItem] = useState<{
     roadmapId: string;
     modelId: string;
@@ -186,6 +194,12 @@ export default function RoadmapPage() {
     );
   }, [eligibleOrders, addModelsSearch]);
 
+  const filteredLibraryImages = useMemo(() => {
+    const q = librarySearch.trim().toLowerCase();
+    if (!q) return libraryImages;
+    return libraryImages.filter((image) => image.name.toLowerCase().includes(q));
+  }, [libraryImages, librarySearch]);
+
   const handleAddRoadmap = () => {
     setNewRoadmapTitle("");
     setShowCreateModal(true);
@@ -193,9 +207,13 @@ export default function RoadmapPage() {
 
   const openAddModels = (roadmapId: string) => {
     setSelectedModels([]);
+    setShowModelChooser(false);
     setAddModelsSearch("");
-    setCustomModelInput("");
+    setCustomModelPart1("");
+    setCustomModelPart2("");
+    setCustomModelPart3("");
     setCustomModelQuantity("1");
+    setCustomModelPhoto("");
     setOpenFor(roadmapId);
   };
 
@@ -204,8 +222,7 @@ export default function RoadmapPage() {
     roadmapId: string,
     modelId: string,
   ) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    if (file.size > 2 * 1024 * 1024) return;
+    if (!file || (file.type && !file.type.startsWith("image/"))) return;
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -214,6 +231,15 @@ export default function RoadmapPage() {
           (error) => console.error("Error saving roadmap model photo:", error),
         );
       }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCustomPhotoFile = (file: File | undefined) => {
+    if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") setCustomModelPhoto(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -247,6 +273,8 @@ export default function RoadmapPage() {
       // Close modal and reset selection after all models are added
       setOpenFor(null);
       setSelectedModels([]);
+      setShowModelChooser(false);
+      setAddModelsSearch("");
     } catch (error) {
       console.error("Error adding models to roadmap:", error);
       // Optionally show an error toast here
@@ -257,18 +285,34 @@ export default function RoadmapPage() {
     const quantity = Number.parseInt(customModelQuantity, 10);
     if (
       !openFor ||
-      !customModelInput.trim() ||
+      !customModelPart1.trim() ||
       !Number.isInteger(quantity) ||
       quantity < 1
     )
       return;
 
     try {
-      const modelName = customModelInput.trim();
+      const modelName = [customModelPart1, customModelPart2, customModelPart3]
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .join(" ");
       const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      await addModelToRoadmap(openFor, customModelId, modelName, quantity);
-      setCustomModelInput("");
+      await addModelToRoadmap(
+        openFor,
+        customModelId,
+        modelName,
+        quantity,
+        customModelPhoto || undefined,
+      );
+      setCustomModelPart1("");
+      setCustomModelPart2("");
+      setCustomModelPart3("");
       setCustomModelQuantity("1");
+      setCustomModelPhoto("");
+      setOpenFor(null);
+      setSelectedModels([]);
+      setShowModelChooser(false);
+      setAddModelsSearch("");
     } catch (error) {
       console.error("Error adding custom model to roadmap:", error);
     }
@@ -541,7 +585,7 @@ export default function RoadmapPage() {
                   className="h-10 sm:h-11 px-3 sm:px-6 border-slate-300 hover:bg-slate-50"
                   title="Open image library"
                 >
-                  <ImagePlus className="h-4 w-4 sm:mr-2" />
+                  <Library className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Library</span>
                 </Button>
                 {!isReadOnly && (
@@ -840,6 +884,7 @@ export default function RoadmapPage() {
                                       onClick={(event) => {
                                         event.stopPropagation();
                                         setPhotoSourceFor({
+                                          type: "existing",
                                           roadmapId: r.id,
                                           modelId: it.modelId,
                                         });
@@ -938,85 +983,104 @@ export default function RoadmapPage() {
         onOpenChange={(v: boolean) => {
           if (!v) {
             setOpenFor(null);
+            setSelectedModels([]);
+            setShowModelChooser(false);
             setAddModelsSearch("");
-            setCustomModelInput("");
-            setCustomModelQuantity("1");
+            setCustomModelPart1("");
+    setCustomModelPart2("");
+    setCustomModelPart3("");
+    setCustomModelQuantity("1");
+            setCustomModelPhoto("");
           }
         }}
         title="Add Models"
         footer={
-          <div className="flex items-center gap-3 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setOpenFor(null);
-                setAddModelsSearch("");
-                setCustomModelInput("");
-                setCustomModelQuantity("1");
-              }}
-              className="flex-1 sm:flex-none"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddSelectedToRoadmap}
-              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700"
-            >
-              Add Selected ({selectedModels.length})
-            </Button>
-          </div>
+          showModelChooser ? (
+            <div className="flex items-center gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOpenFor(null);
+                  setSelectedModels([]);
+                  setShowModelChooser(false);
+                  setAddModelsSearch("");
+                  setCustomModelPart1("");
+                  setCustomModelPart2("");
+                  setCustomModelPart3("");
+                  setCustomModelQuantity("1");
+                  setCustomModelPhoto("");
+                }}
+                className="flex-1 sm:flex-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddSelectedToRoadmap}
+                className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700"
+              >
+                Add Selected ({selectedModels.length})
+              </Button>
+            </div>
+          ) : null
         }
       >
         <div className="space-y-4">
-          <Input
-            placeholder="Search models..."
-            value={addModelsSearch}
-            onChange={(e) => setAddModelsSearch(e.target.value)}
-            className="h-10"
-          />
-
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add custom model name..."
-              value={customModelInput}
-              onChange={(e) => setCustomModelInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddCustomModel();
-                }
-              }}
-              className="h-10 flex-1"
-            />
-            <Input
-              type="number"
-              min="1"
-              step="1"
-              aria-label="Custom model quantity"
-              placeholder="Qty"
-              value={customModelQuantity}
-              onChange={(e) => setCustomModelQuantity(e.target.value)}
-              onWheel={(e) => {
-                e.preventDefault();
-                e.currentTarget.blur();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleAddCustomModel();
-                }
-              }}
-              className="no-number-spinner h-10 w-20"
-            />
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900">Model name</label>
+            <div className="grid grid-cols-3 gap-2">
+              <Input
+                value={customModelPart1}
+                onChange={(e) => setCustomModelPart1(e.target.value)}
+                placeholder="e.g., Knot"
+              />
+              <Input
+                value={customModelPart2}
+                onChange={(e) => setCustomModelPart2(e.target.value)}
+                placeholder="e.g., L (optional)"
+              />
+              <Input
+                value={customModelPart3}
+                onChange={(e) => setCustomModelPart3(e.target.value)}
+                placeholder="e.g., Spl (optional)"
+              />
+            </div>
+            <div className="grid grid-cols-[5rem_minmax(0,1fr)_auto_auto] gap-2">
+              <Input
+                type="number"
+                min="1"
+                step="1"
+                aria-label="Quantity"
+                placeholder="Qty"
+                value={customModelQuantity}
+                onChange={(e) => setCustomModelQuantity(e.target.value)}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }}
+                className="no-number-spinner h-10"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                aria-label="Add model photo"
+                title={customModelPhoto ? "Replace model photo" : "Add model photo"}
+                onClick={() => setPhotoSourceFor({ type: "custom" })}
+                className="h-10 border-blue-200 bg-blue-50 px-3 text-blue-600 hover:border-blue-300 hover:bg-blue-100"
+              >
+                <ImagePlus className="h-4 w-4" />
+                <span className="sr-only sm:not-sr-only sm:ml-2">Photo</span>
+              </Button>
             <Button
               size="icon"
               variant="outline"
               onClick={handleAddCustomModel}
               disabled={
-                !customModelInput.trim() ||
+                !customModelPart1.trim() ||
                 !Number.isInteger(Number.parseInt(customModelQuantity, 10)) ||
                 Number.parseInt(customModelQuantity, 10) < 1
               }
-              className="h-10 w-10 border-green-300 hover:bg-green-50 text-green-600"
-              title="Add custom model"
+              className="h-10 w-10 border-green-300 text-green-600 hover:bg-green-50"
+              title="Add model"
             >
               <Check className="h-4 w-4" />
             </Button>
@@ -1024,18 +1088,57 @@ export default function RoadmapPage() {
               size="icon"
               variant="outline"
               onClick={() => {
-                setCustomModelInput("");
+                setCustomModelPart1("");
+                setCustomModelPart2("");
+                setCustomModelPart3("");
                 setCustomModelQuantity("1");
+                setCustomModelPhoto("");
               }}
-              className="h-10 w-10 border-red-300 hover:bg-red-50 text-red-600"
-              title="Clear input"
+              className="h-10 w-10 border-red-300 text-red-600 hover:bg-red-50"
+              title="Clear model inputs"
             >
               <X className="h-4 w-4" />
             </Button>
+            </div>
+            <input
+              ref={(element) => {
+                photoInputRefs.current.custom = element;
+              }}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+            />
+            <input
+              ref={(element) => {
+                cameraInputRefs.current.custom = element;
+              }}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+            />
           </div>
 
-          <div className="space-y-2">
-            {eligibleOrders.length === 0 ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowModelChooser((value) => !value)}
+            className="w-full"
+          >
+            {showModelChooser ? "Hide model list" : "Choose from list"}
+          </Button>
+
+          {showModelChooser && (
+            <div className="space-y-2">
+              <Input
+                placeholder="Search models..."
+                value={addModelsSearch}
+                onChange={(e) => setAddModelsSearch(e.target.value)}
+                className="h-10"
+              />
+              {eligibleOrders.length === 0 ? (
               <div className="text-center py-8 text-sm text-slate-600">
                 No models available to add
               </div>
@@ -1063,8 +1166,9 @@ export default function RoadmapPage() {
                   </div>
                 </label>
               ))
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </SimpleModal>
 
@@ -1301,9 +1405,13 @@ export default function RoadmapPage() {
             variant="outline"
             onClick={() => {
               if (!photoSourceFor) return;
-              cameraInputRefs.current[
-                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
-              ]?.click();
+              if (photoSourceFor.type === "custom") {
+                cameraInputRefs.current.custom?.click();
+              } else {
+                cameraInputRefs.current[
+                  `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+                ]?.click();
+              }
               setPhotoSourceFor(null);
             }}
             className="h-20 flex-col gap-2"
@@ -1316,9 +1424,13 @@ export default function RoadmapPage() {
             variant="outline"
             onClick={() => {
               if (!photoSourceFor) return;
-              photoInputRefs.current[
-                `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
-              ]?.click();
+              if (photoSourceFor.type === "custom") {
+                photoInputRefs.current.custom?.click();
+              } else {
+                photoInputRefs.current[
+                  `${photoSourceFor.roadmapId}:${photoSourceFor.modelId}`
+                ]?.click();
+              }
               setPhotoSourceFor(null);
             }}
             className="h-20 flex-col gap-2"
@@ -1331,7 +1443,12 @@ export default function RoadmapPage() {
 
       <SimpleModal
         open={libraryPickerFor !== null}
-        onOpenChange={(open) => !open && setLibraryPickerFor(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setLibraryPickerFor(null);
+            setLibrarySearch("");
+          }
+        }}
         title="Choose from Library"
       >
         {libraryImages.length === 0 ? (
@@ -1339,35 +1456,55 @@ export default function RoadmapPage() {
             No images saved in the Library yet.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {libraryImages.map((image) => (
-              <button
-                key={image.id}
-                type="button"
-                onClick={() => {
-                  if (!libraryPickerFor) return;
-                  void updateModelPhoto(
-                    libraryPickerFor.roadmapId,
-                    libraryPickerFor.modelId,
-                    image.imageData,
-                  ).catch((error) =>
-                    console.error("Error selecting library image:", error),
-                  );
-                  setLibraryPickerFor(null);
-                }}
-                className="overflow-hidden rounded-lg border border-slate-200 text-left transition hover:border-blue-500 hover:ring-2 hover:ring-blue-100"
-              >
-                <img
-                  src={image.imageData}
-                  alt={image.name}
-                  className="aspect-square w-full object-cover"
-                />
-                <span className="block truncate p-2 text-xs font-medium text-slate-700">
-                  {image.name}
-                </span>
-              </button>
-            ))}
-          </div>
+          <>
+            <Input
+              aria-label="Search library images"
+              placeholder="Search images..."
+              value={librarySearch}
+              onChange={(event) => setLibrarySearch(event.target.value)}
+              className="mb-4"
+            />
+            {filteredLibraryImages.length === 0 ? (
+              <p className="py-8 text-center text-sm text-slate-600">
+                No images match your search.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {filteredLibraryImages.map((image) => (
+                  <button
+                    key={image.id}
+                    type="button"
+                    onClick={() => {
+                      if (!libraryPickerFor) return;
+                      if (libraryPickerFor.type === "custom") {
+                        setCustomModelPhoto(image.imageData);
+                      } else {
+                        void updateModelPhoto(
+                          libraryPickerFor.roadmapId,
+                          libraryPickerFor.modelId,
+                          image.imageData,
+                        ).catch((error) =>
+                          console.error("Error selecting library image:", error),
+                        );
+                      }
+                      setLibraryPickerFor(null);
+                      setLibrarySearch("");
+                    }}
+                    className="overflow-hidden rounded-lg border border-slate-200 text-left transition hover:border-blue-500 hover:ring-2 hover:ring-blue-100"
+                  >
+                    <img
+                      src={image.imageData}
+                      alt={image.name}
+                      className="aspect-square w-full object-cover"
+                    />
+                    <span className="block truncate p-2 text-xs font-medium text-slate-700">
+                      {image.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </SimpleModal>
 
