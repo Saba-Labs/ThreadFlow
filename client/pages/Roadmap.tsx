@@ -184,6 +184,12 @@ export default function RoadmapPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [expandedPhoto]);
 
+  const getPhotoUrl = (item: { modelId: string; photoUrl?: string }) =>
+    normalizePhotoUrl(
+      item.photoUrl ||
+        pipeline.orders.find((order) => order.id === item.modelId)?.photoUrl,
+    );
+
   const eligibleOrders = useMemo(() => {
     return pipeline.orders.filter((o) => {
       if (o.currentStepIndex >= o.steps.length) return false;
@@ -826,7 +832,7 @@ export default function RoadmapPage() {
                               }`}
                             >
                               <div className="flex items-center gap-1.5 flex-shrink-0">
-                                {normalizePhotoUrl(it.photoUrl) ? (
+                                {getPhotoUrl(it) ? (
                                   <button
                                     type="button"
                                     aria-label={`Enlarge ${it.modelName} photo`}
@@ -834,14 +840,14 @@ export default function RoadmapPage() {
                                     onClick={(event) => {
                                       event.stopPropagation();
                                       setExpandedPhoto({
-                                        src: normalizePhotoUrl(it.photoUrl)!,
+                                        src: getPhotoUrl(it)!,
                                         alt: `${it.modelName} preview`,
                                       });
                                     }}
                                     className="rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                                   >
                                     <img
-                                      src={normalizePhotoUrl(it.photoUrl)}
+                                      src={getPhotoUrl(it)}
                                       alt={`${it.modelName} preview`}
                                       className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
                                     />
@@ -895,12 +901,12 @@ export default function RoadmapPage() {
                                       size="icon"
                                       variant="ghost"
                                       aria-label={
-                                        normalizePhotoUrl(it.photoUrl)
+                                        getPhotoUrl(it)
                                           ? "Replace photo"
                                           : "Add photo"
                                       }
                                       title={
-                                        normalizePhotoUrl(it.photoUrl)
+                                        getPhotoUrl(it)
                                           ? "Replace photo"
                                           : "Add photo"
                                       }
@@ -916,7 +922,7 @@ export default function RoadmapPage() {
                                     >
                                       <ImagePlus className="h-4 w-4" />
                                     </Button>
-                                    {normalizePhotoUrl(it.photoUrl) && (
+                                    {getPhotoUrl(it) && (
                                       <Button
                                         type="button"
                                         size="icon"
