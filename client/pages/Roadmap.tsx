@@ -134,7 +134,9 @@ export default function RoadmapPage() {
   } | null>(null);
   const [addModelsSearch, setAddModelsSearch] = useState("");
   const [librarySearch, setLibrarySearch] = useState("");
-  const [customModelInput, setCustomModelInput] = useState("");
+  const [customModelPart1, setCustomModelPart1] = useState("");
+  const [customModelPart2, setCustomModelPart2] = useState("");
+  const [customModelPart3, setCustomModelPart3] = useState("");
   const [customModelQuantity, setCustomModelQuantity] = useState("1");
   const [customModelPhoto, setCustomModelPhoto] = useState("");
   const [draggedItem, setDraggedItem] = useState<{
@@ -205,7 +207,9 @@ export default function RoadmapPage() {
     setSelectedModels([]);
     setShowModelChooser(false);
     setAddModelsSearch("");
-    setCustomModelInput("");
+    setCustomModelPart1("");
+    setCustomModelPart2("");
+    setCustomModelPart3("");
     setCustomModelQuantity("1");
     setCustomModelPhoto("");
     setOpenFor(roadmapId);
@@ -271,14 +275,17 @@ export default function RoadmapPage() {
     const quantity = Number.parseInt(customModelQuantity, 10);
     if (
       !openFor ||
-      !customModelInput.trim() ||
+      !customModelPart1.trim() ||
       !Number.isInteger(quantity) ||
       quantity < 1
     )
       return;
 
     try {
-      const modelName = customModelInput.trim();
+      const modelName = [customModelPart1, customModelPart2, customModelPart3]
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .join(" ");
       const customModelId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
       await addModelToRoadmap(
         openFor,
@@ -287,8 +294,10 @@ export default function RoadmapPage() {
         quantity,
         customModelPhoto || undefined,
       );
-      setCustomModelInput("");
-      setCustomModelQuantity("1");
+      setCustomModelPart1("");
+    setCustomModelPart2("");
+    setCustomModelPart3("");
+    setCustomModelQuantity("1");
       setCustomModelPhoto("");
     } catch (error) {
       console.error("Error adding custom model to roadmap:", error);
@@ -962,8 +971,10 @@ export default function RoadmapPage() {
             setSelectedModels([]);
             setShowModelChooser(false);
             setAddModelsSearch("");
-            setCustomModelInput("");
-            setCustomModelQuantity("1");
+            setCustomModelPart1("");
+    setCustomModelPart2("");
+    setCustomModelPart3("");
+    setCustomModelQuantity("1");
             setCustomModelPhoto("");
           }
         }}
@@ -977,7 +988,9 @@ export default function RoadmapPage() {
                 setSelectedModels([]);
                 setShowModelChooser(false);
                 setAddModelsSearch("");
-                setCustomModelInput("");
+                setCustomModelPart1("");
+                setCustomModelPart2("");
+                setCustomModelPart3("");
                 setCustomModelQuantity("1");
                 setCustomModelPhoto("");
               }}
@@ -1062,19 +1075,28 @@ export default function RoadmapPage() {
             {showModelChooser ? "Hide model list" : "Choose from list"}
           </Button>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_5rem_minmax(0,8rem)_auto_auto] gap-2">
-            <Input
-              aria-label="Model name"
-              placeholder="Model name"
-              value={customModelInput}
-              onChange={(e) => setCustomModelInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAddCustomModel();
-              }}
-              className="h-10"
-            />
-            <Input
-              type="number"
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900">Model name</label>
+            <div className="grid grid-cols-3 gap-2">
+              <Input
+                value={customModelPart1}
+                onChange={(e) => setCustomModelPart1(e.target.value)}
+                placeholder="e.g., Knot"
+              />
+              <Input
+                value={customModelPart2}
+                onChange={(e) => setCustomModelPart2(e.target.value)}
+                placeholder="e.g., L (optional)"
+              />
+              <Input
+                value={customModelPart3}
+                onChange={(e) => setCustomModelPart3(e.target.value)}
+                placeholder="e.g., Spl (optional)"
+              />
+            </div>
+            <div className="grid grid-cols-[5rem_minmax(0,1fr)_auto_auto] gap-2">
+              <Input
+                type="number"
               min="1"
               step="1"
               aria-label="Quantity"
@@ -1110,7 +1132,7 @@ export default function RoadmapPage() {
               variant="outline"
               onClick={handleAddCustomModel}
               disabled={
-                !customModelInput.trim() ||
+                !customModelPart1.trim() ||
                 !Number.isInteger(Number.parseInt(customModelQuantity, 10)) ||
                 Number.parseInt(customModelQuantity, 10) < 1
               }
@@ -1123,7 +1145,9 @@ export default function RoadmapPage() {
               size="icon"
               variant="outline"
               onClick={() => {
-                setCustomModelInput("");
+                setCustomModelPart1("");
+                setCustomModelPart2("");
+                setCustomModelPart3("");
                 setCustomModelQuantity("1");
                 setCustomModelPhoto("");
               }}
@@ -1132,6 +1156,7 @@ export default function RoadmapPage() {
             >
               <X className="h-4 w-4" />
             </Button>
+            </div>
           </div>
 
           {showModelChooser && (
