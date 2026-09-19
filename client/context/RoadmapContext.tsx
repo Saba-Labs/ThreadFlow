@@ -146,14 +146,22 @@ export function useRoadmaps() {
       quantity: number,
       photoUrl?: string,
     ) => {
-      try {
-        console.log("[useRoadmaps.addModelToRoadmap] Called with:", {
-          roadmapId,
-          modelId,
-          modelName,
-          quantity,
-        });
+      const previousStore = STORE;
+      const optimisticItem: RoadmapItem = {
+        modelId,
+        modelName,
+        quantity,
+        photoUrl,
+        addedAt: Date.now(),
+      };
+      STORE = STORE.map((roadmap) =>
+        roadmap.id === roadmapId
+          ? { ...roadmap, items: [...roadmap.items, optimisticItem] }
+          : roadmap,
+      );
+      notifySubscribers();
 
+      try {
         await fetchWithTimeout(`/api/roadmaps/${roadmapId}/models`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -165,10 +173,10 @@ export function useRoadmaps() {
           }),
         });
 
-        console.log("[useRoadmaps.addModelToRoadmap] Success");
-
         await fetchRoadmaps();
       } catch (error) {
+        STORE = previousStore;
+        notifySubscribers();
         console.error("Error adding model to roadmap:", error);
         throw error;
       }
