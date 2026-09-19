@@ -872,7 +872,6 @@ export default function RoadmapPage() {
                                       width={56}
                                       height={56}
                                       loading={idx < 3 ? "eager" : "lazy"}
-                                      fetchPriority={idx < 3 ? "high" : "low"}
                                       decoding="async"
                                       className="h-12 w-12 sm:h-14 sm:w-14 rounded-md object-cover border border-slate-200"
                                     />
