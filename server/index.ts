@@ -35,6 +35,7 @@ import {
 } from "./routes/library";
 import {
   getRoadmaps,
+  getRoadmapModelPhoto,
   createRoadmap,
   updateRoadmap,
   deleteRoadmap,
@@ -200,6 +201,10 @@ export function createServer() {
   app.put("/api/roadmaps/:id", updateRoadmap);
   app.delete("/api/roadmaps/:id", deleteRoadmap);
   app.post("/api/roadmaps/:roadmapId/models", addModelToRoadmap);
+  app.get(
+    "/api/roadmaps/:roadmapId/models/:modelId/photo",
+    getRoadmapModelPhoto,
+  );
   app.patch(
     "/api/roadmaps/:roadmapId/models/:modelId/photo",
     updateRoadmapModelPhoto,

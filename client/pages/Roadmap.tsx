@@ -35,12 +35,12 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
       <div
         className="fixed inset-0 bg-black/50"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col shadow-xl">
+      <div className="relative bg-white rounded-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col shadow-xl">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b">
           <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
           <Button
@@ -64,6 +64,7 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
 export default function RoadmapPage() {
   const {
     roadmaps,
+    isLoading: roadmapsLoading,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
@@ -236,7 +237,7 @@ export default function RoadmapPage() {
   };
 
   const handleCustomPhotoFile = (file: File | undefined) => {
-    if (!file || !file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) return;
+    if (!file || (file.type && !file.type.startsWith("image/"))) return;
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") setCustomModelPhoto(reader.result);
@@ -603,7 +604,7 @@ export default function RoadmapPage() {
         </div>
 
         {/* Empty State */}
-        {roadmaps.length === 0 && (
+        {!roadmapsLoading && roadmaps.length === 0 && (
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center shadow-sm">
               <div className="flex flex-col items-center">
@@ -624,6 +625,14 @@ export default function RoadmapPage() {
                   Create Roadmap
                 </Button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {roadmapsLoading && roadmaps.length === 0 && (
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+              Loading roadmaps...
             </div>
           </div>
         )}
@@ -1107,7 +1116,10 @@ export default function RoadmapPage() {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+              onChange={(event) => {
+                handleCustomPhotoFile(event.target.files?.[0]);
+                event.currentTarget.value = "";
+              }}
             />
             <input
               ref={(element) => {
@@ -1117,7 +1129,10 @@ export default function RoadmapPage() {
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(event) => handleCustomPhotoFile(event.target.files?.[0])}
+              onChange={(event) => {
+                handleCustomPhotoFile(event.target.files?.[0]);
+                event.currentTarget.value = "";
+              }}
             />
           </div>
 

@@ -9,34 +9,64 @@ function uid(prefix = "rdm") {
 export const getRoadmaps: RequestHandler = async (req, res) => {
   try {
     const roadmapsResult = await query(
-      "SELECT id, title, created_at FROM roadmaps ORDER BY roadmap_index ASC, created_at DESC",
+      `SELECT
+        r.id AS roadmap_id,
+        r.title,
+        r.created_at,
+        i.model_id,
+        i.model_name,
+        i.quantity,
+        i.photo_url IS NOT NULL AS has_photo,
+        i.added_at
+      FROM roadmaps r
+      LEFT JOIN roadmap_items i ON i.roadmap_id = r.id
+      ORDER BY r.roadmap_index ASC, r.created_at DESC, i.item_index ASC`,
     );
 
-    const roadmaps = await Promise.all(
-      roadmapsResult.rows.map(async (roadmap: any) => {
-        const itemsResult = await query(
-          "SELECT id, model_id, model_name, quantity, photo_url, added_at FROM roadmap_items WHERE roadmap_id = $1 ORDER BY item_index ASC",
-          [roadmap.id],
-        );
-        return {
-          id: roadmap.id,
-          title: roadmap.title,
-          createdAt: roadmap.created_at,
-          items: itemsResult.rows.map((item: any) => ({
-            modelId: item.model_id,
-            modelName: item.model_name,
-            quantity: item.quantity,
-            photoUrl: item.photo_url || undefined,
-            addedAt: item.added_at,
-          })),
+    const roadmapById = new Map<string, any>();
+    for (const row of roadmapsResult.rows) {
+      let roadmap = roadmapById.get(row.roadmap_id);
+      if (!roadmap) {
+        roadmap = {
+          id: row.roadmap_id,
+          title: row.title,
+          createdAt: row.created_at,
+          items: [],
         };
-      }),
-    );
+        roadmapById.set(row.roadmap_id, roadmap);
+      }
+
+      if (row.model_id !== null) {
+        roadmap.items.push({
+          modelId: row.model_id,
+          modelName: row.model_name,
+          quantity: row.quantity,
+          photoAvailable: row.has_photo,
+          addedAt: row.added_at,
+        });
+      }
+    }
+
+    const roadmaps = Array.from(roadmapById.values());
 
     res.json(roadmaps);
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
     res.status(500).json({ error: "Failed to fetch roadmaps" });
+  }
+};
+
+export const getRoadmapModelPhoto: RequestHandler = async (req, res) => {
+  try {
+    const { roadmapId, modelId } = req.params;
+    const result = await query(
+      "SELECT photo_url FROM roadmap_items WHERE roadmap_id = $1 AND model_id = $2",
+      [roadmapId, modelId],
+    );
+    res.json({ photoUrl: result.rows[0]?.photo_url || null });
+  } catch (error) {
+    console.error("Error fetching roadmap model photo:", error);
+    res.status(500).json({ error: "Failed to fetch roadmap model photo" });
   }
 };
 

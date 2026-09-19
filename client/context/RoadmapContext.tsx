@@ -7,6 +7,7 @@ export interface RoadmapItem {
   modelName: string;
   quantity: number;
   photoUrl?: string;
+  photoAvailable?: boolean;
   addedAt: number;
 }
 
@@ -21,8 +22,23 @@ function uid(prefix = "rdm") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-let STORE: Roadmap[] = [];
+const ROADMAP_CACHE_KEY = "threadflow:roadmaps";
+
+function readCachedRoadmaps(): Roadmap[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const cached = window.localStorage.getItem(ROADMAP_CACHE_KEY);
+    return cached ? (JSON.parse(cached) as Roadmap[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+let STORE: Roadmap[] = readCachedRoadmaps();
 let isLoading = false;
+let hasLoaded = STORE.length > 0;
+let initialFetchStarted = false;
+let loadingFallbackTimer: ReturnType<typeof setTimeout> | null = null;
 
 const subscribers = new Set<() => void>();
 
@@ -30,16 +46,80 @@ function notifySubscribers() {
   for (const subscriber of Array.from(subscribers)) subscriber();
 }
 
+async function hydrateRoadmapPhotos(roadmaps: Roadmap[]) {
+  const photoRequests = roadmaps.flatMap((roadmap) =>
+    roadmap.items
+      .filter((item) => item.photoAvailable && !item.photoUrl)
+      .map(async (item) => {
+        try {
+          const result = await fetchWithTimeout<{ photoUrl: string | null }>(
+            `/api/roadmaps/${encodeURIComponent(roadmap.id)}/models/${encodeURIComponent(item.modelId)}/photo`,
+          );
+          return { roadmapId: roadmap.id, modelId: item.modelId, photoUrl: result.photoUrl };
+        } catch {
+          return null;
+        }
+      }),
+  );
+
+  const photos = await Promise.all(photoRequests);
+  const photoByItem = new Map(
+    photos
+      .filter((photo): photo is NonNullable<typeof photo> => Boolean(photo?.photoUrl))
+      .map((photo) => [`${photo.roadmapId}:${photo.modelId}`, photo.photoUrl]),
+  );
+  if (photoByItem.size === 0) return;
+
+  STORE = STORE.map((roadmap) => ({
+    ...roadmap,
+    items: roadmap.items.map((item) => ({
+      ...item,
+      photoUrl: photoByItem.get(`${roadmap.id}:${item.modelId}`) || item.photoUrl,
+    })),
+  }));
+  notifySubscribers();
+}
+
 async function fetchRoadmaps() {
   if (isLoading) return;
+  initialFetchStarted = true;
   isLoading = true;
+  loadingFallbackTimer = setTimeout(() => {
+    if (isLoading) {
+      hasLoaded = true;
+      notifySubscribers();
+    }
+  }, 1500);
   try {
     STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
     notifySubscribers();
+    void hydrateRoadmapPhotos(STORE);
+    if (typeof window !== "undefined") {
+      try {
+        const cachedRoadmaps = STORE.map((roadmap) => ({
+          ...roadmap,
+          items: roadmap.items.map((item) =>
+            Object.fromEntries(
+              Object.entries(item).filter(([key]) => key !== "photoUrl"),
+            ),
+          ),
+        }));
+        window.localStorage.setItem(
+          ROADMAP_CACHE_KEY,
+          JSON.stringify(cachedRoadmaps),
+        );
+      } catch {}
+    }
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
   } finally {
     isLoading = false;
+    hasLoaded = true;
+    if (loadingFallbackTimer) {
+      clearTimeout(loadingFallbackTimer);
+      loadingFallbackTimer = null;
+    }
+    notifySubscribers();
   }
 }
 
@@ -49,8 +129,8 @@ function getRoadmaps() {
 
 function subscribe(cb: () => void) {
   subscribers.add(cb);
-  if (STORE.length === 0) {
-    fetchRoadmaps();
+  if (!initialFetchStarted) {
+    void fetchRoadmaps();
   }
   return () => subscribers.delete(cb);
 }
@@ -146,14 +226,22 @@ export function useRoadmaps() {
       quantity: number,
       photoUrl?: string,
     ) => {
-      try {
-        console.log("[useRoadmaps.addModelToRoadmap] Called with:", {
-          roadmapId,
-          modelId,
-          modelName,
-          quantity,
-        });
+      const previousStore = STORE;
+      const optimisticItem: RoadmapItem = {
+        modelId,
+        modelName,
+        quantity,
+        photoUrl,
+        addedAt: Date.now(),
+      };
+      STORE = STORE.map((roadmap) =>
+        roadmap.id === roadmapId
+          ? { ...roadmap, items: [...roadmap.items, optimisticItem] }
+          : roadmap,
+      );
+      notifySubscribers();
 
+      try {
         await fetchWithTimeout(`/api/roadmaps/${roadmapId}/models`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -165,10 +253,10 @@ export function useRoadmaps() {
           }),
         });
 
-        console.log("[useRoadmaps.addModelToRoadmap] Success");
-
         await fetchRoadmaps();
       } catch (error) {
+        STORE = previousStore;
+        notifySubscribers();
         console.error("Error adding model to roadmap:", error);
         throw error;
       }
@@ -336,6 +424,7 @@ export function useRoadmaps() {
 
   return {
     roadmaps: state,
+    isLoading: !hasLoaded,
     createRoadmap,
     deleteRoadmap,
     renameRoadmap,
