@@ -16,7 +16,7 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
         i.model_id,
         i.model_name,
         i.quantity,
-        i.photo_url,
+        i.photo_url IS NOT NULL AS has_photo,
         i.added_at
       FROM roadmaps r
       LEFT JOIN roadmap_items i ON i.roadmap_id = r.id
@@ -41,7 +41,7 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
           modelId: row.model_id,
           modelName: row.model_name,
           quantity: row.quantity,
-          photoUrl: row.photo_url || undefined,
+          photoAvailable: row.has_photo,
           addedAt: row.added_at,
         });
       }
@@ -53,6 +53,20 @@ export const getRoadmaps: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
     res.status(500).json({ error: "Failed to fetch roadmaps" });
+  }
+};
+
+export const getRoadmapModelPhoto: RequestHandler = async (req, res) => {
+  try {
+    const { roadmapId, modelId } = req.params;
+    const result = await query(
+      "SELECT photo_url FROM roadmap_items WHERE roadmap_id = $1 AND model_id = $2",
+      [roadmapId, modelId],
+    );
+    res.json({ photoUrl: result.rows[0]?.photo_url || null });
+  } catch (error) {
+    console.error("Error fetching roadmap model photo:", error);
+    res.status(500).json({ error: "Failed to fetch roadmap model photo" });
   }
 };
 
