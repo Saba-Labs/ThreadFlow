@@ -78,8 +78,7 @@ export default function LibraryPage() {
 
   const handleFiles = async (files: File[]) => {
     const validFiles = files.filter(
-      (file) =>
-        file.type.startsWith("image/") && file.size <= 2 * 1024 * 1024,
+      (file) => file.type && file.type.startsWith("image/"),
     );
     if (validFiles.length === 0) return;
 
