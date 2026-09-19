@@ -21,9 +21,21 @@ function uid(prefix = "rdm") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-let STORE: Roadmap[] = [];
+const ROADMAP_CACHE_KEY = "threadflow:roadmaps";
+
+function readCachedRoadmaps(): Roadmap[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const cached = window.localStorage.getItem(ROADMAP_CACHE_KEY);
+    return cached ? (JSON.parse(cached) as Roadmap[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+let STORE: Roadmap[] = readCachedRoadmaps();
 let isLoading = false;
-let hasLoaded = false;
+let hasLoaded = STORE.length > 0;
 
 const subscribers = new Set<() => void>();
 
@@ -36,6 +48,11 @@ async function fetchRoadmaps() {
   isLoading = true;
   try {
     STORE = await fetchWithTimeout<Roadmap[]>("/api/roadmaps");
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(ROADMAP_CACHE_KEY, JSON.stringify(STORE));
+      } catch {}
+    }
   } catch (error) {
     console.error("Error fetching roadmaps:", error);
   } finally {
