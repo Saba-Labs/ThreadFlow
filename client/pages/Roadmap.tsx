@@ -35,12 +35,12 @@ function SimpleModal({ open, onOpenChange, title, children, footer }: any) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
       <div
         className="fixed inset-0 bg-black/50"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col shadow-xl">
+      <div className="relative bg-white rounded-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col shadow-xl">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b">
           <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
           <Button
