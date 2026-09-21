@@ -136,12 +136,14 @@ export default function LibraryPage() {
       return;
     }
 
-    void reorderImages(dragOrder).catch((error) =>
-      console.error("Error reordering library images:", error),
-    );
     setDraggedImageId(null);
     setDragOverImageId(null);
-    setDragOrder(null);
+    void reorderImages(dragOrder)
+      .then(() => setDragOrder(null))
+      .catch((error) => {
+        console.error("Error reordering library images:", error);
+        setDragOrder(null);
+      });
   };
 
   const handleFiles = async (files: File[]) => {
