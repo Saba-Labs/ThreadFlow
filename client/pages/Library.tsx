@@ -73,12 +73,20 @@ export default function LibraryPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
   const [dragOverImageId, setDragOverImageId] = useState<string | null>(null);
+  const [dragOrder, setDragOrder] = useState<string[] | null>(null);
   const imageToDelete = images.find((image) => image.id === deleteConfirmId);
+  const orderedImages = useMemo(() => {
+    if (!dragOrder) return images;
+    const imageById = new Map(images.map((image) => [image.id, image]));
+    return dragOrder
+      .map((id) => imageById.get(id))
+      .filter((image): image is (typeof images)[number] => Boolean(image));
+  }, [dragOrder, images]);
   const filteredImages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return images;
-    return images.filter((image) => image.name.toLowerCase().includes(query));
-  }, [images, searchQuery]);
+    if (!query) return orderedImages;
+    return orderedImages.filter((image) => image.name.toLowerCase().includes(query));
+  }, [orderedImages, searchQuery]);
 
   const handleImageDragStart = (
     event: DragEvent<HTMLDivElement>,
@@ -87,34 +95,53 @@ export default function LibraryPage() {
     if (searchQuery.trim()) return;
     setDraggedImageId(imageId);
     setDragOverImageId(null);
+    setDragOrder(images.map((image) => image.id));
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", imageId);
   };
 
-  const handleImageDrop = (event: DragEvent<HTMLDivElement>, targetId: string) => {
-    event.preventDefault();
+  const handleImageDragOver = (
+    event: DragEvent<HTMLDivElement>,
+    targetId: string,
+  ) => {
     if (!draggedImageId || draggedImageId === targetId || searchQuery.trim()) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setDragOverImageId(targetId);
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const placeAfter = event.clientY >= bounds.top + bounds.height / 2;
+    setDragOrder((currentOrder) => {
+      if (!currentOrder) return currentOrder;
+      const sourceIndex = currentOrder.indexOf(draggedImageId);
+      const targetIndex = currentOrder.indexOf(targetId);
+      if (sourceIndex === -1 || targetIndex === -1) return currentOrder;
+      const nextOrder = currentOrder.slice();
+      const [draggedId] = nextOrder.splice(sourceIndex, 1);
+      const targetIndexAfterRemoval = nextOrder.indexOf(targetId);
+      const insertionIndex = targetIndexAfterRemoval + (placeAfter ? 1 : 0);
+      if (insertionIndex === sourceIndex) return currentOrder;
+      nextOrder.splice(insertionIndex, 0, draggedId);
+      return nextOrder;
+    });
+  };
+
+  const handleImageDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!draggedImageId || !dragOrder || searchQuery.trim()) {
       setDraggedImageId(null);
       setDragOverImageId(null);
+      setDragOrder(null);
       return;
     }
 
-    const nextImages = images.slice();
-    const sourceIndex = nextImages.findIndex((image) => image.id === draggedImageId);
-    const targetIndex = nextImages.findIndex((image) => image.id === targetId);
-    if (sourceIndex === -1 || targetIndex === -1) {
-      setDraggedImageId(null);
-      return;
-    }
-
-    const [draggedImage] = nextImages.splice(sourceIndex, 1);
-    const insertionIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
-    nextImages.splice(insertionIndex, 0, draggedImage);
-    void reorderImages(nextImages.map((image) => image.id)).catch((error) =>
+    void reorderImages(dragOrder).catch((error) =>
       console.error("Error reordering library images:", error),
     );
     setDraggedImageId(null);
     setDragOverImageId(null);
+    setDragOrder(null);
   };
 
   const handleFiles = async (files: File[]) => {
@@ -263,17 +290,12 @@ export default function LibraryPage() {
               key={image.id}
               draggable={!searchQuery.trim()}
               onDragStart={(event) => handleImageDragStart(event, image.id)}
-              onDragOver={(event) => {
-                if (!searchQuery.trim() && draggedImageId) {
-                  event.preventDefault();
-                  event.dataTransfer.dropEffect = "move";
-                  if (draggedImageId !== image.id) setDragOverImageId(image.id);
-                }
-              }}
-              onDrop={(event) => handleImageDrop(event, image.id)}
+              onDragOver={(event) => handleImageDragOver(event, image.id)}
+              onDrop={handleImageDrop}
               onDragEnd={() => {
                 setDraggedImageId(null);
                 setDragOverImageId(null);
+                setDragOrder(null);
               }}
               className={`cursor-grab overflow-hidden rounded-xl border bg-white shadow-sm transition-[transform,opacity,box-shadow,border-color] duration-150 active:cursor-grabbing ${
                 draggedImageId === image.id
