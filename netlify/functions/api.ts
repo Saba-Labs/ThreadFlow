@@ -44,6 +44,7 @@ import {
   createLibraryImage,
   renameLibraryImage,
   deleteLibraryImage,
+  reorderLibraryImages,
 } from "../../server/routes/library";
 import { initializeDatabase } from "../../server/db";
 import { subscribeToChanges } from "../../server/events";
@@ -158,6 +159,7 @@ function initializeHandler() {
   // Library routes
   app.get("/api/library/images", getLibraryImages);
   app.post("/api/library/images", createLibraryImage);
+  app.put("/api/library/images/reorder", reorderLibraryImages);
   app.put("/api/library/images/:id", renameLibraryImage);
   app.delete("/api/library/images/:id", deleteLibraryImage);
 

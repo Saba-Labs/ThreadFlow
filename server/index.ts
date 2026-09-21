@@ -32,6 +32,7 @@ import {
   createLibraryImage,
   renameLibraryImage,
   deleteLibraryImage,
+  reorderLibraryImages,
 } from "./routes/library";
 import {
   getRoadmaps,
@@ -195,6 +196,7 @@ export function createServer() {
   app.post("/api/roadmaps", createRoadmap);
   app.get("/api/library/images", getLibraryImages);
   app.post("/api/library/images", createLibraryImage);
+  app.put("/api/library/images/reorder", reorderLibraryImages);
   app.put("/api/library/images/:id", renameLibraryImage);
   app.delete("/api/library/images/:id", deleteLibraryImage);
   app.put("/api/roadmaps/reorder", reorderRoadmaps);

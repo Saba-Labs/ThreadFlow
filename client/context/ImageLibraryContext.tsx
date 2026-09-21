@@ -102,11 +102,33 @@ export function useImageLibrary(options: { enabled?: boolean } = {}) {
     }
   }, []);
 
+  const reorderImages = useCallback(async (imageIds: string[]) => {
+    const previousStore = STORE;
+    const imageById = new Map(STORE.map((image) => [image.id, image]));
+    STORE = imageIds
+      .map((id) => imageById.get(id))
+      .filter((image): image is LibraryImage => Boolean(image));
+    notifySubscribers();
+
+    try {
+      await fetchWithTimeout("/api/library/images/reorder", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageIds }),
+      });
+    } catch (error) {
+      STORE = previousStore;
+      notifySubscribers();
+      throw error;
+    }
+  }, []);
+
   return {
     images,
     addImage,
     renameImage,
     deleteImage,
+    reorderImages,
     refreshImages: fetchImages,
   };
 }

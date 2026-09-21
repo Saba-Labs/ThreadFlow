@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type DragEvent } from "react";
 import {
   Camera,
   ImagePlus,
@@ -6,6 +6,7 @@ import {
   Trash2,
   Library as LibraryIcon,
   Pencil,
+  GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,6 +62,7 @@ export default function LibraryPage() {
     refreshImages,
     renameImage,
     deleteImage,
+    reorderImages,
   } = useImageLibrary();
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -69,12 +71,46 @@ export default function LibraryPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
   const imageToDelete = images.find((image) => image.id === deleteConfirmId);
   const filteredImages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return images;
     return images.filter((image) => image.name.toLowerCase().includes(query));
   }, [images, searchQuery]);
+
+  const handleImageDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    imageId: string,
+  ) => {
+    if (searchQuery.trim()) return;
+    setDraggedImageId(imageId);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", imageId);
+  };
+
+  const handleImageDrop = (event: DragEvent<HTMLDivElement>, targetId: string) => {
+    event.preventDefault();
+    if (!draggedImageId || draggedImageId === targetId || searchQuery.trim()) {
+      setDraggedImageId(null);
+      return;
+    }
+
+    const nextImages = images.slice();
+    const sourceIndex = nextImages.findIndex((image) => image.id === draggedImageId);
+    const targetIndex = nextImages.findIndex((image) => image.id === targetId);
+    if (sourceIndex === -1 || targetIndex === -1) {
+      setDraggedImageId(null);
+      return;
+    }
+
+    const [draggedImage] = nextImages.splice(sourceIndex, 1);
+    nextImages.splice(targetIndex, 0, draggedImage);
+    void reorderImages(nextImages.map((image) => image.id)).catch((error) =>
+      console.error("Error reordering library images:", error),
+    );
+    setDraggedImageId(null);
+  };
 
   const handleFiles = async (files: File[]) => {
     const validFiles = files.filter(
@@ -210,12 +246,36 @@ export default function LibraryPage() {
           No images match your search.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <>
+          {!searchQuery.trim() && (
+            <p className="mb-3 text-xs text-slate-500">
+              Drag images to reorder them.
+            </p>
+          )}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filteredImages.map((image) => (
             <div
               key={image.id}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+              draggable={!searchQuery.trim()}
+              onDragStart={(event) => handleImageDragStart(event, image.id)}
+              onDragOver={(event) => {
+                if (!searchQuery.trim() && draggedImageId) {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "move";
+                }
+              }}
+              onDrop={(event) => handleImageDrop(event, image.id)}
+              onDragEnd={() => setDraggedImageId(null)}
+              className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-opacity ${
+                draggedImageId === image.id ? "opacity-40" : ""
+              }`}
             >
+              {!searchQuery.trim() && (
+                <div className="flex items-center gap-1 border-b border-slate-100 px-3 py-1.5 text-xs text-slate-400">
+                  <GripVertical className="h-3.5 w-3.5" />
+                  <span>Drag to reorder</span>
+                </div>
+              )}
               <img
                 src={image.imageData}
                 alt={image.name}
@@ -273,7 +333,8 @@ export default function LibraryPage() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        </>
       )}
 
       <AlertDialog

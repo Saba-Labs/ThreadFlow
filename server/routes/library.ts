@@ -9,7 +9,7 @@ function uid() {
 export const getLibraryImages: RequestHandler = async (_req, res) => {
   try {
     const result = await query(
-      "SELECT id, name, image_data, created_at FROM library_images ORDER BY created_at DESC",
+      "SELECT id, name, image_data, created_at FROM library_images ORDER BY order_index ASC, created_at DESC",
     );
     res.json(
       result.rows.map((image: any) => ({
@@ -34,9 +34,13 @@ export const createLibraryImage: RequestHandler = async (req, res) => {
 
     const id = uid();
     const now = Date.now();
+    const orderResult = await query(
+      "SELECT COALESCE(MIN(order_index), 0) - 1 AS next_index FROM library_images",
+    );
+    const nextIndex = Number(orderResult.rows[0]?.next_index ?? -1);
     await query(
-      "INSERT INTO library_images (id, name, image_data, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)",
-      [id, String(name || "Untitled image").trim(), imageData, now, now],
+      "INSERT INTO library_images (id, name, image_data, created_at, updated_at, order_index) VALUES ($1, $2, $3, $4, $5, $6)",
+      [id, String(name || "Untitled image").trim(), imageData, now, now, nextIndex],
     );
     broadcastChange({ type: "library_updated" });
     res.json({ success: true, id });
@@ -60,6 +64,28 @@ export const renameLibraryImage: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error renaming library image:", error);
     res.status(500).json({ error: "Failed to rename library image" });
+  }
+};
+
+export const reorderLibraryImages: RequestHandler = async (req, res) => {
+  try {
+    const { imageIds } = req.body;
+    if (!Array.isArray(imageIds) || imageIds.some((id) => typeof id !== "string")) {
+      return res.status(400).json({ error: "imageIds must be an array of strings" });
+    }
+
+    const now = Date.now();
+    for (let index = 0; index < imageIds.length; index += 1) {
+      await query(
+        "UPDATE library_images SET order_index = $1, updated_at = $2 WHERE id = $3",
+        [index, now, imageIds[index]],
+      );
+    }
+    broadcastChange({ type: "library_updated" });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error reordering library images:", error);
+    res.status(500).json({ error: "Failed to reorder library images" });
   }
 };
 
