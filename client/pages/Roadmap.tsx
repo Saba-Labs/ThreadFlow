@@ -141,6 +141,10 @@ export default function RoadmapPage() {
     roadmapId: string;
     modelId: string;
   } | null>(null);
+  const [removePhotoConfirm, setRemovePhotoConfirm] = useState<{
+    roadmapId: string;
+    modelId: string;
+  } | null>(null);
   const [clearModelsConfirmId, setClearModelsConfirmId] = useState<
     string | null
   >(null);
@@ -985,16 +989,10 @@ export default function RoadmapPage() {
                                         title="Remove photo"
                                         onClick={(event) => {
                                           event.stopPropagation();
-                                          void updateModelPhoto(
-                                            r.id,
-                                            it.modelId,
-                                            null,
-                                          ).catch((error) =>
-                                            console.error(
-                                              "Error removing roadmap model photo:",
-                                              error,
-                                            ),
-                                          );
+                                          setRemovePhotoConfirm({
+                                            roadmapId: r.id,
+                                            modelId: it.modelId,
+                                          });
                                         }}
                                         className="h-7 w-7 text-red-600 hover:bg-red-50"
                                       >
@@ -1412,6 +1410,46 @@ export default function RoadmapPage() {
             </div>
           )}
         </div>
+      </SimpleModal>
+
+      {/* Remove Photo Confirmation Modal */}
+      <SimpleModal
+        open={removePhotoConfirm !== null && !isReadOnly}
+        onOpenChange={(v: boolean) => !v && setRemovePhotoConfirm(null)}
+        title="Remove Photo"
+        footer={
+          <div className="flex items-center gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setRemovePhotoConfirm(null)}
+              className="flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (removePhotoConfirm) {
+                  void updateModelPhoto(
+                    removePhotoConfirm.roadmapId,
+                    removePhotoConfirm.modelId,
+                    null,
+                  ).catch((error) =>
+                    console.error("Error removing roadmap model photo:", error),
+                  );
+                }
+                setRemovePhotoConfirm(null);
+              }}
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700"
+            >
+              Remove Photo
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-sm text-slate-600">
+          Are you sure you want to remove this photo? This action cannot be undone.
+        </p>
       </SimpleModal>
 
       {/* Delete Model Confirmation Modal */}
