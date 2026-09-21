@@ -72,6 +72,7 @@ export default function LibraryPage() {
   const [isSourcePickerOpen, setIsSourcePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
+  const [dragOverImageId, setDragOverImageId] = useState<string | null>(null);
   const imageToDelete = images.find((image) => image.id === deleteConfirmId);
   const filteredImages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -85,6 +86,7 @@ export default function LibraryPage() {
   ) => {
     if (searchQuery.trim()) return;
     setDraggedImageId(imageId);
+    setDragOverImageId(null);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", imageId);
   };
@@ -93,6 +95,7 @@ export default function LibraryPage() {
     event.preventDefault();
     if (!draggedImageId || draggedImageId === targetId || searchQuery.trim()) {
       setDraggedImageId(null);
+      setDragOverImageId(null);
       return;
     }
 
@@ -105,11 +108,13 @@ export default function LibraryPage() {
     }
 
     const [draggedImage] = nextImages.splice(sourceIndex, 1);
-    nextImages.splice(targetIndex, 0, draggedImage);
+    const insertionIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    nextImages.splice(insertionIndex, 0, draggedImage);
     void reorderImages(nextImages.map((image) => image.id)).catch((error) =>
       console.error("Error reordering library images:", error),
     );
     setDraggedImageId(null);
+    setDragOverImageId(null);
   };
 
   const handleFiles = async (files: File[]) => {
@@ -262,17 +267,25 @@ export default function LibraryPage() {
                 if (!searchQuery.trim() && draggedImageId) {
                   event.preventDefault();
                   event.dataTransfer.dropEffect = "move";
+                  if (draggedImageId !== image.id) setDragOverImageId(image.id);
                 }
               }}
               onDrop={(event) => handleImageDrop(event, image.id)}
-              onDragEnd={() => setDraggedImageId(null)}
-              className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-opacity ${
-                draggedImageId === image.id ? "opacity-40" : ""
+              onDragEnd={() => {
+                setDraggedImageId(null);
+                setDragOverImageId(null);
+              }}
+              className={`cursor-grab overflow-hidden rounded-xl border bg-white shadow-sm transition-[transform,opacity,box-shadow,border-color] duration-150 active:cursor-grabbing ${
+                draggedImageId === image.id
+                  ? "scale-[0.98] opacity-45 shadow-inner"
+                  : dragOverImageId === image.id
+                    ? "border-blue-500 shadow-lg ring-2 ring-blue-100"
+                    : "border-slate-200"
               }`}
             >
               {!searchQuery.trim() && (
                 <div className="flex items-center gap-1 border-b border-slate-100 px-3 py-1.5 text-xs text-slate-400">
-                  <GripVertical className="h-3.5 w-3.5" />
+                  <GripVertical className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>Drag to reorder</span>
                 </div>
               )}
