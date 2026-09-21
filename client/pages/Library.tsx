@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type DragEvent } from "react";
 import {
   Camera,
   ImagePlus,
@@ -6,6 +6,7 @@ import {
   Trash2,
   Library as LibraryIcon,
   Pencil,
+  GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,6 +62,7 @@ export default function LibraryPage() {
     refreshImages,
     renameImage,
     deleteImage,
+    reorderImages,
   } = useImageLibrary();
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -69,12 +71,80 @@ export default function LibraryPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSourcePickerOpen, setIsSourcePickerOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
+  const [dragOverImageId, setDragOverImageId] = useState<string | null>(null);
+  const [dragOrder, setDragOrder] = useState<string[] | null>(null);
   const imageToDelete = images.find((image) => image.id === deleteConfirmId);
+  const orderedImages = useMemo(() => {
+    if (!dragOrder) return images;
+    const imageById = new Map(images.map((image) => [image.id, image]));
+    return dragOrder
+      .map((id) => imageById.get(id))
+      .filter((image): image is (typeof images)[number] => Boolean(image));
+  }, [dragOrder, images]);
   const filteredImages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return images;
-    return images.filter((image) => image.name.toLowerCase().includes(query));
-  }, [images, searchQuery]);
+    if (!query) return orderedImages;
+    return orderedImages.filter((image) => image.name.toLowerCase().includes(query));
+  }, [orderedImages, searchQuery]);
+
+  const handleImageDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    imageId: string,
+  ) => {
+    if (searchQuery.trim()) return;
+    setDraggedImageId(imageId);
+    setDragOverImageId(null);
+    setDragOrder(images.map((image) => image.id));
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", imageId);
+  };
+
+  const handleImageDragOver = (
+    event: DragEvent<HTMLDivElement>,
+    targetId: string,
+  ) => {
+    if (!draggedImageId || draggedImageId === targetId || searchQuery.trim()) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setDragOverImageId(targetId);
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const placeAfter = event.clientY >= bounds.top + bounds.height / 2;
+    setDragOrder((currentOrder) => {
+      if (!currentOrder) return currentOrder;
+      const sourceIndex = currentOrder.indexOf(draggedImageId);
+      const targetIndex = currentOrder.indexOf(targetId);
+      if (sourceIndex === -1 || targetIndex === -1) return currentOrder;
+      const nextOrder = currentOrder.slice();
+      const [draggedId] = nextOrder.splice(sourceIndex, 1);
+      const targetIndexAfterRemoval = nextOrder.indexOf(targetId);
+      const insertionIndex = targetIndexAfterRemoval + (placeAfter ? 1 : 0);
+      if (insertionIndex === sourceIndex) return currentOrder;
+      nextOrder.splice(insertionIndex, 0, draggedId);
+      return nextOrder;
+    });
+  };
+
+  const handleImageDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!draggedImageId || !dragOrder || searchQuery.trim()) {
+      setDraggedImageId(null);
+      setDragOverImageId(null);
+      setDragOrder(null);
+      return;
+    }
+
+    setDraggedImageId(null);
+    setDragOverImageId(null);
+    void reorderImages(dragOrder)
+      .then(() => setDragOrder(null))
+      .catch((error) => {
+        console.error("Error reordering library images:", error);
+        setDragOrder(null);
+      });
+  };
 
   const handleFiles = async (files: File[]) => {
     const validFiles = files.filter(
@@ -210,12 +280,39 @@ export default function LibraryPage() {
           No images match your search.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <>
+          {!searchQuery.trim() && (
+            <p className="mb-3 text-xs text-slate-500">
+              Drag images to reorder them.
+            </p>
+          )}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filteredImages.map((image) => (
             <div
               key={image.id}
-              className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+              draggable={!searchQuery.trim()}
+              onDragStart={(event) => handleImageDragStart(event, image.id)}
+              onDragOver={(event) => handleImageDragOver(event, image.id)}
+              onDrop={handleImageDrop}
+              onDragEnd={() => {
+                setDraggedImageId(null);
+                setDragOverImageId(null);
+                setDragOrder(null);
+              }}
+              className={`cursor-grab overflow-hidden rounded-xl border bg-white shadow-sm transition-[transform,opacity,box-shadow,border-color] duration-150 active:cursor-grabbing ${
+                draggedImageId === image.id
+                  ? "scale-[0.98] opacity-45 shadow-inner"
+                  : dragOverImageId === image.id
+                    ? "border-blue-500 shadow-lg ring-2 ring-blue-100"
+                    : "border-slate-200"
+              }`}
             >
+              {!searchQuery.trim() && (
+                <div className="flex items-center gap-1 border-b border-slate-100 px-3 py-1.5 text-xs text-slate-400">
+                  <GripVertical className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Drag to reorder</span>
+                </div>
+              )}
               <img
                 src={image.imageData}
                 alt={image.name}
@@ -273,7 +370,8 @@ export default function LibraryPage() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        </>
       )}
 
       <AlertDialog

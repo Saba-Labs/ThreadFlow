@@ -35,6 +35,7 @@ function readCachedRoadmaps(): Roadmap[] {
 }
 
 let STORE: Roadmap[] = readCachedRoadmaps();
+const pendingPhotoUpdates = new Map<string, string | null>();
 let isLoading = false;
 let hasLoaded = STORE.length > 0;
 let loadError: string | null = null;
@@ -67,19 +68,27 @@ async function hydrateRoadmapPhotos(roadmaps: Roadmap[]) {
       }),
   );
   const photos = await Promise.all(requests);
-  const photoByItem = new globalThis.Map(
+  const photoByItem = new globalThis.Map<string, string>(
     photos
       .filter((photo): photo is NonNullable<typeof photo> => Boolean(photo?.photoUrl))
-      .map((photo) => [`${photo.roadmapId}:${photo.modelId}`, photo.photoUrl] as const),
+      .map((photo) => [`${photo.roadmapId}:${photo.modelId}`, photo.photoUrl]),
   );
   if (photoByItem.size === 0) return;
 
   STORE = STORE.map((roadmap) => ({
     ...roadmap,
-    items: roadmap.items.map((item) => ({
-      ...item,
-      photoUrl: item.photoUrl || photoByItem.get(`${roadmap.id}:${item.modelId}`),
-    })),
+    items: roadmap.items.map((item) => {
+      const pendingPhoto = pendingPhotoUpdates.get(
+        photoUpdateKey(roadmap.id, item.modelId),
+      );
+      return {
+        ...item,
+        photoUrl:
+          pendingPhoto !== undefined
+            ? pendingPhoto || undefined
+            : item.photoUrl || photoByItem.get(`${roadmap.id}:${item.modelId}`),
+      };
+    }),
   }));
   notifySubscribers();
 }
@@ -101,31 +110,35 @@ async function fetchRoadmaps() {
       throw new Error("Roadmap API returned an invalid response");
     }
     const roadmaps = fetchedRoadmaps as Roadmap[];
-    const currentPhotos = new Map(
+    const currentPhotos = new Map<string, string>(
       STORE.flatMap((roadmap) =>
         roadmap.items
           .filter((item) => item.photoUrl)
-          .map((item) => [`${roadmap.id}:${item.modelId}`, item.photoUrl!] as const),
+          .map((item) => [`${roadmap.id}:${item.modelId}`, item.photoUrl!]),
       ),
     );
+    const serverPhotoKeys = new Set<string>();
     STORE = roadmaps.map((roadmap) => ({
       ...roadmap,
-      items: roadmap.items.map((item) => ({
-        ...item,
-        photoUrl:
-          item.photoUrl || currentPhotos.get(`${roadmap.id}:${item.modelId}`),
-      })),
+      items: roadmap.items.map((item) => {
+        const key = photoUpdateKey(roadmap.id, item.modelId);
+        const pendingPhoto = pendingPhotoUpdates.get(key);
+        const photoUrl = pendingPhoto !== undefined
+          ? pendingPhoto || undefined
+          : item.photoUrl || currentPhotos.get(key);
+        serverPhotoKeys.add(key);
+        if (pendingPhoto !== undefined && (item.photoUrl || null) === pendingPhoto) {
+          pendingPhotoUpdates.delete(key);
+        }
+        return { ...item, photoUrl };
+      }),
     }));
+    for (const key of pendingPhotoUpdates.keys()) {
+      if (!serverPhotoKeys.has(key)) pendingPhotoUpdates.delete(key);
+    }
     notifySubscribers();
     void hydrateRoadmapPhotos(STORE);
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem(
-          ROADMAP_CACHE_KEY,
-          JSON.stringify(STORE),
-        );
-      } catch {}
-    }
+    cacheRoadmaps();
   } catch (error) {
     loadError = error instanceof Error ? error.message : "Unable to load roadmaps";
     console.error("Error fetching roadmaps:", error);
@@ -142,6 +155,17 @@ async function fetchRoadmaps() {
 
 function getRoadmaps() {
   return STORE;
+}
+
+function photoUpdateKey(roadmapId: string, modelId: string) {
+  return `${roadmapId}:${modelId}`;
+}
+
+function cacheRoadmaps() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(ROADMAP_CACHE_KEY, JSON.stringify(STORE));
+  } catch {}
 }
 
 function subscribe(cb: () => void) {
@@ -163,33 +187,48 @@ export function useRoadmaps() {
   });
 
   const createRoadmap = useCallback(async (title?: string) => {
+    const previousStore = STORE;
+    const roadmapId = uid("roadmap");
+    const roadmap: Roadmap = {
+      id: roadmapId,
+      title: (title || `Roadmap ${STORE.length + 1}`).trim(),
+      createdAt: Date.now(),
+      items: [],
+    };
+    STORE = [...STORE, roadmap];
+    notifySubscribers();
+    cacheRoadmaps();
+
     try {
-      const count = STORE.length + 1;
-      const roadmapId = uid("roadmap");
       await fetchWithTimeout("/api/roadmaps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: roadmapId,
-          title: (title || `Roadmap ${count}`).trim(),
-        }),
+        body: JSON.stringify({ id: roadmapId, title: roadmap.title }),
       });
-
-      await fetchRoadmaps();
       return roadmapId;
     } catch (error) {
+      STORE = previousStore;
+      notifySubscribers();
+      cacheRoadmaps();
       console.error("Error creating roadmap:", error);
       throw error;
     }
   }, []);
 
   const deleteRoadmap = useCallback(async (roadmapId: string) => {
+    const previousStore = STORE;
+    STORE = STORE.filter((roadmap) => roadmap.id !== roadmapId);
+    notifySubscribers();
+    cacheRoadmaps();
+
     try {
       await fetchWithTimeout(`/api/roadmaps/${roadmapId}`, {
         method: "DELETE",
       });
-      await fetchRoadmaps();
     } catch (error) {
+      STORE = previousStore;
+      notifySubscribers();
+      cacheRoadmaps();
       console.error("Error deleting roadmap:", error);
       throw error;
     }
@@ -197,14 +236,24 @@ export function useRoadmaps() {
 
   const renameRoadmap = useCallback(
     async (roadmapId: string, title: string) => {
+      const previousStore = STORE;
+      const nextTitle = title.trim();
+      STORE = STORE.map((roadmap) =>
+        roadmap.id === roadmapId ? { ...roadmap, title: nextTitle } : roadmap,
+      );
+      notifySubscribers();
+      cacheRoadmaps();
+
       try {
         await fetchWithTimeout(`/api/roadmaps/${roadmapId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: title.trim() }),
+          body: JSON.stringify({ title: nextTitle }),
         });
-        await fetchRoadmaps();
       } catch (error) {
+        STORE = previousStore;
+        notifySubscribers();
+        cacheRoadmaps();
         console.error("Error renaming roadmap:", error);
         throw error;
       }
@@ -226,10 +275,11 @@ export function useRoadmaps() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roadmapIds }),
       });
-      await fetchRoadmaps();
+      cacheRoadmaps();
     } catch (error) {
       STORE = previousStore;
       notifySubscribers();
+      cacheRoadmaps();
       console.error("Error reordering roadmaps:", error);
       throw error;
     }
@@ -257,6 +307,7 @@ export function useRoadmaps() {
           : roadmap,
       );
       notifySubscribers();
+      cacheRoadmaps();
 
       try {
         await fetchWithTimeout(`/api/roadmaps/${roadmapId}/models`, {
@@ -270,10 +321,11 @@ export function useRoadmaps() {
           }),
         });
 
-        await fetchRoadmaps();
+        cacheRoadmaps();
       } catch (error) {
         STORE = previousStore;
         notifySubscribers();
+        cacheRoadmaps();
         console.error("Error adding model to roadmap:", error);
         throw error;
       }
@@ -284,6 +336,8 @@ export function useRoadmaps() {
   const updateModelPhoto = useCallback(
     async (roadmapId: string, modelId: string, photoUrl: string | null) => {
       const previousStore = STORE;
+      const key = photoUpdateKey(roadmapId, modelId);
+      pendingPhotoUpdates.set(key, photoUrl);
       STORE = STORE.map((roadmap) =>
         roadmap.id === roadmapId
           ? {
@@ -297,6 +351,7 @@ export function useRoadmaps() {
           : roadmap,
       );
       notifySubscribers();
+      cacheRoadmaps();
 
       try {
         await fetchWithTimeout(
@@ -308,8 +363,10 @@ export function useRoadmaps() {
           },
         );
       } catch (error) {
+        pendingPhotoUpdates.delete(key);
         STORE = previousStore;
         notifySubscribers();
+        cacheRoadmaps();
         console.error("Error updating roadmap model photo:", error);
         throw error;
       }
@@ -319,12 +376,26 @@ export function useRoadmaps() {
 
   const removeModelFromRoadmap = useCallback(
     async (roadmapId: string, modelId: string) => {
+      const previousStore = STORE;
+      STORE = STORE.map((roadmap) =>
+        roadmap.id === roadmapId
+          ? {
+              ...roadmap,
+              items: roadmap.items.filter((item) => item.modelId !== modelId),
+            }
+          : roadmap,
+      );
+      notifySubscribers();
+      cacheRoadmaps();
+
       try {
         await fetchWithTimeout(`/api/roadmaps/${roadmapId}/models/${modelId}`, {
           method: "DELETE",
         });
-        await fetchRoadmaps();
       } catch (error) {
+        STORE = previousStore;
+        notifySubscribers();
+        cacheRoadmaps();
         console.error("Error removing model from roadmap:", error);
         throw error;
       }
@@ -362,10 +433,11 @@ export function useRoadmaps() {
             items: newItems.map((roadmapItem) => roadmapItem.modelId),
           }),
         });
-        await fetchRoadmaps();
+        cacheRoadmaps();
       } catch (error) {
         STORE = previousStore;
         notifySubscribers();
+        cacheRoadmaps();
         console.error("Error moving model within roadmap:", error);
         throw error;
       }
@@ -428,10 +500,11 @@ export function useRoadmaps() {
             ...(typeof toIndex === "number" ? { toIndex } : {}),
           }),
         });
-        await fetchRoadmaps();
+        cacheRoadmaps();
       } catch (error) {
         STORE = previousStore;
         notifySubscribers();
+        cacheRoadmaps();
         console.error("Error moving model to roadmap:", error);
         throw error;
       }
